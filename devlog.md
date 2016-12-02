@@ -1,0 +1,11 @@
+# Dev Log
+
+## 2016-12-01
+
+Today, I started work on Flapjack OS. I created the Git repo, created some (presently aspirational) build instructions and created some basic build scripts. Next, I'll follow the [Bare Bones Tutorial](http://wiki.osdev.org/Bare_Bones) to create an extremely basic, but bootable, kernel to serve as my starting point.
+
+## 2016-12-02
+
+Today, I followed the [Bare Bones Tutorial](http://wiki.osdev.org/Bare_Bones) to create an extremely basic kernel starting point. The one I wrote merely clears the screen to red and then halts the machine.
+
+Additionally, I updated the README with instructions for installing the GRUB2 command-line tools from source and using them to verify that the kernel is a multi-boot compliant (and thus presumably bootable) kernel.
