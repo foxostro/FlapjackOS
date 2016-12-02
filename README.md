@@ -4,45 +4,53 @@ Flapjack OS is a basic operating system for i386 computers. What is this operati
 
 Flapjack is going to be a 32-bit multitasking, preemptive kernel with virtual memory. It will eventually be a sort of pseudo-unix system. Though, by no means will I attempt to implement the POSIX standard.
 
+I'm developing Flapjack on macOS and all instructions will assume you are too. It is possible to get the thing to build and run on Linux but that is left as an exercise for the reader. You'll need to install a number of dependencies and tools first.
+
+## Building and Installing Dependencies and Tools
+
+1. Install [MacPorts](https://www.macports.org).
+2. Use MacPorts to install the following packages:
+
+   ```bash
+   % sudo port install i386-elf-gcc objconv check
+   ```
+
+   * i386-elf-gcc -- This is the cross-compiler we'll use to build the kernel.
+   * objconv -- This tool can convert and manipulate object files in a variety of formats. This is required for the GRUB2 command-line tools.
+   * check -- This is a C unit testing framework used by Flapjack OS.
+
+3. Make sure to put the MacPorts cross-compiler and other tools into your $PATH. The cross-compiler in particular will appear there as a suite of tools named i386-elf-*.
+
+4. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
+
+   ```bash
+   % git clone git://git.savannah.gnu.org/grub.git
+   % cd grub
+   % ./autogen.sh
+   % mkdir ../temp
+   % cd ../temp
+   % ../grub/configure --disable-werror TARGET_CC=i386-elf-gcc TARGET_OBJCOPY=i386-elf-objcopy TARGET_STRIP=i386-elf-strip TARGET_NM=i386-elf-nm TARGET_RANLIB=i386-elf-ranlib --target=i386-elf
+   % make
+   % sudo make install
+   ```
+
 ## Building Flapjack OS
 
 __NOTE: These instructions are currently aspirational. The builds scripts &c are not complete.__
 
-I'm developing Flapjack on macOS and all instructions will assume you are too. It is possible to get the thing to build and run on Linux but that is left as an exercise for the reader. You'll need to install a number of dependencies and tools first.
-
-1. Install [MacPorts](https://www.macports.org).
-2. Install dependencies with MacPorts as follows:
-
-   ```bash
-   % sudo port install i386-elf-gcc mtools check
-   ```
-
-3. Make sure to set the following environment variables to ensure the build scripts use the cross-compiler.
-
-   ```bash
-   CC=/opt/local/bin/i386-elf-gcc
-   AS=/opt/local/bin/i386-elf-as
-   LD=/opt/local/bin/i386-elf-ld
-   STRIP=/opt/local/bin/i386-elf-strip
-   OBJCOPY=/opt/local/bin/i386-elf-objcopy
-   AR=/opt/local/bin/i386-elf-ar
-   HOSTCC=/usr/bin/gcc
-   MCOPY=/opt/local/bin/mcopy 
-   ```
-
-4. Use Cmake to create an Xcode project:
+1. Use Cmake to create an Xcode project:
 
    ```bash
    % cmake -GXcode .
    ```
 
-5. Use Xcode to build the project. You can do this in the IDE GUI or you can do this on the command line like so:
+2. Use Xcode to build the project. You can do this in the IDE GUI or you can do this on the command line like so:
 
    ```bash
    % xcodebuild
    ```
 
-6. Run unit tests by build thing the Xcode project's testing target: On the command line this is done like so:
+3. Run unit tests by build thing the Xcode project's testing target: On the command line this is done like so:
 
    ```bash
    TODO
