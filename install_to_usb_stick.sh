@@ -1,5 +1,5 @@
 #!/bin/sh
-# On a Mac, install boot floppy disk image onto a specified USB disk drive.
+# On a Mac, install boot disk image onto a specified USB disk drive.
 set -o errexit
 
 echo "This tool will install the boot image onto a bootable USB storage device."
@@ -10,7 +10,7 @@ if [ -z "$OUTPUT_DEVICE" ]; then
 	exit 2
 fi
 
-T=`hdid -nomount bootfd.img`
+T=`hdid -nomount FlapjackOS.iso`
 BOOTFD_DEVICE=`perl -e 'print $ARGV[$1]' $T`
 MOUNT_POINT="/Volumes/bootfd"
 

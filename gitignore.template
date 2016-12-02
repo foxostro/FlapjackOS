@@ -2,3 +2,9 @@ syntax:glob
 .gitignore
 *.o
 *.bin
+FlapjackOS.iso
+bochsrc
+isodir/
+parport.out
+bochsout.txt
+debugger.out

@@ -1,5 +1,5 @@
-boot: floppy
-floppya: 1_44="bootfd.img", status=inserted
+boot: cdrom
+ata0-master: type=cdrom, path=FlapjackOS.iso, status=inserted
 
 # Options useful for debugging the system
 port_e9_hack: enabled=1

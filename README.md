@@ -21,7 +21,18 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 
 3. Make sure to put the MacPorts cross-compiler and other tools into your $PATH. The cross-compiler in particular will appear there as a suite of tools named i386-elf-*.
 
-4. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
+4. Install [xorriso](https://www.gnu.org/software/xorriso)
+
+   ```bash
+   % wget https://www.gnu.org/software/xorriso/xorriso-1.4.6.tar.gz
+   % tar -xzf xorriso-1.4.6.tar.gz
+   % cd xorriso-1.4.6
+   % ./configure
+   % make
+   % sudo make install
+   ```
+
+5. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
 
    ```bash
    % git clone git://git.savannah.gnu.org/grub.git
@@ -86,11 +97,11 @@ __NOTE: These instructions are currently aspirational. The builds scripts &c are
    % sudo port install qemu
    ```
 
-2. Build Flapjack OS so that you have the "bootfd.img" floppy disk image file.
+2. Build Flapjack OS so that you have the "FlapjackOS.iso" disk image.
 3. Launch Qemu as follows:
 
    ```bash
-   % qemu-system-i386 -fda ./bootfd.img
+   % qemu-system-i386 -cdrom ./FlapjackOS.iso
    ```
 
 ### Running on real hardware
