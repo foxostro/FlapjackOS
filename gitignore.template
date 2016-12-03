@@ -8,3 +8,7 @@ isodir/
 parport.out
 bochsout.txt
 debugger.out
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile

@@ -47,24 +47,17 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 
 ## Building Flapjack OS
 
-__NOTE: These instructions are currently aspirational. The builds scripts &c are not complete.__
-
-1. Use Cmake to create an Xcode project:
+1. Use Cmake to generate a makefile and build the bootable iso image:
 
    ```bash
-   % cmake -GXcode .
+   % cmake -G 'Unix Makefiles' .
+   % make iso
    ```
 
-2. Use Xcode to build the project. You can do this in the IDE GUI or you can do this on the command line like so:
+2. TODO: Run unit tests by building thing the testing target on the command line like so:
 
    ```bash
-   % xcodebuild
-   ```
-
-3. Run unit tests by build thing the Xcode project's testing target: On the command line this is done like so:
-
-   ```bash
-   TODO
+   % make test
    ```
 
 ## Running Flapjack OS
