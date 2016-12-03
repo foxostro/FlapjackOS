@@ -47,17 +47,19 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 
 ## Building Flapjack OS
 
-1. Use Cmake to generate a makefile and build the bootable iso image:
+To build Flapjack OS, have CMake generate build files for the i386-elf cross-compile and then build the bootable iso:
 
    ```bash
-   % cmake -G 'Unix Makefiles' .
-   % make iso
+   % ./scripts/generate_cross_compile.sh
+   % cmake --build . --target iso
    ```
 
-2. TODO: Run unit tests by building thing the testing target on the command line like so:
+To run the unit tests, have CMake generate build files for a native build instead, build the test runner, and then invoke tests with ctest:
 
    ```bash
-   % make test
+   % ./scripts/generate_native.sh
+   % make
+   % ctest
    ```
 
 ## Running Flapjack OS

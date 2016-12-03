@@ -1,8 +1,10 @@
 syntax:glob
+.DS_Store
 .gitignore
 *.o
-*.bin
+kernel.bin
 FlapjackOS.iso
+FlapjackOS_Test
 bochsrc
 isodir/
 parport.out
@@ -12,3 +14,8 @@ CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
+.idea/
+FlapjackOS.cbp
+CMakeScripts/
+CTestTestfile.cmake
+Testing/

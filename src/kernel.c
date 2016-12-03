@@ -17,7 +17,7 @@ void kernel_main(void)
 		for (size_t x = 0; x < TERM_WIDTH; x++)
 		{
 			const size_t index = y * TERM_WIDTH + x;
-			terminal_buffer[index] = ((uint16_t)(' ')) | terminal_color << 8;
+			terminal_buffer[index] = (uint16_t)' ' | terminal_color << 8;
 		}
 	}
 }
