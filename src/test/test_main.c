@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <check.h>
 
@@ -11,5 +12,5 @@ int main(int __unused argc, char * __unused argv[])
     srunner_run_all(runner, CK_NORMAL);
     numberOfFailedTests = srunner_ntests_failed(runner);
     srunner_free(runner);
-    return numberOfFailedTests;
+    return (numberOfFailedTests == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

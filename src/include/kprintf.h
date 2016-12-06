@@ -12,13 +12,13 @@
 //
 // Returns the number of characters that would have been output if the size had
 // not been limited.
-int kvsnprintf(char * restrict str,
-               size_t size,
-               const char * restrict format,
-               va_list args);
+size_t kvsnprintf(char * restrict str,
+                  size_t size,
+                  const char * restrict format,
+                  va_list args);
 
 // Wraps kvsnprintf to allow the use of a variable number of arguments.
-int ksnprintf(char * restrict str,
-              size_t size,
-              const char * restrict format,
-              ...);
+size_t ksnprintf(char * restrict str,
+                 size_t size,
+                 const char * restrict format,
+                 ...);
