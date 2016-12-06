@@ -2,12 +2,19 @@ cmake_minimum_required(VERSION 3.6)
 project(FlapjackOS C)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
+set(COMMON_SOURCE_FILES
+    "src/kprintf.c"
+    )
+
+include_directories("src/include")
+
 if(CMAKE_CROSSCOMPILING)
 
     enable_language(ASM)
 
     # Source files for the kernel. (no organization to these files yet)
     set(KERNEL_SOURCE_FILES
+        ${COMMON_SOURCE_FILES}
         "src/kernel.c"
         "src/boot.S"
         )
@@ -60,6 +67,8 @@ else()
 
     # Source files for the test suite.
     set(TEST_SOURCE_FILES
+         ${COMMON_SOURCE_FILES}
+        "src/test/test_printf.c"
         "src/test/test_main.c"
         )
 

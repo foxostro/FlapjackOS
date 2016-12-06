@@ -59,7 +59,7 @@ To run the unit tests, have CMake generate build files for a native build instea
    ```bash
    % ./scripts/generate_native.sh
    % make
-   % ctest
+   % ctest --output-on-failure
    ```
 
 ## Running Flapjack OS
