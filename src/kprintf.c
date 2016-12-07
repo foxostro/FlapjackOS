@@ -2,10 +2,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-static size_t insert_int(__attribute__((__unused__)) char **str,
-                         __attribute__((__unused__)) size_t *size)
+#define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
+
+static void reverse(char *begin, char *end)
 {
-    return 0;
+    while(end > begin)
+    {
+        SWAP(*begin, *end);
+        begin++;
+        end--;
+    }
 }
 
 static size_t insert_char(char c, char **str, size_t *size)
@@ -17,10 +23,54 @@ static size_t insert_char(char c, char **str, size_t *size)
     return 1;
 }
 
+static size_t insert_string(char * restrict value, char **str, size_t *size)
+{
+    size_t i = 0;
+
+    if (value == NULL) {
+        value = "NULL";
+    }
+
+    while(*value)
+    {
+        i += insert_char(*value, str, size);
+        value++;
+    }
+
+    return i;
+}
+
+static size_t insert_int(long long value, unsigned base, char **str, size_t *size)
+{
+    size_t i = 0;
+    const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    bool negative = value < 0;
+    char tmp[32] = {0};
+
+    if (negative) {
+        value = -value;
+        i += insert_char('-', str, size);
+    }
+
+    char *begin = tmp, *iter = tmp;
+
+    while (value > 0) {
+        *iter++ = digits[value % base];
+        value /= base;
+    }
+
+    // Above, we inserted digits in reverse order. Here, we put them right.
+    reverse(begin, iter - 1);
+
+    i += insert_string(begin, str, size);
+
+    return i;
+}
+
 size_t kvsnprintf(char * restrict buf,
                   size_t size,
                   const char * restrict fmt,
-                  __attribute__((__unused__)) va_list args)
+                  va_list args)
 {
     size_t i = 0;
     char *str = buf;
@@ -35,7 +85,7 @@ size_t kvsnprintf(char * restrict buf,
         char c = *fmt++;
 
         if (c == '\0') {
-            if (size == 1) {
+            if (size >= 1) {
                 *str = '\0';
                 size = 0;
             }
@@ -49,7 +99,15 @@ size_t kvsnprintf(char * restrict buf,
         } else {
             switch(c) {
                 case 'd':
-                    i += insert_int(&str, &size);
+                    i += insert_int(va_arg(args, int), 10, &str, &size);
+                    break;
+
+                case 'x':
+                    i += insert_int(va_arg(args, int), 16, &str, &size);
+                    break;
+
+                case 's':
+                    i += insert_string((char *)va_arg(args, char *), &str, &size);
                     break;
 
                 case 'c':
