@@ -17,6 +17,7 @@ if(CMAKE_CROSSCOMPILING)
         ${COMMON_SOURCE_FILES}
         "src/kernel.c"
         "src/boot.S"
+        "src/console.c"
         )
 
     set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O2 -Wall -Wextra -Werror")

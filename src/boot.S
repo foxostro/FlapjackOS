@@ -25,7 +25,7 @@ stack_top:
 _start:
 	# Setup the initial kernel stack and jump to the kernel entry point.
 	mov $stack_top, %esp
-	call kernelMain
+	call kernel_main
 
 	# Halt the machine forever.	
 	cli
