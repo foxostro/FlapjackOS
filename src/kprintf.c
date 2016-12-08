@@ -5,8 +5,8 @@
 
 #define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
 
-static const char digitsLower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-static const char digitsUpper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
+static const char digits_lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+static const char digits_upper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
 
 static void reverse(char *begin, char *end)
 {
@@ -42,8 +42,7 @@ static size_t insert_string(const char * restrict value, char **str, size_t *siz
     return i;
 }
 
-static size_t insert_int(int value, unsigned base, const char * restrict digits,
-                         char **str, size_t *size)
+static size_t insert_int(int value, unsigned base, const char * restrict digits, char **str, size_t *size)
 {
     size_t i = 0;
     bool negative = value < 0;
@@ -69,8 +68,7 @@ static size_t insert_int(int value, unsigned base, const char * restrict digits,
     return i;
 }
 
-static size_t insert_uint(unsigned value, unsigned base, const char * restrict digits,
-                          char **str, size_t *size)
+static size_t insert_uint(unsigned value, unsigned base, const char * restrict digits, char **str, size_t *size)
 {
     char tmp[32] = {0};
 
@@ -99,7 +97,7 @@ static size_t insert_pointer(uintptr_t pvalue, char **str, size_t *size)
     char *begin = tmp, *iter = tmp;
 
     while (value > 0) {
-        *iter++ = digitsLower[value % base];
+        *iter++ = digits_lower[value % base];
         value /= base;
         c--;
     }
@@ -127,7 +125,7 @@ size_t kvsnprintf(char * restrict buf,
 {
     size_t i = 0;
     char *str = buf;
-    bool handlingPercent = false;
+    bool handling_percent = false;
 
     if (buf == NULL || size == 0 || fmt == NULL) {
         return 0;
@@ -142,24 +140,24 @@ size_t kvsnprintf(char * restrict buf,
                 size = 0;
             }
             break;
-        } else if (!handlingPercent) {
+        } else if (!handling_percent) {
             if (c == '%') {
-                handlingPercent = true;
+                handling_percent = true;
             } else {
                 i += insert_char(c, &str, &size);
             }
         } else {
             switch(c) {
                 case 'd':
-                    i += insert_int(va_arg(args, int), 10, digitsLower, &str, &size);
+                    i += insert_int(va_arg(args, int), 10, digits_lower, &str, &size);
                     break;
 
                 case 'x':
-                    i += insert_uint(va_arg(args, unsigned), 16, digitsLower, &str, &size);
+                    i += insert_uint(va_arg(args, unsigned), 16, digits_lower, &str, &size);
                     break;
 
                 case 'X':
-                    i += insert_uint(va_arg(args, unsigned), 16, digitsUpper, &str, &size);
+                    i += insert_uint(va_arg(args, unsigned), 16, digits_upper, &str, &size);
                     break;
 
                 case 'p':
@@ -179,17 +177,14 @@ size_t kvsnprintf(char * restrict buf,
                     break;
             }
 
-            handlingPercent = false;
+            handling_percent = false;
         }
     }
 
     return i;
 }
 
-size_t ksnprintf(char * restrict str,
-                 size_t size,
-                 const char * restrict fmt,
-                 ...)
+size_t ksnprintf(char * restrict str, size_t size, const char * restrict fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
