@@ -16,6 +16,7 @@ if(CMAKE_CROSSCOMPILING)
     set(KERNEL_SOURCE_FILES
         ${COMMON_SOURCE_FILES}
         "src/kernel.c"
+        "src/asm.S"
         "src/boot.S"
         "src/console.c"
         )

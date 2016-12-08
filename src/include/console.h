@@ -48,3 +48,10 @@ void console_putchar(char ch);
 
 // Puts the string at the next position in the termoinal.
 void console_puts(const char *s);
+
+// Sets the hardware cursor at the specified position.
+// If the cursor is placed outside the visible console then it will be hidden.
+void console_set_hardware_cursor_position(int row, int col);
+
+// Move the cursor to the next position where a character will be inserted.
+void console_next_cursor_position();

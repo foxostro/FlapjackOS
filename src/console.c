@@ -1,10 +1,17 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <console.h>
+#include <asm.h>
+#include <misc.h>
+
+static const uint16_t CRTC_IDX_REG = 0x3d4;
+static const uint16_t CRTC_DATA_REG = 0x3d5;
+static const uint8_t CRTC_CURSOR_LSB_IDX = 15;
+static const uint8_t CRTC_CURSOR_MSB_IDX = 14;
 
 static vgachar_t *terminal_buffer;
-size_t cursor_row = 0, cursor_col = 0;
-size_t curr_fg = LGRAY, curr_bg = BLACK; 
+static size_t cursor_row = 0, cursor_col = 0,
+              curr_fg = LGRAY, curr_bg = BLACK;
 
 static inline vgachar_t space_character()
 {
@@ -32,6 +39,8 @@ void console_clear(void)
 
     cursor_row = 0;
     cursor_col = 0;
+
+    console_next_cursor_position();
 }
 
 vgachar_t console_get_char(size_t row, size_t col)
@@ -66,6 +75,8 @@ void console_newline()
     }
 
     cursor_col = 0;
+
+    console_next_cursor_position();
 }
 
 void console_putchar(char ch)
@@ -87,6 +98,8 @@ void console_putchar(char ch)
         .bg = curr_bg,
         .ch = ch
     });
+
+    console_next_cursor_position();
 }
 
 void console_puts(const char *s)
@@ -94,5 +107,27 @@ void console_puts(const char *s)
     while(*s)
     {
         console_putchar(*s++);
+    }
+}
+
+void console_set_hardware_cursor_position(int row, int col)
+{
+    unsigned short offset = row*TERM_WIDTH + col;
+
+    // Send the least significant byte of the offset.
+    outb(CRTC_IDX_REG, CRTC_CURSOR_LSB_IDX);
+    outb(CRTC_DATA_REG, WORD_LOWER_BYTE(offset));
+
+    // Send the most significant byte of the offset.
+    outb(CRTC_IDX_REG, CRTC_CURSOR_MSB_IDX);
+    outb(CRTC_DATA_REG, WORD_UPPER_BYTE(offset));
+}
+
+void console_next_cursor_position()
+{
+    if (cursor_col == TERM_WIDTH) {
+        console_set_hardware_cursor_position(cursor_row + 1, 0);
+    } else {
+        console_set_hardware_cursor_position(cursor_row, cursor_col + 1);
     }
 }
