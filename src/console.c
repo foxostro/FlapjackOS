@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <console.h>
-#include <asm.h>
+#include <inout.h>
 #include <misc.h>
 
 static const uint16_t CRTC_IDX_REG = 0x3d4;

@@ -15,10 +15,14 @@ if(CMAKE_CROSSCOMPILING)
     # Source files for the kernel. (no organization to these files yet)
     set(KERNEL_SOURCE_FILES
         ${COMMON_SOURCE_FILES}
-        "src/kernel.c"
-        "src/asm.S"
-        "src/boot.S"
+        "src/pic.c"
         "src/console.c"
+        "src/inout.S"
+        "src/idt.c"
+        "src/idt_asm.S"
+        "src/interrupt_asm.S"
+        "src/kernel.c"
+        "src/boot.S"
         )
 
     set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O2 -Wall -Wextra -Werror")
