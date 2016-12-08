@@ -23,6 +23,11 @@ static inline vgachar_t space_character()
     };
 }
 
+bool isprint(int c)
+{
+    return ((c) >= ' ') && ((c) <= 126);
+}
+
 void console_init(vgachar_t * const addr)
 {
     terminal_buffer = addr;
@@ -55,7 +60,7 @@ vgachar_t console_get_char(size_t row, size_t col)
 
 void console_draw_char(size_t row, size_t col, vgachar_t ch)
 {
-    if (row <= TERM_HEIGHT && col <= TERM_WIDTH) {
+    if (row <= TERM_HEIGHT && col <= TERM_WIDTH && isprint(ch.ch)) {
         const size_t index = row * TERM_WIDTH + col;
         terminal_buffer[index] = ch;
     }
