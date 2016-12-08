@@ -34,8 +34,17 @@ static const size_t TERM_HEIGHT = 25;
 // addr -- The address of the VGA text buffer.
 void console_init(vgachar_t * const addr);
 
-// Fills the console with space characters on a black background.
+// Clears the console to the current background color.
 void console_clear(void);
 
 // Draws the specified character at the specified position in the terminal buffer.
 void console_draw_char(size_t row, size_t col, vgachar_t ch);
+
+// Gets the character at the specified position of the terminal buffer.
+vgachar_t console_get_char(size_t row, size_t col);
+
+// Puts a character at the next place in the terminal.
+void console_putchar(char ch);
+
+// Puts the string at the next position in the termoinal.
+void console_puts(const char *s);
