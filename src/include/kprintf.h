@@ -10,7 +10,8 @@
 // one. And a terminating null character will be placed at the size-th position.
 // This is intended to be the same as traditional vsnprintf.
 //
-// Supports %d, %c, %s, %x, %p, and %%. Field width specifiers aren't supported.
+// Supports %d, %c, %s, %x, %X, %p, and %%. Field width specifiers and flags are
+// not supported.
 //
 // Returns the number of characters that would have been output if the size had
 // not been limited.
