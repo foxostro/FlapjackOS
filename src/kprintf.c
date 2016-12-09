@@ -201,7 +201,7 @@ size_t ksnprintf(char * restrict str, size_t size, const char * restrict fmt, ..
 
 size_t kprintf(const char * restrict fmt, ...)
 {
-    char buffer[128];
+    char buffer[128] = {0};
 
     va_list args;
     va_start(args, fmt);

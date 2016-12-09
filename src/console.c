@@ -82,6 +82,10 @@ void console_newline()
 
     s_cursor_col = 0;
 
+    for (size_t col = 0; col < TERM_WIDTH; col++) {
+        console_draw_char(s_cursor_row, col, space_character());
+    }
+
     console_next_cursor_position();
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 enum vgacolor_t {
 	BLACK    = 0x0,

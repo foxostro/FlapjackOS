@@ -22,7 +22,6 @@ void timer_int_handler()
 	if(++s_leap_counter > s_timer_leap_interval) {
 		s_leap_counter = 0; // reset
 		s_clock_ticks += s_timer_leap_ticks;
-		kprintf("leap tick! -- timer_ticks = %u\n", s_clock_ticks);
 	}
 
 	s_clock_ticks += s_timer_rate;
@@ -30,8 +29,6 @@ void timer_int_handler()
 		s_clock_seconds += s_clock_ticks / CLOCK_FREQUENCY;
 		s_clock_ticks = s_clock_ticks % CLOCK_FREQUENCY;
 	}
-
-	pic_clear();
 }
 
 void timer_init(unsigned short timer_rate, int leap_interval, int leap_ticks)

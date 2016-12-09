@@ -17,6 +17,9 @@ if(CMAKE_CROSSCOMPILING)
     # Source files for the kernel. (no organization to these files yet)
     set(KERNEL_SOURCE_FILES
         ${COMMON_SOURCE_FILES}
+        "src/backtrace.c"
+        "src/backtrace_asm.S"
+        "src/halt.S"
         "src/pic.c"
         "src/console.c"
         "src/inout.S"
@@ -25,13 +28,14 @@ if(CMAKE_CROSSCOMPILING)
         "src/interrupt_asm.S"
         "src/ltr.S"
         "src/timer.c"
+        "src/panic.c"
         "src/strings.c"
         "src/kernel.c"
         "src/boot.S"
         )
 
-    set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O2 -Wall -Wextra -Werror")
-    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O2 -nostdlib")
+    set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O0 -Wall -Wextra -Werror")
+    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O0 -nostdlib")
 
     # The layout file specifies how the linker puts together the kernel binary image.
     set(KERNEL_LAYOUT_FILE "kernel.ld")

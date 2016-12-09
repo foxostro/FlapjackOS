@@ -4,4 +4,4 @@
 void pic_init();
 
 // Clear the PIC, signaling the end of an interrupt.
-void pic_clear();
+void pic_clear(unsigned irq);

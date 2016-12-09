@@ -49,10 +49,11 @@ void pic_init()
     pic_remap(0x20, 0x28);
 }
 
-void pic_clear()
+void pic_clear(unsigned irq)
 {
-    // Note that this will not work if the IRQ to clear is >= 8.
-    // In that case we need to clear it from PIC2 instead.
-    // We're sticking to only clearing PIC1 now because it's simpler.
+    if (irq >= 8) {
+        outb(PIC2, PIC_EOI);    
+    }
+
     outb(PIC1, PIC_EOI);
 }

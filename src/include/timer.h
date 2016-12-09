@@ -4,7 +4,9 @@
 #define TIMER_RATE_10ms          11931
 #define TIMER_LEAP_INTERVAL_10ms 50
 #define TIMER_LEAP_TICKS_10ms    41
-#define TIMER_IDT_ENTRY          0x20
+
+// Timer interrupt handler. Called by the interrupt dispatcher.
+void timer_int_handler();
 
 // Set the rate of timer interrupts.
 // timer_rate -- clock cycles between timer interrupts
