@@ -159,7 +159,7 @@ void interrupt_dispatch(unsigned interrupt_number,
             panic("Unknown interrupt: %d", interrupt_number);
     }
 
-    pic_clear(interrupt_number);
+    pic_clear(interrupt_number - 0x20); // XXX: no magic numbers
 }
 
 __attribute__((noreturn))

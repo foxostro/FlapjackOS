@@ -57,7 +57,9 @@ static size_t insert_int(int value, unsigned base, const char * restrict digits,
 
     char *begin = tmp, *iter = tmp;
 
-    while (value > 0) {
+    if (value == 0) {
+        *iter++ = digits[0];
+    } else while (value > 0) {
         *iter++ = digits[value % base];
         value /= base;
     }
@@ -76,7 +78,9 @@ static size_t insert_uint(unsigned value, unsigned base, const char * restrict d
 
     char *begin = tmp, *iter = tmp;
 
-    while (value > 0) {
+    if (value == 0) {
+        *iter++ = digits[0];
+    } else while (value > 0) {
         *iter++ = digits[value % base];
         value /= base;
     }
