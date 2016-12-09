@@ -1,4 +1,6 @@
 #pragma once
 
-void unused_hardware_interrupt();
 void asm_timer_wrapper();
+void asm_keyboard_wrapper();
+
+void enable_interrupts();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #define IDT_DE          0       // Devision Error (Fault)
 #define IDT_DB          1       // Debug Exception (Fault/Trap)
 #define IDT_NMI         2       // Non-Maskable Interrupt (Interrupt)
@@ -23,19 +25,35 @@
                                 // IDT entries 16 through 31 are reserved.
 #define IDT_USER_START  32      // User define IDT entries start here
 
-#define IDT_ENTS        256     /* There are this many IDT entries */
+#define IDT_ENTS        256     // There are this many IDT entries.
+
+#define TASK_GATE       0b0101  // 32-bit task gate
+#define INTERRUPT_GATE  0b1110  // 32-bit interrupt gate
+#define TRAP_GATE       0b1111  // 32-bit trap gate
+
+typedef struct
+{
+   uint16_t offset_1;   // offset bits 0..15
+   uint16_t selector;   // a code segment selector in GDT or LDT
+   uint8_t zero;        // unused, set to 0
+   uint8_t gate_type:4; // type of gate
+   uint8_t s:1;         // storage segement
+   uint8_t dpl:2;       // priviledge level for the gate
+   uint8_t p:1;         // present bit, set to zero for unused interrupts
+   uint16_t offset_2;   // offset bits 16..31
+} idt_entry_t;
+_Static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
+
 
 // Returns a pointer to the beginning of the installed IDT.
-void* idt_base();
+idt_entry_t* idt_base();
 
-// Installs an interrupt handler in the IDT.
-// TODO: not all interrupt handlers should use Trap Gates
-// index -- Index of the appropriate IDT entry
-// pOffset -- Due to the segment setup that the 410 support code provides,
-// this is merely the address of the interrupt handler assembly
-// wrapper.
-// DPL -- Caller must be running at this Privilege Level, or lower
-void idt_install_trap_gate(unsigned int index, void *pOffset, unsigned DPL);
+// Loads a new IDT.
+void lidt(void *idt, unsigned limit);
 
-// Resets all entries in the IDT so they do nothing.
-void idt_reset();
+// Build an IDT entry.
+// entry -- The entry to write into.
+// offset -- Pointer to the handler function.
+// gate_type -- The type of gate to use for the entry.
+// dpl -- Privilege level for the gate.
+void idt_build_entry(idt_entry_t *entry, uint32_t offset, unsigned gate_type, unsigned dpl);

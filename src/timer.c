@@ -1,7 +1,10 @@
 #include <timer.h>
+#include <stdint.h>
+#include <pic.h>
+#include <inout.h>
 #include <misc.h>
+#include <kprintf.h>
 
-#define TIMER_IDT_ENTRY      0x20
 #define TIMER_PERIOD_IO_PORT 0x40
 #define TIMER_MODE_IO_PORT   0x43
 #define TIMER_SQUARE_WAVE    0x36
@@ -14,7 +17,7 @@ static unsigned s_timer_rate;
 static unsigned s_timer_leap_interval;
 static unsigned s_timer_leap_ticks;
 
-void timer_int_handler(uint32_t iret_eip)
+void timer_int_handler()
 {
 	if(++s_leap_counter > s_timer_leap_interval) {
 		s_leap_counter = 0; // reset
@@ -26,6 +29,8 @@ void timer_int_handler(uint32_t iret_eip)
 		s_clock_seconds += s_clock_ticks / CLOCK_FREQUENCY;
 		s_clock_ticks = s_clock_ticks % CLOCK_FREQUENCY;
 	}
+
+	kprintf("timer_ticks = %u ; timer_seconds = %u\n", timer_ticks(), timer_seconds());
 
 	pic_clear();
 }

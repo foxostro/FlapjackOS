@@ -2,15 +2,29 @@
 #include <stdio.h>
 #include <check.h>
 
-Suite* test_suite_printf(void); // defined in test_printf.c
-
-int main(int __unused argc, char * __unused argv[])
+void lgdt(__attribute__((unused)) void *gdt, __attribute__((unused)) unsigned limit)
 {
-    int numberOfFailedTests;
-    Suite *suite = test_suite_printf();
-    SRunner *runner = srunner_create(suite);
-    srunner_run_all(runner, CK_NORMAL);
-    numberOfFailedTests = srunner_ntests_failed(runner);
-    srunner_free(runner);
+    // satisfy the linker
+}
+
+void console_puts(__attribute__((unused)) const char *s)
+{
+    // satisfy the linker
+}
+
+Suite* test_suite_printf(); // defined in test_printf.c
+Suite* test_suite_gdt(); // defined in test_gdt.c
+Suite* test_suite_idt(); // defined in test_idt.c
+
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
+{
+    int numberOfFailedTests = 0;
+    Suite* suite[] = {test_suite_printf(), test_suite_gdt(), test_suite_idt()};
+    for (int i = 0, n = sizeof(suite) / sizeof(*suite); i < n; ++i) {
+        SRunner *runner = srunner_create(suite[i]);
+        srunner_run_all(runner, CK_NORMAL);
+        numberOfFailedTests += srunner_ntests_failed(runner);
+        srunner_free(runner);   
+    }
     return (numberOfFailedTests == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

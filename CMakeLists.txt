@@ -4,6 +4,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
 set(COMMON_SOURCE_FILES
     "src/kprintf.c"
+    "src/idt.c"
+    "src/gdt.c"
     )
 
 include_directories("src/include")
@@ -18,9 +20,12 @@ if(CMAKE_CROSSCOMPILING)
         "src/pic.c"
         "src/console.c"
         "src/inout.S"
-        "src/idt.c"
         "src/idt_asm.S"
+        "src/gdt_asm.S"
         "src/interrupt_asm.S"
+        "src/ltr.S"
+        "src/timer.c"
+        "src/strings.c"
         "src/kernel.c"
         "src/boot.S"
         )
@@ -74,6 +79,8 @@ else()
     # Source files for the test suite.
     set(TEST_SOURCE_FILES
          ${COMMON_SOURCE_FILES}
+        "src/test/test_gdt.c"
+        "src/test/test_idt.c"
         "src/test/test_printf.c"
         "src/test/test_main.c"
         )
@@ -83,7 +90,7 @@ else()
     include_directories(${CHECK_INCLUDE_DIRS})
     link_directories(${CHECK_LIBRARIES_DIR})
     set(LIBS ${LIBS} ${CHECK_LIBRARIES})
-    set(CMAKE_C_FLAGS "-std=c11 -g -O2 -Wall -Wextra -Werror")
+    set(CMAKE_C_FLAGS "-std=c11 -g -O0 -Wall -Wextra -Werror")
     add_executable(${TEST_RUNNER_NAME} ${TEST_SOURCE_FILES})
     target_link_libraries(${TEST_RUNNER_NAME} ${LIBS})
     add_test(${TEST_RUNNER_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_RUNNER_NAME})

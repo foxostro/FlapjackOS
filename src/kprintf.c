@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <strings.h>
+#include <console.h>
 
 #define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
 
@@ -152,6 +154,10 @@ size_t kvsnprintf(char * restrict buf,
                     i += insert_int(va_arg(args, int), 10, digits_lower, &str, &size);
                     break;
 
+                case 'u':
+                    i += insert_uint(va_arg(args, unsigned), 10, digits_lower, &str, &size);
+                    break;
+
                 case 'x':
                     i += insert_uint(va_arg(args, unsigned), 16, digits_lower, &str, &size);
                     break;
@@ -191,4 +197,18 @@ size_t ksnprintf(char * restrict str, size_t size, const char * restrict fmt, ..
     int c = kvsnprintf(str, size, fmt, args);
     va_end(args);
     return c;
+}
+
+size_t kprintf(const char * restrict fmt, ...)
+{
+    char buffer[128];
+
+    va_list args;
+    va_start(args, fmt);
+    kvsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+
+    console_puts(buffer);
+
+    return strnlen(buffer, sizeof(buffer));
 }
