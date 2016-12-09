@@ -33,10 +33,12 @@ stack_top:
 .global _start
 .type _start, @function
 _start:
+    cli
+    cld
+
     # Setup the initial kernel stack and jump to the kernel entry point.
     mov $stack_top, %esp
     mov $0, %ebp # back traces end here
-    cld
     call kernel_main
 
     # Halt the machine forever. 
