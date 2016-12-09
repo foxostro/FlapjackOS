@@ -30,7 +30,7 @@ void timer_int_handler()
 		s_clock_ticks = s_clock_ticks % CLOCK_FREQUENCY;
 	}
 
-	kprintf("timer_ticks = %u ; timer_seconds = %u\n", timer_ticks(), timer_seconds());
+	kprintf("timer_ticks = %u ; timer_seconds = %u\n", s_clock_ticks, s_clock_seconds);
 
 	pic_clear();
 }
@@ -46,12 +46,12 @@ void timer_init(unsigned short timer_rate, int leap_interval, int leap_ticks)
 	outb(TIMER_PERIOD_IO_PORT, WORD_UPPER_BYTE(timer_rate));
 }
 
-unsigned timer_ticks(void)
+unsigned timer_ticks()
 {
 	return s_clock_ticks;
 }
 
-unsigned timer_seconds(void)
+unsigned timer_seconds()
 {
 	return s_clock_seconds;
 }

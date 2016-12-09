@@ -16,8 +16,8 @@
 void load_task_register(); // defined in ltr.S
 
 static gdt_entry_t s_gdt[6];
-static idt_entry_t s_idt[IDT_ENTS];
 static tss_struct_t s_tss;
+static idt_entry_t s_idt[IDT_ENTS];
 
 void keyboard_int_handler()
 {
@@ -43,7 +43,6 @@ void kernel_main(void *mb_info, void *istack)
     lidt(s_idt, sizeof(s_idt) - 1);
 
     pic_init();
-    enable_interrupts();
 
     console_init((vgachar_t *)0xB8000);
     kprintf("Hello, world!\n");
@@ -51,4 +50,8 @@ void kernel_main(void *mb_info, void *istack)
     kprintf("istack = %p\n", istack);
 
     timer_init(TIMER_RATE_10ms, TIMER_LEAP_INTERVAL_10ms, TIMER_LEAP_TICKS_10ms);
+
+    enable_interrupts();
+
+    for(;;);
 }

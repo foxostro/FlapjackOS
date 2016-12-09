@@ -7,6 +7,13 @@ void bzero(char *s, size_t n)
     }
 }
 
+size_t strlen(const char *s)
+{
+    size_t c;
+    for(c = 0; *s; ++c, ++s);
+    return c;
+}
+
 size_t strnlen(const char *s, size_t maxlen)
 {
     size_t c;
