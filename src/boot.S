@@ -32,7 +32,8 @@ _start:
     pushl %ebx
     call kernel_main  # Call the C entry point
 
-    # Halt the machine forever. 
+    # Halt the machine forever.
+    # This is unreachable and is only here just-in-case.
     cli
 hang:
     hlt

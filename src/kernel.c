@@ -5,15 +5,16 @@
 #include <gdt.h>
 #include <idt.h>
 #include <tss.h>
+#include <ltr.h>
 #include <interrupt_asm.h>
 #include <pic.h>
 #include <console.h>
 #include <kprintf.h>
 #include <timer.h>
+#include <inout.h>
 
 #define KEY_IDT_ENTRY 0x21
-
-void load_task_register(); // defined in ltr.S
+#define KEYBOARD_PORT 0x60
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
@@ -21,10 +22,12 @@ static idt_entry_t s_idt[IDT_ENTS];
 
 void keyboard_int_handler()
 {
-    console_puts("key press\n");
+    uint8_t key = inb(KEYBOARD_PORT);
+    kprintf("key press: %d\n", key);
     pic_clear();
 }
 
+__attribute__((noreturn))
 void kernel_main(void *mb_info, void *istack)
 {
     // Setup the initial Task State Segment. The kernel uses one TSS between all
@@ -71,4 +74,5 @@ void kernel_main(void *mb_info, void *istack)
     // Spin forever. After this point, the kernel is entirely driven in response
     // to interrupts.
     for(;;);
+    __builtin_unreachable();
 }

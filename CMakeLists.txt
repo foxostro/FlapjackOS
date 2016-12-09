@@ -30,8 +30,8 @@ if(CMAKE_CROSSCOMPILING)
         "src/boot.S"
         )
 
-    set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O0 -Wall -Wextra -Werror")
-    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O0 -nostdlib")
+    set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O2 -Wall -Wextra -Werror")
+    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O2 -nostdlib")
 
     # The layout file specifies how the linker puts together the kernel binary image.
     set(KERNEL_LAYOUT_FILE "kernel.ld")
