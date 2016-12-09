@@ -12,12 +12,14 @@
 .long FLAGS
 .long CHECKSUM
 
-# Initial stack
+# Setup a 16KiB stack with 16 byte alignment.
 .align 16
 stack_bottom:
 .skip 16384
 stack_top:
 
+.global _start
+.type _start, @function
 _start:
     cli
     cld
@@ -35,3 +37,5 @@ _start:
 hang:
     hlt
     jmp hang
+
+.size _start, . - _start
