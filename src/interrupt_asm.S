@@ -8,6 +8,7 @@ asm_de_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_db_wrapper
@@ -18,6 +19,7 @@ asm_db_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_nmi_wrapper
@@ -38,6 +40,7 @@ asm_bp_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_of_wrapper
@@ -48,6 +51,7 @@ asm_of_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_br_wrapper
@@ -58,6 +62,7 @@ asm_br_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_ud_wrapper
@@ -68,6 +73,7 @@ asm_ud_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_nm_wrapper
@@ -78,6 +84,7 @@ asm_nm_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_df_wrapper
@@ -89,6 +96,7 @@ asm_df_wrapper:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
+    sti
     iret
 
 .global asm_cso_wrapper
@@ -99,6 +107,7 @@ asm_cso_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_ts_wrapper
@@ -110,6 +119,7 @@ asm_ts_wrapper:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
+    sti
     iret
 
 .global asm_np_wrapper
@@ -121,6 +131,7 @@ asm_np_wrapper:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
+    sti
     iret
 
 .global asm_ss_wrapper
@@ -132,6 +143,7 @@ asm_ss_wrapper:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
+    sti
     iret
 
 .global asm_gp_wrapper
@@ -143,6 +155,7 @@ asm_gp_wrapper:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
+    sti
     iret
 
 .global asm_pf_wrapper
@@ -154,6 +167,7 @@ asm_pf_wrapper:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
+    sti
     iret
 
 .global asm_mf_wrapper
@@ -164,6 +178,7 @@ asm_mf_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_ac_wrapper
@@ -174,6 +189,7 @@ asm_ac_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_mc_wrapper
@@ -184,6 +200,7 @@ asm_mc_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_xf_wrapper
@@ -194,6 +211,7 @@ asm_xf_wrapper:
     call interrupt_dispatch
     addl $4, %esp # Clean up the interrupt number.
     popa
+    sti
     iret
 
 .global asm_timer_wrapper
