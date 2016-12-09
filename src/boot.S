@@ -12,12 +12,6 @@
 .long FLAGS
 .long CHECKSUM
 
-# Setup a 16KiB stack with 16 byte alignment.
-.align 16
-stack_bottom:
-.skip 16384
-stack_top:
-
 .global _start
 .type _start, @function
 _start:
@@ -40,3 +34,10 @@ hang:
     jmp hang
 
 .size _start, . - _start
+
+# Setup a 16KiB stack with 16 byte alignment.
+.section .data
+.align 16
+stack_bottom:
+.skip 16384
+stack_top:
