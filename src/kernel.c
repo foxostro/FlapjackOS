@@ -29,15 +29,16 @@ void keyboard_int_handler()
 }
 
 void interrupt_dispatch(unsigned interrupt_number,
-                        __attribute__((unused)) unsigned edi,
-                        __attribute__((unused)) unsigned esi,
-                        __attribute__((unused)) unsigned ebp,
-                        __attribute__((unused)) unsigned esp,
-                        __attribute__((unused)) unsigned ebx,
-                        __attribute__((unused)) unsigned edx,
-                        __attribute__((unused)) unsigned ecx,
-                        __attribute__((unused)) unsigned eax,
-                        unsigned error_code)
+                        unsigned edi,
+                        unsigned esi,
+                        unsigned ebp,
+                        unsigned esp,
+                        unsigned ebx,
+                        unsigned edx,
+                        unsigned ecx,
+                        unsigned eax,
+                        unsigned error_code,
+                        unsigned eip)
 {
     switch(interrupt_number) {
         case KEY_IDT_ENTRY:
@@ -114,8 +115,18 @@ void interrupt_dispatch(unsigned interrupt_number,
             break;
 
         case IDT_GP:
+            kprintf("Registers:\n");
+            kprintf("edi = 0x%x\n", edi);
+            kprintf("esi = 0x%x\n", esi);
+            kprintf("ebp = 0x%x\n", ebp);
+            kprintf("esp = 0x%x\n", esp);
+            kprintf("ebx = 0x%x\n", ebx);
+            kprintf("edx = 0x%x\n", edx);
+            kprintf("ecx = 0x%x\n", ecx);
+            kprintf("eax = 0x%x\n\n", eax);
             backtrace();
-            panic("General Protection Fault. Error Code: 0x%x", error_code);
+            panic("General Protection Fault. EIP = %p, Error Code = 0x%x",
+                  eip, error_code);
             break;
 
         case IDT_PF:
