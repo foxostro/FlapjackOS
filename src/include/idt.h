@@ -31,8 +31,7 @@
 #define INTERRUPT_GATE  0b1110  // 32-bit interrupt gate
 #define TRAP_GATE       0b1111  // 32-bit trap gate
 
-typedef struct
-{
+typedef struct {
    uint16_t offset_1;   // offset bits 0..15
    uint16_t selector;   // a code segment selector in GDT or LDT
    uint8_t zero;        // unused, set to 0

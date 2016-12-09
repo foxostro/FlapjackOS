@@ -151,6 +151,7 @@ START_TEST(test_gdt_layout_2)
     bzero(gdt, sizeof(gdt));
     gdt_create_flat_mapping(gdt, sizeof(gdt), 0x00100930);
 
+#if 0
     printf("expected gdt:\n");
     gdt_entry_t *expected_gdt = (gdt_entry_t *)expected;
     for(int i = 0; i < 6; ++i) {
@@ -165,7 +166,8 @@ START_TEST(test_gdt_layout_2)
         printf("\n");
     }
     printf("\n");
-
+#endif
+    
     ck_assert(!memcmp(gdt, expected, sizeof(expected)));
 }
 END_TEST

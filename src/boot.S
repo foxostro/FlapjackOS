@@ -14,15 +14,9 @@
 .long FLAGS
 .long CHECKSUM
 
-.global init_tss # TODO: define in readable code
-init_tss:
-    .space 8
-    .word 0x0018
-    .space 92
-    .word 0x0068
-
 # Setup a 16KiB stack with 16 byte alignment.
 .section .bss
+.global stack_top
 .align 16
 stack_bottom:
 .skip 16384
@@ -39,11 +33,15 @@ _start:
     # Setup the initial kernel stack and jump to the kernel entry point.
     mov $stack_top, %esp
     mov $0, %ebp # back traces end here
+
+    pushl $stack_top
+    pushl %ebx # Pointer to multiboot info structure
     call kernel_main
 
     # Halt the machine forever. 
     cli
-1:  hlt
-    jmp 1b
+hang:
+    hlt
+    jmp hang
 
 .size _start, . - _start

@@ -4,8 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef struct
-{
+typedef struct {
     uint16_t limit_0_15;
     uint16_t base_0_15;
     uint8_t base_16_23;
