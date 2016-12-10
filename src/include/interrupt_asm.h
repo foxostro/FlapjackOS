@@ -22,6 +22,7 @@ void asm_xf_wrapper();
 
 void asm_timer_wrapper();
 void asm_keyboard_wrapper();
+void asm_spurious_wrapper();
 
 void disable_interrupts();
 void enable_interrupts();

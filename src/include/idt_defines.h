@@ -25,5 +25,6 @@
 
 #define IDT_ENTS        256     // There are this many IDT entries.
 
-#define TIMER_IDT_ENTRY 0x20
-#define KEY_IDT_ENTRY   0x21
+#define TIMER_IDT_ENTRY     0x20
+#define KEY_IDT_ENTRY       0x21
+#define SPURIOUS_IDT_ENTRY  0x27

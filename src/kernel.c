@@ -187,27 +187,28 @@ void kernel_main(void *mb_info, void *istack)
     // Setup the Interrupt Descriptor Table. This wires various IRQs up to their
     // handler functions.
     bzero(s_idt, sizeof(idt_entry_t) * IDT_ENTS);
-    idt_build_entry(&s_idt[IDT_DE],          (uint32_t)asm_de_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_DB],          (uint32_t)asm_db_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_NMI],         (uint32_t)asm_nmi_wrapper,      INTERRUPT_GATE, 0);
-    idt_build_entry(&s_idt[IDT_BP],          (uint32_t)asm_bp_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_OF],          (uint32_t)asm_of_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_BR],          (uint32_t)asm_br_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_UD],          (uint32_t)asm_ud_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_NM],          (uint32_t)asm_nm_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_DF],          (uint32_t)asm_df_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_CSO],         (uint32_t)asm_cso_wrapper,      TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_TS],          (uint32_t)asm_ts_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_NP],          (uint32_t)asm_np_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_SS],          (uint32_t)asm_ss_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_GP],          (uint32_t)asm_gp_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_PF],          (uint32_t)asm_pf_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_MF],          (uint32_t)asm_mf_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_AC],          (uint32_t)asm_ac_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_MC],          (uint32_t)asm_mc_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_XF],          (uint32_t)asm_xf_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[KEY_IDT_ENTRY],   (uint32_t)asm_keyboard_wrapper, INTERRUPT_GATE, 0);
-    idt_build_entry(&s_idt[TIMER_IDT_ENTRY], (uint32_t)asm_timer_wrapper,    INTERRUPT_GATE, 0);
+    idt_build_entry(&s_idt[IDT_DE],             (uint32_t)asm_de_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_DB],             (uint32_t)asm_db_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_NMI],            (uint32_t)asm_nmi_wrapper,      INTERRUPT_GATE, 0);
+    idt_build_entry(&s_idt[IDT_BP],             (uint32_t)asm_bp_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_OF],             (uint32_t)asm_of_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_BR],             (uint32_t)asm_br_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_UD],             (uint32_t)asm_ud_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_NM],             (uint32_t)asm_nm_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_DF],             (uint32_t)asm_df_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_CSO],            (uint32_t)asm_cso_wrapper,      TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_TS],             (uint32_t)asm_ts_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_NP],             (uint32_t)asm_np_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_SS],             (uint32_t)asm_ss_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_GP],             (uint32_t)asm_gp_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_PF],             (uint32_t)asm_pf_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_MF],             (uint32_t)asm_mf_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_AC],             (uint32_t)asm_ac_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_MC],             (uint32_t)asm_mc_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[IDT_XF],             (uint32_t)asm_xf_wrapper,       TRAP_GATE, 0);
+    idt_build_entry(&s_idt[KEY_IDT_ENTRY],      (uint32_t)asm_keyboard_wrapper, INTERRUPT_GATE, 0);
+    idt_build_entry(&s_idt[TIMER_IDT_ENTRY],    (uint32_t)asm_timer_wrapper,    INTERRUPT_GATE, 0);
+    idt_build_entry(&s_idt[SPURIOUS_IDT_ENTRY], (uint32_t)asm_spurious_wrapper, INTERRUPT_GATE, 0);
     lidt(s_idt, sizeof(s_idt) - 1);
 
     // Initialize the PIC chip. It is necessary to remap IRQs before enabling

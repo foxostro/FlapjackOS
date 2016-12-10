@@ -234,6 +234,10 @@ asm_keyboard_wrapper:
     popa
     iret
 
+.global asm_spurious_wrapper
+asm_spurious_wrapper:
+    iret # ignore
+
 .global enable_interrupts
 enable_interrupts:
 	sti
