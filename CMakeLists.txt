@@ -26,6 +26,7 @@ if(CMAKE_CROSSCOMPILING)
         "src/idt_asm.S"
         "src/gdt_asm.S"
         "src/interrupt_asm.S"
+        "src/isr_asm.S"
         "src/ltr.S"
         "src/timer.c"
         "src/panic.c"
