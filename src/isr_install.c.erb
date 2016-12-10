@@ -1,0 +1,22 @@
+// isr_installer.c is an automatically generated file. Do not edit directly.
+//
+// Interrupt Service Routines
+// These are the procedures which are directly referenced by the IDT.
+// Though, all are simply assembly wrappers which call the high-level dispatcher.
+
+#include <idt.h>
+#include <strings.h>
+
+// These wrappers are defined in isr_wrapper_asm.S
+<% [0..14, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+void isr_wrapper_<%= isr %>();<% end %>
+
+void isr_install(idt_entry_t *idt)
+{
+	bzero(idt, sizeof(idt_entry_t) * IDT_MAX);
+	
+	<% [0..14, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+	idt_build_entry(&idt[<%= isr %>], (uint32_t)isr_wrapper_<%= isr %>, TRAP_GATE, 0);<% end %>
+
+    lidt(idt, sizeof(idt_entry_t) * IDT_MAX - 1);
+}

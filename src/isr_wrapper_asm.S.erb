@@ -1,0 +1,34 @@
+# isr_wrapper_asm.S is an automatically generated file. Do not edit directly.
+#
+# Interrupt Service Routines
+# These are the procedures which are directly referenced by the IDT.
+# Though, all are simply assembly wrappers which call the high-level dispatcher.
+
+# The CPU pushes an error code on the stack for the following ISR wrappers.
+<% [8, 10..14].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+.global isr_wrapper_<%= isr %>
+isr_wrapper_<%= isr %>:
+    cli
+    pusha
+    pushl $<%= isr %>
+    call interrupt_dispatch
+    addl $4, %esp # Clean up the interrupt number.
+    popa
+    addl $4, %esp  # Clean up the error code.
+    sti
+    iret
+<% end %>
+
+# The CPU does not push an error code for the following ISR wrappers.
+<% [0..7, 9, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+.global isr_wrapper_<%= isr %>
+isr_wrapper_<%= isr %>:
+    cli
+    pusha
+    pushl $<%= isr %>
+    call interrupt_dispatch
+    addl $4, %esp # Clean up the interrupt number.
+    popa
+    sti
+    iret
+<% end %>

@@ -3,9 +3,9 @@ project(FlapjackOS C)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
 set(COMMON_SOURCE_FILES
-    "src/kprintf.c"
-    "src/idt.c"
     "src/gdt.c"
+    "src/idt.c"
+    "src/kprintf.c"
     )
 
 include_directories("src/include")
@@ -19,19 +19,20 @@ if(CMAKE_CROSSCOMPILING)
         ${COMMON_SOURCE_FILES}
         "src/backtrace.c"
         "src/backtrace_asm.S"
-        "src/halt.S"
-        "src/pic.c"
         "src/console.c"
-        "src/inout.S"
-        "src/idt_asm.S"
         "src/gdt_asm.S"
+        "src/halt.S"
+        "src/idt_asm.S"
+        "src/inout.S"
         "src/interrupt_asm.S"
-        "src/isr_asm.S"
-        "src/ltr.S"
-        "src/timer.c"
-        "src/panic.c"
-        "src/strings.c"
+        "src/isr_install.c"
+        "src/isr_wrapper_asm.S"
         "src/kernel.c"
+        "src/ltr.S"
+        "src/panic.c"
+        "src/pic.c"
+        "src/strings.c"
+        "src/timer.c"
         "src/boot.S"
         )
 
@@ -75,6 +76,20 @@ if(CMAKE_CROSSCOMPILING)
     add_custom_target(
         iso ALL
         DEPENDS ${CMAKE_PROJECT_NAME}.iso
+    )
+
+    set(ERB_TOOL "scripts/erb.sh")
+    add_custom_command(
+        OUTPUT src/isr_install.c
+        COMMAND ${ERB_TOOL} src/isr_install.c.erb src/isr_install.c
+        DEPENDS ${ERB_TOOL} src/isr_install.c.erb
+        VERBATIM
+    )
+    add_custom_command(
+        OUTPUT src/isr_wrapper_asm.S
+        COMMAND ${ERB_TOOL} src/isr_wrapper_asm.S.erb src/isr_wrapper_asm.S
+        DEPENDS ${ERB_TOOL} src/isr_wrapper_asm.S.erb
+        VERBATIM
     )
 
 else()

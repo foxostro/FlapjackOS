@@ -21,6 +21,7 @@
 #define ICW4_BUF_MASTER 0x0C // Buffered mode/master
 #define ICW4_SFNM       0x10 // Special fully nested (not)
 
+#define PIC_READ_ISR    0x0b
 #define PIC_EOI         0x20 // Command code for "end of interrupt"
 
 void pic_remap(unsigned char master_base, unsigned char slave_base)
@@ -48,12 +49,29 @@ void pic_init()
     // are reserved by Intel up until 0x1F. Remap them.
     pic_remap(0x20, 0x28);
 }
-
-void pic_clear(unsigned irq)
+ 
+static uint16_t pic_get_isr()
 {
+    outb(PIC1_COMMAND, PIC_READ_ISR);
+    outb(PIC2_COMMAND, PIC_READ_ISR);
+    return (inb(PIC2_COMMAND) << 8) | inb(PIC1_COMMAND);
+}
+
+bool pic_clear(unsigned interrupt_number)
+{
+    unsigned irq = interrupt_number - 0x20;
+
+    uint16_t isr = pic_get_isr();
+
+    if ((irq == 7) && ((isr & (1 << irq)) == 0)) {
+        return true;
+    }
+
     if (irq >= 8) {
         outb(PIC2, PIC_EOI);    
     }
 
     outb(PIC1, PIC_EOI);
+
+    return false;
 }

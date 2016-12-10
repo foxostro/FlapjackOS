@@ -7,6 +7,7 @@
 #include <tss.h>
 #include <ltr.h>
 #include <interrupt_asm.h>
+#include <isr_install.h>
 #include <pic.h>
 #include <console.h>
 #include <kprintf.h>
@@ -20,7 +21,7 @@
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
-static idt_entry_t s_idt[IDT_ENTS];
+static idt_entry_t s_idt[IDT_MAX];
 
 void keyboard_int_handler()
 {
@@ -40,126 +41,119 @@ void interrupt_dispatch(unsigned interrupt_number,
                         unsigned error_code,
                         unsigned eip)
 {
+    bool spurious = pic_clear(interrupt_number);
+
+    if (spurious) {
+        return;
+    }
+
     switch(interrupt_number) {
-        case KEY_IDT_ENTRY:
+        case IDT_KEY:
             keyboard_int_handler();
             break;
 
-        case TIMER_IDT_ENTRY:
+        case IDT_TIMER:
             timer_int_handler();
             break;
 
         case IDT_DE:
-            backtrace();
-            panic("Division Error");
+            panic2("Division Error", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_DB:
-            backtrace();
-            panic("Debug Exception");
+            panic2("Debug Exception", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_NMI:
-            backtrace();
-            panic("Non-Maskable Interrupt");
+            panic2("Non-Maskable Interrupt", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_BP:
-            backtrace();
-            panic("Breakpoint");
+            panic2("Breakpoint", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_OF:
-            backtrace();
-            panic("Overflow");
+            panic2("Overflow", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_BR:
-            backtrace();
-            panic("BOUND Range exceeded");
+            panic2("BOUND Range exceeded", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_UD:
-            backtrace();
-            panic("UnDefined Opcode");
+            panic2("Undefined Opcode", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_NM:
-            backtrace();
-            panic("No Math coprocessor");
+            panic2("No Math coprocessor", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_DF:
-            backtrace();
-            panic("Double Fault. Error Code: 0x%x", error_code);
+            panic2("Double Fault.", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
             break;
 
         case IDT_CSO:
-            backtrace();
-            panic("Coprocessor Segment Overrun");
+            panic2("Coprocessor Segment Overrun", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_TS:
-            backtrace();
-            panic("Invalid Task Segment Selector. Error Code: 0x%x", error_code);
+            panic2("Invalid Task Segment Selector.", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
             break;
 
         case IDT_NP:
-            backtrace();
-            panic("Segment Not Present. Error Code: 0x%x", error_code);
+            panic2("Segment Not Present.", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
             break;
 
         case IDT_SS:
-            backtrace();
-            panic("Stack Segment Fault. Error Code: 0x%x", error_code);
+            panic2("Stack Segment Fault.", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
             break;
 
         case IDT_GP:
-            kprintf("Registers:\n");
-            kprintf("edi = 0x%x\n", edi);
-            kprintf("esi = 0x%x\n", esi);
-            kprintf("ebp = 0x%x\n", ebp);
-            kprintf("esp = 0x%x\n", esp);
-            kprintf("ebx = 0x%x\n", ebx);
-            kprintf("edx = 0x%x\n", edx);
-            kprintf("ecx = 0x%x\n", ecx);
-            kprintf("eax = 0x%x\n\n", eax);
-            backtrace();
-            panic("General Protection Fault. EIP = %p, Error Code = 0x%x",
-                  eip, error_code);
+            panic2("General Protection Fault.", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
             break;
 
         case IDT_PF:
-            backtrace();
-            panic("Page Fault. Error Code: 0x%x", error_code);
+            panic2("Page Fault.", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
             break;
 
         case IDT_MF:
-            backtrace();
-            panic("X87 Math Fault");
+            panic2("X87 Math Fault", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_AC:
-            backtrace();
-            panic("Alignment Check");
+            panic2("Alignment Check", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_MC:
-            backtrace();
-            panic("Machine Check");
+            panic2("Machine Check", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         case IDT_XF:
-            backtrace();
-            panic("SSE Floating Point Exception");
+            panic2("SSE Floating Point Exception", 
+                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
             break;
 
         default:
-            backtrace();
-            panic("Unknown interrupt: %d", interrupt_number);
+            panic("Unknown interrupt: 0x%x", interrupt_number);
     }
-
-    pic_clear(interrupt_number - 0x20); // XXX: no magic numbers
 }
 
 __attribute__((noreturn))
@@ -172,13 +166,7 @@ void kernel_main(void *mb_info, void *istack)
     s_tss.esp0 = (uint32_t)istack;
     s_tss.iomap = sizeof(s_tss);
 
-    // Setup the Global Descriptor Table. The kernel uses a flat memory map
-    // and so the GDT only requires five entries:
-    // 1 -- descriptor for the TSS
-    // 2 -- descriptor for kernel code
-    // 3 -- descriptor for kernel data
-    // 4 -- descriptor for user space code
-    // 5 -- descriptor for user space data
+    // Setup the Global Descriptor Table. The kernel uses a flat memory map.
     bzero(s_gdt, sizeof(s_gdt));
     gdt_create_flat_mapping(s_gdt, sizeof(s_gdt), (uint32_t)&s_tss);
     lgdt(s_gdt, sizeof(s_gdt) - 1);
@@ -186,30 +174,7 @@ void kernel_main(void *mb_info, void *istack)
 
     // Setup the Interrupt Descriptor Table. This wires various IRQs up to their
     // handler functions.
-    bzero(s_idt, sizeof(idt_entry_t) * IDT_ENTS);
-    idt_build_entry(&s_idt[IDT_DE],             (uint32_t)asm_de_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_DB],             (uint32_t)asm_db_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_NMI],            (uint32_t)asm_nmi_wrapper,      INTERRUPT_GATE, 0);
-    idt_build_entry(&s_idt[IDT_BP],             (uint32_t)asm_bp_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_OF],             (uint32_t)asm_of_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_BR],             (uint32_t)asm_br_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_UD],             (uint32_t)asm_ud_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_NM],             (uint32_t)asm_nm_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_DF],             (uint32_t)asm_df_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_CSO],            (uint32_t)asm_cso_wrapper,      TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_TS],             (uint32_t)asm_ts_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_NP],             (uint32_t)asm_np_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_SS],             (uint32_t)asm_ss_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_GP],             (uint32_t)asm_gp_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_PF],             (uint32_t)asm_pf_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_MF],             (uint32_t)asm_mf_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_AC],             (uint32_t)asm_ac_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_MC],             (uint32_t)asm_mc_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[IDT_XF],             (uint32_t)asm_xf_wrapper,       TRAP_GATE, 0);
-    idt_build_entry(&s_idt[KEY_IDT_ENTRY],      (uint32_t)asm_keyboard_wrapper, INTERRUPT_GATE, 0);
-    idt_build_entry(&s_idt[TIMER_IDT_ENTRY],    (uint32_t)asm_timer_wrapper,    INTERRUPT_GATE, 0);
-    idt_build_entry(&s_idt[SPURIOUS_IDT_ENTRY], (uint32_t)asm_spurious_wrapper, INTERRUPT_GATE, 0);
-    lidt(s_idt, sizeof(s_idt) - 1);
+    isr_install(s_idt);
 
     // Initialize the PIC chip. It is necessary to remap IRQs before enabling
     // interrupts.
