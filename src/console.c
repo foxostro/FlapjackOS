@@ -4,11 +4,13 @@
 #include <console.h>
 #include <inout.h>
 #include <misc.h>
+#include <ctypes.h>
 
-static const uint16_t CRTC_IDX_REG = 0x3d4;
-static const uint16_t CRTC_DATA_REG = 0x3d5;
-static const uint8_t CRTC_CURSOR_LSB_IDX = 15;
-static const uint8_t CRTC_CURSOR_MSB_IDX = 14;
+#define CRTC_IDX_REG         0x3d4
+#define CRTC_DATA_REG        0x3d5
+#define CRTC_CURSOR_LSB_IDX  15
+#define CRTC_CURSOR_MSB_IDX  14
+#define TAB_WIDTH            8
 
 static vgachar_t *s_terminal_buffer;
 static size_t s_cursor_row = 0, s_cursor_col = 0,
@@ -22,11 +24,6 @@ static inline vgachar_t space_character()
         .bg = s_curr_bg,
         .ch = ' '
     };
-}
-
-bool isprint(int c)
-{
-    return ((c) >= ' ') && ((c) <= 126);
 }
 
 void console_init(vgachar_t * const addr)
@@ -89,27 +86,36 @@ void console_newline()
     console_next_cursor_position();
 }
 
+void console_tab()
+{
+    s_cursor_col += TAB_WIDTH - (s_cursor_col % TAB_WIDTH);
+    console_next_cursor_position();
+}
+
 void console_putchar(char ch)
 {
     if (ch == '\n') {
         console_newline();
         return;
+    } else if (ch == '\t') {
+        console_tab();
+        return;
+    } else {
+        if (s_cursor_col == TERM_WIDTH) {
+            console_newline();
+        }
+
+        s_cursor_col++;
+
+        console_draw_char(s_cursor_row, s_cursor_col, (vgachar_t){
+            .blink = 0,
+            .fg = s_curr_fg,
+            .bg = s_curr_bg,
+            .ch = ch
+        });
+
+        console_next_cursor_position();
     }
-
-    if (s_cursor_col == TERM_WIDTH) {
-        console_newline();
-    }
-
-    s_cursor_col++;
-
-    console_draw_char(s_cursor_row, s_cursor_col, (vgachar_t){
-        .blink = 0,
-        .fg = s_curr_fg,
-        .bg = s_curr_bg,
-        .ch = ch
-    });
-
-    console_next_cursor_position();
 }
 
 void console_puts(const char *s)
