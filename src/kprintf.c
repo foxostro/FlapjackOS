@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <strings.h>
 #include <console.h>
+#include <ctypes.h>
 
 #define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
 
@@ -22,8 +23,10 @@ static void reverse(char *begin, char *end)
 static size_t insert_char(char c, char **str, size_t *size)
 {
     if (*size > 1) {
-        *(*str)++ = c;
-        (*size)--;
+        if (isprint(c) || (c == '\n') || (c == '\t')) {
+            *(*str)++ = c;
+            (*size)--;
+        }
     }
     return 1;
 }
