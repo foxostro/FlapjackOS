@@ -16,18 +16,11 @@
 #include <halt.h>
 #include <panic.h>
 #include <backtrace.h>
-
-#define KEYBOARD_PORT 0x60
+#include <keyboard.h>
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
-
-void keyboard_int_handler()
-{
-    int key = inb(KEYBOARD_PORT);
-    kprintf("key press: %d (time=%u)\n", key, timer_seconds());
-}
 
 void interrupt_dispatch(unsigned interrupt_number,
                         unsigned edi,
@@ -181,9 +174,9 @@ void kernel_main(void *mb_info, void *istack)
     pic_init();
 
     console_init((vgachar_t *)0xB8000);
-    kprintf("Hello, world!\n");
     kprintf("mb_info = %p\n", mb_info);
     kprintf("istack = %p\n", istack);
+    keyboard_init();
 
     // Configure the PIC timer chip so that it fires an interrupt every 10ms.
     timer_init(TIMER_RATE_10ms, TIMER_LEAP_INTERVAL_10ms, TIMER_LEAP_TICKS_10ms);
