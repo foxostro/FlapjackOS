@@ -11,6 +11,7 @@
 #define CRTC_CURSOR_LSB_IDX  15
 #define CRTC_CURSOR_MSB_IDX  14
 #define TAB_WIDTH            8
+#define BACKSPACE_CHAR       8
 
 static vgachar_t *s_terminal_buffer;
 static size_t s_cursor_row = 0, s_cursor_col = 0,
@@ -92,9 +93,31 @@ void console_tab()
     console_next_cursor_position();
 }
 
+static void console_backspace()
+{
+    console_draw_char(s_cursor_row, s_cursor_col, (vgachar_t){
+        .blink = 0,
+        .fg = s_curr_fg,
+        .bg = s_curr_bg,
+        .ch = ' '
+    });
+
+    if (s_cursor_col == 0) {
+        s_cursor_col = TERM_WIDTH;
+
+        if (s_cursor_row > 0) {
+            s_cursor_row--;
+        }
+    } else {
+        s_cursor_col--;
+    }
+
+    console_next_cursor_position();
+}
+
 bool console_is_printable(char ch)
 {
-    return isprint(ch) || (ch == '\n') || (ch == '\t');
+    return isprint(ch) || (ch == '\n') || (ch == '\t') || (ch == BACKSPACE_CHAR);
 }
 
 void console_putchar(char ch)
@@ -104,6 +127,9 @@ void console_putchar(char ch)
         return;
     } else if (ch == '\t') {
         console_tab();
+        return;
+    } else if (ch == BACKSPACE_CHAR) {
+        console_backspace();
         return;
     } else {
         if (s_cursor_col == TERM_WIDTH) {
