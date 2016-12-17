@@ -46,6 +46,11 @@ void console_draw_char(size_t row, size_t col, vgachar_t ch);
 // Gets the character at the specified position of the terminal buffer.
 vgachar_t console_get_char(size_t row, size_t col);
 
+// Returns true if the console can accept the given character for printing.
+// This includes so-called isprint characters as well as characters like
+// BACKSPACE and NEWLINE which can also affect console output.
+bool console_is_printable(char ch);
+
 // Puts a character at the next place in the terminal.
 void console_putchar(char ch);
 

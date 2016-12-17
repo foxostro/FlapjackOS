@@ -112,7 +112,7 @@ void keyboard_int_handler()
         const char* char_tbl = shift ? g_keyboard_keycode_ascii_uppercase : g_keyboard_keycode_ascii_lowercase;
         char c = char_tbl[event.key];
 
-        if ((event.state == PRESSED) && (isprint(c) || (c == '\n') || (c == '\t'))) {
+        if ((event.state == PRESSED) && console_is_printable(c)) {
             console_putchar(c);
         }
     }

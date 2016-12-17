@@ -92,6 +92,11 @@ void console_tab()
     console_next_cursor_position();
 }
 
+bool console_is_printable(char ch)
+{
+    return isprint(ch) || (ch == '\n') || (ch == '\t');
+}
+
 void console_putchar(char ch)
 {
     if (ch == '\n') {
