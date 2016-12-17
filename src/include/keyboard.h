@@ -131,6 +131,15 @@ enum {
 
 typedef unsigned keycode_t;
 
+typedef enum {
+    PRESSED, RELEASED
+} keycode_key_state_t;
+
+typedef struct {
+    keycode_t key;
+    keycode_key_state_t state;
+} keyboard_event_t;
+
 // Keyboard interrupt handler.
 // To be called when the keyboard interrupt fires. Implements the lower half of
 // the keyboard driver.
