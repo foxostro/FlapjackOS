@@ -17,6 +17,7 @@ if(CMAKE_CROSSCOMPILING)
     # Source files for the kernel. (no organization to these files yet)
     set(KERNEL_SOURCE_FILES
         ${COMMON_SOURCE_FILES}
+        "src/readline.c"
         "src/backtrace.c"
         "src/backtrace_asm.S"
         "src/console.c"

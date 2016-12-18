@@ -4,12 +4,20 @@
 #include <inout.h>
 #include <console.h>
 #include <ctypes.h>
-#include <panic.h>
 #include <keyboard.h>
+#include <interrupt_asm.h>
+#include <halt.h>
+#include <strings.h>
 
 #define KEYBOARD_DATA_PORT     (0x60)
 #define KEYBOARD_CONTROL_PORT  (0x64)
 #define MAX_SCANCODE_BYTES     (6)
+#define BUFFER_SIZE            (32)
+
+typedef enum {
+    IDLE,
+    PROCESSING_ESCAPE_CODE
+} keyboard_driver_state_t;
 
 static const uint8_t g_scancodes_make[KEYCODE_MAX] = {
 #include "keyboard_scancodes_make.inc"
@@ -39,12 +47,44 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-keycode_key_state_t g_key_state[KEYCODE_MAX];
+static keycode_key_state_t g_key_state[KEYCODE_MAX];
+static keyboard_event_t s_ring_buffer[BUFFER_SIZE];
+static size_t s_dequeue_pos = 0;
+static size_t s_enqueue_pos = 0;
+static size_t s_count = 0;
 
-typedef enum {
-    IDLE,
-    PROCESSING_ESCAPE_CODE
-} keyboard_driver_state_t;
+static void keyboard_enqueue(keyboard_event_t *event)
+{
+    // Drop keyboard input if the buffer is full.
+    if (s_count < BUFFER_SIZE) {
+        memcpy(&s_ring_buffer[s_enqueue_pos], event, sizeof(keyboard_event_t));
+        s_enqueue_pos++;
+
+        if (s_enqueue_pos >= BUFFER_SIZE) {
+            s_enqueue_pos = 0;
+        }
+
+        s_count++;
+    }
+}
+
+static bool keyboard_dequeue(keyboard_event_t *event)
+{
+    if(s_count == 0) {
+        return false;
+    }
+
+    s_count--;
+
+    memcpy(event, &s_ring_buffer[s_dequeue_pos], sizeof(keyboard_event_t));
+    s_dequeue_pos++;
+
+    if(s_dequeue_pos >= BUFFER_SIZE) {
+        s_dequeue_pos = 0;
+    }
+
+    return true;
+}
 
 const char* keyboard_keycode_name(keycode_t key)
 {
@@ -110,11 +150,15 @@ void keyboard_int_handler()
 
         bool shift = (g_key_state[KEYCODE_LEFT_SHIFT] == PRESSED) || (g_key_state[KEYCODE_RIGHT_SHIFT] == PRESSED);
         const char* char_tbl = shift ? g_keyboard_keycode_ascii_uppercase : g_keyboard_keycode_ascii_lowercase;
-        char c = char_tbl[event.key];
+        event.ch = char_tbl[event.key];
 
-        if ((event.state == PRESSED) && console_is_acceptable(c)) {
-            console_putchar(c);
-        }
+        // No synchronization is needed here. We're synchronizing access to the
+        // ring buffer only by disabling interrupts, and interrupts are already
+        // disabled. As there is only one CPU (in use, at least) the only way a
+        // new thread can execute is through an interrupt which invokes the
+        // scheduler or something like that.
+        // XXX: Need better kernel synchronization primitives.
+        keyboard_enqueue(&event);
     }
 }
 
@@ -122,5 +166,22 @@ void keyboard_init()
 {
     for (size_t i = 0; i < KEYCODE_MAX; ++i) {
         g_key_state[i] = RELEASED;
+    }
+}
+
+void keyboard_get_event(keyboard_event_t *event)
+{
+    bool have_a_key = false;
+
+    while (!have_a_key) {
+        // Until there are better synchronization primitives, simply disable
+        // interrupts while reading the ring buffer. As there is only one CPU
+        // (in use, at least) the only way a new thread can execute is through
+        // an interrupt which invokes the scheduler or something like that.
+        // XXX: Need better kernel synchronization primitives.
+        disable_interrupts();
+        have_a_key = keyboard_dequeue(event);
+        enable_interrupts();
+        hlt();
     }
 }

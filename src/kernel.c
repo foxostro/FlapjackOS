@@ -17,6 +17,7 @@
 #include <panic.h>
 #include <backtrace.h>
 #include <keyboard.h>
+#include <readline.h>
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
@@ -184,8 +185,14 @@ void kernel_main(void *mb_info, void *istack)
     // After this point, interrupts will start firing.
     enable_interrupts();
 
-    // Spin forever. After this point, the kernel is entirely driven in response
-    // to interrupts.
-    halt();
+    // Read lines of input from the user forever, but don't do anything with them.
+    // (This operating system doesn't do much yet.)
+    while (true) {
+        char buffer[512];
+        readline(">", sizeof(buffer), buffer);
+        kprintf("Got: %s\n", buffer);
+    }
+
+    panic("We should never reach this point.");
     __builtin_unreachable();
 }

@@ -136,8 +136,14 @@ typedef enum {
 } keycode_key_state_t;
 
 typedef struct {
+    // Identifies which button on the keyboard corresponds to this event.
     keycode_t key;
+
+    // The new state of the key with this event, e.g., PRESSED or RELEASED.
     keycode_key_state_t state;
+
+    // The ASCII character associated with the key press, or zero if none.
+    char ch;
 } keyboard_event_t;
 
 // Keyboard interrupt handler.
@@ -150,3 +156,7 @@ const char* keyboard_keycode_name(keycode_t key);
 
 // Initializes the keyboard device and driver.
 void keyboard_init();
+
+// Gets the next key event.
+// Blocks on the next key event and returns it in the specified event structure.
+void keyboard_get_event(keyboard_event_t *output);

@@ -20,7 +20,7 @@ void panic(const char * restrict fmt, ...)
     console_puts(buffer);
     console_puts("\n");
 
-    halt();
+    halt_forever();
 }
 
 __attribute__((noreturn))
