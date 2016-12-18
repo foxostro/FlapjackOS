@@ -33,7 +33,7 @@ void console_init(vgachar_t * const addr)
     console_clear();
 }
 
-void console_clear(void)
+void console_clear()
 {
     for (size_t row = 0; row < CONSOLE_HEIGHT; row++) {
         for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
@@ -44,7 +44,7 @@ void console_clear(void)
     s_cursor_row = 0;
     s_cursor_col = 0;
 
-    console_next_cursor_position();
+    console_set_hardware_cursor_position(0, 0);
 }
 
 vgachar_t console_get_char(size_t row, size_t col)
@@ -83,25 +83,15 @@ void console_newline()
     for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
         console_draw_char(s_cursor_row, col, space_character());
     }
-
-    console_next_cursor_position();
 }
 
 void console_tab()
 {
     s_cursor_col += TAB_WIDTH - (s_cursor_col % TAB_WIDTH);
-    console_next_cursor_position();
 }
 
 static void console_backspace()
 {
-    console_draw_char(s_cursor_row, s_cursor_col, (vgachar_t){
-        .blink = 0,
-        .fg = s_curr_fg,
-        .bg = s_curr_bg,
-        .ch = ' '
-    });
-
     if (s_cursor_col == 0) {
         s_cursor_col = CONSOLE_WIDTH;
 
@@ -112,7 +102,7 @@ static void console_backspace()
         s_cursor_col--;
     }
 
-    console_next_cursor_position();
+    console_draw_char(s_cursor_row, s_cursor_col, space_character());
 }
 
 bool console_is_acceptable(char ch)
@@ -122,37 +112,45 @@ bool console_is_acceptable(char ch)
 
 void console_putchar(char ch)
 {
-    if (ch == '\n') {
-        console_newline();
+    if (!console_is_acceptable(ch)) {
         return;
-    } else if (ch == '\t') {
-        console_tab();
-        return;
-    } else if (ch == '\b') {
-        console_backspace();
-        return;
-    } else {
-        if (s_cursor_col == CONSOLE_WIDTH) {
-            console_newline();
-        }
-
-        s_cursor_col++;
-
-        console_draw_char(s_cursor_row, s_cursor_col, (vgachar_t){
-            .blink = 0,
-            .fg = s_curr_fg,
-            .bg = s_curr_bg,
-            .ch = ch
-        });
-
-        console_next_cursor_position();
     }
+
+    switch (ch) {
+        case '\n':
+            console_newline();
+            break;
+
+        case '\t':
+            console_tab();
+            break;
+            
+        case '\b':
+            console_backspace();
+            break;
+            
+        default:
+            console_draw_char(s_cursor_row, s_cursor_col, (vgachar_t){
+                .blink = 0,
+                .fg = s_curr_fg,
+                .bg = s_curr_bg,
+                .ch = ch
+            });
+
+            if (s_cursor_col == CONSOLE_WIDTH) {
+                console_newline();
+            }
+
+            s_cursor_col++;
+            break;
+    }
+
+    console_set_hardware_cursor_position(s_cursor_row, s_cursor_col);
 }
 
 void console_puts(const char *s)
 {
-    while(*s)
-    {
+    while (*s) {
         console_putchar(*s++);
     }
 }
@@ -168,13 +166,4 @@ void console_set_hardware_cursor_position(int row, int col)
     // Send the most significant byte of the offset.
     outb(CRTC_IDX_REG, CRTC_CURSOR_MSB_IDX);
     outb(CRTC_DATA_REG, WORD_UPPER_BYTE(offset));
-}
-
-void console_next_cursor_position()
-{
-    if (s_cursor_col == CONSOLE_WIDTH) {
-        console_set_hardware_cursor_position(s_cursor_row + 1, 0);
-    } else {
-        console_set_hardware_cursor_position(s_cursor_row, s_cursor_col + 1);
-    }
 }
