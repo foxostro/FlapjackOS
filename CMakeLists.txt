@@ -33,7 +33,7 @@ if(CMAKE_CROSSCOMPILING)
         "src/pic.c"
         "src/strings.c"
         "src/timer.c"
-        "src/keyboard.c"
+        "src/keyboard/keyboard.c"
         "src/boot.S"
         )
 
