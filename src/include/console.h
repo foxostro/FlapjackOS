@@ -1,3 +1,4 @@
+// VGA console output driver.
 #pragma once
 
 #include <stddef.h>
@@ -30,8 +31,8 @@ typedef struct {
 } vgachar_t;
 _Static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
 
-static const size_t TERM_WIDTH = 80;
-static const size_t TERM_HEIGHT = 25;
+#define CONSOLE_WIDTH   80
+#define CONSOLE_HEIGHT  25
 
 // Initializes and clears the console.
 // addr -- The address of the VGA text buffer.
@@ -40,21 +41,21 @@ void console_init(vgachar_t * const addr);
 // Clears the console to the current background color.
 void console_clear(void);
 
-// Draws the specified character at the specified position in the terminal buffer.
+// Draws the specified character at the specified position in the console buffer.
 void console_draw_char(size_t row, size_t col, vgachar_t ch);
 
-// Gets the character at the specified position of the terminal buffer.
+// Gets the character at the specified position of the console buffer.
 vgachar_t console_get_char(size_t row, size_t col);
 
 // Returns true if the console can accept the given character for printing.
 // This includes so-called isprint characters as well as characters like
 // BACKSPACE and NEWLINE which can also affect console output.
-bool console_is_printable(char ch);
+bool console_is_acceptable(char ch);
 
-// Puts a character at the next place in the terminal.
+// Puts a character at the next place on the console.
 void console_putchar(char ch);
 
-// Puts the string at the next position in the termoinal.
+// Puts the string at the next position on the console.
 void console_puts(const char *s);
 
 // Sets the hardware cursor at the specified position.

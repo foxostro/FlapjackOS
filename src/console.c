@@ -1,3 +1,4 @@
+// VGA console output driver.
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -11,9 +12,8 @@
 #define CRTC_CURSOR_LSB_IDX  15
 #define CRTC_CURSOR_MSB_IDX  14
 #define TAB_WIDTH            8
-#define BACKSPACE_CHAR       8
 
-static vgachar_t *s_terminal_buffer;
+static volatile vgachar_t *s_vga_console_buffer;
 static size_t s_cursor_row = 0, s_cursor_col = 0,
               s_curr_fg = LGRAY, s_curr_bg = BLACK;
 
@@ -29,14 +29,14 @@ static inline vgachar_t space_character()
 
 void console_init(vgachar_t * const addr)
 {
-    s_terminal_buffer = addr;
+    s_vga_console_buffer = addr;
     console_clear();
 }
 
 void console_clear(void)
 {
-    for (size_t row = 0; row < TERM_HEIGHT; row++) {
-        for (size_t col = 0; col < TERM_WIDTH; col++) {
+    for (size_t row = 0; row < CONSOLE_HEIGHT; row++) {
+        for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
             console_draw_char(row, col, space_character());
         }
     }
@@ -49,9 +49,9 @@ void console_clear(void)
 
 vgachar_t console_get_char(size_t row, size_t col)
 {
-    if (row <= TERM_HEIGHT && col <= TERM_WIDTH) {
-        const size_t index = row * TERM_WIDTH + col;
-        return s_terminal_buffer[index];
+    if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH) {
+        const size_t index = row * CONSOLE_WIDTH + col;
+        return s_vga_console_buffer[index];
     } else {
         return space_character();
     }
@@ -59,17 +59,17 @@ vgachar_t console_get_char(size_t row, size_t col)
 
 void console_draw_char(size_t row, size_t col, vgachar_t ch)
 {
-    if (row <= TERM_HEIGHT && col <= TERM_WIDTH && isprint(ch.ch)) {
-        const size_t index = row * TERM_WIDTH + col;
-        s_terminal_buffer[index] = ch;
+    if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH && isprint(ch.ch)) {
+        const size_t index = row * CONSOLE_WIDTH + col;
+        s_vga_console_buffer[index] = ch;
     }
 }
 
 void console_newline()
 {
-    if (s_cursor_row == TERM_HEIGHT) {
-        for (size_t row = 1; row <= TERM_HEIGHT; row++) {
-            for (size_t col = 0; col < TERM_WIDTH; col++) {
+    if (s_cursor_row == CONSOLE_HEIGHT) {
+        for (size_t row = 1; row <= CONSOLE_HEIGHT; row++) {
+            for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
                 vgachar_t ch = console_get_char(row, col);
                 console_draw_char(row - 1, col, ch);
             }
@@ -80,7 +80,7 @@ void console_newline()
 
     s_cursor_col = 0;
 
-    for (size_t col = 0; col < TERM_WIDTH; col++) {
+    for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
         console_draw_char(s_cursor_row, col, space_character());
     }
 
@@ -103,7 +103,7 @@ static void console_backspace()
     });
 
     if (s_cursor_col == 0) {
-        s_cursor_col = TERM_WIDTH;
+        s_cursor_col = CONSOLE_WIDTH;
 
         if (s_cursor_row > 0) {
             s_cursor_row--;
@@ -115,9 +115,9 @@ static void console_backspace()
     console_next_cursor_position();
 }
 
-bool console_is_printable(char ch)
+bool console_is_acceptable(char ch)
 {
-    return isprint(ch) || (ch == '\n') || (ch == '\t') || (ch == BACKSPACE_CHAR);
+    return isprint(ch) || (ch == '\n') || (ch == '\t') || (ch == '\b');
 }
 
 void console_putchar(char ch)
@@ -128,11 +128,11 @@ void console_putchar(char ch)
     } else if (ch == '\t') {
         console_tab();
         return;
-    } else if (ch == BACKSPACE_CHAR) {
+    } else if (ch == '\b') {
         console_backspace();
         return;
     } else {
-        if (s_cursor_col == TERM_WIDTH) {
+        if (s_cursor_col == CONSOLE_WIDTH) {
             console_newline();
         }
 
@@ -159,7 +159,7 @@ void console_puts(const char *s)
 
 void console_set_hardware_cursor_position(int row, int col)
 {
-    unsigned short offset = row*TERM_WIDTH + col;
+    unsigned short offset = row*CONSOLE_WIDTH + col;
 
     // Send the least significant byte of the offset.
     outb(CRTC_IDX_REG, CRTC_CURSOR_LSB_IDX);
@@ -172,7 +172,7 @@ void console_set_hardware_cursor_position(int row, int col)
 
 void console_next_cursor_position()
 {
-    if (s_cursor_col == TERM_WIDTH) {
+    if (s_cursor_col == CONSOLE_WIDTH) {
         console_set_hardware_cursor_position(s_cursor_row + 1, 0);
     } else {
         console_set_hardware_cursor_position(s_cursor_row, s_cursor_col + 1);
