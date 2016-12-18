@@ -47,6 +47,9 @@ void console_draw_char(size_t row, size_t col, vgachar_t ch);
 // Gets the character at the specified position of the console buffer.
 vgachar_t console_get_char(size_t row, size_t col);
 
+// Returns a VGA character in the current color for the specified ASCII char.
+vgachar_t console_make_char(char ch);
+
 // Returns true if the console can accept the given character for printing.
 // This includes so-called isprint characters as well as characters like
 // BACKSPACE and NEWLINE which can also affect console output.
@@ -58,6 +61,9 @@ void console_putchar(char ch);
 // Puts the string at the next position on the console.
 void console_puts(const char *s);
 
-// Sets the hardware cursor at the specified position.
+// Moves the hardware cursor to the specified position.
 // If the cursor is placed outside the visible console then it will be hidden.
-void console_set_hardware_cursor_position(int row, int col);
+void console_set_cursor_position(size_t row, size_t col);
+
+size_t console_get_cursor_row();
+size_t console_get_cursor_col();

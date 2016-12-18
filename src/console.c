@@ -44,7 +44,15 @@ void console_clear()
     s_cursor_row = 0;
     s_cursor_col = 0;
 
-    console_set_hardware_cursor_position(0, 0);
+    console_set_cursor_position(0, 0);
+}
+
+void console_draw_char(size_t row, size_t col, vgachar_t ch)
+{
+    if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH && isprint(ch.ch)) {
+        const size_t index = row * CONSOLE_WIDTH + col;
+        s_vga_console_buffer[index] = ch;
+    }
 }
 
 vgachar_t console_get_char(size_t row, size_t col)
@@ -57,15 +65,17 @@ vgachar_t console_get_char(size_t row, size_t col)
     }
 }
 
-void console_draw_char(size_t row, size_t col, vgachar_t ch)
+vgachar_t console_make_char(char ch)
 {
-    if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH && isprint(ch.ch)) {
-        const size_t index = row * CONSOLE_WIDTH + col;
-        s_vga_console_buffer[index] = ch;
-    }
+    return (vgachar_t){
+        .blink = 0,
+        .fg = s_curr_fg,
+        .bg = s_curr_bg,
+        .ch = ch
+    };
 }
 
-void console_newline()
+static void console_newline()
 {
     if (s_cursor_row == CONSOLE_HEIGHT) {
         for (size_t row = 1; row <= CONSOLE_HEIGHT; row++) {
@@ -145,7 +155,7 @@ void console_putchar(char ch)
             break;
     }
 
-    console_set_hardware_cursor_position(s_cursor_row, s_cursor_col);
+    console_set_cursor_position(s_cursor_row, s_cursor_col);
 }
 
 void console_puts(const char *s)
@@ -155,7 +165,7 @@ void console_puts(const char *s)
     }
 }
 
-void console_set_hardware_cursor_position(int row, int col)
+void console_set_cursor_position(size_t row, size_t col)
 {
     unsigned short offset = row*CONSOLE_WIDTH + col;
 
@@ -166,4 +176,14 @@ void console_set_hardware_cursor_position(int row, int col)
     // Send the most significant byte of the offset.
     outb(CRTC_IDX_REG, CRTC_CURSOR_MSB_IDX);
     outb(CRTC_DATA_REG, WORD_UPPER_BYTE(offset));
+}
+
+size_t console_get_cursor_row()
+{
+    return s_cursor_row;
+}
+
+size_t console_get_cursor_col()
+{
+    return s_cursor_col;
 }
