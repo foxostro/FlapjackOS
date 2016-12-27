@@ -25,12 +25,11 @@
 // the console interface.
 console_interface_t g_console;
 
-// This global is used for access to the keyboard in the interrupt dispatcher.
-static keyboard_interface_t g_keyboard;
-
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
+static keyboard_interface_t s_keyboard;
+static timer_interface_t s_timer;
 
 void interrupt_dispatch(unsigned interrupt_number,
                         unsigned edi,
@@ -52,11 +51,11 @@ void interrupt_dispatch(unsigned interrupt_number,
 
     switch(interrupt_number) {
         case IDT_KEY:
-            g_keyboard.int_handler();
+            s_keyboard.int_handler();
             break;
 
         case IDT_TIMER:
-            timer_int_handler();
+            s_timer.int_handler();
             break;
 
         case IDT_DE:
@@ -163,7 +162,8 @@ __attribute__((noreturn))
 void kernel_main(void *mb_info, void *istack)
 {
     console_interface_t *console = &g_console;
-    keyboard_interface_t *keyboard = &g_keyboard;
+    keyboard_interface_t *keyboard = &s_keyboard;
+    timer_interface_t *timer = &s_timer;
 
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
@@ -197,7 +197,8 @@ void kernel_main(void *mb_info, void *istack)
     keyboard->init();
 
     // Configure the PIC timer chip so that it fires an interrupt every 10ms.
-    timer_init(TIMER_RATE_10ms, TIMER_LEAP_INTERVAL_10ms, TIMER_LEAP_TICKS_10ms);
+    get_timer_interface(timer);
+    timer->init(TIMER_RATE_10ms, TIMER_LEAP_INTERVAL_10ms, TIMER_LEAP_TICKS_10ms);
 
     // After this point, interrupts will start firing.
     enable_interrupts();
