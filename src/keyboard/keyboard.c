@@ -138,7 +138,7 @@ static bool keyboard_step_state_machine(keyboard_driver_state_t *state, keyboard
     return true;
 }
 
-void keyboard_int_handler()
+static void keyboard_int_handler()
 {
     keyboard_driver_state_t state = IDLE;
     keyboard_event_t event = { .state = RELEASED, .key = KEYCODE_MAX };
@@ -162,14 +162,14 @@ void keyboard_int_handler()
     }
 }
 
-void keyboard_init()
+static void keyboard_init()
 {
     for (size_t i = 0; i < KEYCODE_MAX; ++i) {
         g_key_state[i] = RELEASED;
     }
 }
 
-void keyboard_get_event(keyboard_event_t *event)
+static void keyboard_get_event(keyboard_event_t *event)
 {
     bool have_a_key = false;
 
@@ -184,4 +184,12 @@ void keyboard_get_event(keyboard_event_t *event)
         enable_interrupts();
         hlt();
     }
+}
+
+void get_keyboard_interface(keyboard_interface_t *keyboard)
+{
+    keyboard->int_handler = keyboard_int_handler;
+    keyboard->keycode_name = keyboard_keycode_name;
+    keyboard->init = keyboard_init;
+    keyboard->get_event = keyboard_get_event;
 }

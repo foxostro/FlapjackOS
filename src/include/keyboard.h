@@ -146,17 +146,21 @@ typedef struct {
     char ch;
 } keyboard_event_t;
 
-// Keyboard interrupt handler.
-// To be called when the keyboard interrupt fires. Implements the lower half of
-// the keyboard driver.
-void keyboard_int_handler();
+typedef struct {
+    // Keyboard interrupt handler.
+    // To be called when the keyboard interrupt fires. Implements the lower half of
+    // the keyboard driver.
+    void (*int_handler)();
 
-// Returns the name of the given key code.
-const char* keyboard_keycode_name(keycode_t key);
+    // Returns the name of the given key code.
+    const char* (*keycode_name)(keycode_t key);
 
-// Initializes the keyboard device and driver.
-void keyboard_init();
+    // Initializes the keyboard device and driver.
+    void (*init)();
 
-// Gets the next key event.
-// Blocks on the next key event and returns it in the specified event structure.
-void keyboard_get_event(keyboard_event_t *output);
+    // Gets the next key event.
+    // Blocks on the next key event and returns it in the specified event structure.
+    void (*get_event)(keyboard_event_t *output);
+} keyboard_interface_t;
+
+void get_keyboard_interface(keyboard_interface_t *keyboard);

@@ -19,10 +19,14 @@
 #include <keyboard.h>
 #include <readline.h>
 
-// This global is really only for use in panic() because it severely clutters
-// the interface of assert() and panic() if we are reqired to pass down the
-// console interface.
+// This global is used for access to the console in the interrupt dispatcher.
+// Besides this, it's really only for use in panic() because it severely
+// clutters the interface of assert() and panic() if we are reqired to pass down
+// the console interface.
 console_interface_t g_console;
+
+// This global is used for access to the keyboard in the interrupt dispatcher.
+static keyboard_interface_t g_keyboard;
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
@@ -48,7 +52,7 @@ void interrupt_dispatch(unsigned interrupt_number,
 
     switch(interrupt_number) {
         case IDT_KEY:
-            keyboard_int_handler();
+            g_keyboard.int_handler();
             break;
 
         case IDT_TIMER:
@@ -159,6 +163,7 @@ __attribute__((noreturn))
 void kernel_main(void *mb_info, void *istack)
 {
     console_interface_t *console = &g_console;
+    keyboard_interface_t *keyboard = &g_keyboard;
 
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
@@ -188,7 +193,8 @@ void kernel_main(void *mb_info, void *istack)
     kprintf(console, "istack = %p\n", istack);
 
     // Initialize the keyboard driver.
-    keyboard_init();
+    get_keyboard_interface(keyboard);
+    keyboard->init();
 
     // Configure the PIC timer chip so that it fires an interrupt every 10ms.
     timer_init(TIMER_RATE_10ms, TIMER_LEAP_INTERVAL_10ms, TIMER_LEAP_TICKS_10ms);
@@ -200,7 +206,7 @@ void kernel_main(void *mb_info, void *istack)
     // (This operating system doesn't do much yet.)
     while (true) {
         char buffer[512];
-        readline(console, ">", sizeof(buffer), buffer);
+        readline(console, keyboard, ">", sizeof(buffer), buffer);
         kprintf(console, "Got: %s\n", buffer);
     }
 

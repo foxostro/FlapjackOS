@@ -8,13 +8,17 @@
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-size_t readline(const console_interface_t *console, const char * const prompt, size_t buffer_size, char *buffer)
+size_t readline(const console_interface_t *console,
+                const keyboard_interface_t *keyboard,
+                const char * const prompt,
+                size_t buffer_size, char *buffer)
 {
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
     size_t maxcount = MIN(CONSOLE_WIDTH - strlen(prompt) - 1, buffer_size);
 
     assert(console);
+    assert(keyboard);
     assert(prompt);
     assert(buffer);
 
@@ -25,7 +29,7 @@ size_t readline(const console_interface_t *console, const char * const prompt, s
 
     while (!have_a_newline) {
         keyboard_event_t event;
-        keyboard_get_event(&event);
+        keyboard->get_event(&event);
 
         if (event.state != PRESSED) {
             continue;
