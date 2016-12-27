@@ -7,7 +7,7 @@
 #include <idt.h>
 #include <misc.h>
 
-idt_entry_t g_idt[IDT_ENTS];
+idt_entry_t g_idt[IDT_MAX];
 
 idt_entry_t* idt_base()
 {

@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <console.h>
 
 // Similar to traditional vsnprintf.
 // Formats the string in manner similar to traditional vsnprintf and returns
@@ -28,4 +29,5 @@ size_t ksnprintf(char * restrict str,
                  ...);
 
 // Formats a string and prints directly to the VGA console.
-size_t kprintf(const char * restrict fmt, ...);
+size_t kprintf(const console_interface_t *console,
+	           const char * restrict fmt, ...);

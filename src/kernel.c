@@ -19,6 +19,11 @@
 #include <keyboard.h>
 #include <readline.h>
 
+// This global is really only for use in panic() because it severely clutters
+// the interface of assert() and panic() if we are reqired to pass down the
+// console interface.
+console_interface_t g_console;
+
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
@@ -153,6 +158,8 @@ void interrupt_dispatch(unsigned interrupt_number,
 __attribute__((noreturn))
 void kernel_main(void *mb_info, void *istack)
 {
+    console_interface_t *console = &g_console;
+
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
     bzero(&s_tss, sizeof(s_tss));
@@ -174,9 +181,13 @@ void kernel_main(void *mb_info, void *istack)
     // interrupts.
     pic_init();
 
-    console_init((vgachar_t *)0xB8000);
-    kprintf("mb_info = %p\n", mb_info);
-    kprintf("istack = %p\n", istack);
+    // Initialize the console output driver.
+    get_console_interface(console);
+    console->init((vgachar_t *)0xB8000);
+    kprintf(console, "mb_info = %p\n", mb_info);
+    kprintf(console, "istack = %p\n", istack);
+
+    // Initialize the keyboard driver.
     keyboard_init();
 
     // Configure the PIC timer chip so that it fires an interrupt every 10ms.
@@ -189,8 +200,8 @@ void kernel_main(void *mb_info, void *istack)
     // (This operating system doesn't do much yet.)
     while (true) {
         char buffer[512];
-        readline(">", sizeof(buffer), buffer);
-        kprintf("Got: %s\n", buffer);
+        readline(console, ">", sizeof(buffer), buffer);
+        kprintf(console, "Got: %s\n", buffer);
     }
 
     panic("We should never reach this point.");

@@ -3,8 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <strings.h>
-#include <console.h>
 #include <ctypes.h>
+#include <console.h>
 
 #define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
 
@@ -206,7 +206,7 @@ size_t ksnprintf(char * restrict str, size_t size, const char * restrict fmt, ..
     return c;
 }
 
-size_t kprintf(const char * restrict fmt, ...)
+size_t kprintf(const console_interface_t *console, const char * restrict fmt, ...)
 {
     char buffer[128] = {0};
 
@@ -215,7 +215,7 @@ size_t kprintf(const char * restrict fmt, ...)
     kvsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
 
-    console_puts(buffer);
+    console->puts(buffer);
 
     return strnlen(buffer, sizeof(buffer));
 }

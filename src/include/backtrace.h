@@ -1,3 +1,5 @@
 #pragma once
 
-void backtrace();
+#include <console.h>
+
+void backtrace(const console_interface_t *console);

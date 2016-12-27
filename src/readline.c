@@ -3,20 +3,25 @@
 #include <keyboard.h>
 #include <kprintf.h>
 #include <strings.h>
+#include <assert.h>
 #include <readline.h>
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-size_t readline(const char * const prompt, size_t buffer_size, char *buffer)
+size_t readline(const console_interface_t *console, const char * const prompt, size_t buffer_size, char *buffer)
 {
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
     size_t maxcount = MIN(CONSOLE_WIDTH - strlen(prompt) - 1, buffer_size);
 
-    console_puts(prompt);
-    console_putchar(' ');
-    size_t cursor_row = console_get_cursor_row();
-    size_t cursor_col_offset = console_get_cursor_col();
+    assert(console);
+    assert(prompt);
+    assert(buffer);
+
+    console->puts(prompt);
+    console->putchar(' ');
+    size_t cursor_row = console->get_cursor_row();
+    size_t cursor_col_offset = console->get_cursor_col();
 
     while (!have_a_newline) {
         keyboard_event_t event;
@@ -36,7 +41,7 @@ size_t readline(const char * const prompt, size_t buffer_size, char *buffer)
             case KEYCODE_LEFT_ARROW:
                 if (cursor_col > 0) {
                     cursor_col--;
-                    console_set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -46,7 +51,7 @@ size_t readline(const char * const prompt, size_t buffer_size, char *buffer)
             case KEYCODE_RIGHT_ARROW:
                 if (cursor_col < count) {
                     cursor_col++;
-                    console_set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -59,44 +64,44 @@ size_t readline(const char * const prompt, size_t buffer_size, char *buffer)
                             // Slide all input one character to the left.
                             for (size_t i = cursor_col; i < count; ++i) {
                                 buffer[i] = buffer[i+1];
-                                console_draw_char(cursor_row, i + cursor_col_offset,
-                                                  console_get_char(cursor_row, i + cursor_col_offset + 1));
+                                console->draw_char(cursor_row, i + cursor_col_offset,
+                                                   console->get_char(cursor_row, i + cursor_col_offset + 1));
                             }
-                            console_draw_char(cursor_row, count + cursor_col_offset, console_make_char(' '));
+                            console->draw_char(cursor_row, count + cursor_col_offset, console->make_char(' '));
                             buffer[count] = '\0';
 
                             if (count > 0) {
                                 count--;
                             }
 
-                            console_set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                            console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                         }
                         break;
 
                     case '\n':
                         buffer[count] = '\0';
                         cursor_col = count;
-                        console_set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
-                        console_putchar('\n');
+                        console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                        console->putchar('\n');
                         have_a_newline = true;
                         break;
 
                     default:
-                        if ((count < maxcount) && console_is_acceptable(ch)) {
+                        if ((count < maxcount) && console->is_acceptable(ch)) {
                             // Slide all input one character to the right.
                             if (count > 0 && cursor_col < count-1) {
                                 for (size_t i = count; i > cursor_col; --i) {
                                     buffer[i] = buffer[i-1];
-                                    console_draw_char(cursor_row, i + cursor_col_offset,
-                                                      console_get_char(cursor_row, i + cursor_col_offset - 1));
+                                    console->draw_char(cursor_row, i + cursor_col_offset,
+                                                       console->get_char(cursor_row, i + cursor_col_offset - 1));
                                 }
                             }
-                            console_draw_char(cursor_row, cursor_col + cursor_col_offset, console_make_char(ch));
+                            console->draw_char(cursor_row, cursor_col + cursor_col_offset, console->make_char(ch));
                             buffer[cursor_col] = ch;
 
                             count++;
                             cursor_col++;
-                            console_set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                            console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                         }
                         break;
                 } // switch (ch)

@@ -5,14 +5,14 @@
 
 unsigned* get_ebp(); // defined in backtrace_asm.S
 
-void backtrace()
+void backtrace(const console_interface_t *console)
 {
 	unsigned frame;
 	unsigned * ebp;
 
 	ebp = get_ebp();
 
-	kprintf("Back Trace:\n");
+	kprintf(console, "Back Trace:\n");
 	for(frame = 0; frame < MAXFRAMES; ++frame)
 	{
 		unsigned eip;
@@ -30,8 +30,8 @@ void backtrace()
 		}
 
 		ebp = (unsigned *)(ebp[0]);
-		kprintf("[%p]\n", eip);
+		kprintf(console, "[%p]\n", eip);
 	}
 
-	kprintf("\n");
+	kprintf(console, "\n");
 }

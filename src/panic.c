@@ -5,6 +5,8 @@
 #include <interrupt_asm.h>
 #include <backtrace.h>
 
+extern console_interface_t g_console; // defined in kernel.c
+
 __attribute__((noreturn))
 void panic(const char * restrict fmt, ...)
 {
@@ -16,9 +18,9 @@ void panic(const char * restrict fmt, ...)
     kvsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
 
-    console_puts("PANIC: ");
-    console_puts(buffer);
-    console_puts("\n");
+    g_console.puts("PANIC: ");
+    g_console.puts(buffer);
+    g_console.puts("\n");
 
     halt_forever();
 }
@@ -37,21 +39,21 @@ void panic2(const char * restrict message,
             unsigned error_code,
             unsigned eip)
 {    
-    kprintf("Registers:\n");
-    kprintf("edi = 0x%x\n", edi);
-    kprintf("esi = 0x%x\n", esi);
-    kprintf("ebp = 0x%x\n", ebp);
-    kprintf("esp = 0x%x\n", esp);
-    kprintf("ebx = 0x%x\n", ebx);
-    kprintf("edx = 0x%x\n", edx);
-    kprintf("ecx = 0x%x\n", ecx);
-    kprintf("eax = 0x%x\n", eax);
-    kprintf("eip = %p\n\n", eip);
+    kprintf(&g_console, "Registers:\n");
+    kprintf(&g_console, "edi = 0x%x\n", edi);
+    kprintf(&g_console, "esi = 0x%x\n", esi);
+    kprintf(&g_console, "ebp = 0x%x\n", ebp);
+    kprintf(&g_console, "esp = 0x%x\n", esp);
+    kprintf(&g_console, "ebx = 0x%x\n", ebx);
+    kprintf(&g_console, "edx = 0x%x\n", edx);
+    kprintf(&g_console, "ecx = 0x%x\n", ecx);
+    kprintf(&g_console, "eax = 0x%x\n", eax);
+    kprintf(&g_console, "eip = %p\n\n", eip);
 
-    backtrace();
+    backtrace(&g_console);
 
     if (error_code_present) {
-        kprintf("Error Code: 0x%x\n", error_code);
+        kprintf(&g_console, "Error Code: 0x%x\n", error_code);
     }
 
     panic("%s", message);

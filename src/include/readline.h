@@ -7,4 +7,6 @@
 // prompt -- Prompt string to display on the console.
 // count -- Maximum number of bytes in buffer.
 // buffer -- The output string is written here.
-size_t readline(const char * const prompt, size_t count, char *buffer);
+size_t readline(const console_interface_t *console,
+	            const char * const prompt,
+	            size_t count, char *buffer);
