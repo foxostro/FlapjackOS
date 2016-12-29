@@ -7,11 +7,7 @@ void lgdt(__attribute__((unused)) void *gdt, __attribute__((unused)) unsigned li
     // satisfy the linker
 }
 
-void console_puts(__attribute__((unused)) const char *s)
-{
-    // satisfy the linker
-}
-
+Suite* test_suite_heap_pool(); // defined in test_heap_pool.c
 Suite* test_suite_printf(); // defined in test_printf.c
 Suite* test_suite_gdt(); // defined in test_gdt.c
 Suite* test_suite_idt(); // defined in test_idt.c
@@ -19,7 +15,12 @@ Suite* test_suite_idt(); // defined in test_idt.c
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {
     int numberOfFailedTests = 0;
-    Suite* suite[] = {test_suite_printf(), test_suite_gdt(), test_suite_idt()};
+    Suite* suite[] = {
+        test_suite_heap_pool(),
+        test_suite_printf(),
+        test_suite_gdt(),
+        test_suite_idt()
+    };
     for (int i = 0, n = sizeof(suite) / sizeof(*suite); i < n; ++i) {
         SRunner *runner = srunner_create(suite[i]);
         srunner_run_all(runner, CK_NORMAL);

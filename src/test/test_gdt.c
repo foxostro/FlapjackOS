@@ -185,7 +185,7 @@ Suite* test_suite_gdt(void)
 
     for (size_t i = 0; i < num_tests; ++i) {
         TCase *testCase = tcase_create(tests[i].name);
-        tcase_add_test(testCase, tests[i].fn);
+        _tcase_add_test(testCase, tests[i].fn, tests[i].name, 0, 0, 0, 1);
         suite_add_tcase(suite, testCase);        
     }
 

@@ -203,7 +203,7 @@ void kernel_main(void *mb_info, void *istack)
     // After this point, interrupts will start firing.
     enable_interrupts();
 
-    // Read lines of input from the user forever, but don't do anything with them.
+    // Read lines of input from forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     while (true) {
         char buffer[512];
