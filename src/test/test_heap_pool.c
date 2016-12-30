@@ -156,7 +156,7 @@ START_TEST(test_coalesce_0)
 
     void *e = heap_pool_malloc(pool, SMALL*2);
     ck_assert(e); // should succeed now
-    ck_assert(a == e); // using the same block as `a'
+    ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
 END_TEST
 
@@ -186,7 +186,7 @@ START_TEST(test_coalesce_1)
 
     void *e = heap_pool_malloc(pool, SMALL*2);
     ck_assert(e); // should succeed now
-    ck_assert(a == e); // using the same block as `a'
+    ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
 END_TEST
 
@@ -216,8 +216,63 @@ START_TEST(test_coalesce_2)
     heap_pool_free(pool, b); // preceding and following both merged here
 
     void *e = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - sizeof(heap_block_t));
-    assert(e); // should succeed now
-    ck_assert(a == e); // using the same block as `a'
+    ck_assert(e); // should succeed now
+    ck_assert_ptr_eq(a, e); // using the same block as `a'
+}
+END_TEST
+
+// Realloc extends a live allocation into the free space following it.
+// If the block already has capacity then there's no need to change anything.
+START_TEST(test_realloc_0)
+{
+    bzero(s_buffer, sizeof(s_buffer));
+    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+
+    void *a = heap_pool_malloc(pool, 1);
+    ck_assert(a);
+    ck_assert_ptr_ne(pool->head->next, NULL);
+
+    heap_block_t *block1 = pool->head;
+    heap_block_t *block2 = pool->head->next;
+
+    size_t size1 = block1->size;
+    size_t size2 = block2->size;
+
+    void *b = heap_pool_realloc(pool, a, 2);
+    ck_assert(b);
+    ck_assert_ptr_eq(a, b);
+
+    ck_assert_ptr_eq(pool->head, block1);
+    ck_assert_ptr_eq(pool->head->next, block2);
+    ck_assert_uint_eq(block1->size, size1);
+    ck_assert_uint_eq(block2->size, size2);
+}
+END_TEST
+
+// Realloc extends a live allocation into the free space following it.
+// If the current block does not have enough capacity but it followed by free
+// space which does then consume some of that free space.
+START_TEST(test_realloc_1)
+{
+    bzero(s_buffer, sizeof(s_buffer));
+    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+
+    void *a = heap_pool_malloc(pool, 0);
+    ck_assert(a);
+    ck_assert_ptr_ne(pool->head->next, NULL);
+
+    void *b = heap_pool_realloc(pool, a, SMALL);
+    ck_assert(b);
+    ck_assert_ptr_eq(a, b);
+
+    heap_block_t *block1 = pool->head;
+    ck_assert(block1);
+
+    heap_block_t *block2 = pool->head->next;
+    ck_assert(block2);
+
+    ck_assert_uint_ge(block1->size, SMALL);
+    ck_assert_uint_ge(block2->size, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*sizeof(heap_block_t) - SMALL);
 }
 END_TEST
 
@@ -233,6 +288,8 @@ static const struct { char *name; void *fn; } tests[] = {
     { "test_coalesce_0", test_coalesce_0 },
     { "test_coalesce_1", test_coalesce_1 },
     { "test_coalesce_2", test_coalesce_2 },
+    { "test_realloc_0", test_realloc_0 },
+    { "test_realloc_1", test_realloc_1 },
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
