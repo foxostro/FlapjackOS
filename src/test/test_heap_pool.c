@@ -223,7 +223,7 @@ END_TEST
 
 // Realloc extends a live allocation into the free space following it.
 // If the block already has capacity then there's no need to change anything.
-START_TEST(test_realloc_0)
+START_TEST(test_realloc_extend_0)
 {
     bzero(s_buffer, sizeof(s_buffer));
     heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
@@ -249,10 +249,10 @@ START_TEST(test_realloc_0)
 }
 END_TEST
 
-// Realloc extends a live allocation into the free space following it.
-// If the current block does not have enough capacity but it followed by free
-// space which does then consume some of that free space.
-START_TEST(test_realloc_1)
+// If realloc cannot extend the current allocation into the following block
+// then it allocates another chunk of memory for the new allocation and moves
+// it there.
+START_TEST(test_realloc_extend_1)
 {
     bzero(s_buffer, sizeof(s_buffer));
     heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
@@ -276,6 +276,186 @@ START_TEST(test_realloc_1)
 }
 END_TEST
 
+// Realloc tries to extend an allocation in place. If it cannot then it
+// allocates a new block and moves the allocation.
+START_TEST(test_realloc_relocate_0)
+{
+    bzero(s_buffer, sizeof(s_buffer));
+    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+
+    void *a = heap_pool_malloc(pool, SMALL);
+    ck_assert(a);
+
+    void *b = heap_pool_malloc(pool, SMALL);
+    ck_assert(b);
+
+    void *c = heap_pool_realloc(pool, a, 2*SMALL);
+    ck_assert(c);
+    ck_assert_ptr_ne(a, c);
+
+    size_t count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ++count;
+    }
+    ck_assert_uint_eq(count, 4);
+
+    size_t expected_size[] = {
+        SMALL,
+        SMALL,
+        2*SMALL,
+        sizeof(s_buffer) - sizeof(heap_pool_t) - 4*SMALL - 4*sizeof(heap_block_t)
+    };
+    size_t expected_inuse[] = {
+        false,
+        true,
+        true,
+        false
+    };
+    count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ck_assert_uint_eq(block->size, expected_size[count]);
+        ck_assert_uint_eq(block->inuse, expected_inuse[count]);
+        ++count;
+    }
+}
+END_TEST
+
+// Realloc tries to extend an allocation in place. If it cannot then it
+// allocates a new block and moves the allocation. However, if the second
+// allocation fails then realloc returns NULL.
+START_TEST(test_realloc_relocate_1)
+{
+    bzero(s_buffer, sizeof(s_buffer));
+    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+
+    void *a = heap_pool_malloc(pool, SMALL);
+    ck_assert(a);
+
+    void *b = heap_pool_malloc(pool, SMALL);
+    ck_assert(b);
+
+    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    ck_assert(c);
+
+    void *d = heap_pool_realloc(pool, a, 2*SMALL);
+    ck_assert(!d);
+
+    size_t count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ++count;
+    }
+    ck_assert_uint_eq(count, 3);
+
+    size_t expected_size[] = {
+        SMALL,
+        SMALL,
+        sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t)
+    };
+    size_t expected_inuse[] = {
+        true,
+        true,
+        true
+    };
+    count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ck_assert_uint_eq(block->size, expected_size[count]);
+        ck_assert_uint_eq(block->inuse, expected_inuse[count]);
+        ++count;
+    }
+}
+END_TEST
+
+// Realloc tries to extend an allocation in place. If it cannot then it
+// allocates a new block and moves the allocation. In the case where the
+// preceding block has space then we merge the block into the preceding block
+// and move the allocation. This allows realloc to succeed in the case where
+// the only space large enough is the combined space of the preceding block
+// and the current block.
+START_TEST(test_realloc_relocate_2)
+{
+    bzero(s_buffer, sizeof(s_buffer));
+    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+
+    void *a = heap_pool_malloc(pool, SMALL);
+    ck_assert(a);
+
+    void *b = heap_pool_malloc(pool, SMALL);
+    ck_assert(b);
+
+    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    ck_assert(c);
+
+    heap_pool_free(pool, a);
+
+    void *d = heap_pool_realloc(pool, b, 2*SMALL);
+    ck_assert(d);
+    ck_assert_ptr_eq(a, d);
+
+    size_t count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        printf("size = %zu\n", block->size);
+        ++count;
+    }
+    ck_assert_uint_eq(count, 2);
+
+    size_t expected_size[] = {
+        2*SMALL,
+        sizeof(s_buffer) - sizeof(heap_pool_t) - 2*sizeof(heap_block_t) - SMALL
+    };
+    size_t expected_inuse[] = {
+        true,
+        true,
+    };
+    count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ck_assert_uint_eq(block->size, expected_size[count]);
+        ck_assert_uint_eq(block->inuse, expected_inuse[count]);
+        ++count;
+    }
+}
+END_TEST
+
+// Realloc tries to extend an allocation in place. If it cannot then it
+// allocates a new block and moves the allocation. In the case where the
+// preceding block has space then we merge the block into the preceding block
+// and move the allocation. This allows realloc to succeed in the case where
+// the only space large enough is the combined space of the preceding block
+// and the current block.
+START_TEST(test_realloc_shrink)
+{
+    bzero(s_buffer, sizeof(s_buffer));
+    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+
+    void *a = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - sizeof(heap_block_t));
+    ck_assert(a);
+
+    void *d = heap_pool_realloc(pool, a, SMALL);
+    ck_assert(d);
+    ck_assert_ptr_eq(a, d);
+
+    size_t count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ++count;
+    }
+    ck_assert_uint_eq(count, 2);
+
+    size_t expected_size[] = {
+        SMALL,
+        sizeof(s_buffer) - sizeof(heap_pool_t) - 2*sizeof(heap_block_t) - SMALL
+    };
+    size_t expected_inuse[] = {
+        true,
+        false,
+    };
+    count = 0;
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        ck_assert_uint_eq(block->size, expected_size[count]);
+        ck_assert_uint_eq(block->inuse, expected_inuse[count]);
+        ++count;
+    }
+}
+END_TEST
+
 static const struct { char *name; void *fn; } tests[] = {
     { "test_init", test_init },
     { "test_malloc_really_big", test_malloc_really_big },
@@ -288,8 +468,12 @@ static const struct { char *name; void *fn; } tests[] = {
     { "test_coalesce_0", test_coalesce_0 },
     { "test_coalesce_1", test_coalesce_1 },
     { "test_coalesce_2", test_coalesce_2 },
-    { "test_realloc_0", test_realloc_0 },
-    { "test_realloc_1", test_realloc_1 },
+    { "test_realloc_extend_0", test_realloc_extend_0 },
+    { "test_realloc_extend_1", test_realloc_extend_1 },
+    { "test_realloc_relocate_0", test_realloc_relocate_0 },
+    { "test_realloc_relocate_1", test_realloc_relocate_1 },
+    { "test_realloc_relocate_2", test_realloc_relocate_2 },
+    { "test_realloc_shrink", test_realloc_shrink },
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 

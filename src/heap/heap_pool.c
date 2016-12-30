@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <strings.h>
+#include <string.h>
 #include <stdio.h>
 
 #define ALIGN 4
@@ -162,12 +163,8 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
         return heap_pool_malloc(this, new_size);
     }
 
-    if (new_size == 0) {
-        heap_pool_free(this, ptr);
-        return heap_pool_malloc(this, 0);
-    }
-
     heap_block_t *block = ptr - sizeof(heap_block_t);
+    assert(block->inuse);
 
     // Walk over the heap and see if we can find this allocation.
     // If we cannot find it then the calling code has an error in it.
@@ -179,19 +176,23 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
         }
     }
     assert(found_it);
-    assert(block->inuse);
 #endif
 
-    // The block is already large enough to accomodate the new size.
-    // TODO: actually try to shrink the allocation
-    if (block->size >= new_size) {
-        return ptr;
+    if (new_size == 0) {
+        heap_pool_free(this, ptr);
+        return heap_pool_malloc(this, 0);
     }
 
     // Blocks for allocations are always multiples of four bytes in size.
     // This ensures that blocks are always aligned on four byte boundaries
     // given that the initial block is also aligned on a four byte boundary.
     new_size = round_up_block_size(new_size);
+
+    // The block is already large enough to accomodate the new size.
+    if (block->size >= new_size) {
+        consider_splitting_block(block, new_size);
+        return ptr;
+    }
 
     heap_block_t *following = block->next;
 
@@ -214,6 +215,40 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
         consider_splitting_block(block, new_size);
 
         return ptr;
+    }
+
+    // Can we allocate a new block of memory for the resized allocation?
+    void *new_alloc = heap_pool_malloc(this, new_size);
+    if (new_alloc) {
+        memcpy(ptr, new_alloc, block->size);
+        heap_pool_free(this, ptr);
+        return new_alloc;
+    }
+
+    heap_block_t *preceding = block->prev;
+
+    // If this block is preceded by a free block then would it satisfy our
+    // requirements to merge into the preceding block?
+    if (preceding
+        && !preceding->inuse
+        && (block->size + preceding->size + sizeof(heap_block_t)) >= new_size) {
+
+        // Remove this block, extending the preceding one so as to not leave a
+        // hole in the pool.
+        preceding->next = following;
+        if (following) {
+            following->prev = preceding;
+        }
+        preceding->size = block->size + preceding->size + sizeof(heap_block_t);
+
+        // Move the contents to the beginning of the new, combined block.
+        new_alloc = (void *)preceding + sizeof(heap_block_t);
+        memmove(ptr, new_alloc, block->size);
+
+        // Split the remaining free space if there's enough of it.
+        consider_splitting_block(preceding, new_size);
+
+        return new_alloc;
     }
 
     return NULL;
