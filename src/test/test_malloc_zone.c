@@ -5,7 +5,7 @@
 #include <check.h>
 #include <assert.h>
 
-#include <heap/heap_pool.h>
+#include <malloc/malloc_zone.h>
 
 #define SMALL 64
 
@@ -17,81 +17,81 @@ START_TEST(test_init)
     size_t size = sizeof(s_buffer) - 3;
 
     bzero(buffer, size);
-    heap_pool_t *pool = heap_pool_init(buffer, size);
+    malloc_zone_t *zone = malloc_zone_init(buffer, size);
 
-    ck_assert_ptr_ne(pool, NULL);
+    ck_assert_ptr_ne(zone, NULL);
 
     // alignment
     ck_assert_uint_eq((uintptr_t)s_buffer % 4, 0);
     ck_assert_uint_eq((uintptr_t)buffer % 4, 3);
-    ck_assert_uint_eq((uintptr_t)pool % 4, 0); // four byte alignment
+    ck_assert_uint_eq((uintptr_t)zone % 4, 0); // four byte alignment
 
-    // pool initially contains one large empty block
-    ck_assert_ptr_ne(pool->head, NULL);
-    ck_assert_ptr_eq(pool->head->prev, NULL);
-    ck_assert_ptr_eq(pool->head->next, NULL);
-    ck_assert_uint_lt(pool->head->size, size);
-    ck_assert(!pool->head->inuse);
+    // zone initially contains one large empty block
+    ck_assert_ptr_ne(zone->head, NULL);
+    ck_assert_ptr_eq(zone->head->prev, NULL);
+    ck_assert_ptr_eq(zone->head->next, NULL);
+    ck_assert_uint_lt(zone->head->size, size);
+    ck_assert(!zone->head->inuse);
 }
 END_TEST
 
-// Starting with an empty pool, we cannot satisfy an allocation request larger
-// than the size of the pool itself.
+// Starting with an empty zone, we cannot satisfy an allocation request larger
+// than the size of the zone itself.
 START_TEST(test_malloc_really_big)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
-    void *allocation = heap_pool_malloc(pool, SIZE_MAX);
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = malloc_zone_malloc(zone, SIZE_MAX);
     ck_assert_ptr_eq(allocation, NULL);
 }
 END_TEST
 
-// Starting with an empty pool, we should be able to satisfy a small request.
+// Starting with an empty zone, we should be able to satisfy a small request.
 START_TEST(test_malloc_one_small_request)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
-    void *allocation = heap_pool_malloc(pool, 64);
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = malloc_zone_malloc(zone, 64);
     ck_assert_ptr_ne(allocation, NULL);
     ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
 }
 END_TEST
 
-// Starting with an empty pool, we should be able to satisfy a request for a
+// Starting with an empty zone, we should be able to satisfy a request for a
 // size zero block. This returns a minimum size heap block.
 START_TEST(test_malloc_one_smallest_request)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
-    void *allocation = heap_pool_malloc(pool, SMALL);
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = malloc_zone_malloc(zone, SMALL);
     ck_assert_ptr_ne(allocation, NULL);
     ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
 }
 END_TEST
 
-// Starting with an empty pool, we should be able to satisfy a request the size
-// of the pool's free space.
+// Starting with an empty zone, we should be able to satisfy a request the size
+// of the zone's free space.
 START_TEST(test_malloc_whole_thing)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
-    void *allocation = heap_pool_malloc(pool, pool->head->size);
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = malloc_zone_malloc(zone, zone->head->size);
     ck_assert_ptr_ne(allocation, NULL);
     ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
 }
 END_TEST
 
-// Starting with an empty pool, we should be able to several small requests.
+// Starting with an empty zone, we should be able to several small requests.
 START_TEST(test_malloc_several_small)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
     size_t size = SMALL, i = 0;
-    size_t ex = (sizeof(s_buffer) - sizeof(heap_pool_t)) / (sizeof(heap_block_t) + size);
+    size_t ex = (sizeof(s_buffer) - sizeof(malloc_zone_t)) / (sizeof(malloc_block_t) + size);
 
     while (true) {
-        void *allocation = heap_pool_malloc(pool, size);
+        void *allocation = malloc_zone_malloc(zone, size);
         ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
         if (!allocation) {
             break;
@@ -107,115 +107,115 @@ END_TEST
 START_TEST(test_malloc_one_free_one)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
-    void *alloc = heap_pool_malloc(pool, pool->head->size);
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *alloc = malloc_zone_malloc(zone, zone->head->size);
     ck_assert_ptr_ne(alloc, NULL);
-    ck_assert_ptr_eq(heap_pool_malloc(pool, pool->head->size), NULL);
-    heap_pool_free(pool, alloc);
-    alloc = heap_pool_malloc(pool, pool->head->size);
+    ck_assert_ptr_eq(malloc_zone_malloc(zone, zone->head->size), NULL);
+    malloc_zone_free(zone, alloc);
+    alloc = malloc_zone_malloc(zone, zone->head->size);
     ck_assert_ptr_ne(alloc, NULL);
 }
 END_TEST
 
-// Freeing allocations should release memory to the pool for future allocations.
+// Freeing allocations should release memory to the zone for future allocations.
 START_TEST(test_malloc_several_free_one)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
-    void *allocation = heap_pool_malloc(pool, SMALL);
-    while (heap_pool_malloc(pool, SMALL));
-    heap_pool_free(pool, allocation);
-    allocation = heap_pool_malloc(pool, SMALL);
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = malloc_zone_malloc(zone, SMALL);
+    while (malloc_zone_malloc(zone, SMALL));
+    malloc_zone_free(zone, allocation);
+    allocation = malloc_zone_malloc(zone, SMALL);
     ck_assert_ptr_ne(allocation, NULL);
 }
 END_TEST
 
 // Free blocks should coalesce to avoid fragmentation.
-// Allocate three blocks to fill the pool. Free two and then see whether we can
+// Allocate three blocks to fill the zone. Free two and then see whether we can
 // use the coalesced free space to allocate a new block. This tests merging of
 // a preceding free block.
 START_TEST(test_coalesce_0)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, SMALL);
+    void *a = malloc_zone_malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = heap_pool_malloc(pool, SMALL);
+    void *b = malloc_zone_malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    void *c = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = heap_pool_malloc(pool, SMALL*2);
+    void *d = malloc_zone_malloc(zone, SMALL*2);
     ck_assert(!d); // expected to fail
 
-    heap_pool_free(pool, a);
-    heap_pool_free(pool, b); // merge with preceding free block
+    malloc_zone_free(zone, a);
+    malloc_zone_free(zone, b); // merge with preceding free block
 
-    void *e = heap_pool_malloc(pool, SMALL*2);
+    void *e = malloc_zone_malloc(zone, SMALL*2);
     ck_assert(e); // should succeed now
     ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
 END_TEST
 
 // Free blocks should coalesce to avoid fragmentation.
-// Allocate three blocks to fill the pool. Free two and then see whether we can
+// Allocate three blocks to fill the zone. Free two and then see whether we can
 // use the coalesced free space to allocate a new block. This tests merging of
 // a following free block.
 START_TEST(test_coalesce_1)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, SMALL);
+    void *a = malloc_zone_malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = heap_pool_malloc(pool, SMALL);
+    void *b = malloc_zone_malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    void *c = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = heap_pool_malloc(pool, SMALL*2);
+    void *d = malloc_zone_malloc(zone, SMALL*2);
     ck_assert(!d); // expected to fail
 
-    heap_pool_free(pool, b);
-    heap_pool_free(pool, a); // merge with the following free block
+    malloc_zone_free(zone, b);
+    malloc_zone_free(zone, a); // merge with the following free block
 
-    void *e = heap_pool_malloc(pool, SMALL*2);
+    void *e = malloc_zone_malloc(zone, SMALL*2);
     ck_assert(e); // should succeed now
     ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
 END_TEST
 
 // Free blocks should coalesce to avoid fragmentation.
-// Allocate three blocks to fill the pool. Free three and then see whether we
+// Allocate three blocks to fill the zone. Free three and then see whether we
 // can use the coalesced free space to allocate a new block. This tests merging
 // a preceding and following free block in one step.
 START_TEST(test_coalesce_2)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, SMALL);
+    void *a = malloc_zone_malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = heap_pool_malloc(pool, SMALL);
+    void *b = malloc_zone_malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    void *c = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - sizeof(heap_block_t));
+    void *d = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
     ck_assert(!d); // expected to fail
 
-    heap_pool_free(pool, c);
-    heap_pool_free(pool, a);
-    heap_pool_free(pool, b); // preceding and following both merged here
+    malloc_zone_free(zone, c);
+    malloc_zone_free(zone, a);
+    malloc_zone_free(zone, b); // preceding and following both merged here
 
-    void *e = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - sizeof(heap_block_t));
+    void *e = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
     ck_assert(e); // should succeed now
     ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
@@ -226,24 +226,24 @@ END_TEST
 START_TEST(test_realloc_extend_0)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, 1);
+    void *a = malloc_zone_malloc(zone, 1);
     ck_assert(a);
-    ck_assert_ptr_ne(pool->head->next, NULL);
+    ck_assert_ptr_ne(zone->head->next, NULL);
 
-    heap_block_t *block1 = pool->head;
-    heap_block_t *block2 = pool->head->next;
+    malloc_block_t *block1 = zone->head;
+    malloc_block_t *block2 = zone->head->next;
 
     size_t size1 = block1->size;
     size_t size2 = block2->size;
 
-    void *b = heap_pool_realloc(pool, a, 2);
+    void *b = malloc_zone_realloc(zone, a, 2);
     ck_assert(b);
     ck_assert_ptr_eq(a, b);
 
-    ck_assert_ptr_eq(pool->head, block1);
-    ck_assert_ptr_eq(pool->head->next, block2);
+    ck_assert_ptr_eq(zone->head, block1);
+    ck_assert_ptr_eq(zone->head->next, block2);
     ck_assert_uint_eq(block1->size, size1);
     ck_assert_uint_eq(block2->size, size2);
 }
@@ -255,24 +255,24 @@ END_TEST
 START_TEST(test_realloc_extend_1)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, 0);
+    void *a = malloc_zone_malloc(zone, 0);
     ck_assert(a);
-    ck_assert_ptr_ne(pool->head->next, NULL);
+    ck_assert_ptr_ne(zone->head->next, NULL);
 
-    void *b = heap_pool_realloc(pool, a, SMALL);
+    void *b = malloc_zone_realloc(zone, a, SMALL);
     ck_assert(b);
     ck_assert_ptr_eq(a, b);
 
-    heap_block_t *block1 = pool->head;
+    malloc_block_t *block1 = zone->head;
     ck_assert(block1);
 
-    heap_block_t *block2 = pool->head->next;
+    malloc_block_t *block2 = zone->head->next;
     ck_assert(block2);
 
     ck_assert_uint_ge(block1->size, SMALL);
-    ck_assert_uint_ge(block2->size, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*sizeof(heap_block_t) - SMALL);
+    ck_assert_uint_ge(block2->size, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*sizeof(malloc_block_t) - SMALL);
 }
 END_TEST
 
@@ -281,20 +281,20 @@ END_TEST
 START_TEST(test_realloc_relocate_0)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, SMALL);
+    void *a = malloc_zone_malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = heap_pool_malloc(pool, SMALL);
+    void *b = malloc_zone_malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = heap_pool_realloc(pool, a, 2*SMALL);
+    void *c = malloc_zone_realloc(zone, a, 2*SMALL);
     ck_assert(c);
     ck_assert_ptr_ne(a, c);
 
     size_t count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ++count;
     }
     ck_assert_uint_eq(count, 4);
@@ -303,7 +303,7 @@ START_TEST(test_realloc_relocate_0)
         SMALL,
         SMALL,
         2*SMALL,
-        sizeof(s_buffer) - sizeof(heap_pool_t) - 4*SMALL - 4*sizeof(heap_block_t)
+        sizeof(s_buffer) - sizeof(malloc_zone_t) - 4*SMALL - 4*sizeof(malloc_block_t)
     };
     size_t expected_inuse[] = {
         false,
@@ -312,7 +312,7 @@ START_TEST(test_realloc_relocate_0)
         false
     };
     count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ck_assert_uint_eq(block->size, expected_size[count]);
         ck_assert_uint_eq(block->inuse, expected_inuse[count]);
         ++count;
@@ -326,22 +326,22 @@ END_TEST
 START_TEST(test_realloc_relocate_1)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, SMALL);
+    void *a = malloc_zone_malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = heap_pool_malloc(pool, SMALL);
+    void *b = malloc_zone_malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    void *c = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = heap_pool_realloc(pool, a, 2*SMALL);
+    void *d = malloc_zone_realloc(zone, a, 2*SMALL);
     ck_assert(!d);
 
     size_t count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ++count;
     }
     ck_assert_uint_eq(count, 3);
@@ -349,7 +349,7 @@ START_TEST(test_realloc_relocate_1)
     size_t expected_size[] = {
         SMALL,
         SMALL,
-        sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t)
+        sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t)
     };
     size_t expected_inuse[] = {
         true,
@@ -357,7 +357,7 @@ START_TEST(test_realloc_relocate_1)
         true
     };
     count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ck_assert_uint_eq(block->size, expected_size[count]);
         ck_assert_uint_eq(block->inuse, expected_inuse[count]);
         ++count;
@@ -374,46 +374,46 @@ END_TEST
 START_TEST(test_realloc_relocate_2)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, SMALL);
+    void *a = malloc_zone_malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = heap_pool_malloc(pool, SMALL);
+    void *b = malloc_zone_malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - 2*(SMALL+sizeof(heap_block_t)) - sizeof(heap_block_t));
+    void *c = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    heap_pool_free(pool, a);
+    malloc_zone_free(zone, a);
 
     printf("Before:\n");
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         printf("size = %zu ; inuse = %d\n", block->size, block->inuse);
     }
 
-    void *d = heap_pool_realloc(pool, b, 2*SMALL);
+    void *d = malloc_zone_realloc(zone, b, 2*SMALL);
     ck_assert(d);
     ck_assert_ptr_eq(a, d);
 
     printf("After:\n");
     size_t count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         printf("size = %zu ; inuse = %d\n", block->size, block->inuse);
         ++count;
     }
     ck_assert_uint_eq(count, 2);
 
     size_t expected_size[] = {
-        2*SMALL + sizeof(heap_block_t),
-        sizeof(s_buffer) - sizeof(heap_pool_t) - 3*sizeof(heap_block_t) - 2*SMALL
+        2*SMALL + sizeof(malloc_block_t),
+        sizeof(s_buffer) - sizeof(malloc_zone_t) - 3*sizeof(malloc_block_t) - 2*SMALL
     };
     size_t expected_inuse[] = {
         true,
         true,
     };
     count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ck_assert_uint_eq(block->size, expected_size[count]);
         ck_assert_uint_eq(block->inuse, expected_inuse[count]);
         ++count;
@@ -430,31 +430,31 @@ END_TEST
 START_TEST(test_realloc_shrink)
 {
     bzero(s_buffer, sizeof(s_buffer));
-    heap_pool_t *pool = heap_pool_init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = heap_pool_malloc(pool, sizeof(s_buffer) - sizeof(heap_pool_t) - sizeof(heap_block_t));
+    void *a = malloc_zone_malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
     ck_assert(a);
 
-    void *d = heap_pool_realloc(pool, a, SMALL);
+    void *d = malloc_zone_realloc(zone, a, SMALL);
     ck_assert(d);
     ck_assert_ptr_eq(a, d);
 
     size_t count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ++count;
     }
     ck_assert_uint_eq(count, 2);
 
     size_t expected_size[] = {
         SMALL,
-        sizeof(s_buffer) - sizeof(heap_pool_t) - 2*sizeof(heap_block_t) - SMALL
+        sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*sizeof(malloc_block_t) - SMALL
     };
     size_t expected_inuse[] = {
         true,
         false,
     };
     count = 0;
-    for (heap_block_t *block = pool->head; block; block = block->next) {
+    for (malloc_block_t *block = zone->head; block; block = block->next) {
         ck_assert_uint_eq(block->size, expected_size[count]);
         ck_assert_uint_eq(block->inuse, expected_inuse[count]);
         ++count;
@@ -483,9 +483,9 @@ static const struct { char *name; void *fn; } tests[] = {
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
-Suite* test_suite_heap_pool()
+Suite* test_suite_malloc_zone()
 {
-    Suite *suite = suite_create("test_suite_heap_pool");
+    Suite *suite = suite_create(__FUNCTION__);
 
     for (size_t i = 0; i < num_tests; ++i) {
         TCase *testCase = tcase_create(tests[i].name);

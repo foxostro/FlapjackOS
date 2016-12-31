@@ -6,7 +6,7 @@ set(COMMON_SOURCE_FILES
     "src/gdt.c"
     "src/idt.c"
     "src/kprintf.c"
-    "src/heap/heap_pool.c"
+    "src/malloc/malloc_zone.c"
     )
 
 include_directories("src/include")
@@ -102,7 +102,7 @@ else()
     # Source files for the test suite.
     set(TEST_SOURCE_FILES
          ${COMMON_SOURCE_FILES}
-        "src/test/test_heap_pool.c"
+        "src/test/test_malloc_zone.c"
         "src/test/test_gdt.c"
         "src/test/test_idt.c"
         "src/test/test_printf.c"

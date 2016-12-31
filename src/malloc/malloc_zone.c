@@ -1,11 +1,11 @@
-#include <heap/heap_pool.h>
+#include <malloc/malloc_zone.h>
 #include <assert.h>
 #include <stdint.h>
 #include <strings.h>
 #include <string.h>
 
 #define ALIGN 4
-#define MIN_SPLIT_SIZE (sizeof(heap_block_t))
+#define MIN_SPLIT_SIZE (sizeof(malloc_block_t))
 
 static inline size_t round_up_block_size(size_t size)
 {
@@ -19,17 +19,17 @@ static inline size_t round_up_block_size(size_t size)
     return new_size;
 }
 
-static void consider_splitting_block(heap_block_t *block, size_t size)
+static void consider_splitting_block(malloc_block_t *block, size_t size)
 {
     // Split the block if the remaining free space is big enough.
     size_t remaining_space = block->size - size;
     if (remaining_space > MIN_SPLIT_SIZE) {
-        heap_block_t *new_block = (heap_block_t *)((void *)block + sizeof(heap_block_t) + size);
+        malloc_block_t *new_block = (malloc_block_t *)((void *)block + sizeof(malloc_block_t) + size);
 
         assert((uintptr_t)new_block % ALIGN == 0);
         new_block->prev = block;
         new_block->next = block->next;
-        new_block->size = remaining_space - sizeof(heap_block_t);
+        new_block->size = remaining_space - sizeof(malloc_block_t);
         new_block->inuse = false;
 
         block->size = size;
@@ -40,9 +40,9 @@ static void consider_splitting_block(heap_block_t *block, size_t size)
 
         // If the next block is empty then merge the new free block with the
         // free block that follows it.
-        heap_block_t *following = new_block->next;
+        malloc_block_t *following = new_block->next;
         if (following && !following->inuse) {
-            new_block->size += following->size + sizeof(heap_block_t);
+            new_block->size += following->size + sizeof(malloc_block_t);
             new_block->next = following->next;
             if (following->next) {
                 following->next->prev = new_block;
@@ -51,26 +51,26 @@ static void consider_splitting_block(heap_block_t *block, size_t size)
     }
 }
 
-heap_pool_t* heap_pool_init(void *start, size_t size)
+malloc_zone_t* malloc_zone_init(void *start, size_t size)
 {
     assert(start);
-    assert(size > sizeof(heap_pool_t));
+    assert(size > sizeof(malloc_zone_t));
     bzero(start, size);
 
-    heap_pool_t *pool = start + (4 - (uintptr_t)start % 4); // 4 byte alignment
+    malloc_zone_t *zone = start + (4 - (uintptr_t)start % 4); // 4 byte alignment
 
     // The first block is placed at the address immediately after the header.
-    heap_block_t *first = pool->head = (void *)pool + sizeof(heap_pool_t);
+    malloc_block_t *first = zone->head = (void *)zone + sizeof(malloc_zone_t);
 
     first->prev = NULL;
     first->next = NULL;
-    first->size = size - sizeof(heap_pool_t) - sizeof(heap_block_t);
+    first->size = size - sizeof(malloc_zone_t) - sizeof(malloc_block_t);
     first->inuse = false;
 
-    return pool;
+    return zone;
 }
 
-void* heap_pool_malloc(heap_pool_t *this, size_t size)
+void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
 {
     assert(this);
 
@@ -79,10 +79,10 @@ void* heap_pool_malloc(heap_pool_t *this, size_t size)
     // given that the initial block is also aligned on a four byte boundary.
     size = round_up_block_size(size);
 
-    heap_block_t *best = NULL;
+    malloc_block_t *best = NULL;
 
     // Get the smallest free block that is large enough to satisfy the request.
-    for (heap_block_t *block = this->head; block; block = block->next) {
+    for (malloc_block_t *block = this->head; block; block = block->next) {
         if (block->size >= size
             && !block->inuse
             && (!best || (block->size < best->size))) {
@@ -97,10 +97,10 @@ void* heap_pool_malloc(heap_pool_t *this, size_t size)
     consider_splitting_block(best, size);
 
     best->inuse = true;
-    return (void *)best + sizeof(heap_block_t);
+    return (void *)best + sizeof(malloc_block_t);
 }
 
-void heap_pool_free(heap_pool_t *this, void *ptr)
+void malloc_zone_free(malloc_zone_t *this, void *ptr)
 {
     assert(this);
 
@@ -108,13 +108,13 @@ void heap_pool_free(heap_pool_t *this, void *ptr)
         return; // do nothing
     }
 
-    heap_block_t *block = ptr - sizeof(heap_block_t);
+    malloc_block_t *block = ptr - sizeof(malloc_block_t);
 
     // Walk over the heap and see if we can find this allocation.
     // If we cannot find it then the calling code has an error in it.
 #ifndef NDEBUG
     bool found_it = false;
-    for (heap_block_t *iter = this->head; iter; iter = iter->next) {
+    for (malloc_block_t *iter = this->head; iter; iter = iter->next) {
         if (iter == block) {
             found_it = true;
         }
@@ -125,12 +125,12 @@ void heap_pool_free(heap_pool_t *this, void *ptr)
 
     block->inuse = false;
 
-    heap_block_t *preceding = block->prev, *following = block->next;
+    malloc_block_t *preceding = block->prev, *following = block->next;
 
     // If the preceding chunk is free then merge this one into it. This block
     // goes away and the preceding chunk expands to fill the hole.
     if (preceding && !preceding->inuse) {
-        preceding->size += block->size + sizeof(heap_block_t);
+        preceding->size += block->size + sizeof(malloc_block_t);
         preceding->next = following;
         if (following) {
             following->prev = preceding;
@@ -144,7 +144,7 @@ void heap_pool_free(heap_pool_t *this, void *ptr)
     // If the following chunk is free then merge it into this one.
     // The following block goes away and this chunk expands to fill the hole.
     if (following && !following->inuse) {
-        block->size += following->size + sizeof(heap_block_t);
+        block->size += following->size + sizeof(malloc_block_t);
         block->next = following->next;
         if (following->next) {
             following->next->prev = block;
@@ -165,22 +165,22 @@ void heap_pool_free(heap_pool_t *this, void *ptr)
 // 
 // If size is zero and ptr is not NULL, a new minimum-sized object is
 // allocated and the original object is freed.
-void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
+void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size)
 {
     assert(this);
 
     if (!ptr) {
-        return heap_pool_malloc(this, new_size);
+        return malloc_zone_malloc(this, new_size);
     }
 
-    heap_block_t *block = ptr - sizeof(heap_block_t);
+    malloc_block_t *block = ptr - sizeof(malloc_block_t);
     assert(block->inuse);
 
     // Walk over the heap and see if we can find this allocation.
     // If we cannot find it then the calling code has an error in it.
 #ifndef NDEBUG
     bool found_it = false;
-    for (heap_block_t *iter = this->head; iter; iter = iter->next) {
+    for (malloc_block_t *iter = this->head; iter; iter = iter->next) {
         if (iter == block) {
             found_it = true;
         }
@@ -189,8 +189,8 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
 #endif
 
     if (new_size == 0) {
-        heap_pool_free(this, ptr);
-        return heap_pool_malloc(this, 0);
+        malloc_zone_free(this, ptr);
+        return malloc_zone_malloc(this, 0);
     }
 
     // Blocks for allocations are always multiples of four bytes in size.
@@ -204,17 +204,17 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
         return ptr;
     }
 
-    heap_block_t *following = block->next;
+    malloc_block_t *following = block->next;
 
     // If this block is followed by a free block then would it satisfy our
     // requirements to take some of that free space by extending this block?
     if (following
         && !following->inuse
-        && (block->size + following->size + sizeof(heap_block_t)) >= new_size) {
+        && (block->size + following->size + sizeof(malloc_block_t)) >= new_size) {
 
         // Remove the following block, extending this one so as to not leave a
-        // hole in the pool.
-        block->size = block->size + following->size + sizeof(heap_block_t);
+        // hole in the zone.
+        block->size = block->size + following->size + sizeof(malloc_block_t);
         block->next = following->next;
 
         if (following->next) {
@@ -228,32 +228,32 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
     }
 
     // Can we allocate a new block of memory for the resized allocation?
-    void *new_alloc = heap_pool_malloc(this, new_size);
+    void *new_alloc = malloc_zone_malloc(this, new_size);
     if (new_alloc) {
         memcpy(ptr, new_alloc, block->size);
-        heap_pool_free(this, ptr);
+        malloc_zone_free(this, ptr);
         return new_alloc;
     }
 
-    heap_block_t *preceding = block->prev;
+    malloc_block_t *preceding = block->prev;
 
     // If this block is preceded by a free block then would it satisfy our
     // requirements to merge into the preceding block?
     if (preceding
         && !preceding->inuse
-        && (block->size + preceding->size + sizeof(heap_block_t)) >= new_size) {
+        && (block->size + preceding->size + sizeof(malloc_block_t)) >= new_size) {
 
         // Remove this block, extending the preceding one so as to not leave a
-        // hole in the pool.
+        // hole in the zone.
         preceding->next = following;
         if (following) {
             following->prev = preceding;
         }
-        preceding->size = block->size + preceding->size + sizeof(heap_block_t);
+        preceding->size = block->size + preceding->size + sizeof(malloc_block_t);
         preceding->inuse = true;
 
         // Move the contents to the beginning of the new, combined block.
-        new_alloc = (void *)preceding + sizeof(heap_block_t);
+        new_alloc = (void *)preceding + sizeof(malloc_block_t);
         memmove(ptr, new_alloc, block->size);
 
         // Split the remaining free space if there's enough of it.
