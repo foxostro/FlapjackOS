@@ -3,10 +3,9 @@
 #include <stdint.h>
 #include <strings.h>
 #include <string.h>
-#include <stdio.h>
 
 #define ALIGN 4
-#define MIN_SPLIT_SIZE 16
+#define MIN_SPLIT_SIZE (sizeof(heap_block_t))
 
 static inline size_t round_up_block_size(size_t size)
 {
@@ -20,24 +19,35 @@ static inline size_t round_up_block_size(size_t size)
     return new_size;
 }
 
-static void consider_splitting_block(heap_block_t *best, size_t size)
+static void consider_splitting_block(heap_block_t *block, size_t size)
 {
     // Split the block if the remaining free space is big enough.
-    size_t remaining_space = best->size - size;
-    if (remaining_space >= MIN_SPLIT_SIZE) {
-        heap_block_t *new_block = (heap_block_t *)((void *)best + sizeof(heap_block_t) + size);
+    size_t remaining_space = block->size - size;
+    if (remaining_space > MIN_SPLIT_SIZE) {
+        heap_block_t *new_block = (heap_block_t *)((void *)block + sizeof(heap_block_t) + size);
 
         assert((uintptr_t)new_block % ALIGN == 0);
-        new_block->prev = best;
-        new_block->next = best->next;
+        new_block->prev = block;
+        new_block->next = block->next;
         new_block->size = remaining_space - sizeof(heap_block_t);
         new_block->inuse = false;
 
-        best->size = size;
-        if (best->next) {
-            best->next->prev = new_block;
+        block->size = size;
+        if (block->next) {
+            block->next->prev = new_block;
         }
-        best->next = new_block;
+        block->next = new_block;
+
+        // If the next block is empty then merge the new free block with the
+        // free block that follows it.
+        heap_block_t *following = new_block->next;
+        if (following && !following->inuse) {
+            new_block->size += following->size + sizeof(heap_block_t);
+            new_block->next = following->next;
+            if (following->next) {
+                following->next->prev = new_block;
+            }
+        }
     }
 }
 
@@ -240,6 +250,7 @@ void* heap_pool_realloc(heap_pool_t *this, void *ptr, size_t new_size)
             following->prev = preceding;
         }
         preceding->size = block->size + preceding->size + sizeof(heap_block_t);
+        preceding->inuse = true;
 
         // Move the contents to the beginning of the new, combined block.
         new_alloc = (void *)preceding + sizeof(heap_block_t);

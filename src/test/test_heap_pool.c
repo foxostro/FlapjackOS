@@ -387,20 +387,26 @@ START_TEST(test_realloc_relocate_2)
 
     heap_pool_free(pool, a);
 
+    printf("Before:\n");
+    for (heap_block_t *block = pool->head; block; block = block->next) {
+        printf("size = %zu ; inuse = %d\n", block->size, block->inuse);
+    }
+
     void *d = heap_pool_realloc(pool, b, 2*SMALL);
     ck_assert(d);
     ck_assert_ptr_eq(a, d);
 
+    printf("After:\n");
     size_t count = 0;
     for (heap_block_t *block = pool->head; block; block = block->next) {
-        printf("size = %zu\n", block->size);
+        printf("size = %zu ; inuse = %d\n", block->size, block->inuse);
         ++count;
     }
     ck_assert_uint_eq(count, 2);
 
     size_t expected_size[] = {
-        2*SMALL,
-        sizeof(s_buffer) - sizeof(heap_pool_t) - 2*sizeof(heap_block_t) - SMALL
+        2*SMALL + sizeof(heap_block_t),
+        sizeof(s_buffer) - sizeof(heap_pool_t) - 3*sizeof(heap_block_t) - 2*SMALL
     };
     size_t expected_inuse[] = {
         true,
