@@ -12,6 +12,8 @@ Suite* test_suite_printf(); // defined in test_printf.c
 Suite* test_suite_gdt(); // defined in test_gdt.c
 Suite* test_suite_idt(); // defined in test_idt.c
 
+// TODO: need tests for string functions in string.h
+
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {
     int numberOfFailedTests = 0;

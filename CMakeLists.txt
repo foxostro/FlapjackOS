@@ -9,11 +9,11 @@ set(COMMON_SOURCE_FILES
     "src/malloc/malloc_zone.c"
     )
 
-include_directories("src/include")
-
 if(CMAKE_CROSSCOMPILING)
 
     enable_language(ASM)
+
+    include_directories("src/include" "src/include/libc")
 
     # Source files for the kernel. (no organization to these files yet)
     set(KERNEL_SOURCE_FILES
@@ -33,7 +33,7 @@ if(CMAKE_CROSSCOMPILING)
         "src/ltr.S"
         "src/panic.c"
         "src/pic.c"
-        "src/strings.c"
+        "src/libc/string.c"
         "src/timer.c"
         "src/keyboard/keyboard.c"
         "src/boot.S"
@@ -96,6 +96,8 @@ if(CMAKE_CROSSCOMPILING)
     )
 
 else()
+
+    include_directories("src/include")
 
     set(TEST_RUNNER_NAME "${CMAKE_PROJECT_NAME}_Test")
 

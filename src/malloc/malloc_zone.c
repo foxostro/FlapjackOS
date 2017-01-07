@@ -1,7 +1,6 @@
 #include <malloc/malloc_zone.h>
 #include <assert.h>
 #include <stdint.h>
-#include <strings.h>
 #include <string.h>
 
 #define ALIGN 4
@@ -55,7 +54,7 @@ malloc_zone_t* malloc_zone_init(void *start, size_t size)
 {
     assert(start);
     assert(size > sizeof(malloc_zone_t));
-    bzero(start, size);
+    memset(start, 0, size);
 
     malloc_zone_t *zone = start + (4 - (uintptr_t)start % 4); // 4 byte alignment
 

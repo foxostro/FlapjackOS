@@ -5,7 +5,7 @@
 // Though, all are simply assembly wrappers which call the high-level dispatcher.
 
 #include <idt.h>
-#include <strings.h>
+#include <string.h>
 
 // These wrappers are defined in isr_wrapper_asm.S
 
@@ -255,7 +255,7 @@ void isr_wrapper_255();
 
 void isr_install(idt_entry_t *idt)
 {
-	bzero(idt, sizeof(idt_entry_t) * IDT_MAX);
+	memset(idt, 0, sizeof(idt_entry_t) * IDT_MAX);
 	
 	
 	idt_build_entry(&idt[0], (uint32_t)isr_wrapper_0, TRAP_GATE, 0);

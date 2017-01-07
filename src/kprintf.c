@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <strings.h>
+#include <string.h>
 #include <ctypes.h>
 #include <console.h>
 

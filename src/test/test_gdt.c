@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <check.h>
+#include <string.h>
 
 #include <seg.h>
 #include <gdt.h>
@@ -148,7 +149,7 @@ START_TEST(test_gdt_layout_2)
         0x00cff200,
     };
     gdt_entry_t gdt[6];
-    bzero(gdt, sizeof(gdt));
+    memset(gdt, 0, sizeof(gdt));
     gdt_create_flat_mapping(gdt, sizeof(gdt), 0x00100930);
 
 #if 0

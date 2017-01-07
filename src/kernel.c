@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <strings.h>
+#include <string.h>
 #include <seg.h>
 #include <gdt.h>
 #include <idt.h>
@@ -167,13 +167,13 @@ void kernel_main(void *mb_info, void *istack)
 
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
-    bzero(&s_tss, sizeof(s_tss));
+    memset(&s_tss, 0, sizeof(s_tss));
     s_tss.ss0 = SEGSEL_KERNEL_DS;
     s_tss.esp0 = (uint32_t)istack;
     s_tss.iomap = sizeof(s_tss);
 
     // Setup the Global Descriptor Table. The kernel uses a flat memory map.
-    bzero(s_gdt, sizeof(s_gdt));
+    memset(s_gdt, 0, sizeof(s_gdt));
     gdt_create_flat_mapping(s_gdt, sizeof(s_gdt), (uint32_t)&s_tss);
     lgdt(s_gdt, sizeof(s_gdt) - 1);
     load_task_register();

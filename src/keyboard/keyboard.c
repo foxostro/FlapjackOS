@@ -7,7 +7,7 @@
 #include <keyboard.h>
 #include <interrupt_asm.h>
 #include <halt.h>
-#include <strings.h>
+#include <string.h>
 
 #define KEYBOARD_DATA_PORT     (0x60)
 #define KEYBOARD_CONTROL_PORT  (0x64)

@@ -2,7 +2,7 @@
 #include <console.h>
 #include <keyboard.h>
 #include <kprintf.h>
-#include <strings.h>
+#include <string.h>
 #include <assert.h>
 #include <readline.h>
 
