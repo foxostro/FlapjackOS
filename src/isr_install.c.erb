@@ -13,10 +13,10 @@ void isr_wrapper_<%= isr %>();<% end %>
 
 void isr_install(idt_entry_t *idt)
 {
-	memset(idt, 0, sizeof(idt_entry_t) * IDT_MAX);
-	
-	<% [0..14, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
-	idt_build_entry(&idt[<%= isr %>], (uint32_t)isr_wrapper_<%= isr %>, TRAP_GATE, 0);<% end %>
+    memset(idt, 0, sizeof(idt_entry_t) * IDT_MAX);
+    
+    <% [0..14, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+    idt_build_entry(&idt[<%= isr %>], (uint32_t)isr_wrapper_<%= isr %>, TRAP_GATE, 0);<% end %>
 
     lidt(idt, sizeof(idt_entry_t) * IDT_MAX - 1);
 }

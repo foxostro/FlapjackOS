@@ -2,5 +2,5 @@
 
 static inline bool isprint(int c)
 {
-	return ((c) >= ' ') && ((c) <= 126);
+    return ((c) >= ' ') && ((c) <= 126);
 }

@@ -35,14 +35,14 @@
 #define TRAP_GATE       0b1111  // 32-bit trap gate
 
 typedef struct {
-   uint16_t offset_1;   // offset bits 0..15
-   uint16_t selector;   // a code segment selector in GDT or LDT
-   uint8_t zero;        // unused, set to 0
-   uint8_t gate_type:4; // type of gate
-   uint8_t s:1;         // storage segement
-   uint8_t dpl:2;       // priviledge level for the gate
-   uint8_t p:1;         // present bit, set to zero for unused interrupts
-   uint16_t offset_2;   // offset bits 16..31
+    uint16_t offset_1;   // offset bits 0..15
+    uint16_t selector;   // a code segment selector in GDT or LDT
+    uint8_t zero;        // unused, set to 0
+    uint8_t gate_type:4; // type of gate
+    uint8_t s:1;         // storage segement
+    uint8_t dpl:2;       // priviledge level for the gate
+    uint8_t p:1;         // present bit, set to zero for unused interrupts
+    uint16_t offset_2;   // offset bits 16..31
 } idt_entry_t;
 _Static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
 

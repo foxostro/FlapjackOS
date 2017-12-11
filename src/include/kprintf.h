@@ -30,4 +30,4 @@ size_t ksnprintf(char * restrict str,
 
 // Formats a string and prints directly to the VGA console.
 size_t kprintf(const console_interface_t *console,
-	           const char * restrict fmt, ...);
+               const char * restrict fmt, ...);

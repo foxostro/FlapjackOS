@@ -49,7 +49,7 @@ void interrupt_dispatch(unsigned interrupt_number,
         return;
     }
 
-    switch(interrupt_number) {
+    switch (interrupt_number) {
         case IDT_KEY:
             s_keyboard.int_handler();
             break;
