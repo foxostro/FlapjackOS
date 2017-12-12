@@ -2,24 +2,13 @@
 #include <stdio.h>
 #include <check.h>
 
-void lgdt(__attribute__((unused)) void *gdt, __attribute__((unused)) unsigned limit)
-{
-    // satisfy the linker
-}
-
-Suite* test_suite_printf(); // defined in test_printf.c
-Suite* test_suite_gdt(); // defined in test_gdt.c
-Suite* test_suite_idt(); // defined in test_idt.c
-
-// TODO: need tests for string functions in string.h
+Suite* test_suite_malloc_zone(); // defined in test_malloc_zone.c
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {
     int numberOfFailedTests = 0;
     Suite* suite[] = {
-        test_suite_printf(),
-        test_suite_gdt(),
-        test_suite_idt()
+        test_suite_malloc_zone()
     };
     for (int i = 0, n = sizeof(suite) / sizeof(*suite); i < n; ++i) {
         SRunner *runner = srunner_create(suite[i]);

@@ -94,7 +94,6 @@ source_group("Kernel" FILES ${KERNEL_SOURCE_FILES})
 
 # Source files for the test suite.
 set(TEST_SOURCE_FILES
-    "src/test/test_malloc_zone.c"
     "src/test/test_gdt.c"
     "src/test/test_idt.c"
     "src/test/test_printf.c"

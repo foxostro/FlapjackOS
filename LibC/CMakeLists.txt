@@ -7,3 +7,27 @@ set(SOURCE_FILES_LIBC
     "src/string.c"
     )
 add_library(LibC STATIC ${SOURCE_FILES_LIBC})
+
+if(NOT CMAKE_CROSSCOMPILING)
+
+    enable_testing()
+
+    include_directories("include"
+                        ${CHECK_INCLUDE_DIRS}
+                        )
+
+    link_directories(${CHECK_LIBRARIES_DIR})
+
+    add_executable(LibCTest
+                   "test/test_string.c"
+                   "test/test_main.c"
+                   )
+
+    target_link_libraries(LibCTest
+                          LibC
+                          ${CHECK_LIBRARIES}
+                          )
+
+    add_test(LibCTest ${CMAKE_CURRENT_BINARY_DIR}/LibCTest)
+
+endif()
