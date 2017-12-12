@@ -2,8 +2,22 @@ cmake_minimum_required(VERSION 3.6)
 project(FlapjackOS C)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
+# Setup compiler flags.
+if(CMAKE_CROSSCOMPILING)
+    set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O0 -Wall -Wextra -Werror")
+    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O0 -nostdlib")
+else()
+    set(CMAKE_C_FLAGS "-std=c11 -g -O0 -Wall -Wextra -Werror -DTESTING")
+endif()
+
+# Setup build for libc static library.
+set(SOURCE_FILES_LIBC
+    "src/include/libc/string.h" "src/libc/string.c"
+    )
+add_library(StaticLibC STATIC ${SOURCE_FILES_LIBC})
+
+# Setup other source files. We'll use these in targets below.
 set(CORE_INCLUDE_FILES
-    "src/include/libc/string.h"
     "src/include/console.h"
     "src/include/ltr.h"
     "src/include/seg.h"
@@ -71,7 +85,6 @@ set(KERNEL_SOURCE_FILES
     "src/ltr.S"
     "src/panic.c"
     "src/pic.c"
-    "src/libc/string.c"
     "src/timer.c"
     "src/keyboard/keyboard.c"
     "src/boot.S"
@@ -88,6 +101,9 @@ set(TEST_SOURCE_FILES
     )
 source_group("Test" FILES ${TEST_SOURCE_FILES})
 
+# Setup a build for either the kernel or the test suite.
+# We can't setup both because (as far as I know) we can only have one toolchain
+# for the entire CMake project.
 if(CMAKE_CROSSCOMPILING)
 
     set(ALL_SOURCE_FILES
@@ -101,9 +117,6 @@ if(CMAKE_CROSSCOMPILING)
     enable_language(ASM)
 
     include_directories("src/include" "src/include/libc")
-
-    set(CMAKE_C_FLAGS "-std=c11 -ffreestanding -O0 -Wall -Wextra -Werror")
-    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O0 -nostdlib")
 
     # The layout file specifies how the linker puts together the kernel binary image.
     set(KERNEL_LAYOUT_FILE "kernel.ld")
@@ -119,6 +132,7 @@ if(CMAKE_CROSSCOMPILING)
     set(KERNEL_BIN "kernel.bin")
     set(KERNEL_LINK_FLAGS "-m32 -march=i386 -T ${KERNEL_LAYOUT_FILE}")
     add_executable(${KERNEL_BIN} ${ALL_SOURCE_FILES})
+    target_link_libraries(${KERNEL_BIN} StaticLibC)
     set_target_properties(
         ${KERNEL_BIN} PROPERTIES
         LINKER_LANGUAGE C
@@ -173,8 +187,7 @@ else()
     find_package(Check REQUIRED)
     include_directories(${CHECK_INCLUDE_DIRS})
     link_directories(${CHECK_LIBRARIES_DIR})
-    set(LIBS ${LIBS} ${CHECK_LIBRARIES})
-    set(CMAKE_C_FLAGS "-std=c11 -g -O0 -Wall -Wextra -Werror -DTESTING")
+    set(LIBS ${LIBS} ${CHECK_LIBRARIES} StaticLibC)
     add_executable(${TEST_RUNNER_NAME} ${ALL_SOURCE_FILES})
     target_link_libraries(${TEST_RUNNER_NAME} ${LIBS})
     add_test(${TEST_RUNNER_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_RUNNER_NAME})
