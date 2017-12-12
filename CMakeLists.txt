@@ -13,20 +13,25 @@ endif()
 # We build our own libc as a static library.
 # This can be linked to the kernel or to userspace programs.
 set(SOURCE_FILES_LIBC
-    "src/include/libc/string.h"
+    "src/libc/include/string.h"
     "src/libc/string.c"
     )
 add_library(LibC STATIC ${SOURCE_FILES_LIBC})
+set(LIBC_LIBRARIES LibC)
+set(LIBC_INCLUDE_DIRS "src/libc/include")
 
 # We build a static library for our heap memory allocator.
 # This can be linked to the kernel or to userspace programs, where it will be
 # used by the userspace libc.
 set(SOURCE_FILES_MALLOC
-    "src/include/malloc/malloc_zone.h"
-    "src/include/malloc/malloc_block.h"
+    "src/malloc/include/malloc/malloc_zone.h"
+    "src/malloc/include/malloc/malloc_block.h"
     "src/malloc/malloc_zone.c"
     )
 add_library(Malloc STATIC ${SOURCE_FILES_MALLOC})
+target_link_libraries(Malloc ${LIBC_LIBRARIES})
+set(MALLOC_LIBRARIES Malloc)
+set(MALLOC_INCLUDE_DIRS "src/malloc/include")
 
 # Setup other source files. We'll use these in targets below.
 set(CORE_INCLUDE_FILES
@@ -125,7 +130,10 @@ if(CMAKE_CROSSCOMPILING)
 
     enable_language(ASM)
 
-    include_directories("src/include" "src/include/libc")
+    include_directories("src/include"
+                        ${LIBC_INCLUDE_DIRS}
+                        ${MALLOC_INCLUDE_DIRS}
+                        )
 
     # The layout file specifies how the linker puts together the kernel binary image.
     set(KERNEL_LAYOUT_FILE "kernel.ld")
@@ -141,7 +149,10 @@ if(CMAKE_CROSSCOMPILING)
     set(KERNEL_BIN "kernel.bin")
     set(KERNEL_LINK_FLAGS "-m32 -march=i386 -T ${KERNEL_LAYOUT_FILE}")
     add_executable(${KERNEL_BIN} ${ALL_SOURCE_FILES})
-    target_link_libraries(${KERNEL_BIN} LibC Malloc)
+    target_link_libraries(${KERNEL_BIN}
+                          ${LIBC_LIBRARIES}
+                          ${MALLOC_LIBRARIES}
+                          )
     set_target_properties(
         ${KERNEL_BIN} PROPERTIES
         LINKER_LANGUAGE C
@@ -183,22 +194,22 @@ if(CMAKE_CROSSCOMPILING)
 
 else()
 
-    set(ALL_SOURCE_FILES
-        ${COMMON_SOURCE_FILES}
-        ${TEST_SOURCE_FILES}
-        )
-
-    include_directories("src/include")
-
     set(TEST_RUNNER_NAME "${CMAKE_PROJECT_NAME}_Test")
-
+    include_directories("src/include"
+                        ${MALLOC_INCLUDE_DIRS}
+                        )
     enable_testing()
     find_package(Check REQUIRED)
     include_directories(${CHECK_INCLUDE_DIRS})
     link_directories(${CHECK_LIBRARIES_DIR})
-    set(LIBS ${LIBS} ${CHECK_LIBRARIES} LibC Malloc)
-    add_executable(${TEST_RUNNER_NAME} ${ALL_SOURCE_FILES})
-    target_link_libraries(${TEST_RUNNER_NAME} ${LIBS})
+    add_executable(${TEST_RUNNER_NAME}
+                   ${COMMON_SOURCE_FILES}
+                   ${TEST_SOURCE_FILES}
+                   )
+    target_link_libraries(${TEST_RUNNER_NAME} 
+                          ${CHECK_LIBRARIES}
+                          ${MALLOC_LIBRARIES}
+                          )
     add_test(${TEST_RUNNER_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_RUNNER_NAME})
 
 endif()
