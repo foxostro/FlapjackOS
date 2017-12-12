@@ -13,8 +13,6 @@ add_library(Malloc STATIC ${SOURCE_FILES_MALLOC})
 
 if(NOT CMAKE_CROSSCOMPILING)
 
-    enable_testing()
-
     include_directories("include"
                         ${CHECK_INCLUDE_DIRS}
                         )

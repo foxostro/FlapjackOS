@@ -10,8 +10,6 @@ add_library(LibC STATIC ${SOURCE_FILES_LIBC})
 
 if(NOT CMAKE_CROSSCOMPILING)
 
-    enable_testing()
-
     include_directories("include"
                         ${CHECK_INCLUDE_DIRS}
                         )
