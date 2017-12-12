@@ -10,11 +10,23 @@ else()
     set(CMAKE_C_FLAGS "-std=c11 -g -O0 -Wall -Wextra -Werror -DTESTING")
 endif()
 
-# Setup build for libc static library.
+# We build our own libc as a static library.
+# This can be linked to the kernel or to userspace programs.
 set(SOURCE_FILES_LIBC
-    "src/include/libc/string.h" "src/libc/string.c"
+    "src/include/libc/string.h"
+    "src/libc/string.c"
     )
-add_library(StaticLibC STATIC ${SOURCE_FILES_LIBC})
+add_library(LibC STATIC ${SOURCE_FILES_LIBC})
+
+# We build a static library for our heap memory allocator.
+# This can be linked to the kernel or to userspace programs, where it will be
+# used by the userspace libc.
+set(SOURCE_FILES_MALLOC
+    "src/include/malloc/malloc_zone.h"
+    "src/include/malloc/malloc_block.h"
+    "src/malloc/malloc_zone.c"
+    )
+add_library(Malloc STATIC ${SOURCE_FILES_MALLOC})
 
 # Setup other source files. We'll use these in targets below.
 set(CORE_INCLUDE_FILES
@@ -33,8 +45,6 @@ set(CORE_INCLUDE_FILES
     "src/include/keyboard.h"
     "src/include/ctypes.h"
     "src/include/panic.h"
-    "src/include/malloc/malloc_zone.h"
-    "src/include/malloc/malloc_block.h"
     "src/include/interrupt_asm.h"
     "src/include/inout.h"
     "src/include/tss.h"
@@ -64,7 +74,6 @@ set(COMMON_SOURCE_FILES
     "src/gdt.c"
     "src/idt.c"
     "src/kprintf.c"
-    "src/malloc/malloc_zone.c"
     )
 source_group("Common" FILES ${COMMON_SOURCE_FILES})
 
@@ -132,7 +141,7 @@ if(CMAKE_CROSSCOMPILING)
     set(KERNEL_BIN "kernel.bin")
     set(KERNEL_LINK_FLAGS "-m32 -march=i386 -T ${KERNEL_LAYOUT_FILE}")
     add_executable(${KERNEL_BIN} ${ALL_SOURCE_FILES})
-    target_link_libraries(${KERNEL_BIN} StaticLibC)
+    target_link_libraries(${KERNEL_BIN} LibC Malloc)
     set_target_properties(
         ${KERNEL_BIN} PROPERTIES
         LINKER_LANGUAGE C
@@ -187,7 +196,7 @@ else()
     find_package(Check REQUIRED)
     include_directories(${CHECK_INCLUDE_DIRS})
     link_directories(${CHECK_LIBRARIES_DIR})
-    set(LIBS ${LIBS} ${CHECK_LIBRARIES} StaticLibC)
+    set(LIBS ${LIBS} ${CHECK_LIBRARIES} LibC Malloc)
     add_executable(${TEST_RUNNER_NAME} ${ALL_SOURCE_FILES})
     target_link_libraries(${TEST_RUNNER_NAME} ${LIBS})
     add_test(${TEST_RUNNER_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_RUNNER_NAME})
