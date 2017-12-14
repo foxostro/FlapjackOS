@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include <console.h>
 #include <kprintf.h>
 #include <halt.h>
@@ -15,7 +16,7 @@ void panic(const char * restrict fmt, ...)
     char buffer[128];
     va_list args;
     va_start(args, fmt);
-    kvsnprintf(buffer, sizeof(buffer), fmt, args);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
 
     g_console.puts("PANIC: ");

@@ -3,12 +3,14 @@
 #include <check.h>
 
 Suite* test_suite_string(); // defined in test_string.c
+Suite* test_suite_stdio(); // defined in test_stdio.c
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {
     int numberOfFailedTests = 0;
     Suite* suite[] = {
         test_suite_string(),
+        test_suite_stdio(),
     };
     for (int i = 0, n = sizeof(suite) / sizeof(*suite); i < n; ++i) {
         SRunner *runner = srunner_create(suite[i]);

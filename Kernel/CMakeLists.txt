@@ -130,7 +130,6 @@ else(CMAKE_CROSSCOMPILING)
                    ${COMMON_SOURCE_FILES}
                    "test/test_gdt.c"
                    "test/test_idt.c"
-                   "test/test_printf.c"
                    "test/test_main.c"
                    )
 

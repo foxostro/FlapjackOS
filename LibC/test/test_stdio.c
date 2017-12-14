@@ -1,47 +1,52 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <check.h>
 
-#include "kprintf.h"
+// Resort to declaring these functions ourselves since we won't get the correct
+// header if we include <stdio.h>. This feels a little hacky.
+size_t strlen(const char *s);
+int strcmp(const char *s1, const char *s2);
+int snprintf(char * restrict str, size_t size, const char * restrict format, ...);
+
+#include "../include/stdio.h"
 
 #define MIN(a, b) \
    do { __typeof__ (a) _a = (a); \
         __typeof__ (b) _b = (b); \
         _a < _b ? _a : _b; } while(0)
 
-// ksnprintf returns zero when the buffer is null
+// SNPRINTF returns zero when the buffer is null
 START_TEST(test_null_buffer)
 {
-    int c = ksnprintf(NULL, 1000, NULL);
+    int c = SNPRINTF(NULL, 1000, NULL);
     ck_assert_int_eq(c, 0);
 }
 END_TEST
 
-// ksnprintf returns zero when the format string is null
+// SNPRINTF returns zero when the format string is null
 START_TEST(test_null_format)
 {
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), NULL);
+    int c = SNPRINTF(buf, sizeof(buf), NULL);
     ck_assert_int_eq(c, 0);
 }
 END_TEST
 
-// ksnprintf returns zero when the size is zero
+// SNPRINTF returns zero when the size is zero
 START_TEST(test_zero_length)
 {
-    int c = ksnprintf(NULL, 0, NULL);
+    int c = SNPRINTF(NULL, 0, NULL);
     ck_assert_int_eq(c, 0);
 }
 END_TEST
 
-// ksnprintf copies the format string verbatim when there are no args
+// SNPRINTF copies the format string verbatim when there are no args
 // (assuming enough space in the output buffer)
 START_TEST(test_return_no_args_0)
 {
     const char fmt[] = "test test";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), fmt);
+    int c = SNPRINTF(buf, sizeof(buf), fmt);
     ck_assert_int_eq(c, strlen(fmt));
     ck_assert(!strcmp(buf, fmt));
 
@@ -53,7 +58,7 @@ START_TEST(test_return_no_args_0)
 }
 END_TEST
 
-// ksnprintf copies the format string verbatim when there are no args
+// SNPRINTF copies the format string verbatim when there are no args
 // If there's not enough space it truncates the string in the output buffer.
 // The return value is the number of characters that would have been output had
 // the buffer not been size restricted.
@@ -61,7 +66,7 @@ START_TEST(test_return_no_args_1)
 {
     const char fmt[] = "test test";
     char buf[5];
-    int c = ksnprintf(buf, sizeof(buf), fmt);
+    int c = SNPRINTF(buf, sizeof(buf), fmt);
     ck_assert_int_eq(c, strlen(fmt));
     ck_assert_str_eq(buf, "test");
 
@@ -77,7 +82,7 @@ START_TEST(test_return_char_arg)
 {
     static const char expected[] = "test a";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), "test %c", 'a');
+    int c = SNPRINTF(buf, sizeof(buf), "test %c", 'a');
     ck_assert_int_eq(c, strlen(expected));
     ck_assert_str_eq(buf, expected);
 
@@ -93,7 +98,7 @@ START_TEST(test_return_format_percent)
 {
     static const char expected[] = "test %";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), "test %%");
+    int c = SNPRINTF(buf, sizeof(buf), "test %%");
     ck_assert_int_eq(c, strlen(expected));
     ck_assert_str_eq(buf, expected);
 
@@ -105,12 +110,12 @@ START_TEST(test_return_format_percent)
 }
 END_TEST
 
-// ksnprintf can format string arguments
+// SNPRINTF can format string arguments
 START_TEST(test_string_arg_0)
 {
     static const char expected[] = "test foo";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), "test %s", "foo");
+    int c = SNPRINTF(buf, sizeof(buf), "test %s", "foo");
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen(expected));
 
@@ -122,13 +127,13 @@ START_TEST(test_string_arg_0)
 }
 END_TEST
 
-// ksnprintf can format string arguments
+// SNPRINTF can format string arguments
 // If the string is NULL then we format as "NULL".
 START_TEST(test_string_arg_1)
 {
     static const char expected[] = "test (null)";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), "test %s", NULL);
+    int c = SNPRINTF(buf, sizeof(buf), "test %s", NULL);
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen(expected));
 
@@ -140,13 +145,13 @@ START_TEST(test_string_arg_1)
 }
 END_TEST
 
-// ksnprintf can format string arguments
+// SNPRINTF can format string arguments
 // If the output buffer cannot contain the entire string then it truncates.
 START_TEST(test_string_arg_2)
 {
     static const char expected[] = "test";
     char buf[5];
-    int c = ksnprintf(buf, sizeof(buf), "test %s", NULL);
+    int c = SNPRINTF(buf, sizeof(buf), "test %s", NULL);
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen("test (null)"));
 
@@ -158,30 +163,30 @@ START_TEST(test_string_arg_2)
 }
 END_TEST
 
-// ksnprintf can format integer arguments
+// SNPRINTF can format integer arguments
 START_TEST(test_int_arg_0)
 {
     static const char expected[] = "test -123";
     char buf[16];
-    int c = ksnprintf(buf, sizeof(buf), "test %d", -123);
+    int c = SNPRINTF(buf, sizeof(buf), "test %d", -123);
     ck_assert_int_eq(c, strlen(expected));
     ck_assert_str_eq(buf, expected);
 
     // ensure behavior is the same as libc
     char libcbuf[16];
-    int d = sprintf(libcbuf, "test %d", -123);
+    int d = snprintf(libcbuf, sizeof(libcbuf), "test %d", -123);
     ck_assert_int_eq(c, d);
     ck_assert_str_eq(buf, libcbuf);
 }
 END_TEST
 
-// ksnprintf can format integer arguments
+// SNPRINTF can format integer arguments
 // If the output buffer cannot contain the entire string then it truncates.
 START_TEST(test_int_arg_1)
 {
     static const char expected[] = "test 1"; // truncated by small buffer
     char buf[7];
-    int c = ksnprintf(buf, sizeof(buf), "test %d", 12345);
+    int c = SNPRINTF(buf, sizeof(buf), "test %d", 12345);
     ck_assert_str_eq(buf, expected);
 
     // The buffer wasn't long enough to hold the entire output string. This
@@ -197,12 +202,12 @@ START_TEST(test_int_arg_1)
 }
 END_TEST
 
-// ksnprintf can format hexadecimal integer arguments
+// SNPRINTF can format hexadecimal integer arguments
 START_TEST(test_hex_arg_0)
 {
     static const char expected[] = "0xdeadbeef";
     char buf[16];
-    int c = ksnprintf(buf, sizeof(buf), "0x%x", 0xdeadbeef);
+    int c = SNPRINTF(buf, sizeof(buf), "0x%x", 0xdeadbeef);
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen(expected));
 
@@ -214,12 +219,12 @@ START_TEST(test_hex_arg_0)
 }
 END_TEST
 
-// ksnprintf can format hexadecimal integer arguments
+// SNPRINTF can format hexadecimal integer arguments
 START_TEST(test_hex_arg_1)
 {
     static const char expected[] = "0xCAFE10";
     char buf[16];
-    int c = ksnprintf(buf, sizeof(buf), "0x%X", 0xcafe10);
+    int c = SNPRINTF(buf, sizeof(buf), "0x%X", 0xcafe10);
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen(expected));
 
@@ -231,24 +236,24 @@ START_TEST(test_hex_arg_1)
 }
 END_TEST
 
-// ksnprintf can format pointers arguments too
+// SNPRINTF can format pointers arguments too
 START_TEST(test_ptr_arg_0)
 {
     static const char expected[] = "ptr is 0xdeadbeef";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), "ptr is %p", (void *)0xdeadbeef);
+    int c = SNPRINTF(buf, sizeof(buf), "ptr is %p", (void *)0xdeadbeef);
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen(expected));
 }
 END_TEST
 
-// ksnprintf can format pointers arguments too
+// SNPRINTF can format pointers arguments too
 // pointers are padded on the left with zeroes.
 START_TEST(test_ptr_arg_1)
 {
     static const char expected[] = "ptr is 0x00010000";
     char buf[32];
-    int c = ksnprintf(buf, sizeof(buf), "ptr is %p", (void *)0x00010000);
+    int c = SNPRINTF(buf, sizeof(buf), "ptr is %p", (void *)0x00010000);
     ck_assert_str_eq(buf, expected);
     ck_assert_int_eq(c, strlen(expected));
 }
@@ -274,9 +279,9 @@ static const struct { char *name; void *fn; } tests[] = {
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
-Suite* test_suite_printf(void)
+Suite* test_suite_stdio(void)
 {
-    Suite *suite = suite_create("test_suite_printf");
+    Suite *suite = suite_create(__FUNCTION__);
 
     for (size_t i = 0; i < num_tests; ++i) {
         TCase *testCase = tcase_create(tests[i].name);

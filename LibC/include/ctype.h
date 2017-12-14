@@ -1,6 +1,6 @@
 #pragma once
 
-static inline int isprint(int c)
+static inline bool isprint(int c)
 {
     return ((c) >= ' ') && ((c) <= 126);
 }

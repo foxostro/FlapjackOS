@@ -182,7 +182,7 @@ static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
 Suite* test_suite_gdt(void)
 {
-    Suite *suite = suite_create("test_suite_gdt");
+    Suite *suite = suite_create(__FUNCTION__);
 
     for (size_t i = 0; i < num_tests; ++i) {
         TCase *testCase = tcase_create(tests[i].name);

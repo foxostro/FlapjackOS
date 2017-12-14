@@ -7,7 +7,6 @@ void lgdt(__attribute__((unused)) void *gdt, __attribute__((unused)) unsigned li
     // satisfy the linker
 }
 
-Suite* test_suite_printf(); // defined in test_printf.c
 Suite* test_suite_gdt(); // defined in test_gdt.c
 Suite* test_suite_idt(); // defined in test_idt.c
 
@@ -17,7 +16,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {
     int numberOfFailedTests = 0;
     Suite* suite[] = {
-        test_suite_printf(),
         test_suite_gdt(),
         test_suite_idt()
     };
