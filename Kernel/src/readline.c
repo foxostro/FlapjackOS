@@ -6,7 +6,10 @@
 #include <assert.h>
 #include <readline.h>
 
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define MIN(a, b) \
+   ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+      _a < _b ? _a : _b; })
 
 size_t readline(const console_interface_t *console,
                 const keyboard_interface_t *keyboard,
