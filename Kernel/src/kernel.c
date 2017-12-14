@@ -178,17 +178,12 @@ static void find_contiguous_free_memory(multiboot_info_t *mb_info,
         uint64_t end = begin + len;
 
         if (entry->type == MULTIBOOT_MEMORY_AVAILABLE &&
-            begin < UINT32_MAX &&
-            end < UINT32_MAX &&
-            len < UINT32_MAX) {
+            begin <= (uintptr_t)kernel_image_begin &&
+            end >= (uintptr_t)kernel_image_begin) {
 
-            if (begin <= (uintptr_t)kernel_image_begin &&
-                end >= (uintptr_t)kernel_image_begin) {
-
-                *outBeginAddr = (uintptr_t)begin;
-                *outLen = (uintptr_t)len;
-                return;
-            }
+            *outBeginAddr = (uintptr_t)begin;
+            *outLen = (uintptr_t)len;
+            return;
         }
 
         entry = (multiboot_memory_map_t*)((unsigned)entry + entry->size + sizeof(entry->size));
@@ -234,6 +229,11 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
     {
         static const unsigned megabyte = 1024*1024;
+
+        kprintf(console, "mem_upper: %u\n", mb_info->mem_upper);
+        kprintf(console, "mem_upper implies [0x100000, %p] (%u MiB)\n",
+                mb_info->mem_upper*1024+0x100000-1,
+                mb_info->mem_upper*1024/megabyte);
 
         uintptr_t beginAddr, len;
         find_contiguous_free_memory(mb_info, &beginAddr, &len);
