@@ -62,12 +62,12 @@ if(CMAKE_CROSSCOMPILING)
     link_directories(${KERNEL_LIBRARIES_DIRS})
 
     # The layout file specifies how the linker puts together the binary image.
-    set(KERNEL_LAYOUT_FILE "kernel.ld")
+    set(KERNEL_LAYOUT_FILE "${PROJECT_SOURCE_DIR}/kernel.ld")
 
     # Force a dependency between boot.S and the linker layout so that a build is
     # triggered when it changes.
     set_source_files_properties(
-        boot.S PROPERTIES OBJECT_DEPENDS ${KERNEL_LAYOUT_FILE}
+        ${PROJECT_SOURCE_DIR}/boot.S PROPERTIES OBJECT_DEPENDS ${KERNEL_LAYOUT_FILE}
     )
 
     # The linker produces a kernel binary image which is multiboot compliant and
@@ -89,12 +89,11 @@ if(CMAKE_CROSSCOMPILING)
     # Add a custom target for the CD-ROM ISO image. Specify dependencies so that the
     # ISO will be rebuilt correctly after modifying the kernel binary, the Grub
     # configuration file, or the ISO build script itself.
-    set(GRUB_CFG "grub.cfg")
-    set(BUILD_ISO_TOOL "${CMAKE_SOURCE_DIR}/scripts/build_iso.sh")
+    set(BUILD_ISO_TOOL "${CMAKE_SOURCE_DIR}/scripts/make_iso.sh")
     add_custom_command(
         OUTPUT ${CMAKE_PROJECT_NAME}.iso
-        COMMAND ${BUILD_ISO_TOOL} ${KERNEL_BIN} ${GRUB_CFG} ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso
-        DEPENDS ${BUILD_ISO_TOOL} ${KERNEL_BIN} ${GRUB_CFG}
+        COMMAND ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso
+        DEPENDS ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg"
         COMMENT "Build the bootable ISO."
         VERBATIM
     )

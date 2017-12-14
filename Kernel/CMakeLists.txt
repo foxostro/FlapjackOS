@@ -99,15 +99,15 @@ if(CMAKE_CROSSCOMPILING)
                      )
 
     add_custom_command(
-        OUTPUT src/isr_install.c
-        COMMAND ${ERB_TOOL} src/isr_install.c.erb src/isr_install.c
-        DEPENDS ${ERB_TOOL} src/isr_install.c.erb
+        OUTPUT ${PROJECT_SOURCE_DIR}/src/isr_install.c
+        COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_install.c.erb ${PROJECT_SOURCE_DIR}/src/isr_install.c
+        DEPENDS ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_install.c.erb
         VERBATIM
     )
     add_custom_command(
-        OUTPUT src/isr_wrapper_asm.S
-        COMMAND ${ERB_TOOL} src/isr_wrapper_asm.S.erb src/isr_wrapper_asm.S
-        DEPENDS ${ERB_TOOL} src/isr_wrapper_asm.S.erb
+        OUTPUT ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S
+        COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S.erb ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S
+        DEPENDS ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S.erb
         VERBATIM
     )
 

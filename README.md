@@ -47,19 +47,16 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 
 ## Building Flapjack OS
 
-To build Flapjack OS, have CMake generate build files for the i386-elf cross-compile and then build the bootable iso:
+The build script will generate CMake build files, build a bootable iso, and build unit tests:
 
    ```bash
-   % ./scripts/generate_cross_compile.sh
-   % cmake --build . --target iso
+   % ./scripts/build.sh
    ```
 
-To run the unit tests, have CMake generate build files for a native build instead, build the test runner, and then invoke tests with ctest:
+To run the unit tests, run the test script, or cd to the build_host directory and run ctest:
 
    ```bash
-   % ./scripts/generate_native.sh
-   % make
-   % ctest --output-on-failure
+   % ./scripts/test.sh
    ```
 
 ## Running Flapjack OS
@@ -77,11 +74,11 @@ To run the unit tests, have CMake generate build files for a native build instea
    ```
 
 2. An example bochsrc file may be found in bochsrc.template. Copy this to bochsrc and tweak as needed.
-3. Build Flapjack OS so that you have the "bootfd.img" floppy disk image file.
+3. Build Flapjack OS so that you have the "FlapjackOS.iso" disk image.
 4. Launch Bochs with the "run.sh" helper script:
 
    ```bash
-   % ./run.sh
+   % ./scripts/run.sh
    ```
 
 ### Running on Qemu

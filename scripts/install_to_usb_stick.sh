@@ -10,7 +10,7 @@ if [ -z "$OUTPUT_DEVICE" ]; then
 	exit 2
 fi
 
-T=`hdid -nomount FlapjackOS.iso`
+T=`hdid -nomount build_cross/FlapjackOS.iso`
 BOOTFD_DEVICE=`perl -e 'print $ARGV[$1]' $T`
 MOUNT_POINT="/Volumes/bootfd"
 
