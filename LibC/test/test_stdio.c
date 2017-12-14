@@ -1,12 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <check.h>
-
-// Resort to declaring these functions ourselves since we won't get the correct
-// header if we include <stdio.h>. This feels a little hacky.
-size_t strlen(const char *s);
-int strcmp(const char *s1, const char *s2);
-int snprintf(char * restrict str, size_t size, const char * restrict format, ...);
+#include <stdio.h>
 
 #include "../include/stdio.h"
 

@@ -10,13 +10,9 @@ add_library(LibC STATIC ${SOURCE_FILES_LIBC})
 
 if(NOT CMAKE_CROSSCOMPILING)
 
-    include_directories("include"
-                        ${CHECK_INCLUDE_DIRS}
-                        )
+    include_directories(${CHECK_INCLUDE_DIRS})
 
     link_directories(${CHECK_LIBRARIES_DIR})
-
-    include_directories("include")
 
     add_executable(LibCTest
                    "test/test_string.c"
