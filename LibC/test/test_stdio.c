@@ -254,6 +254,18 @@ START_TEST(test_ptr_arg_1)
 }
 END_TEST
 
+// Make sure SNPRINTF can handle the max size value of 0xFFFFFFFF.
+// pointers are padded on the left with zeroes.
+START_TEST(test_ptr_arg_2)
+{
+    static const char expected[] = "ptr is 0xffffffff";
+    char buf[32];
+    int c = SNPRINTF(buf, sizeof(buf), "ptr is %p", (void *)0xffffffff);
+    ck_assert_str_eq(buf, expected);
+    ck_assert_int_eq(c, strlen(expected));
+}
+END_TEST
+
 static const struct { char *name; void *fn; } tests[] = {
     { "test_null_buffer", test_null_buffer },
     { "test_null_format", test_null_format },
@@ -271,6 +283,7 @@ static const struct { char *name; void *fn; } tests[] = {
     { "test_hex_arg_1", test_hex_arg_1 },
     { "test_ptr_arg_0", test_ptr_arg_0 },
     { "test_ptr_arg_1", test_ptr_arg_1 },
+    { "test_ptr_arg_2", test_ptr_arg_2 },
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 

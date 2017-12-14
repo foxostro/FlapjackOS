@@ -102,7 +102,7 @@ static size_t insert_pointer(uintptr_t pvalue, char **str, size_t *size)
     const unsigned base = 16;
     char tmp[32] = {0};
     unsigned value = (unsigned)pvalue;
-    int c = sizeof(uintptr_t);
+    int c = sizeof(uintptr_t) * 2;
     size_t i = insert_string("0x", str, size);
     char *begin = tmp, *iter = tmp;
 

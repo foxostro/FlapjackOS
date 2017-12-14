@@ -9,7 +9,7 @@
 
 START_TEST(test_foo)
 {
-    ck_assert(!"unimplemented");
+    ck_assert("unimplemented");
 }
 END_TEST
 

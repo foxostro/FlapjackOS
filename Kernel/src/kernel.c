@@ -18,6 +18,7 @@
 #include <backtrace.h>
 #include <keyboard.h>
 #include <readline.h>
+#include <multiboot.h>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
@@ -158,8 +159,46 @@ void interrupt_dispatch(unsigned interrupt_number,
     }
 }
 
+// Search the multiboot image for contiguous memory which the kernel can use.
+// Return the beginning address and length of this region in `begin' and `len'.
+// Panics on failure.
+static void find_contiguous_free_memory(multiboot_info_t *mb_info,
+                                        uintptr_t *outBeginAddr,
+                                        uintptr_t *outLen)
+{
+    extern char kernel_image_begin[];
+
+    multiboot_memory_map_t *entry = (multiboot_memory_map_t *)mb_info->mmap_addr;
+    multiboot_memory_map_t *limit = entry + mb_info->mmap_length;
+
+    while (entry < limit) {
+
+        uint64_t len = entry->len;
+        uint64_t begin = entry->addr;
+        uint64_t end = begin + len;
+
+        if (entry->type == MULTIBOOT_MEMORY_AVAILABLE &&
+            begin < UINT32_MAX &&
+            end < UINT32_MAX &&
+            len < UINT32_MAX) {
+
+            if (begin <= (uintptr_t)kernel_image_begin &&
+                end >= (uintptr_t)kernel_image_begin) {
+
+                *outBeginAddr = (uintptr_t)begin;
+                *outLen = (uintptr_t)len;
+                return;
+            }
+        }
+
+        entry = (multiboot_memory_map_t*)((unsigned)entry + entry->size + sizeof(entry->size));
+    }
+
+    panic("Unable to find contiguous free memory the kernel can use.");
+}
+
 __attribute__((noreturn))
-void kernel_main(void *mb_info, void *istack)
+void kernel_main(multiboot_info_t *mb_info, void *istack)
 {
     console_interface_t *console = &g_console;
     keyboard_interface_t *keyboard = &s_keyboard;
@@ -191,6 +230,36 @@ void kernel_main(void *mb_info, void *istack)
     console->init((vgachar_t *)0xB8000);
     kprintf(console, "mb_info = %p\n", mb_info);
     kprintf(console, "istack = %p\n", istack);
+
+    // Find contiguous free memory the kernel can freely use, e.g., for a heap.
+    {
+        static const unsigned megabyte = 1024*1024;
+
+        uintptr_t beginAddr, len;
+        find_contiguous_free_memory(mb_info, &beginAddr, &len);
+        kprintf(console, "Contiguous free memory at [%p, %p] (%u MiB).\n",
+                beginAddr,
+                beginAddr + len - 1,
+                len / megabyte);
+
+        // The kernel gets the lower 16MB. The rest goes to user programs.
+        static const unsigned PAGE_SIZE = 4096;
+        const uintptr_t USER_MEM_START = 16 * megabyte;
+        extern char kernel_image_end[];
+        kprintf(console, "We can put the kernel heap at [%p, %p] (%u MiB).\n",
+                kernel_image_end,
+                USER_MEM_START - 1,
+                (USER_MEM_START - (uintptr_t)kernel_image_end) / megabyte);
+
+        kprintf(console, "And then user programs can use [%p, %p] (%u MiB).\n",
+                USER_MEM_START,
+                beginAddr + len - 1,
+                (beginAddr + len - USER_MEM_START) / megabyte);
+
+        size_t userMemSize = beginAddr + len - USER_MEM_START;
+        unsigned numFrames = userMemSize / PAGE_SIZE;
+        kprintf(console, "This is %u physical frames of memory.\n", numFrames);
+    }
 
     // Initialize the keyboard driver.
     get_keyboard_interface(keyboard);

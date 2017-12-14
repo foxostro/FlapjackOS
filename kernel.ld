@@ -4,6 +4,8 @@ SECTIONS
 {
 	. = 1M;
 
+	PROVIDE (kernel_image_begin = .);
+
 	/* Multi-boot header comes first, followed by the text section. */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
@@ -26,4 +28,6 @@ SECTIONS
 		*(COMMON)
 		*(.bss)
 	}
+
+	PROVIDE (kernel_image_end = .);
 }
