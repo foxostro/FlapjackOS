@@ -201,9 +201,12 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
             panic("The bootloader did not provide memory information.");
         }
 
+        kprintf(console, "%u KiB low memory, %u MiB high memory\n",
+                mb_info->mem_lower, mb_info->mem_upper/1024);
+
         uintptr_t beginAddr = 0x100000, len = mb_info->mem_upper*1024;
 
-        kprintf(console, "Contiguous free memory is at [%p, %p] (%u MiB).\n",
+        kprintf(console, "High memory memory is at [%p, %p] (%u MiB).\n",
                 beginAddr,
                 beginAddr + len - 1,
                 len/mebibyte);
