@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <check.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "../include/stdio.h"
 
@@ -232,37 +233,34 @@ START_TEST(test_hex_arg_1)
 END_TEST
 
 // SNPRINTF can format pointers arguments too
-START_TEST(test_ptr_arg_0)
+START_TEST(test_ptr_arg)
 {
-    static const char expected[] = "ptr is 0xdeadbeef";
-    char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "ptr is %p", (void *)0xdeadbeef);
-    ck_assert_str_eq(buf, expected);
-    ck_assert_int_eq(c, strlen(expected));
-}
-END_TEST
+    static const size_t N = 3;
+    static const void *values[N] = {
+        (void *)0xdeadbeef,
+        (void *)0x00010000,
+        (void *)0xffffffff
+    };
 
-// SNPRINTF can format pointers arguments too
-// pointers are padded on the left with zeroes.
-START_TEST(test_ptr_arg_1)
-{
-    static const char expected[] = "ptr is 0x00010000";
-    char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "ptr is %p", (void *)0x00010000);
-    ck_assert_str_eq(buf, expected);
-    ck_assert_int_eq(c, strlen(expected));
-}
-END_TEST
+    // We expect our %p to left-pad the pointer addresses with zeroes. Since we
+    // build unit tests for a 64-bit host architecture, we need sixteen
+    // characters for the address portion of the output.
+    // This doesn't match the exact behavior of the libc on my system, but I
+    // like it anyway.
+    assert(sizeof(void*) == 8);
+    static const void *expected[N] = {
+        "ptr is 0x00000000deadbeef",
+        "ptr is 0x0000000000010000",
+        "ptr is 0x00000000ffffffff"
+    };
 
-// Make sure SNPRINTF can handle the max size value of 0xFFFFFFFF.
-// pointers are padded on the left with zeroes.
-START_TEST(test_ptr_arg_2)
-{
-    static const char expected[] = "ptr is 0xffffffff";
-    char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "ptr is %p", (void *)0xffffffff);
-    ck_assert_str_eq(buf, expected);
-    ck_assert_int_eq(c, strlen(expected));
+    char buf[128];
+
+    for (size_t i = 0; i < N; ++i) {
+        int r = SNPRINTF(buf, sizeof(buf), "ptr is %p", values[i]);
+        ck_assert_str_eq(buf, expected[i]);
+        ck_assert_int_eq(r, strlen(expected[i]));
+    }
 }
 END_TEST
 
@@ -281,9 +279,7 @@ static const struct { char *name; void *fn; } tests[] = {
     { "test_int_arg_1", test_int_arg_1 },
     { "test_hex_arg_0", test_hex_arg_0 },
     { "test_hex_arg_1", test_hex_arg_1 },
-    { "test_ptr_arg_0", test_ptr_arg_0 },
-    { "test_ptr_arg_1", test_ptr_arg_1 },
-    { "test_ptr_arg_2", test_ptr_arg_2 },
+    { "test_ptr_arg", test_ptr_arg },
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
