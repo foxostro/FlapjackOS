@@ -7,7 +7,7 @@ typedef struct malloc_zone {
 } malloc_zone_t;
 
 // Initializes the malloc zone using the specified region of memory.
-// Returns the address of the malloc_zone_t structure stored within that memory.
+// Returns the address of the malloc_zone_t structure stored within that memory.
 // Allocations from the zone will always be taken from this memory region.
 malloc_zone_t* malloc_zone_init(void *start, size_t size);
 

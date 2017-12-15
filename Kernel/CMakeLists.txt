@@ -22,7 +22,6 @@ set(CORE_INCLUDE_FILES
     "include/inout.h"
     "include/tss.h"
     "include/gdt.h"
-    "include/assert.h"
     )
 source_group("Headers" FILES ${CORE_INCLUDE_FILES})
 

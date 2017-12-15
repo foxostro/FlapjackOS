@@ -19,6 +19,7 @@
 #include <keyboard.h>
 #include <readline.h>
 #include <multiboot.h>
+#include <malloc/malloc_zone.h>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
@@ -194,6 +195,7 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     kprintf(console, "istack = %p\n", istack);
 
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
+    malloc_zone_t *kernel_heap;
     {
         static const unsigned mebibyte = 1024*1024;
 
@@ -215,10 +217,17 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
         static const unsigned PAGE_SIZE = 4096;
         static const uintptr_t USER_MEM_START = 16*1024*1024;
         extern char kernel_image_end[];
+
+        kprintf(console, "kernel_image_end = %p\n", kernel_image_end);
+
+        // Round up to the nearest frame.
+        uintptr_t heapBeginAddr = ((uintptr_t)kernel_image_end & ~(PAGE_SIZE-1)) + PAGE_SIZE;
+        uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
+
         kprintf(console, "We can put the kernel heap at [%p, %p] (%u MiB).\n",
-                kernel_image_end,
+                heapBeginAddr,
                 USER_MEM_START - 1,
-                (USER_MEM_START - (uintptr_t)kernel_image_end) / mebibyte);
+                heapLen / mebibyte);
 
         kprintf(console, "And then user programs can use [%p, %p] (%u MiB).\n",
                 USER_MEM_START,
@@ -228,6 +237,9 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
         size_t userMemSize = beginAddr + len - USER_MEM_START;
         unsigned numFrames = userMemSize / PAGE_SIZE;
         kprintf(console, "This is %u physical frames of memory.\n", numFrames);
+
+        // Initialize the kernel heap allocator using the memory region we identified above.
+        kernel_heap = malloc_zone_init((void *)heapBeginAddr, heapLen);
     }
 
     // Initialize the keyboard driver.
@@ -244,9 +256,11 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Read lines of input from forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     while (true) {
-        char buffer[512];
-        readline(console, keyboard, ">", sizeof(buffer), buffer);
+        static const size_t len = 512;
+        char *buffer = malloc_zone_malloc(kernel_heap, len);
+        readline(console, keyboard, ">", len, buffer);
         kprintf(console, "Got: %s\n", buffer);
+        malloc_zone_free(kernel_heap, buffer);
     }
 
     panic("We should never reach this point.");

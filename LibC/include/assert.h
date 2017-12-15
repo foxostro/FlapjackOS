@@ -1,7 +1,9 @@
 #pragma once
 
 #include <stdlib.h>
-#include <panic.h>
+
+// Panic is defined in libKernel. Need to figure out how to resolve this circular dependency.
+__attribute__((noreturn)) void panic(const char * restrict fmt, ...);
 
 #ifdef TESTING
 #define assert(expr) ((void)((expr) ? 0 : (abort(), 0)))

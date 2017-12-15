@@ -54,7 +54,6 @@ malloc_zone_t* malloc_zone_init(void *start, size_t size)
 {
     assert(start);
     assert(size > sizeof(malloc_zone_t));
-    memset(start, 0, size);
 
     malloc_zone_t *zone = start + (4 - (uintptr_t)start % 4); // 4 byte alignment
 
