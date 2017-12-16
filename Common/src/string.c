@@ -1,16 +1,16 @@
-#include "../include/string.h"
+#include "flapjack_libc/string.h"
 
 size_t STRLEN(const char *s)
 {
-    size_t c;
-    for (c = 0; *s; ++c, ++s);
+    size_t c = 0;
+    if (s) for (; *s; ++c, ++s);
     return c;
 }
 
 size_t STRNLEN(const char *s, size_t maxlen)
 {
-    size_t c;
-    for (c = 0; c < maxlen && *s; ++c, ++s);
+    size_t c = 0;
+    if (s) for (; c < maxlen && *s; ++c, ++s);
     return c;
 }
 
@@ -33,7 +33,7 @@ void* MEMMOVE(void *dst, const void *src, size_t n)
         size_t begin, end;
         int step;
 
-        if (dst < src) {
+        if (dst > src) {
             begin = n - 1;
             end = ~0;
             step = -1;

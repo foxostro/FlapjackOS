@@ -10,7 +10,7 @@
 #include <isr_install.h>
 #include <pic.h>
 #include <console.h>
-#include <kprintf.h>
+#include <console_printf.h>
 #include <timer.h>
 #include <inout.h>
 #include <halt.h>
@@ -32,6 +32,7 @@ static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
 static keyboard_interface_t s_keyboard;
 static timer_interface_t s_timer;
+static malloc_interface_t s_allocator;
 
 void interrupt_dispatch(unsigned interrupt_number,
                         unsigned edi,
@@ -166,6 +167,7 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     console_interface_t *console = &g_console;
     keyboard_interface_t *keyboard = &s_keyboard;
     timer_interface_t *timer = &s_timer;
+    malloc_interface_t *allocator = &s_allocator;
 
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
@@ -191,55 +193,32 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Initialize the console output driver.
     get_console_interface(console);
     console->init((vgachar_t *)0xB8000);
-    kprintf(console, "mb_info = %p\n", mb_info);
-    kprintf(console, "istack = %p\n", istack);
+    console_printf(console, "mb_info = %p\n", mb_info);
+    console_printf(console, "istack = %p\n", istack);
 
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
     malloc_zone_t *kernel_heap;
     {
-        static const unsigned mebibyte = 1024*1024;
-
         if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
             panic("The bootloader did not provide memory information.");
         }
 
-        kprintf(console, "%u KiB low memory, %u MiB high memory\n",
-                mb_info->mem_lower, mb_info->mem_upper/1024);
+        console_printf(console, "%u KiB low memory, %u MiB high memory\n",
+                       mb_info->mem_lower, mb_info->mem_upper/1024);
 
-        uintptr_t beginAddr = 0x100000, len = mb_info->mem_upper*1024;
-
-        kprintf(console, "High memory memory is at [%p, %p] (%u MiB).\n",
-                beginAddr,
-                beginAddr + len - 1,
-                len/mebibyte);
-
-        // The kernel gets the lower 16MB. The rest goes to user programs.
+        // The kernel gets the lower 16MB of high memory.
+        // The rest goes to user programs as managed by the frame allocator.
         static const unsigned PAGE_SIZE = 4096;
         static const uintptr_t USER_MEM_START = 16*1024*1024;
         extern char kernel_image_end[];
-
-        kprintf(console, "kernel_image_end = %p\n", kernel_image_end);
 
         // Round up to the nearest frame.
         uintptr_t heapBeginAddr = ((uintptr_t)kernel_image_end & ~(PAGE_SIZE-1)) + PAGE_SIZE;
         uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
 
-        kprintf(console, "We can put the kernel heap at [%p, %p] (%u MiB).\n",
-                heapBeginAddr,
-                USER_MEM_START - 1,
-                heapLen / mebibyte);
-
-        kprintf(console, "And then user programs can use [%p, %p] (%u MiB).\n",
-                USER_MEM_START,
-                beginAddr + len - 1,
-                (beginAddr + len - USER_MEM_START) / mebibyte);
-
-        size_t userMemSize = beginAddr + len - USER_MEM_START;
-        unsigned numFrames = userMemSize / PAGE_SIZE;
-        kprintf(console, "This is %u physical frames of memory.\n", numFrames);
-
         // Initialize the kernel heap allocator using the memory region we identified above.
-        kernel_heap = malloc_zone_init((void *)heapBeginAddr, heapLen);
+        get_malloc_interface(allocator);
+        kernel_heap = allocator->init((void *)heapBeginAddr, heapLen);
     }
 
     // Initialize the keyboard driver.
@@ -256,11 +235,12 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Read lines of input from forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     while (true) {
-        static const size_t len = 512;
-        char *buffer = malloc_zone_malloc(kernel_heap, len);
-        readline(console, keyboard, ">", len, buffer);
-        kprintf(console, "Got: %s\n", buffer);
-        malloc_zone_free(kernel_heap, buffer);
+        static const size_t buffer_size = 512;
+        const char prompt[] = ">";
+        char *buffer = allocator->malloc(kernel_heap, buffer_size);
+        readline(console, keyboard, sizeof(prompt), prompt, buffer_size, buffer);
+        console_printf(console, "Got: %s\n", buffer);
+        allocator->free(kernel_heap, buffer);
     }
 
     panic("We should never reach this point.");

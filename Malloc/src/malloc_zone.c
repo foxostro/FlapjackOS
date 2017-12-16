@@ -50,7 +50,7 @@ static void consider_splitting_block(malloc_block_t *block, size_t size)
     }
 }
 
-malloc_zone_t* malloc_zone_init(void *start, size_t size)
+static malloc_zone_t* malloc_zone_init(void *start, size_t size)
 {
     assert(start);
     assert(size > sizeof(malloc_zone_t));
@@ -68,7 +68,7 @@ malloc_zone_t* malloc_zone_init(void *start, size_t size)
     return zone;
 }
 
-void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
+static void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
 {
     assert(this);
 
@@ -98,7 +98,7 @@ void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
     return (void *)best + sizeof(malloc_block_t);
 }
 
-void malloc_zone_free(malloc_zone_t *this, void *ptr)
+static void malloc_zone_free(malloc_zone_t *this, void *ptr)
 {
     assert(this);
 
@@ -163,7 +163,7 @@ void malloc_zone_free(malloc_zone_t *this, void *ptr)
 // 
 // If size is zero and ptr is not NULL, a new minimum-sized object is
 // allocated and the original object is freed.
-void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size)
+static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size)
 {
     assert(this);
 
@@ -261,4 +261,13 @@ void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size)
     }
 
     return NULL;
+}
+
+void get_malloc_interface(malloc_interface_t *interface)
+{
+    assert(interface);
+    interface->init = malloc_zone_init;
+    interface->malloc = malloc_zone_malloc;
+    interface->realloc = malloc_zone_realloc;
+    interface->free = malloc_zone_free;
 }

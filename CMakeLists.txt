@@ -38,10 +38,20 @@ else()
 
 endif()
 
-add_subdirectory("LibC")
-set(LIBC_LIBRARIES LibC)
-set(LIBC_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/LibC")
-set(LIBC_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/LibC/include")
+add_subdirectory("Common")
+set(COMMON_LIBRARIES Common)
+set(COMMON_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/Common")
+if(CMAKE_CROSSCOMPILING)
+    # Some of our headers have names that collide with the host libc.
+    # So, we omit those from the header search path unless building for
+    # a cross-compile.
+    set(COMMON_INCLUDE_DIRS
+        "${PROJECT_SOURCE_DIR}/Common/include"
+        "${PROJECT_SOURCE_DIR}/Common/include/flapjack_libc"
+        )
+else(CMAKE_CROSSCOMPILING)
+    set(COMMON_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Common/include")
+endif(CMAKE_CROSSCOMPILING)
 
 add_subdirectory("Malloc")
 set(MALLOC_LIBRARIES Malloc)

@@ -3,7 +3,6 @@
 #include <pic.h>
 #include <inout.h>
 #include <misc.h>
-#include <kprintf.h>
 
 #define TIMER_PERIOD_IO_PORT 0x40
 #define TIMER_MODE_IO_PORT   0x43

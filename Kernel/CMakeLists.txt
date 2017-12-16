@@ -9,8 +9,6 @@ set(CORE_INCLUDE_FILES
     "include/isr_install.h"
     "include/halt.h"
     "include/idt.h"
-    "include/readline.h"
-    "include/kprintf.h"
     "include/backtrace.h"
     "include/misc.h"
     "include/timer.h"
@@ -42,16 +40,15 @@ set(KEYBOARD_INC_FILES
     )
 source_group("Keyboard Inc" FILES ${KEYBOARD_INC_FILES})
 
-set(COMMON_SOURCE_FILES
+set(SOURCE_FILES
     "src/gdt.c"
     "src/idt.c"
-    "src/kprintf.c"
     )
-source_group("Common" FILES ${COMMON_SOURCE_FILES})
 
-# Source files for the kernel.
-set(KERNEL_SOURCE_FILES
-    "src/readline.c"
+# Platform specific source files for the kernel.
+# These cannot be used in unit tests on the host because they cannot be built
+# for the host architecture.
+set(PLATFORM_SPECIFIC_SOURCE_FILES
     "src/backtrace.c"
     "src/backtrace_asm.S"
     "src/console.c"
@@ -69,15 +66,25 @@ set(KERNEL_SOURCE_FILES
     "src/timer.c"
     "src/keyboard/keyboard.c"
     )
-source_group("Kernel" FILES ${KERNEL_SOURCE_FILES})
+source_group("Platform-specific" FILES ${PLATFORM_SPECIFIC_SOURCE_FILES})
 
-set(ALL_KERNEL_SOURCE_FILES
+set(ALL_PLATFORM_SPECIFIC_SOURCE_FILES
     ${CORE_INCLUDE_FILES}
     ${ISR_ERB_FILES}
     ${KEYBOARD_INC_FILES}
-    ${COMMON_SOURCE_FILES}
-    ${KERNEL_SOURCE_FILES}
+    ${SOURCE_FILES}
+    ${PLATFORM_SPECIFIC_SOURCE_FILES}
     )
+
+
+include_directories("include"
+                    ${COMMON_INCLUDE_DIRS}
+                    ${MALLOC_INCLUDE_DIRS}
+                    )
+
+link_directories(${COMMON_LIBRARIES_DIR}
+                 ${MALLOC_LIBRARIES_DIRS}
+                 )
 
 # We can only build the kernel static library when cross-compiling to the target
 # architecture. Also, it's not very testable since it will try to actually make
@@ -85,17 +92,9 @@ set(ALL_KERNEL_SOURCE_FILES
 # which uses only a small subset of the source files here.
 #
 # TODO: I'd like to break each testable component off into it's own static
-# library and give it its own unittest suite. See how I've done this with LibC
-# and Malloc for details.
+# library and give it its own unittest suite. See how I've done this with
+# libCommon and Malloc for details.
 if(CMAKE_CROSSCOMPILING)
-    include_directories("include"
-                        ${LIBC_INCLUDE_DIRS}
-                        ${MALLOC_INCLUDE_DIRS}
-                        )
-
-    link_directories(${LIBC_LIBRARIES_DIR}
-                     ${MALLOC_LIBRARIES_DIRS}
-                     )
 
     add_custom_command(
         OUTPUT ${PROJECT_SOURCE_DIR}/src/isr_install.c
@@ -110,29 +109,28 @@ if(CMAKE_CROSSCOMPILING)
         VERBATIM
     )
 
-    add_library(Kernel STATIC ${ALL_KERNEL_SOURCE_FILES})
+    add_library(Kernel STATIC ${ALL_PLATFORM_SPECIFIC_SOURCE_FILES})
 
     target_link_libraries(Kernel
-                          ${LIBC_LIBRARIES}
+                          ${COMMON_LIBRARIES}
                           ${MALLOC_LIBRARIES}
                           )
 
 else(CMAKE_CROSSCOMPILING)
 
-    include_directories("include"
-                        ${CHECK_INCLUDE_DIRS}
-                        )
-
+    include_directories(${CHECK_INCLUDE_DIRS})
     link_directories(${CHECK_LIBRARIES_DIR})
 
     add_executable(KernelTest
-                   ${COMMON_SOURCE_FILES}
+                   ${SOURCE_FILES}
                    "test/test_gdt.c"
                    "test/test_idt.c"
                    "test/test_main.c"
                    )
 
     target_link_libraries(KernelTest
+                          ${COMMON_LIBRARIES}
+                          ${MALLOC_LIBRARIES}
                           ${CHECK_LIBRARIES}
                           )
 

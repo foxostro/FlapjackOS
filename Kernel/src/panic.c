@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <console.h>
-#include <kprintf.h>
+#include <console_printf.h>
 #include <halt.h>
 #include <interrupt_asm.h>
 #include <backtrace.h>
@@ -40,21 +40,21 @@ void panic2(const char * restrict message,
             unsigned error_code,
             unsigned eip)
 {    
-    kprintf(&g_console, "Registers:\n");
-    kprintf(&g_console, "edi = 0x%x\n", edi);
-    kprintf(&g_console, "esi = 0x%x\n", esi);
-    kprintf(&g_console, "ebp = 0x%x\n", ebp);
-    kprintf(&g_console, "esp = 0x%x\n", esp);
-    kprintf(&g_console, "ebx = 0x%x\n", ebx);
-    kprintf(&g_console, "edx = 0x%x\n", edx);
-    kprintf(&g_console, "ecx = 0x%x\n", ecx);
-    kprintf(&g_console, "eax = 0x%x\n", eax);
-    kprintf(&g_console, "eip = %p\n\n", eip);
+    console_printf(&g_console, "Registers:\n");
+    console_printf(&g_console, "edi = 0x%x\n", edi);
+    console_printf(&g_console, "esi = 0x%x\n", esi);
+    console_printf(&g_console, "ebp = 0x%x\n", ebp);
+    console_printf(&g_console, "esp = 0x%x\n", esp);
+    console_printf(&g_console, "ebx = 0x%x\n", ebx);
+    console_printf(&g_console, "edx = 0x%x\n", edx);
+    console_printf(&g_console, "ecx = 0x%x\n", ecx);
+    console_printf(&g_console, "eax = 0x%x\n", eax);
+    console_printf(&g_console, "eip = %p\n\n", eip);
 
     backtrace(&g_console);
 
     if (error_code_present) {
-        kprintf(&g_console, "Error Code: 0x%x\n", error_code);
+        console_printf(&g_console, "Error Code: 0x%x\n", error_code);
     }
 
     panic("%s", message);

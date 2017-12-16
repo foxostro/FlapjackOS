@@ -3,9 +3,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/ctype.h"
-#include "../include/string.h"
-#include "../include/stdio.h"
+#include "flapjack_libc/ctype.h"
+#include "flapjack_libc/string.h"
+#include "flapjack_libc/stdio.h"
 
 #define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
 

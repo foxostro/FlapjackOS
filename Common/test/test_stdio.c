@@ -1,15 +1,10 @@
+#include "flapjack_libc/stdio.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <check.h>
 #include <stdio.h>
 #include <assert.h>
-
-#include "../include/stdio.h"
-
-#define MIN(a, b) \
-   do { __typeof__ (a) _a = (a); \
-        __typeof__ (b) _b = (b); \
-        _a < _b ? _a : _b; } while(0)
 
 // SNPRINTF returns zero when the buffer is null
 START_TEST(test_null_buffer)

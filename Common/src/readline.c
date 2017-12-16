@@ -1,10 +1,7 @@
 #include <stdbool.h>
-#include <console.h>
-#include <keyboard.h>
-#include <kprintf.h>
-#include <string.h>
-#include <assert.h>
 #include <readline.h>
+#include "flapjack_libc/string.h"
+#include "flapjack_libc/assert.h"
 
 #define MIN(a, b) \
    ({ __typeof__ (a) _a = (a); \
@@ -13,12 +10,12 @@
 
 size_t readline(const console_interface_t *console,
                 const keyboard_interface_t *keyboard,
-                const char * const prompt,
+                size_t prompt_size, const char * const prompt,
                 size_t buffer_size, char *buffer)
 {
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
-    size_t maxcount = MIN(CONSOLE_WIDTH - strlen(prompt) - 1, buffer_size);
+    size_t maxcount = MIN(CONSOLE_WIDTH - STRNLEN(prompt, prompt_size) - 1, buffer_size);
 
     assert(console);
     assert(keyboard);

@@ -2,6 +2,9 @@
 
 #include <stddef.h>
 
+// To prevent name collisions between symbols here and in the host's C standard
+// library, we hide the FlapjackOS symbols behind macros. When building for unit
+// tests, we rename the symbols to avoid the collision.
 #ifdef TESTING
 #define MEMCPY  flapjack_memcpy
 #define MEMMOVE flapjack_memmove

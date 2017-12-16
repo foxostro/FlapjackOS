@@ -1,4 +1,4 @@
-#include <kprintf.h>
+#include <console_printf.h>
 
 // Maximum number of stack frames in a backtrace.
 #define MAXFRAMES (16)
@@ -12,7 +12,7 @@ void backtrace(const console_interface_t *console)
 
     ebp = get_ebp();
 
-    kprintf(console, "Back Trace:\n");
+    console_printf(console, "Back Trace:\n");
     for (frame = 0; frame < MAXFRAMES; ++frame) {
         unsigned eip;
 
@@ -29,8 +29,8 @@ void backtrace(const console_interface_t *console)
         }
 
         ebp = (unsigned *)(ebp[0]);
-        kprintf(console, "[%p]\n", eip);
+        console_printf(console, "[%p]\n", eip);
     }
 
-    kprintf(console, "\n");
+    console_printf(console, "\n");
 }

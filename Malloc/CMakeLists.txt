@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.6)
 # used by the userspace libc.
 set(SOURCE_FILES_MALLOC
     "include/malloc/malloc_zone.h"
-    "include/malloc/malloc_block.h"
     "src/malloc_zone.c"
     )
 
@@ -14,11 +13,11 @@ add_library(Malloc STATIC ${SOURCE_FILES_MALLOC})
 
 if(CMAKE_CROSSCOMPILING)
 
-  # When cross-compiling, build using our own LibC.
-  # When we build unit tests, we use the system LibC instead.
-  include_directories(BEFORE ${LIBC_INCLUDE_DIRS} )
+  # When cross-compiling, build using libCommon, which implements a subset of
+  # the C standard library. When we build unit tests, we use the system libc.
+  include_directories(BEFORE ${COMMON_INCLUDE_DIRS} )
   target_link_libraries(Malloc 
-                        ${LIBC_LIBRARIES}
+                        ${COMMON_LIBRARIES}
                         )
 
 else(CMAKE_CROSSCOMPILING)
