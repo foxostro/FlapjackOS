@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
 
-set(ERB_TOOL "${PROJECT_SOURCE_DIR}/scripts/erb.sh")
-
 set(CORE_INCLUDE_FILES
     "include/console.h"
     "include/ltr.h"
@@ -57,8 +55,8 @@ set(PLATFORM_SPECIFIC_SOURCE_FILES
     "src/idt_asm.S"
     "src/inout.S"
     "src/interrupt_asm.S"
-    "src/isr_install.c"
-    "src/isr_wrapper_asm.S"
+    "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c"
+    "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
     "src/kernel.c"
     "src/ltr.S"
     "src/panic.c"
@@ -86,6 +84,22 @@ link_directories(${COMMON_LIBRARIES_DIR}
                  ${MALLOC_LIBRARIES_DIRS}
                  )
 
+# Generate source files from template files.
+function(GenerateSourceFromTemplate TEMPLATE_FILENAME)
+    set(ERB_TOOL "${PROJECT_SOURCE_DIR}/scripts/erb.sh")
+    string(REGEX REPLACE "\\.[^.]*$" "" OUTPUT_FILENAME ${TEMPLATE_FILENAME})
+    message("OUTPUT_FILENAME: ${OUTPUT_FILENAME}")
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME}
+        COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/Kernel/src/${TEMPLATE_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME}
+        DEPENDS ${PROJECT_SOURCE_DIR}/Kernel/src/${TEMPLATE_FILENAME}
+        VERBATIM
+    )
+endfunction(GenerateSourceFromTemplate)
+
+GenerateSourceFromTemplate(isr_install.c.erb)
+GenerateSourceFromTemplate(isr_wrapper_asm.S.erb)
+
 # We can only build the kernel static library when cross-compiling to the target
 # architecture. Also, it's not very testable since it will try to actually make
 # low-level calls not permitted in userspace. So, we build a small test program
@@ -95,19 +109,6 @@ link_directories(${COMMON_LIBRARIES_DIR}
 # library and give it its own unittest suite. See how I've done this with
 # libCommon and Malloc for details.
 if(CMAKE_CROSSCOMPILING)
-
-    add_custom_command(
-        OUTPUT ${PROJECT_SOURCE_DIR}/src/isr_install.c
-        COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_install.c.erb ${PROJECT_SOURCE_DIR}/src/isr_install.c
-        DEPENDS ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_install.c.erb
-        VERBATIM
-    )
-    add_custom_command(
-        OUTPUT ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S
-        COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S.erb ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S
-        DEPENDS ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/src/isr_wrapper_asm.S.erb
-        VERBATIM
-    )
 
     add_library(Kernel STATIC ${ALL_PLATFORM_SPECIFIC_SOURCE_FILES})
 
