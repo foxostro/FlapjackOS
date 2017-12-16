@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <check.h>
 
-Suite* test_suite_string(); // defined in test_string.c
-Suite* test_suite_stdio(); // defined in test_stdio.c
+Suite* test_suite_string(void); // defined in test_string.c
+Suite* test_suite_stdio(void); // defined in test_stdio.c
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {

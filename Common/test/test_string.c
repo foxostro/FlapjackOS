@@ -222,7 +222,7 @@ static const struct { char *name; void *fn; } tests[] = {
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
-Suite* test_suite_string()
+Suite* test_suite_string(void)
 {
     Suite *suite = suite_create(__FUNCTION__);
 

@@ -9,7 +9,7 @@
 
 idt_entry_t g_idt[IDT_MAX];
 
-idt_entry_t* idt_base()
+idt_entry_t* idt_base(void)
 {
     return g_idt;
 }

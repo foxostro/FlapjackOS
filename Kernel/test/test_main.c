@@ -7,8 +7,8 @@ void lgdt(__attribute__((unused)) void *gdt, __attribute__((unused)) unsigned li
     // satisfy the linker
 }
 
-Suite* test_suite_gdt(); // defined in test_gdt.c
-Suite* test_suite_idt(); // defined in test_idt.c
+Suite* test_suite_gdt(void); // defined in test_gdt.c
+Suite* test_suite_idt(void); // defined in test_idt.c
 
 // TODO: need tests for string functions in string.h
 

@@ -48,7 +48,7 @@ _Static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
 
 
 // Returns a pointer to the beginning of the installed IDT.
-idt_entry_t* idt_base();
+idt_entry_t* idt_base(void);
 
 // Loads a new IDT.
 void lidt(void *idt, unsigned limit);

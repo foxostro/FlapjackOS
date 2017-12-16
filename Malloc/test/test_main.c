@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <check.h>
 
-Suite* test_suite_malloc_zone(); // defined in test_malloc_zone.c
+Suite* test_suite_malloc_zone(void); // defined in test_malloc_zone.c
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[])
 {

@@ -152,13 +152,13 @@ typedef struct {
     // To be called when the keyboard interrupt fires. Implements the lower half of
     // the keyboard driver.
     // This is only meaningful when used in the kernel implementation.
-    void (*int_handler)();
+    void (*int_handler)(void);
 
     // Returns the name of the given key code.
     const char* (*keycode_name)(keycode_t key);
 
     // Initializes the keyboard device and driver.
-    void (*init)();
+    void (*init)(void);
 
     // Gets the next key event.
     // Blocks on the next key event and returns it in the specified event structure.

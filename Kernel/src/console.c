@@ -38,7 +38,7 @@ static void console_init(vgachar_t * const addr)
     console_clear();
 }
 
-static void console_clear()
+static void console_clear(void)
 {
     for (size_t row = 0; row < CONSOLE_HEIGHT; row++) {
         for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
@@ -80,7 +80,7 @@ static vgachar_t console_make_char(char ch)
     };
 }
 
-static void console_newline()
+static void console_newline(void)
 {
     if (s_cursor_row == CONSOLE_HEIGHT) {
         for (size_t row = 1; row <= CONSOLE_HEIGHT; row++) {
@@ -100,12 +100,12 @@ static void console_newline()
     }
 }
 
-static void console_tab()
+static void console_tab(void)
 {
     s_cursor_col += TAB_WIDTH - (s_cursor_col % TAB_WIDTH);
 }
 
-static void console_backspace()
+static void console_backspace(void)
 {
     if (s_cursor_col == 0) {
         s_cursor_col = CONSOLE_WIDTH;
@@ -183,12 +183,12 @@ static void console_set_cursor_position(size_t row, size_t col)
     outb(CRTC_DATA_REG, WORD_UPPER_BYTE(offset));
 }
 
-static size_t console_get_cursor_row()
+static size_t console_get_cursor_row(void)
 {
     return s_cursor_row;
 }
 
-static size_t console_get_cursor_col()
+static size_t console_get_cursor_col(void)
 {
     return s_cursor_col;
 }

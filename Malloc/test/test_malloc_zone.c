@@ -560,7 +560,7 @@ static const struct { char *name; void *fn; } tests[] = {
 };
 static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
 
-Suite* test_suite_malloc_zone()
+Suite* test_suite_malloc_zone(void)
 {
     Suite *suite = suite_create(__FUNCTION__);
 

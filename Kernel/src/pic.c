@@ -43,14 +43,14 @@ void pic_remap(unsigned char master_base, unsigned char slave_base)
     outb(PIC2_DATA, a2);
 }
 
-void pic_init()
+void pic_init(void)
 {
     // In protected mode, the IRQs 0 to 7 conflict with the CPU exceptions which
     // are reserved by Intel up until 0x1F. Remap them.
     pic_remap(0x20, 0x28);
 }
  
-static uint16_t pic_get_isr()
+static uint16_t pic_get_isr(void)
 {
     outb(PIC1_COMMAND, PIC_READ_ISR);
     outb(PIC2_COMMAND, PIC_READ_ISR);

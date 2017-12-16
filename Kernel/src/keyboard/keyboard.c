@@ -138,7 +138,7 @@ static bool keyboard_step_state_machine(keyboard_driver_state_t *state, keyboard
     return true;
 }
 
-static void keyboard_int_handler()
+static void keyboard_int_handler(void)
 {
     keyboard_driver_state_t state = IDLE;
     keyboard_event_t event = { .state = RELEASED, .key = KEYCODE_MAX };
@@ -162,7 +162,7 @@ static void keyboard_int_handler()
     }
 }
 
-static void keyboard_init()
+static void keyboard_init(void)
 {
     for (size_t i = 0; i < KEYCODE_MAX; ++i) {
         g_key_state[i] = RELEASED;

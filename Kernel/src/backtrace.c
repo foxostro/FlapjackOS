@@ -3,7 +3,7 @@
 // Maximum number of stack frames in a backtrace.
 #define MAXFRAMES (16)
 
-unsigned* get_ebp(); // defined in backtrace_asm.S
+unsigned* get_ebp(void); // defined in backtrace_asm.S
 
 void backtrace(const console_interface_t *console)
 {

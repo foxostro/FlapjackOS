@@ -41,7 +41,7 @@ typedef struct {
     void (*init)(vgachar_t * const addr);
 
     // Clears the console to the current background color.
-    void (*clear)();
+    void (*clear)(void);
 
     // Draws the specified character at the specified position in the console buffer.
     void (*draw_char)(size_t row, size_t col, vgachar_t ch);
@@ -67,6 +67,6 @@ typedef struct {
     // If the cursor is placed outside the visible console then it will be hidden.
     void (*set_cursor_position)(size_t row, size_t col);
 
-    size_t (*get_cursor_row)();
-    size_t (*get_cursor_col)();
+    size_t (*get_cursor_row)(void);
+    size_t (*get_cursor_col)(void);
 } console_interface_t;

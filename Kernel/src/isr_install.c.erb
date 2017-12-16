@@ -9,7 +9,7 @@
 
 // These wrappers are defined in isr_wrapper_asm.S
 <% [0..14, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
-void isr_wrapper_<%= isr %>();<% end %>
+void isr_wrapper_<%= isr %>(void);<% end %>
 
 void isr_install(idt_entry_t *idt)
 {

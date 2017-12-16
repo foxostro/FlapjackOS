@@ -7,7 +7,7 @@
 
 typedef struct {
     // Timer interrupt handler. Called by the interrupt dispatcher.
-    void (*int_handler)();
+    void (*int_handler)(void);
 
     // Set the rate of timer interrupts.
     // timer_rate -- clock cycles between timer interrupts
@@ -20,10 +20,10 @@ typedef struct {
     void (*init)(unsigned short timer_rate, int leap_interval, int leap_ticks);
 
     // Gets the number of timer ticks since boot.
-    unsigned (*ticks)();
+    unsigned (*ticks)(void);
 
     // Gets the number of seconds since boot.
-    unsigned (*seconds)();
+    unsigned (*seconds)(void);
 } timer_interface_t;
 
 void get_timer_interface(timer_interface_t *timer);

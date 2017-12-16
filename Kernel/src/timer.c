@@ -16,7 +16,7 @@ static unsigned s_timer_rate;
 static unsigned s_timer_leap_interval;
 static unsigned s_timer_leap_ticks;
 
-static void timer_int_handler()
+static void timer_int_handler(void)
 {
     if (++s_leap_counter > s_timer_leap_interval) {
         s_leap_counter = 0; // reset
@@ -41,12 +41,12 @@ static void timer_init(unsigned short timer_rate, int leap_interval, int leap_ti
     outb(TIMER_PERIOD_IO_PORT, WORD_UPPER_BYTE(timer_rate));
 }
 
-static unsigned timer_ticks()
+static unsigned timer_ticks(void)
 {
     return s_clock_ticks;
 }
 
-static unsigned timer_seconds()
+static unsigned timer_seconds(void)
 {
     return s_clock_seconds;
 }

@@ -1,3 +1,3 @@
 #pragma once
 
-void load_task_register();
+void load_task_register(void);
