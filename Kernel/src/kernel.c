@@ -32,7 +32,6 @@ static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
 static keyboard_interface_t s_keyboard;
 static timer_interface_t s_timer;
-static malloc_interface_t s_allocator;
 
 void interrupt_dispatch(unsigned interrupt_number,
                         unsigned edi,
@@ -167,7 +166,6 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     console_interface_t *console = &g_console;
     keyboard_interface_t *keyboard = &s_keyboard;
     timer_interface_t *timer = &s_timer;
-    malloc_interface_t *allocator = &s_allocator;
 
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
@@ -197,7 +195,7 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     console_printf(console, "istack = %p\n", istack);
 
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
-    malloc_zone_t *kernel_heap;
+    malloc_interface_t *allocator;
     {
         if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
             panic("The bootloader did not provide memory information.");
@@ -217,8 +215,7 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
         uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
 
         // Initialize the kernel heap allocator using the memory region we identified above.
-        get_malloc_interface(allocator);
-        kernel_heap = allocator->init((void *)heapBeginAddr, heapLen);
+        allocator = malloc_zone_init((void *)heapBeginAddr, heapLen);
     }
 
     // Initialize the keyboard driver.
@@ -232,15 +229,17 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // After this point, interrupts will start firing.
     enable_interrupts();
 
+    const char prompt[] = ">";
+    readline_t *readline_ctx = readline_init(allocator, console, keyboard, sizeof(prompt), prompt);
+
     // Read lines of input from forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     while (true) {
         static const size_t buffer_size = 512;
-        const char prompt[] = ">";
-        char *buffer = allocator->malloc(kernel_heap, buffer_size);
-        readline(console, keyboard, sizeof(prompt), prompt, buffer_size, buffer);
+        char *buffer = allocator->malloc(allocator, buffer_size);
+        readline(readline_ctx, buffer_size, buffer);
         console_printf(console, "Got: %s\n", buffer);
-        allocator->free(kernel_heap, buffer);
+        allocator->free(allocator, buffer);
     }
 
     panic("We should never reach this point.");

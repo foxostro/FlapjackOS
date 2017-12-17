@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include <readline.h>
+#include "flapjack_libc/../readline.h"
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
 
@@ -8,28 +8,70 @@
       __typeof__ (b) _b = (b); \
       _a < _b ? _a : _b; })
 
-size_t readline(const console_interface_t *console,
-                const keyboard_interface_t *keyboard,
-                size_t prompt_size, const char * const prompt,
-                size_t buffer_size, char *buffer)
-{
-    bool have_a_newline = false;
-    size_t count = 0, cursor_col = 0;
-    size_t maxcount = MIN(CONSOLE_WIDTH - STRNLEN(prompt, prompt_size) - 1, buffer_size);
+typedef struct readline {
+    malloc_interface_t *allocator;
+    console_interface_t *console;
+    keyboard_interface_t *keyboard;
+    size_t prompt_size;
+    const char *prompt;
+} readline_t;
 
+readline_t* readline_init(malloc_interface_t *allocator,
+                          console_interface_t *console,
+                          keyboard_interface_t *keyboard,
+                          size_t prompt_size, const char *prompt)
+{
+    assert(allocator);
     assert(console);
     assert(keyboard);
+    assert(prompt_size>0);
     assert(prompt);
+
+    readline_t *this = allocator->malloc(allocator, sizeof(readline_t));
+
+    this->allocator = allocator;
+    this->console = console;
+    this->keyboard = keyboard;
+    this->prompt_size = prompt_size;
+    this->prompt = prompt;
+
+    return this;
+}
+
+void readline_destroy(readline_t *this)
+{
+    assert(this);
+    malloc_interface_t *allocator = this->allocator;
+    allocator->free(allocator, this);
+}
+
+// Prompt for one line of user input on the console.
+// Returns the number of characters placed into the buffer.
+// buffer_size -- The capacity of the buffer in `buffer'
+// buffer -- The output string is written here.
+size_t readline(readline_t *this, size_t buffer_size, char *buffer)
+{
+    assert(this);
+    assert(this->console);
+    assert(this->keyboard);
+    assert(this->prompt);
+
+    assert(buffer_size > 0);
     assert(buffer);
 
-    console->puts(prompt);
-    console->putchar(' ');
-    size_t cursor_row = console->get_cursor_row();
-    size_t cursor_col_offset = console->get_cursor_col();
+    bool have_a_newline = false;
+    size_t count = 0, cursor_col = 0;
+    size_t prompt_len = STRNLEN(this->prompt, this->prompt_size);
+    size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
+
+    this->console->puts(this->prompt);
+    this->console->putchar(' ');
+    size_t cursor_row = this->console->get_cursor_row();
+    size_t cursor_col_offset = this->console->get_cursor_col();
 
     while (!have_a_newline) {
         keyboard_event_t event;
-        keyboard->get_event(&event);
+        this->keyboard->get_event(&event);
 
         if (event.state != PRESSED) {
             continue;
@@ -45,7 +87,7 @@ size_t readline(const console_interface_t *console,
             case KEYCODE_LEFT_ARROW:
                 if (cursor_col > 0) {
                     cursor_col--;
-                    console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -55,7 +97,7 @@ size_t readline(const console_interface_t *console,
             case KEYCODE_RIGHT_ARROW:
                 if (cursor_col < count) {
                     cursor_col++;
-                    console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -68,44 +110,44 @@ size_t readline(const console_interface_t *console,
                             // Slide all input one character to the left.
                             for (size_t i = cursor_col; i < count; ++i) {
                                 buffer[i] = buffer[i+1];
-                                console->draw_char(cursor_row, i + cursor_col_offset,
-                                                   console->get_char(cursor_row, i + cursor_col_offset + 1));
+                                this->console->draw_char(cursor_row, i + cursor_col_offset,
+                                                         this->console->get_char(cursor_row, i + cursor_col_offset + 1));
                             }
-                            console->draw_char(cursor_row, count + cursor_col_offset, console->make_char(' '));
+                            this->console->draw_char(cursor_row, count + cursor_col_offset, this->console->make_char(' '));
                             buffer[count] = '\0';
 
                             if (count > 0) {
                                 count--;
                             }
 
-                            console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                            this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                         }
                         break;
 
                     case '\n':
                         buffer[count] = '\0';
                         cursor_col = count;
-                        console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
-                        console->putchar('\n');
+                        this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                        this->console->putchar('\n');
                         have_a_newline = true;
                         break;
 
                     default:
-                        if ((count < maxcount) && console->is_acceptable(ch)) {
+                        if ((count < maxcount) && this->console->is_acceptable(ch)) {
                             // Slide all input one character to the right.
                             if (count > 0 && cursor_col < count-1) {
                                 for (size_t i = count; i > cursor_col; --i) {
                                     buffer[i] = buffer[i-1];
-                                    console->draw_char(cursor_row, i + cursor_col_offset,
-                                                       console->get_char(cursor_row, i + cursor_col_offset - 1));
+                                    this->console->draw_char(cursor_row, i + cursor_col_offset,
+                                                             this->console->get_char(cursor_row, i + cursor_col_offset - 1));
                                 }
                             }
-                            console->draw_char(cursor_row, cursor_col + cursor_col_offset, console->make_char(ch));
+                            this->console->draw_char(cursor_row, cursor_col + cursor_col_offset, this->console->make_char(ch));
                             buffer[cursor_col] = ch;
 
                             count++;
                             cursor_col++;
-                            console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                            this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                         }
                         break;
                 } // switch (ch)

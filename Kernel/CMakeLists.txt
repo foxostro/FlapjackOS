@@ -88,7 +88,6 @@ link_directories(${COMMON_LIBRARIES_DIR}
 function(GenerateSourceFromTemplate TEMPLATE_FILENAME)
     set(ERB_TOOL "${PROJECT_SOURCE_DIR}/scripts/erb.sh")
     string(REGEX REPLACE "\\.[^.]*$" "" OUTPUT_FILENAME ${TEMPLATE_FILENAME})
-    message("OUTPUT_FILENAME: ${OUTPUT_FILENAME}")
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME}
         COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/Kernel/src/${TEMPLATE_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME}

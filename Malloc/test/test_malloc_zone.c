@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <malloc/malloc_zone.h>
+#include <malloc/malloc_zone_private.h>
 
 #define VERBOSE 0
 #define SMALL 64
@@ -15,15 +16,11 @@ static uint8_t s_buffer[1024];
 
 START_TEST(test_init)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     void *buffer = s_buffer + 3; // break alignment intentionally for test
     size_t size = sizeof(s_buffer) - 3;
 
     memset(buffer, 0, size);
-    malloc_zone_t *zone = allocator->init(buffer, size);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(buffer, size);
 
     ck_assert_ptr_ne(zone, NULL);
 
@@ -45,13 +42,9 @@ END_TEST
 // than the size of the zone itself.
 START_TEST(test_malloc_really_big)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
-    void *allocation = allocator->malloc(zone, SIZE_MAX);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = zone->malloc(zone, SIZE_MAX);
     ck_assert_ptr_eq(allocation, NULL);
 }
 END_TEST
@@ -59,13 +52,9 @@ END_TEST
 // Starting with an empty zone, we should be able to satisfy a small request.
 START_TEST(test_malloc_one_small_request)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
-    void *allocation = allocator->malloc(zone, 64);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = zone->malloc(zone, 64);
     ck_assert_ptr_ne(allocation, NULL);
     ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
 }
@@ -75,13 +64,9 @@ END_TEST
 // size zero block. This returns a minimum size heap block.
 START_TEST(test_malloc_one_smallest_request)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
-    void *allocation = allocator->malloc(zone, SMALL);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = zone->malloc(zone, SMALL);
     ck_assert_ptr_ne(allocation, NULL);
     ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
 }
@@ -91,13 +76,9 @@ END_TEST
 // of the zone's free space.
 START_TEST(test_malloc_whole_thing)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
-    void *allocation = allocator->malloc(zone, zone->head->size);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = zone->malloc(zone, zone->head->size);
     ck_assert_ptr_ne(allocation, NULL);
     ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
 }
@@ -106,18 +87,14 @@ END_TEST
 // Starting with an empty zone, we should be able to several small requests.
 START_TEST(test_malloc_several_small)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
     size_t size = SMALL, i = 0;
     size_t ex = (sizeof(s_buffer) - sizeof(malloc_zone_t)) / (sizeof(malloc_block_t) + size);
 
     while (true) {
-        void *allocation = allocator->malloc(zone, size);
+        void *allocation = zone->malloc(zone, size);
         ck_assert_uint_eq((uintptr_t)allocation % 4, 0);
         if (!allocation) {
             break;
@@ -132,17 +109,13 @@ END_TEST
 // We should be able to allocate one, free one, and then allocate another.
 START_TEST(test_malloc_one_free_one)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
-    void *alloc = allocator->malloc(zone, zone->head->size);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *alloc = zone->malloc(zone, zone->head->size);
     ck_assert_ptr_ne(alloc, NULL);
-    ck_assert_ptr_eq(allocator->malloc(zone, zone->head->size), NULL);
-    allocator->free(zone, alloc);
-    alloc = allocator->malloc(zone, zone->head->size);
+    ck_assert_ptr_eq(zone->malloc(zone, zone->head->size), NULL);
+    zone->free(zone, alloc);
+    alloc = zone->malloc(zone, zone->head->size);
     ck_assert_ptr_ne(alloc, NULL);
 }
 END_TEST
@@ -150,16 +123,12 @@ END_TEST
 // Freeing allocations should release memory to the zone for future allocations.
 START_TEST(test_malloc_several_free_one)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
-    void *allocation = allocator->malloc(zone, SMALL);
-    while (allocator->malloc(zone, SMALL));
-    allocator->free(zone, allocation);
-    allocation = allocator->malloc(zone, SMALL);
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
+    void *allocation = zone->malloc(zone, SMALL);
+    while (zone->malloc(zone, SMALL));
+    zone->free(zone, allocation);
+    allocation = zone->malloc(zone, SMALL);
     ck_assert_ptr_ne(allocation, NULL);
 }
 END_TEST
@@ -170,29 +139,25 @@ END_TEST
 // a preceding free block.
 START_TEST(test_coalesce_0)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, SMALL);
+    void *a = zone->malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = allocator->malloc(zone, SMALL);
+    void *b = zone->malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
+    void *c = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = allocator->malloc(zone, SMALL*2);
+    void *d = zone->malloc(zone, SMALL*2);
     ck_assert(!d); // expected to fail
 
-    allocator->free(zone, a);
-    allocator->free(zone, b); // merge with preceding free block
+    zone->free(zone, a);
+    zone->free(zone, b); // merge with preceding free block
 
-    void *e = allocator->malloc(zone, SMALL*2);
+    void *e = zone->malloc(zone, SMALL*2);
     ck_assert(e); // should succeed now
     ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
@@ -204,29 +169,25 @@ END_TEST
 // a following free block.
 START_TEST(test_coalesce_1)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, SMALL);
+    void *a = zone->malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = allocator->malloc(zone, SMALL);
+    void *b = zone->malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
+    void *c = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = allocator->malloc(zone, SMALL*2);
+    void *d = zone->malloc(zone, SMALL*2);
     ck_assert(!d); // expected to fail
 
-    allocator->free(zone, b);
-    allocator->free(zone, a); // merge with the following free block
+    zone->free(zone, b);
+    zone->free(zone, a); // merge with the following free block
 
-    void *e = allocator->malloc(zone, SMALL*2);
+    void *e = zone->malloc(zone, SMALL*2);
     ck_assert(e); // should succeed now
     ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
@@ -238,30 +199,26 @@ END_TEST
 // a preceding and following free block in one step.
 START_TEST(test_coalesce_2)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, SMALL);
+    void *a = zone->malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = allocator->malloc(zone, SMALL);
+    void *b = zone->malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
+    void *c = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
+    void *d = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
     ck_assert(!d); // expected to fail
 
-    allocator->free(zone, c);
-    allocator->free(zone, a);
-    allocator->free(zone, b); // preceding and following both merged here
+    zone->free(zone, c);
+    zone->free(zone, a);
+    zone->free(zone, b); // preceding and following both merged here
 
-    void *e = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
+    void *e = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
     ck_assert(e); // should succeed now
     ck_assert_ptr_eq(a, e); // using the same block as `a'
 }
@@ -271,14 +228,10 @@ END_TEST
 // If the block already has capacity then there's no need to change anything.
 START_TEST(test_realloc_extend_0)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, 1);
+    void *a = zone->malloc(zone, 1);
     ck_assert(a);
     ck_assert_ptr_ne(zone->head->next, NULL);
 
@@ -288,7 +241,7 @@ START_TEST(test_realloc_extend_0)
     size_t size1 = block1->size;
     size_t size2 = block2->size;
 
-    void *b = allocator->realloc(zone, a, 2);
+    void *b = zone->realloc(zone, a, 2);
     ck_assert(b);
     ck_assert_ptr_eq(a, b);
 
@@ -304,18 +257,14 @@ END_TEST
 // it there.
 START_TEST(test_realloc_extend_1)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, 0);
+    void *a = zone->malloc(zone, 0);
     ck_assert(a);
     ck_assert_ptr_ne(zone->head->next, NULL);
 
-    void *b = allocator->realloc(zone, a, SMALL);
+    void *b = zone->realloc(zone, a, SMALL);
     ck_assert(b);
     ck_assert_ptr_eq(a, b);
 
@@ -334,20 +283,16 @@ END_TEST
 // allocates a new block and moves the allocation.
 START_TEST(test_realloc_relocate_0)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, SMALL);
+    void *a = zone->malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = allocator->malloc(zone, SMALL);
+    void *b = zone->malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = allocator->realloc(zone, a, 2*SMALL);
+    void *c = zone->realloc(zone, a, 2*SMALL);
     ck_assert(c);
     ck_assert_ptr_ne(a, c);
 
@@ -383,23 +328,19 @@ END_TEST
 // allocation fails then realloc returns NULL.
 START_TEST(test_realloc_relocate_1)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, SMALL);
+    void *a = zone->malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = allocator->malloc(zone, SMALL);
+    void *b = zone->malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
+    void *c = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    void *d = allocator->realloc(zone, a, 2*SMALL);
+    void *d = zone->realloc(zone, a, 2*SMALL);
     ck_assert(!d);
 
     size_t count = 0;
@@ -435,23 +376,19 @@ END_TEST
 // and the current block.
 START_TEST(test_realloc_relocate_2)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, SMALL);
+    void *a = zone->malloc(zone, SMALL);
     ck_assert(a);
 
-    void *b = allocator->malloc(zone, SMALL);
+    void *b = zone->malloc(zone, SMALL);
     ck_assert(b);
 
-    void *c = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
+    void *c = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - 2*(SMALL+sizeof(malloc_block_t)) - sizeof(malloc_block_t));
     ck_assert(c);
 
-    allocator->free(zone, a);
+    zone->free(zone, a);
 
 #if VERBOSE
     printf("Before:\n");
@@ -460,7 +397,7 @@ START_TEST(test_realloc_relocate_2)
     }
 #endif
 
-    void *d = allocator->realloc(zone, b, 2*SMALL);
+    void *d = zone->realloc(zone, b, 2*SMALL);
     ck_assert(d);
     ck_assert_ptr_eq(a, d);
 
@@ -502,17 +439,13 @@ END_TEST
 // and the current block.
 START_TEST(test_realloc_shrink)
 {
-    malloc_interface_t _allocator;
-    malloc_interface_t *allocator = &_allocator;
-    get_malloc_interface(allocator);
-    
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone_t *zone = allocator->init(s_buffer, sizeof(s_buffer));
+    malloc_zone_t *zone = (malloc_zone_t *)malloc_zone_init(s_buffer, sizeof(s_buffer));
 
-    void *a = allocator->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
+    void *a = zone->malloc(zone, sizeof(s_buffer) - sizeof(malloc_zone_t) - sizeof(malloc_block_t));
     ck_assert(a);
 
-    void *d = allocator->realloc(zone, a, SMALL);
+    void *d = zone->realloc(zone, a, SMALL);
     ck_assert(d);
     ck_assert_ptr_eq(a, d);
 

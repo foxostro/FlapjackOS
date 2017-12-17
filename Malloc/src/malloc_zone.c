@@ -1,10 +1,15 @@
 #include <malloc/malloc_zone.h>
+#include <malloc/malloc_zone_private.h>
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
 #define ALIGN 4
 #define MIN_SPLIT_SIZE (sizeof(malloc_block_t))
+
+static void* malloc_zone_malloc(malloc_zone_t *this, size_t size);
+static void malloc_zone_free(malloc_zone_t *this, void *ptr);
+static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size);
 
 static inline size_t round_up_block_size(size_t size)
 {
@@ -50,12 +55,16 @@ static void consider_splitting_block(malloc_block_t *block, size_t size)
     }
 }
 
-static malloc_zone_t* malloc_zone_init(void *start, size_t size)
+malloc_interface_t* malloc_zone_init(void *start, size_t size)
 {
     assert(start);
     assert(size > sizeof(malloc_zone_t));
 
     malloc_zone_t *zone = start + (4 - (uintptr_t)start % 4); // 4 byte alignment
+
+    zone->malloc = malloc_zone_malloc;
+    zone->realloc = malloc_zone_realloc;
+    zone->free = malloc_zone_free;
 
     // The first block is placed at the address immediately after the header.
     malloc_block_t *first = zone->head = (void *)zone + sizeof(malloc_zone_t);
@@ -65,7 +74,7 @@ static malloc_zone_t* malloc_zone_init(void *start, size_t size)
     first->size = size - sizeof(malloc_zone_t) - sizeof(malloc_block_t);
     first->inuse = false;
 
-    return zone;
+    return (malloc_interface_t *)zone;
 }
 
 static void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
@@ -261,13 +270,4 @@ static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size
     }
 
     return NULL;
-}
-
-void get_malloc_interface(malloc_interface_t *interface)
-{
-    assert(interface);
-    interface->init = malloc_zone_init;
-    interface->malloc = malloc_zone_malloc;
-    interface->realloc = malloc_zone_realloc;
-    interface->free = malloc_zone_free;
 }
