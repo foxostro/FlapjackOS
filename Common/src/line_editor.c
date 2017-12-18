@@ -1,4 +1,4 @@
-#include <readline_private.h>
+#include <line_editor_private.h>
 #include <stdbool.h>
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
@@ -8,7 +8,7 @@
       __typeof__ (b) _b = (b); \
       _a < _b ? _a : _b; })
 
-static void readline_destroy(readline_impl_t *this)
+static void line_editor_destroy(line_editor_impl_t *this)
 {
     assert(this);
     malloc_interface_t *allocator = this->allocator;
@@ -16,7 +16,7 @@ static void readline_destroy(readline_impl_t *this)
 }
 
 // Prompt for one line of user input on the console.
-static char * readline(readline_impl_t *this)
+static char * line_editor_getline(line_editor_impl_t *this)
 {
     assert(this);
     assert(this->console);
@@ -126,8 +126,8 @@ static char * readline(readline_impl_t *this)
 }
 
 // Change the prompt displayed at the beginning of the line.
-static void readline_set_prompt(readline_impl_t *this,
-                                size_t prompt_size, const char *prompt)
+static void line_editor_set_prompt(line_editor_impl_t *this,
+                                   size_t prompt_size, const char *prompt)
 {
     assert(this);
     assert(prompt_size > 0);
@@ -143,20 +143,20 @@ static void readline_set_prompt(readline_impl_t *this,
     this->prompt_size = prompt_size;
 }
 
-// Returns a new initialized readline object.
-readline_t* readline_init(malloc_interface_t *allocator,
-                          console_interface_t *console,
-                          keyboard_interface_t *keyboard)
+// Returns a new initialized line_editor object.
+line_editor_t* line_editor_init(malloc_interface_t *allocator,
+                                console_interface_t *console,
+                                keyboard_interface_t *keyboard)
 {
     assert(allocator);
     assert(console);
     assert(keyboard);
 
-    readline_impl_t *this = allocator->malloc(allocator, sizeof(readline_impl_t));
+    line_editor_impl_t *this = allocator->malloc(allocator, sizeof(line_editor_impl_t));
 
-    this->destroy = readline_destroy;
-    this->readline = readline;
-    this->set_prompt = readline_set_prompt;
+    this->destroy = line_editor_destroy;
+    this->getline = line_editor_getline;
+    this->set_prompt = line_editor_set_prompt;
     this->allocator = allocator;
     this->console = console;
     this->keyboard = keyboard;
@@ -164,7 +164,7 @@ readline_t* readline_init(malloc_interface_t *allocator,
     this->prompt = NULL;
 
     static const char default_prompt[] = ">";
-    readline_set_prompt(this, sizeof(default_prompt), default_prompt);
+    line_editor_set_prompt(this, sizeof(default_prompt), default_prompt);
 
-    return (readline_t *)this;
+    return (line_editor_t *)this;
 }

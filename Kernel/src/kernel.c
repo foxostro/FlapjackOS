@@ -17,7 +17,7 @@
 #include <panic.h>
 #include <backtrace.h>
 #include <keyboard.h>
-#include <readline.h>
+#include <line_editor.h>
 #include <multiboot.h>
 #include <malloc/malloc_zone.h>
 
@@ -231,9 +231,9 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
 
     // Read lines of input from forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
-    readline_t *rl = readline_init(allocator, console, keyboard);
+    line_editor_t *rl = line_editor_init(allocator, console, keyboard);
     while (true) {
-        char *buffer = rl->readline(rl);
+        char *buffer = rl->getline(rl);
         console_printf(console, "Got: %s\n", buffer);
         allocator->free(allocator, buffer);
     }

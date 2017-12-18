@@ -4,7 +4,7 @@ set(SOURCE_FILES
     "include/flapjack_libc/assert.h"
     "include/flapjack_libc/string.h" "src/string.c"
     "include/flapjack_libc/stdio.h" "src/stdio.c"
-    "include/readline.h" "src/readline.c"
+    "include/line_editor.h" "include/line_editor_private.h" "src/line_editor.c"
     "include/console_printf.h" "src/console_printf.c"
     "include/interfaces/console_interface.h"
     "include/interfaces/keyboard_interface.h"
