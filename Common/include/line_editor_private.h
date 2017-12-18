@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <ll_str.h>
 #include <line_editor.h>
 
 typedef struct line_editor_impl {
@@ -13,7 +14,8 @@ typedef struct line_editor_impl {
     keyboard_interface_t *keyboard;
     size_t prompt_size;
     char *prompt;
-    char *history;
+    ll_str_t *history;
+    int history_cursor;
 } line_editor_impl_t;
 
 _Static_assert(offsetof(line_editor_impl_t, destroy) == offsetof(line_editor_t, destroy),

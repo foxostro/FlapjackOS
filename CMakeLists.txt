@@ -10,17 +10,12 @@ function(GenerateSourceFromTemplate
          TEMPLATE_FILENAME
          OUTPUT_FILENAME)
 
-    if (ARGN GREATER 2)
-        set(PARAMS ${ARGV4})
-    else()
-        set(PARAMS "")
-    endif()
-
+    set(PARAMS ${ARGV2})
     set(ERB_TOOL "${PROJECT_SOURCE_DIR}/scripts/erb.sh")
     add_custom_command(
         OUTPUT ${OUTPUT_FILENAME}
         COMMAND ${ERB_TOOL} ${TEMPLATE_FILENAME} ${OUTPUT_FILENAME} ${PARAMS}
-        DEPENDS ${TEMPLATE_FILENAME}
+        DEPENDS ${TEMPLATE_FILENAME} ${ERB_TOOL}
         VERBATIM
     )
 

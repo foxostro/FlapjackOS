@@ -3,16 +3,28 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+// #include <console_printf.h>
 
 #define MIN(a, b) \
    ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \
       _a < _b ? _a : _b; })
 
+#define MAX(a, b) \
+   ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+      _a > _b ? _a : _b; })
+
 static void line_editor_destroy(line_editor_impl_t *this)
 {
-    free(this->history);
+    while (ll_count_str(this->history) > 0) {
+        char *history = ll_remove_str(this->history, 0);
+        free(history);
+    }
+    ll_destroy_str(this->history);
+
     free(this->prompt);
+
     free(this);
 }
 
@@ -74,6 +86,41 @@ static void type_character(console_interface_t *console,
     }
 }
 
+static void replace_entire_line(char *replacement,
+                                console_interface_t *console,
+                                char *buffer,
+                                size_t maxcount,
+                                size_t *count,
+                                size_t *cursor_col,
+                                size_t cursor_row,
+                                size_t cursor_col_offset)
+{
+    size_t n = strlen(replacement);
+
+    // Backspace the entire current line.
+    for (size_t i = 0; i < n; ++i) {
+        backspace(console,
+                  buffer,
+                  count,
+                  cursor_col,
+                  cursor_row,
+                  cursor_col_offset);
+    }
+
+    // Re-type the history line.
+    for (size_t i = 0; i < n; ++i) {
+        char ch = replacement[i];
+        type_character(console,
+                       buffer,
+                       maxcount,
+                       count,
+                       cursor_col,
+                       cursor_row,
+                       cursor_col_offset,
+                       ch);
+    }
+}
+
 // Prompt for one line of user input on the console.
 static char * line_editor_getline(line_editor_impl_t *this)
 {
@@ -90,6 +137,7 @@ static char * line_editor_getline(line_editor_impl_t *this)
     size_t prompt_len = strnlen(this->prompt, this->prompt_size);
     size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
+    this->history_cursor = -1;
     this->console->puts(this->prompt);
     this->console->putchar(' ');
     size_t cursor_row = this->console->get_cursor_row();
@@ -131,8 +179,18 @@ static char * line_editor_getline(line_editor_impl_t *this)
                 // fall through
 
             case KEYCODE_DOWN_ARROW:
-                // TODO: Implement a linked list of history entries that we
-                //       can move through.
+                if (this->history_cursor > 0) {
+                    this->history_cursor--;
+                    char *history = ll_at_str(this->history, this->history_cursor);
+                    replace_entire_line(history,
+                                        this->console,
+                                        buffer,
+                                        maxcount,
+                                        &count,
+                                        &cursor_col,
+                                        cursor_row,
+                                        cursor_col_offset);
+                } 
                 break;
 
             case KEYCODE_NUMPAD_8:
@@ -140,46 +198,26 @@ static char * line_editor_getline(line_editor_impl_t *this)
 
             case KEYCODE_UP_ARROW:
                 {
-                    const size_t n = strlen(this->history);
+                    int history_count = (int)ll_count_str(this->history);
+                    if (this->history_cursor+1 < history_count) {
+                        this->history_cursor++;
 
-                    // We're going to swap the history line with the current
-                    // contents of the buffer. We can swap back and forth if we
-                    // like.
-                    // TODO: Implement a linked list of history entries that we
-                    //       can move through.
-                    char *alt_history = malloc(count+1);
-                    memcpy(alt_history, buffer, count+1);
-                    alt_history[count] = 0;
-
-                    // Backspace the entire current line.
-                    for (size_t i = 0; i < n; ++i) {
-                        backspace(this->console,
-                                  buffer,
-                                  &count,
-                                  &cursor_col,
-                                  cursor_row,
-                                  cursor_col_offset);
+                        char *history = ll_at_str(this->history, this->history_cursor);
+                        replace_entire_line(history,
+                                            this->console,
+                                            buffer,
+                                            maxcount,
+                                            &count,
+                                            &cursor_col,
+                                            cursor_row,
+                                            cursor_col_offset);
                     }
-
-                    // Re-type the history line.
-                    for (size_t i = 0; i < n; ++i) {
-                        const char ch = this->history[i];
-                        type_character(this->console,
-                                       buffer,
-                                       maxcount,
-                                       &count,
-                                       &cursor_col,
-                                       cursor_row,
-                                       cursor_col_offset,
-                                       ch);
-                    }
-
-                    free(this->history);
-                    this->history = alt_history;
                 } 
                 break;
 
             default:
+                this->history_cursor = -1;
+
                 switch (ch) {
                     case '\b':
                         backspace(this->console,
@@ -236,17 +274,21 @@ static void line_editor_set_prompt(line_editor_impl_t *this,
 
 // Add a line to the editor history.
 static void line_editor_add_history(line_editor_impl_t *this,
-                                    const char *history)
+                                    const char *line_of_history)
 {
     assert(this);
-    assert(history);
+    assert(line_of_history);
 
-    free(this->history);
+    size_t n = strlen(line_of_history) + 1;
+    char *the_copy = malloc(n);
+    memcpy(the_copy, line_of_history, n);
+    the_copy[n] = 0;
 
-    size_t n = strlen(history) + 1;
-    this->history = malloc(n);
-    memset(this->history, 0, n);
-    memcpy(this->history, history, n);
+    ll_push_front_str(this->history, the_copy);
+
+    // for (int i = 0, n = (int)ll_count_str(this->history); i < n; ++i) {
+    //     console_printf(this->console, "history %d -- %s\n", i, ll_at_str(this->history, i));
+    // }
 }
 
 // Returns a new initialized line_editor object.
@@ -267,7 +309,8 @@ line_editor_t* line_editor_init(console_interface_t *console,
     this->keyboard = keyboard;
     this->prompt_size = 0;
     this->prompt = NULL;
-    this->history = NULL;
+    this->history = ll_init_str();
+    this->history_cursor = -1;
 
     static const char default_prompt[] = ">";
     line_editor_set_prompt(this, sizeof(default_prompt), default_prompt);

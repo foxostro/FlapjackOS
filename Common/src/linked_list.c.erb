@@ -1,0 +1,107 @@
+// ll_<%= suffix %>.c is an automatically generated file. Do not edit directly.
+
+<% ll_node_t="ll_node_#{suffix}_t" %>
+<% ll_t="ll_#{suffix}_t" %>
+
+#include "ll_<%= suffix %>.h"
+#include <stdlib.h>
+#include <assert.h>
+
+<%= ll_node_t %> * ll_node_alloc_<%= suffix %>(<%= type %> value)
+{
+    <%= ll_node_t %> *node = malloc(sizeof(<%= ll_node_t %>));
+    node->prev = NULL;
+    node->next = NULL;
+    node->value = value;
+    return node;
+}
+
+void ll_node_add_<%= suffix %>(<%= ll_node_t %> *head, <%= ll_node_t %> *node)
+{
+    assert(head);
+    while (head->next) {
+        head = head->next;
+    }
+    head->next = node;
+    node->prev = head;
+}
+
+<%= ll_node_t %> * ll_node_at_<%= suffix %>(<%= ll_node_t %> *head, size_t index)
+{
+    for (size_t i = 0; i < index; ++i) {
+        assert(head && head->next);
+        head = head->next;
+    }
+    return head;
+}
+
+<%= type %> ll_node_remove_<%= suffix %>(<%= ll_node_t %> *node)
+{
+    <%= type %> value = node->value;
+    assert(node);
+    if (node->prev) {
+        node->prev->next = node->next;
+    }
+    if (node->next) {
+        node->next->prev = node->prev;
+    }
+    free(node);
+    return value;
+}
+
+<%= ll_t %> * ll_init_<%= suffix %>(void)
+{
+    <%= ll_t %> *list = malloc(sizeof(<%= ll_t %>));
+    list->head = NULL;
+    list->count = 0;
+    return list;
+}
+
+void ll_destroy_<%= suffix %>(<%= ll_t %> *list)
+{
+    while (ll_count_<%= suffix %>(list) > 0) {
+        ll_remove_<%= suffix %>(list, 0);
+    }
+    free(list);
+}
+
+void ll_push_back_<%= suffix %>(<%= ll_t %> *list, <%= type %> value)
+{
+    list->count++;
+    <%= ll_node_t %> *node = ll_node_alloc_<%= suffix %>(value);
+    if (list->head) {
+        ll_node_add_<%= suffix %>(list->head, node);
+    } else {
+        list->head = node;
+    }
+}
+
+void ll_push_front_<%= suffix %>(<%= ll_t %> *list, <%= type %> value)
+{
+    list->count++;
+    <%= ll_node_t %> *node = ll_node_alloc_<%= suffix %>(value);
+    if (list->head) {
+        list->head->prev = node;
+        node->next = list->head;
+    }
+    list->head = node;
+}
+
+<%= type %> ll_at_<%= suffix %>(<%= ll_t %> *list, size_t index)
+{
+    assert(index < list->count);
+    return ll_node_at_<%= suffix %>(list->head, index)->value;
+}
+
+<%= type %> ll_remove_<%= suffix %>(<%= ll_t %> *list, size_t index)
+{
+    assert(list->count > 0);
+    list->count--;
+    <%= ll_node_t %> *node = ll_node_at_<%= suffix %>(list->head, index);
+    return ll_node_remove_<%= suffix %>(node);
+}
+
+size_t ll_count_<%= suffix %>(<%= ll_t %> *list)
+{
+    return list->count;
+}

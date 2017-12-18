@@ -9,9 +9,18 @@ set(SOURCE_FILES
     "include/console_printf.h" "src/console_printf.c"
     "include/interfaces/console_interface.h"
     "include/interfaces/keyboard_interface.h"
+    "include/ll_str.h" "src/ll_str.c" # generated
     )
 include_directories("include")
 add_library(Common STATIC ${SOURCE_FILES})
+
+GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Common/include/linked_list.h.erb"
+                           "${PROJECT_SOURCE_DIR}/Common/include/ll_str.h"
+                           "suffix=str type=char*")
+
+GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Common/src/linked_list.c.erb"
+                           "${PROJECT_SOURCE_DIR}/Common/src/ll_str.c"
+                           "suffix=str type=char*")
 
 if(CMAKE_CROSSCOMPILING)
 
