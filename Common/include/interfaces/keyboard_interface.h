@@ -147,20 +147,20 @@ typedef struct {
     char ch;
 } keyboard_event_t;
 
-typedef struct {
+typedef struct keyboard_interface {
+    // Free memory associated with the keyboard object.
+    void (*destroy)(struct keyboard_interface *this);
+
     // Keyboard interrupt handler.
     // To be called when the keyboard interrupt fires. Implements the lower half of
     // the keyboard driver.
     // This is only meaningful when used in the kernel implementation.
-    void (*int_handler)(void);
+    void (*int_handler)(struct keyboard_interface *this);
 
     // Returns the name of the given key code.
     const char* (*keycode_name)(keycode_t key);
 
-    // Initializes the keyboard device and driver.
-    void (*init)(void);
-
     // Gets the next key event.
     // Blocks on the next key event and returns it in the specified event structure.
-    void (*get_event)(keyboard_event_t *output);
+    void (*get_event)(struct keyboard_interface *this, keyboard_event_t *output);
 } keyboard_interface_t;

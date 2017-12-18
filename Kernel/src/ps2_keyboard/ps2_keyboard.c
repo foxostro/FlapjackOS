@@ -4,15 +4,16 @@
 #include <inout.h>
 #include <console.h>
 #include <ctypes.h>
-#include <keyboard.h>
+#include <ps2_keyboard.h>
 #include <interrupt_asm.h>
 #include <halt.h>
 #include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #define KEYBOARD_DATA_PORT     (0x60)
 #define KEYBOARD_CONTROL_PORT  (0x64)
 #define MAX_SCANCODE_BYTES     (6)
-#define BUFFER_SIZE            (32)
 
 typedef enum {
     IDLE,
@@ -47,40 +48,38 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-static keycode_key_state_t g_key_state[KEYCODE_MAX];
-static keyboard_event_t s_ring_buffer[BUFFER_SIZE];
-static size_t s_dequeue_pos = 0;
-static size_t s_enqueue_pos = 0;
-static size_t s_count = 0;
-
-static void keyboard_enqueue(keyboard_event_t *event)
+static void keyboard_enqueue(ps2_keyboard_t *this, keyboard_event_t *event)
 {
-    // Drop keyboard input if the buffer is full.
-    if (s_count < BUFFER_SIZE) {
-        memcpy(&s_ring_buffer[s_enqueue_pos], event, sizeof(keyboard_event_t));
-        s_enqueue_pos++;
+    assert(this);
 
-        if (s_enqueue_pos >= BUFFER_SIZE) {
-            s_enqueue_pos = 0;
+    // Drop keyboard input if the buffer is full.
+    if (this->count < BUFFER_SIZE) {
+        memcpy(&this->ring_buffer[this->enqueue_pos], event, sizeof(keyboard_event_t));
+        this->enqueue_pos++;
+
+        if (this->enqueue_pos >= BUFFER_SIZE) {
+            this->enqueue_pos = 0;
         }
 
-        s_count++;
+        this->count++;
     }
 }
 
-static bool keyboard_dequeue(keyboard_event_t *event)
+static bool keyboard_dequeue(ps2_keyboard_t *this, keyboard_event_t *event)
 {
-    if(s_count == 0) {
+    assert(this);
+    
+    if(this->count == 0) {
         return false;
     }
 
-    s_count--;
+    this->count--;
 
-    memcpy(event, &s_ring_buffer[s_dequeue_pos], sizeof(keyboard_event_t));
-    s_dequeue_pos++;
+    memcpy(event, &this->ring_buffer[this->dequeue_pos], sizeof(keyboard_event_t));
+    this->dequeue_pos++;
 
-    if(s_dequeue_pos >= BUFFER_SIZE) {
-        s_dequeue_pos = 0;
+    if(this->dequeue_pos >= BUFFER_SIZE) {
+        this->dequeue_pos = 0;
     }
 
     return true;
@@ -95,15 +94,18 @@ const char* keyboard_keycode_name(keycode_t key)
     }
 }
 
-static void keyboard_clear_input()
+static void keyboard_clear_input(void)
 {
-    for (int i = 0; i < MAX_SCANCODE_BYTES; ++i) {
+    for (size_t i = 0; i < MAX_SCANCODE_BYTES; ++i) {
         (void)inb(KEYBOARD_DATA_PORT);       
     }
 }
 
 static bool keyboard_step_state_machine(keyboard_driver_state_t *state, keyboard_event_t *output)
 {
+    assert(state);
+    assert(output);
+    
     unsigned scancode = inb(KEYBOARD_DATA_PORT);
 
     bool escape = (*state == PROCESSING_ESCAPE_CODE);
@@ -138,17 +140,24 @@ static bool keyboard_step_state_machine(keyboard_driver_state_t *state, keyboard
     return true;
 }
 
-static void keyboard_int_handler(void)
+static void keyboard_destroy(ps2_keyboard_t *this)
 {
+    free(this);
+}
+
+static void keyboard_int_handler(ps2_keyboard_t *this)
+{
+    assert(this);
+    
     keyboard_driver_state_t state = IDLE;
     keyboard_event_t event = { .state = RELEASED, .key = KEYCODE_MAX };
 
     for (int i = 0; i < MAX_SCANCODE_BYTES && keyboard_step_state_machine(&state, &event); ++i);
 
     if (event.key < KEYCODE_MAX) {
-        g_key_state[event.key] = event.state;
+        this->key_state[event.key] = event.state;
 
-        bool shift = (g_key_state[KEYCODE_LEFT_SHIFT] == PRESSED) || (g_key_state[KEYCODE_RIGHT_SHIFT] == PRESSED);
+        bool shift = (this->key_state[KEYCODE_LEFT_SHIFT] == PRESSED) || (this->key_state[KEYCODE_RIGHT_SHIFT] == PRESSED);
         const char* char_tbl = shift ? g_keyboard_keycode_ascii_uppercase : g_keyboard_keycode_ascii_lowercase;
         event.ch = char_tbl[event.key];
 
@@ -158,19 +167,15 @@ static void keyboard_int_handler(void)
         // new thread can execute is through an interrupt which invokes the
         // scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
-        keyboard_enqueue(&event);
+        keyboard_enqueue(this, &event);
     }
 }
 
-static void keyboard_init(void)
+static void keyboard_get_event(ps2_keyboard_t *this, keyboard_event_t *event)
 {
-    for (size_t i = 0; i < KEYCODE_MAX; ++i) {
-        g_key_state[i] = RELEASED;
-    }
-}
-
-static void keyboard_get_event(keyboard_event_t *event)
-{
+    assert(this);
+    assert(event);
+    
     bool have_a_key = false;
 
     while (!have_a_key) {
@@ -180,16 +185,25 @@ static void keyboard_get_event(keyboard_event_t *event)
         // an interrupt which invokes the scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
         disable_interrupts();
-        have_a_key = keyboard_dequeue(event);
+        have_a_key = keyboard_dequeue(this, event);
         enable_interrupts();
         hlt();
     }
 }
 
-void get_keyboard_interface(keyboard_interface_t *keyboard)
+keyboard_interface_t* ps2_keyboard_init(void)
 {
-    keyboard->int_handler = keyboard_int_handler;
-    keyboard->keycode_name = keyboard_keycode_name;
-    keyboard->init = keyboard_init;
-    keyboard->get_event = keyboard_get_event;
+    ps2_keyboard_t *this = malloc(sizeof(ps2_keyboard_t));
+    memset(this, 0, sizeof(ps2_keyboard_t));
+
+    this->destroy = keyboard_destroy;
+    this->int_handler = keyboard_int_handler;
+    this->keycode_name = keyboard_keycode_name;
+    this->get_event = keyboard_get_event;
+    
+    for (size_t i = 0; i < KEYCODE_MAX; ++i) {
+        this->key_state[i] = RELEASED;
+    }
+
+    return (keyboard_interface_t *)this;
 }

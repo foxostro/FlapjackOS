@@ -1,7 +1,8 @@
 #include <line_editor_private.h>
 #include <stdbool.h>
-#include "flapjack_libc/string.h"
-#include "flapjack_libc/assert.h"
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #define MIN(a, b) \
    ({ __typeof__ (a) _a = (a); \
@@ -10,9 +11,7 @@
 
 static void line_editor_destroy(line_editor_impl_t *this)
 {
-    assert(this);
-    malloc_interface_t *allocator = this->allocator;
-    allocator->free(allocator, this);
+    free(this);
 }
 
 // Prompt for one line of user input on the console.
@@ -24,11 +23,11 @@ static char * line_editor_getline(line_editor_impl_t *this)
     assert(this->prompt);
 
     static const size_t buffer_size = 512;
-    char *buffer = this->allocator->malloc(this->allocator, buffer_size);
+    char *buffer = malloc(buffer_size);
 
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
-    size_t prompt_len = STRNLEN(this->prompt, this->prompt_size);
+    size_t prompt_len = strnlen(this->prompt, this->prompt_size);
     size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
     this->console->puts(this->prompt);
@@ -38,7 +37,7 @@ static char * line_editor_getline(line_editor_impl_t *this)
 
     while (!have_a_newline) {
         keyboard_event_t event;
-        this->keyboard->get_event(&event);
+        this->keyboard->get_event(this->keyboard, &event);
 
         if (event.state != PRESSED) {
             continue;
@@ -133,31 +132,28 @@ static void line_editor_set_prompt(line_editor_impl_t *this,
     assert(prompt_size > 0);
     assert(prompt);
 
-    this->allocator->free(this->allocator, this->prompt);
+    free(this->prompt);
 
     // Let's always allocate one more byte then requested just to make sure we
     // always have a nul-terminator at the end of the string.
-    this->prompt = this->allocator->malloc(this->allocator, prompt_size+1);
-    MEMSET(this->prompt, 0, prompt_size+1);
-    MEMCPY(this->prompt, prompt, prompt_size);
+    this->prompt = malloc(prompt_size+1);
+    memset(this->prompt, 0, prompt_size+1);
+    memcpy(this->prompt, prompt, prompt_size);
     this->prompt_size = prompt_size;
 }
 
 // Returns a new initialized line_editor object.
-line_editor_t* line_editor_init(malloc_interface_t *allocator,
-                                console_interface_t *console,
+line_editor_t* line_editor_init(console_interface_t *console,
                                 keyboard_interface_t *keyboard)
 {
-    assert(allocator);
     assert(console);
     assert(keyboard);
 
-    line_editor_impl_t *this = allocator->malloc(allocator, sizeof(line_editor_impl_t));
+    line_editor_impl_t *this = malloc(sizeof(line_editor_impl_t));
 
     this->destroy = line_editor_destroy;
     this->getline = line_editor_getline;
     this->set_prompt = line_editor_set_prompt;
-    this->allocator = allocator;
     this->console = console;
     this->keyboard = keyboard;
     this->prompt_size = 0;

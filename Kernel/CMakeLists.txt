@@ -9,9 +9,9 @@ set(CORE_INCLUDE_FILES
     "include/idt.h"
     "include/backtrace.h"
     "include/misc.h"
-    "include/timer.h"
+    "include/interfaces/timer_interface.h"
+    "include/pit_timer.h"
     "include/pic.h"
-    "include/keyboard.h"
     "include/ctypes.h"
     "include/panic.h"
     "include/interrupt_asm.h"
@@ -27,16 +27,18 @@ set(ISR_ERB_FILES
     )
 source_group("ISR Template Files" FILES ${ISR_ERB_FILES})
 
-set(KEYBOARD_INC_FILES
-    "src/keyboard/keyboard_scancodes_make_escaped.inc"
-    "src/keyboard/keyboard_scancodes_break.inc"
-    "src/keyboard/keyboard_keycode_ascii_uppercase.inc"
-    "src/keyboard/keyboard_keycode_names.inc"
-    "src/keyboard/keyboard_keycode_ascii_lowercase.inc"
-    "src/keyboard/keyboard_scancodes_break_escaped.inc"
-    "src/keyboard/keyboard_scancodes_make.inc"
+set(PS2_KEYBOARD_FILES
+    "include/ps2_keyboard.h"
+    "src/ps2_keyboard/ps2_keyboard.c"
+    "src/ps2_keyboard/keyboard_scancodes_make_escaped.inc"
+    "src/ps2_keyboard/keyboard_scancodes_break.inc"
+    "src/ps2_keyboard/keyboard_keycode_ascii_uppercase.inc"
+    "src/ps2_keyboard/keyboard_keycode_names.inc"
+    "src/ps2_keyboard/keyboard_keycode_ascii_lowercase.inc"
+    "src/ps2_keyboard/keyboard_scancodes_break_escaped.inc"
+    "src/ps2_keyboard/keyboard_scancodes_make.inc"
     )
-source_group("Keyboard Inc" FILES ${KEYBOARD_INC_FILES})
+source_group("PS2 Keyboard Driver" FILES ${PS2_KEYBOARD_FILES})
 
 set(SOURCE_FILES
     "src/gdt.c"
@@ -61,15 +63,14 @@ set(PLATFORM_SPECIFIC_SOURCE_FILES
     "src/ltr.S"
     "src/panic.c"
     "src/pic.c"
-    "src/timer.c"
-    "src/keyboard/keyboard.c"
+    "src/pit_timer.c"
     )
 source_group("Platform-specific" FILES ${PLATFORM_SPECIFIC_SOURCE_FILES})
 
 set(ALL_PLATFORM_SPECIFIC_SOURCE_FILES
     ${CORE_INCLUDE_FILES}
     ${ISR_ERB_FILES}
-    ${KEYBOARD_INC_FILES}
+    ${PS2_KEYBOARD_FILES}
     ${SOURCE_FILES}
     ${PLATFORM_SPECIFIC_SOURCE_FILES}
     )

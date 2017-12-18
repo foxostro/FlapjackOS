@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <seg.h>
 #include <gdt.h>
@@ -9,14 +10,14 @@
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
+#include <pit_timer.h>
+#include <ps2_keyboard.h>
 #include <console.h>
 #include <console_printf.h>
-#include <timer.h>
 #include <inout.h>
 #include <halt.h>
 #include <panic.h>
 #include <backtrace.h>
-#include <keyboard.h>
 #include <line_editor.h>
 #include <multiboot.h>
 #include <malloc/malloc_zone.h>
@@ -30,8 +31,8 @@ console_interface_t g_console;
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
-static keyboard_interface_t s_keyboard;
-static timer_interface_t s_timer;
+static keyboard_interface_t *s_keyboard;
+static timer_interface_t *s_timer;
 
 void interrupt_dispatch(unsigned interrupt_number,
                         unsigned edi,
@@ -53,11 +54,11 @@ void interrupt_dispatch(unsigned interrupt_number,
 
     switch (interrupt_number) {
         case IDT_KEY:
-            s_keyboard.int_handler();
+            s_keyboard->int_handler(s_keyboard);
             break;
 
         case IDT_TIMER:
-            s_timer.int_handler();
+            s_timer->int_handler(s_timer);
             break;
 
         case IDT_DE:
@@ -160,12 +161,33 @@ void interrupt_dispatch(unsigned interrupt_number,
     }
 }
 
+static malloc_interface_t* initialize_kernel_heap(multiboot_info_t *mb_info)
+{
+    // Find contiguous free memory the kernel can freely use, e.g., for a heap.
+    if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
+        panic("The bootloader did not provide memory information.");
+    }
+
+    // The kernel gets the lower 16MB of high memory.
+    // The rest goes to user programs as managed by the frame allocator.
+    static const unsigned PAGE_SIZE = 4096;
+    static const uintptr_t USER_MEM_START = 16*1024*1024;
+    extern char kernel_image_end[];
+
+    // Round up to the nearest frame.
+    uintptr_t heapBeginAddr = ((uintptr_t)kernel_image_end & ~(PAGE_SIZE-1)) + PAGE_SIZE;
+    uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
+
+    // Initialize the kernel heap allocator using the memory region we identified above.
+    malloc_interface_t *allocator = malloc_zone_init((void *)heapBeginAddr, heapLen);
+    set_global_allocator(allocator);
+    return allocator;
+}
+
 __attribute__((noreturn))
 void kernel_main(multiboot_info_t *mb_info, void *istack)
 {
     console_interface_t *console = &g_console;
-    keyboard_interface_t *keyboard = &s_keyboard;
-    timer_interface_t *timer = &s_timer;
 
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
@@ -191,54 +213,31 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Initialize the console output driver.
     get_console_interface(console);
     console->init((vgachar_t *)0xB8000);
-    console_printf(console, "mb_info = %p\n", mb_info);
-    console_printf(console, "istack = %p\n", istack);
 
-    // Find contiguous free memory the kernel can freely use, e.g., for a heap.
-    malloc_interface_t *allocator;
-    {
-        if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
-            panic("The bootloader did not provide memory information.");
-        }
+    // Initialize malloc, &c.
+    console_printf(console, "%u KiB low memory, %u MiB high memory\n",
+                   mb_info->mem_lower, mb_info->mem_upper/1024);
+    initialize_kernel_heap(mb_info);
 
-        console_printf(console, "%u KiB low memory, %u MiB high memory\n",
-                       mb_info->mem_lower, mb_info->mem_upper/1024);
+    // Initialize the PS/2 keyboard driver.
+    s_keyboard = ps2_keyboard_init();
 
-        // The kernel gets the lower 16MB of high memory.
-        // The rest goes to user programs as managed by the frame allocator.
-        static const unsigned PAGE_SIZE = 4096;
-        static const uintptr_t USER_MEM_START = 16*1024*1024;
-        extern char kernel_image_end[];
-
-        // Round up to the nearest frame.
-        uintptr_t heapBeginAddr = ((uintptr_t)kernel_image_end & ~(PAGE_SIZE-1)) + PAGE_SIZE;
-        uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
-
-        // Initialize the kernel heap allocator using the memory region we identified above.
-        allocator = malloc_zone_init((void *)heapBeginAddr, heapLen);
-    }
-
-    // Initialize the keyboard driver.
-    get_keyboard_interface(keyboard);
-    keyboard->init();
-
-    // Configure the PIC timer chip so that it fires an interrupt every 10ms.
-    get_timer_interface(timer);
-    timer->init(TIMER_RATE_10ms, TIMER_LEAP_INTERVAL_10ms, TIMER_LEAP_TICKS_10ms);
+    // Configure the PIT timer chip so that it fires an interrupt every 10ms.
+    s_timer = pit_timer_init(TIMER_RATE_10ms,
+                             TIMER_LEAP_INTERVAL_10ms,
+                             TIMER_LEAP_TICKS_10ms);
 
     // After this point, interrupts will start firing.
     enable_interrupts();
 
-    // Read lines of input from forever, but don't do anything with them.
+    // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
-    line_editor_t *rl = line_editor_init(allocator, console, keyboard);
+    line_editor_t *rl = line_editor_init(console, s_keyboard);
     while (true) {
         char *buffer = rl->getline(rl);
         console_printf(console, "Got: %s\n", buffer);
-        allocator->free(allocator, buffer);
+        free(buffer);
     }
-
-    // There's no need to call rl->destroy() because this is unreachable.
 
     panic("We should never reach this point.");
     __builtin_unreachable();

@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <interfaces/console_interface.h>
 #include <interfaces/keyboard_interface.h>
-#include <interfaces/malloc_interface.h>
 
 typedef struct line_editor_interface {
     // Frees memory associated with the line_editor object.
@@ -25,11 +24,13 @@ typedef struct line_editor_interface {
 } line_editor_t;
 
 // Returns a new initialized line_editor object.
+// This can be used to read lines of user input from the terminal and provides
+// useful UI affordances such as nice editing functionality, a prompt, history,
+// and such.
 // allocator -- Memory allocator
 // console -- The console where we display characters.
 // keyboard -- The keyboard which gives us user input.
 // prompt_size -- The capacity of the buffer in `prompt'
 // prompt -- Prompt string to display on the console.
-line_editor_t* line_editor_init(malloc_interface_t *allocator,
-                                console_interface_t *console,
+line_editor_t* line_editor_init(console_interface_t *console,
                                 keyboard_interface_t *keyboard);
