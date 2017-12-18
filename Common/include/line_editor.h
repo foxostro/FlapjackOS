@@ -21,6 +21,10 @@ typedef struct line_editor_interface {
     void (*set_prompt)(struct line_editor_interface *this,
                        size_t prompt_size,
                        const char *prompt);
+
+    // Add a line to the editor history.
+    void (*add_history)(struct line_editor_interface *this,
+                        const char *history);
 } line_editor_t;
 
 // Returns a new initialized line_editor object.

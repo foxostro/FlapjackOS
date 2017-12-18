@@ -232,9 +232,10 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
 
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
-    line_editor_t *rl = line_editor_init(console, s_keyboard);
+    line_editor_t *ed = line_editor_init(console, s_keyboard);
     while (true) {
-        char *buffer = rl->getline(rl);
+        char *buffer = ed->getline(ed);
+        ed->add_history(ed, buffer);
         console_printf(console, "Got: %s\n", buffer);
         free(buffer);
     }
