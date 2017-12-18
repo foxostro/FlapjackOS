@@ -82,7 +82,7 @@ static vgachar_t console_make_char(char ch)
 
 static void console_newline(void)
 {
-    if (s_cursor_row == CONSOLE_HEIGHT) {
+    if (s_cursor_row == CONSOLE_HEIGHT-1) {
         for (size_t row = 1; row <= CONSOLE_HEIGHT; row++) {
             for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
                 vgachar_t ch = console_get_char(row, col);
