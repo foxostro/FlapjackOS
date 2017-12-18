@@ -8,33 +8,6 @@
       __typeof__ (b) _b = (b); \
       _a < _b ? _a : _b; })
 
-static void readline_destroy(readline_impl_t *this);
-static size_t readline(readline_impl_t *this, size_t buffer_size, char *buffer);
-
-readline_t* readline_init(malloc_interface_t *allocator,
-                          console_interface_t *console,
-                          keyboard_interface_t *keyboard,
-                          size_t prompt_size, const char *prompt)
-{
-    assert(allocator);
-    assert(console);
-    assert(keyboard);
-    assert(prompt_size>0);
-    assert(prompt);
-
-    readline_impl_t *this = allocator->malloc(allocator, sizeof(readline_impl_t));
-
-    this->destroy = readline_destroy;
-    this->readline = readline;
-    this->allocator = allocator;
-    this->console = console;
-    this->keyboard = keyboard;
-    this->prompt_size = prompt_size;
-    this->prompt = prompt;
-
-    return (readline_t *)this;
-}
-
 static void readline_destroy(readline_impl_t *this)
 {
     assert(this);
@@ -43,18 +16,15 @@ static void readline_destroy(readline_impl_t *this)
 }
 
 // Prompt for one line of user input on the console.
-// Returns the number of characters placed into the buffer.
-// buffer_size -- The capacity of the buffer in `buffer'
-// buffer -- The output string is written here.
-static size_t readline(readline_impl_t *this, size_t buffer_size, char *buffer)
+static char * readline(readline_impl_t *this)
 {
     assert(this);
     assert(this->console);
     assert(this->keyboard);
     assert(this->prompt);
 
-    assert(buffer_size > 0);
-    assert(buffer);
+    static const size_t buffer_size = 512;
+    char *buffer = this->allocator->malloc(this->allocator, buffer_size);
 
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
@@ -152,5 +122,49 @@ static size_t readline(readline_impl_t *this, size_t buffer_size, char *buffer)
         } // switch (key)
     } // while
 
-    return count;
+    return buffer;
+}
+
+// Change the prompt displayed at the beginning of the line.
+static void readline_set_prompt(readline_impl_t *this,
+                                size_t prompt_size, const char *prompt)
+{
+    assert(this);
+    assert(prompt_size > 0);
+    assert(prompt);
+
+    this->allocator->free(this->allocator, this->prompt);
+
+    // Let's always allocate one more byte then requested just to make sure we
+    // always have a nul-terminator at the end of the string.
+    this->prompt = this->allocator->malloc(this->allocator, prompt_size+1);
+    MEMSET(this->prompt, 0, prompt_size+1);
+    MEMCPY(this->prompt, prompt, prompt_size);
+    this->prompt_size = prompt_size;
+}
+
+// Returns a new initialized readline object.
+readline_t* readline_init(malloc_interface_t *allocator,
+                          console_interface_t *console,
+                          keyboard_interface_t *keyboard)
+{
+    assert(allocator);
+    assert(console);
+    assert(keyboard);
+
+    readline_impl_t *this = allocator->malloc(allocator, sizeof(readline_impl_t));
+
+    this->destroy = readline_destroy;
+    this->readline = readline;
+    this->set_prompt = readline_set_prompt;
+    this->allocator = allocator;
+    this->console = console;
+    this->keyboard = keyboard;
+    this->prompt_size = 0;
+    this->prompt = NULL;
+
+    static const char default_prompt[] = ">";
+    readline_set_prompt(this, sizeof(default_prompt), default_prompt);
+
+    return (readline_t *)this;
 }

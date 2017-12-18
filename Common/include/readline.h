@@ -10,15 +10,21 @@ typedef struct readline_interface {
     void (*destroy)(struct readline_interface *this);
 
     // Prompt for one line of user input on the console.
-    // Returns the number of characters placed into the buffer.
-    // buffer_size -- The capacity of the buffer in `buffer'
-    // buffer -- The output string is written here.
-    size_t (*readline)(struct readline_interface *this,
-                       size_t buffer_size,
-                       char *buffer);
+    // Returns a string containing the line of user input.
+    // It is the responsibility of the caller to free this string when finished.
+    // It will have been allocated using the allocator originally passed to
+    // readline_init().
+    char* (*readline)(struct readline_interface *this);
+
+    // Change the prompt displayed at the beginning of the line.
+    // The specified string is copied and so the buffer is not required to live
+    // past the call to this method.
+    void (*set_prompt)(struct readline_interface *this,
+                       size_t prompt_size,
+                       const char *prompt);
 } readline_t;
 
-// Initializes the readline object.
+// Returns a new initialized readline object.
 // allocator -- Memory allocator
 // console -- The console where we display characters.
 // keyboard -- The keyboard which gives us user input.
@@ -26,5 +32,4 @@ typedef struct readline_interface {
 // prompt -- Prompt string to display on the console.
 readline_t* readline_init(malloc_interface_t *allocator,
                           console_interface_t *console,
-                          keyboard_interface_t *keyboard,
-                          size_t prompt_size, const char *prompt);
+                          keyboard_interface_t *keyboard);
