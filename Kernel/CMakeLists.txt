@@ -85,20 +85,10 @@ link_directories(${COMMON_LIBRARIES_DIR}
                  ${MALLOC_LIBRARIES_DIRS}
                  )
 
-# Generate source files from template files.
-function(GenerateSourceFromTemplate TEMPLATE_FILENAME)
-    set(ERB_TOOL "${PROJECT_SOURCE_DIR}/scripts/erb.sh")
-    string(REGEX REPLACE "\\.[^.]*$" "" OUTPUT_FILENAME ${TEMPLATE_FILENAME})
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME}
-        COMMAND ${ERB_TOOL} ${PROJECT_SOURCE_DIR}/Kernel/src/${TEMPLATE_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME}
-        DEPENDS ${PROJECT_SOURCE_DIR}/Kernel/src/${TEMPLATE_FILENAME}
-        VERBATIM
-    )
-endfunction(GenerateSourceFromTemplate)
-
-GenerateSourceFromTemplate(isr_install.c.erb)
-GenerateSourceFromTemplate(isr_wrapper_asm.S.erb)
+GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_install.c.erb"
+                           "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c")
+GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_wrapper_asm.S.erb"
+                           "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")
 
 # We can only build the kernel static library when cross-compiling to the target
 # architecture. Also, it's not very testable since it will try to actually make

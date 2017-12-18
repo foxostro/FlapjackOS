@@ -5,6 +5,27 @@ enable_language(ASM)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
+# Function to generate source code from a template file.
+function(GenerateSourceFromTemplate
+         TEMPLATE_FILENAME
+         OUTPUT_FILENAME)
+
+    if (ARGN GREATER 2)
+        set(PARAMS ${ARGV4})
+    else()
+        set(PARAMS "")
+    endif()
+
+    set(ERB_TOOL "${PROJECT_SOURCE_DIR}/scripts/erb.sh")
+    add_custom_command(
+        OUTPUT ${OUTPUT_FILENAME}
+        COMMAND ${ERB_TOOL} ${TEMPLATE_FILENAME} ${OUTPUT_FILENAME} ${PARAMS}
+        DEPENDS ${TEMPLATE_FILENAME}
+        VERBATIM
+    )
+
+endfunction(GenerateSourceFromTemplate)
+
 # Let's stick strictly to the C11 standard.
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
