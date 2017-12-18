@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stddef.h>
-#include <interfaces/malloc_interface.h>
+#include <malloc/malloc_zone.h>
 
 typedef struct malloc_block
 {

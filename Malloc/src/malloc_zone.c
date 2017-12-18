@@ -1,5 +1,6 @@
 #include <malloc/malloc_zone.h>
 #include <malloc/malloc_zone_private.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>

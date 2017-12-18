@@ -230,17 +230,19 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     enable_interrupts();
 
     const char prompt[] = ">";
-    readline_t *readline_ctx = readline_init(allocator, console, keyboard, sizeof(prompt), prompt);
+    readline_t *readline = readline_init(allocator, console, keyboard, sizeof(prompt), prompt);
 
     // Read lines of input from forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     while (true) {
         static const size_t buffer_size = 512;
         char *buffer = allocator->malloc(allocator, buffer_size);
-        readline(readline_ctx, buffer_size, buffer);
+        readline->readline(readline, buffer_size, buffer);
         console_printf(console, "Got: %s\n", buffer);
         allocator->free(allocator, buffer);
     }
+
+    // There's no need to call readline->destroy() because this is unreachable.
 
     panic("We should never reach this point.");
     __builtin_unreachable();

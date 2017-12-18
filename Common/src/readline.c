@@ -1,5 +1,5 @@
+#include <readline_private.h>
 #include <stdbool.h>
-#include "flapjack_libc/../readline.h"
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
 
@@ -8,13 +8,8 @@
       __typeof__ (b) _b = (b); \
       _a < _b ? _a : _b; })
 
-typedef struct readline {
-    malloc_interface_t *allocator;
-    console_interface_t *console;
-    keyboard_interface_t *keyboard;
-    size_t prompt_size;
-    const char *prompt;
-} readline_t;
+static void readline_destroy(readline_impl_t *this);
+static size_t readline(readline_impl_t *this, size_t buffer_size, char *buffer);
 
 readline_t* readline_init(malloc_interface_t *allocator,
                           console_interface_t *console,
@@ -27,18 +22,20 @@ readline_t* readline_init(malloc_interface_t *allocator,
     assert(prompt_size>0);
     assert(prompt);
 
-    readline_t *this = allocator->malloc(allocator, sizeof(readline_t));
+    readline_impl_t *this = allocator->malloc(allocator, sizeof(readline_impl_t));
 
+    this->destroy = readline_destroy;
+    this->readline = readline;
     this->allocator = allocator;
     this->console = console;
     this->keyboard = keyboard;
     this->prompt_size = prompt_size;
     this->prompt = prompt;
 
-    return this;
+    return (readline_t *)this;
 }
 
-void readline_destroy(readline_t *this)
+static void readline_destroy(readline_impl_t *this)
 {
     assert(this);
     malloc_interface_t *allocator = this->allocator;
@@ -49,7 +46,7 @@ void readline_destroy(readline_t *this)
 // Returns the number of characters placed into the buffer.
 // buffer_size -- The capacity of the buffer in `buffer'
 // buffer -- The output string is written here.
-size_t readline(readline_t *this, size_t buffer_size, char *buffer)
+static size_t readline(readline_impl_t *this, size_t buffer_size, char *buffer)
 {
     assert(this);
     assert(this->console);

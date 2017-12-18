@@ -5,8 +5,6 @@
 #include <check.h>
 #include <assert.h>
 #include <string.h>
-
-#include <malloc/malloc_zone.h>
 #include <malloc/malloc_zone_private.h>
 
 #define VERBOSE 0

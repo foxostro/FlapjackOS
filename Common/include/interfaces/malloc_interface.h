@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stddef.h>
-#include <stdbool.h>
 
 typedef struct malloc_interface {
     // Allocates a block of memory of the given size from the malloc zone.
