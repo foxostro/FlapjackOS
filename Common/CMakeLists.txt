@@ -8,7 +8,7 @@ set(SOURCE_FILES
     "include/line_editor.hpp" "src/line_editor.cpp"
     "include/console_printf.h" "src/console_printf.c"
     "include/interfaces/console_interface.h"
-    "include/interfaces/keyboard.hpp"
+    "include/interfaces/keyboard_device.hpp"
     "include/ll_str.h" "src/ll_str.c" # generated
     "src/c_plus_plus_support.cpp"
     )

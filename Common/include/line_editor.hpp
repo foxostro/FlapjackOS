@@ -3,13 +3,13 @@
 #include <stddef.h>
 #include <ll_str.h>
 #include <interfaces/console_interface.h>
-#include <interfaces/keyboard.hpp>
+#include <interfaces/keyboard_device.hpp>
 
 // This can be used to read lines of user input from the terminal and provides
 // useful UI affordances such as nice editing functionality, a prompt, history,
 class line_editor {
     console_interface_t *con;
-    keyboard &kb;
+    keyboard_device &kb;
     size_t prompt_size;
     char *prompt;
     ll_str_t *history;
@@ -44,7 +44,7 @@ public:
     // and such.
     // con -- The console device where we display characters.
     // kb -- The keyboard device which gives us user input.
-    line_editor(console_interface_t *con, keyboard &kb);
+    line_editor(console_interface_t *con, keyboard_device &kb);
 
     // Prompt for one line of user input on the console.
     // Returns a string containing the line of user input.

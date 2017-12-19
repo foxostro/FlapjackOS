@@ -1,14 +1,14 @@
 #pragma once
 
 #include <stddef.h>
-#include <timer.hpp>
+#include <timer_device.hpp>
 
 #define CLOCK_FREQUENCY          (1193182) // Clock cycles per second.
 #define TIMER_RATE_10ms          (11931)
 #define TIMER_LEAP_INTERVAL_10ms (50)
 #define TIMER_LEAP_TICKS_10ms    (41)
 
-class pit_timer : public timer {
+class pit_timer_device : public timer_device {
     unsigned clock_ticks;
     unsigned clock_seconds;
     unsigned leap_counter;
@@ -25,9 +25,9 @@ public:
     // leap_ticks -- Every few timer interrupts, it may be necessary to add
     // a few leap ticks to the tick count to keep the timer accurate. This is the
     // number of leap ticks that will be added at such a time.
-    pit_timer(unsigned short timer_rate,
-              int leap_interval,
-              int leap_ticks);
+    pit_timer_device(unsigned short timer_rate,
+                     int leap_interval,
+                     int leap_ticks);
 
     void int_handler() override;
     unsigned ticks() override;

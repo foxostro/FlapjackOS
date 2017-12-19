@@ -1,4 +1,4 @@
-#include <pit_timer.hpp>
+#include <pit_timer_device.hpp>
 #include <stdint.h>
 #include <pic.h>
 #include <inout.h>
@@ -10,7 +10,7 @@
 #define TIMER_MODE_IO_PORT   (0x43)
 #define TIMER_SQUARE_WAVE    (0x36)
 
-void pit_timer::int_handler()
+void pit_timer_device::int_handler()
 {
     if (++leap_counter > timer_leap_interval) {
         leap_counter = 0; // reset
@@ -24,19 +24,19 @@ void pit_timer::int_handler()
     }
 }
 
-unsigned pit_timer::ticks()
+unsigned pit_timer_device::ticks()
 {
     return clock_ticks;
 }
 
-unsigned pit_timer::seconds()
+unsigned pit_timer_device::seconds()
 {
     return clock_seconds;
 }
 
-pit_timer::pit_timer(unsigned short _timer_rate,
-                     int leap_interval,
-                     int leap_ticks)
+pit_timer_device::pit_timer_device(unsigned short _timer_rate,
+                                   int leap_interval,
+                                   int leap_ticks)
 : timer_rate(_timer_rate),
   timer_leap_interval(leap_interval),
   timer_leap_ticks(leap_ticks)

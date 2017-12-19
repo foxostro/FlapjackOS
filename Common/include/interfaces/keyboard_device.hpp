@@ -147,9 +147,9 @@ typedef struct {
     char ch;
 } keyboard_event_t;
 
-class keyboard {
+class keyboard_device {
 public:
-    virtual ~keyboard() = default;
+    virtual ~keyboard_device() = default;
 
     // Keyboard interrupt handler.
     // To be called when the keyboard interrupt fires. Implements the lower half of

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <interfaces/keyboard.hpp>
+#include <interfaces/keyboard_device.hpp>
 #include <stddef.h>
 
 #define BUFFER_SIZE (32)
 
-class ps2_keyboard : public keyboard {
+class ps2_keyboard_device : public keyboard_device {
     typedef enum {
         IDLE,
         PROCESSING_ESCAPE_CODE
@@ -23,7 +23,7 @@ class ps2_keyboard : public keyboard {
     bool step_state_machine(keyboard_driver_state_t *state, keyboard_event_t *output);
 
 public:
-    ps2_keyboard();
+    ps2_keyboard_device();
 
     void int_handler() override;
     const char* keycode_name(keycode_t key) override;

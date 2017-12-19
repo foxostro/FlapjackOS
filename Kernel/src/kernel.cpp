@@ -20,8 +20,8 @@
 #include <multiboot.h>
 #include <malloc/malloc_zone.h>
 
-#include <pit_timer.hpp>
-#include <ps2_keyboard.hpp>
+#include <pit_timer_device.hpp>
+#include <ps2_keyboard_device.hpp>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
@@ -32,8 +32,8 @@ console_interface_t g_console;
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
-static keyboard *s_keyboard;
-static timer *s_timer;
+static keyboard_device *s_keyboard;
+static timer_device *s_timer;
 
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.
@@ -226,12 +226,12 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     initialize_kernel_heap(mb_info);
 
     // Initialize the PS/2 keyboard driver.
-    s_keyboard = new ps2_keyboard();
+    s_keyboard = new ps2_keyboard_device();
 
     // Configure the PIT timer chip so that it fires an interrupt every 10ms.
-    s_timer = new pit_timer(TIMER_RATE_10ms,
-                            TIMER_LEAP_INTERVAL_10ms,
-                            TIMER_LEAP_TICKS_10ms);
+    s_timer = new pit_timer_device(TIMER_RATE_10ms,
+                                   TIMER_LEAP_INTERVAL_10ms,
+                                   TIMER_LEAP_TICKS_10ms);
 
     // After this point, interrupts will start firing.
     enable_interrupts();

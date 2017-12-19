@@ -27,7 +27,7 @@ line_editor::~line_editor()
 }
 
 line_editor::line_editor(console_interface_t *_console,
-                         keyboard &_keyboard)
+                         keyboard_device &_keyboard)
  : con(_console),
    kb(_keyboard),
    prompt_size(0),

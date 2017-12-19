@@ -1,4 +1,4 @@
-#include <ps2_keyboard.hpp>
+#include <ps2_keyboard_device.hpp>
 #include <stdint.h>
 #include <stdbool.h>
 #include <limits.h>
@@ -43,7 +43,7 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-void ps2_keyboard::enqueue(keyboard_event_t *event)
+void ps2_keyboard_device::enqueue(keyboard_event_t *event)
 {
     // Drop keyboard input if the buffer is full.
     if (count < BUFFER_SIZE) {
@@ -58,7 +58,7 @@ void ps2_keyboard::enqueue(keyboard_event_t *event)
     }
 }
 
-bool ps2_keyboard::dequeue(keyboard_event_t *event)
+bool ps2_keyboard_device::dequeue(keyboard_event_t *event)
 {
     if(count == 0) {
         return false;
@@ -76,7 +76,7 @@ bool ps2_keyboard::dequeue(keyboard_event_t *event)
     return true;
 }
 
-const char* ps2_keyboard::keycode_name(keycode_t key)
+const char* ps2_keyboard_device::keycode_name(keycode_t key)
 {
     if (key < KEYCODE_MAX) {
         return g_keycode_names[key];
@@ -85,14 +85,14 @@ const char* ps2_keyboard::keycode_name(keycode_t key)
     }
 }
 
-void ps2_keyboard::clear_input(void)
+void ps2_keyboard_device::clear_input(void)
 {
     for (size_t i = 0; i < MAX_SCANCODE_BYTES; ++i) {
         (void)inb(KEYBOARD_DATA_PORT);
     }
 }
 
-bool ps2_keyboard::step_state_machine(keyboard_driver_state_t *state, keyboard_event_t *output)
+bool ps2_keyboard_device::step_state_machine(keyboard_driver_state_t *state, keyboard_event_t *output)
 {
     assert(state);
     assert(output);
@@ -131,7 +131,7 @@ bool ps2_keyboard::step_state_machine(keyboard_driver_state_t *state, keyboard_e
     return true;
 }
 
-void ps2_keyboard::int_handler()
+void ps2_keyboard_device::int_handler()
 {
     keyboard_driver_state_t state = IDLE;
 
@@ -158,7 +158,7 @@ void ps2_keyboard::int_handler()
     }
 }
 
-void ps2_keyboard::get_event(keyboard_event_t *event)
+void ps2_keyboard_device::get_event(keyboard_event_t *event)
 {
     assert(event);
 
@@ -177,7 +177,7 @@ void ps2_keyboard::get_event(keyboard_event_t *event)
     }
 }
 
-ps2_keyboard::ps2_keyboard()
+ps2_keyboard_device::ps2_keyboard_device()
  : dequeue_pos(0),
    enqueue_pos(0),
    count(0)
