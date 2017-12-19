@@ -1,6 +1,10 @@
 // Abstract interface for a VGA console output driver.
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -70,3 +74,7 @@ typedef struct {
     size_t (*get_cursor_row)(void);
     size_t (*get_cursor_col)(void);
 } console_interface_t;
+
+#ifdef __cplusplus
+}
+#endif

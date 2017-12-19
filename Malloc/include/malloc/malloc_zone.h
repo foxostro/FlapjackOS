@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <interfaces/malloc_interface.h>
 
@@ -8,3 +12,7 @@
 // memory.
 // Allocations from the zone will always be taken from this memory region.
 malloc_interface_t* malloc_zone_init(void *start, size_t size);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 typedef struct malloc_interface {
@@ -27,3 +31,7 @@ typedef struct malloc_interface {
     // no operation is performed.
     void (*free)(struct malloc_interface *this, void *ptr);
 } malloc_interface_t;
+
+#ifdef __cplusplus
+}
+#endif

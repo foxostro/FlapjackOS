@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <malloc/malloc_zone.h>
 
@@ -27,3 +31,7 @@ _Static_assert(offsetof(malloc_zone_t, realloc) == offsetof(malloc_interface_t, 
 
 _Static_assert(offsetof(malloc_zone_t, free) == offsetof(malloc_interface_t, free),
     "Incorrect offset prevents correct casting behavior when casting between types.");
+
+#ifdef __cplusplus
+}
+#endif

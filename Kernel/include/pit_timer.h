@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <interfaces/timer_interface.h>
 
@@ -45,3 +49,7 @@ _Static_assert(offsetof(pit_timer_t, destroy) == offsetof(timer_interface_t, des
 timer_interface_t* pit_timer_init(unsigned short timer_rate,
                                   int leap_interval,
                                   int leap_ticks);
+
+#ifdef __cplusplus
+}
+#endif

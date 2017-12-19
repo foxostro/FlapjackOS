@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -24,3 +28,7 @@ void gdt_create_flat_mapping(gdt_entry_t *gdt, size_t size, uint32_t tss);
 
 // Loads a new GDT.
 void lgdt(void *gdt, unsigned limit);
+
+#ifdef __cplusplus
+}
+#endif

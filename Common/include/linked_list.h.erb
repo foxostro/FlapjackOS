@@ -1,4 +1,9 @@
 // ll_<%= suffix %>.h is an automatically generated file. Do not edit directly.
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 <% ll_node_t="ll_node_#{suffix}_t" %>
 <% ll_t="ll_#{suffix}_t" %>
@@ -55,3 +60,8 @@ void ll_push_front_<%= suffix %>(<%= ll_t %> *list, <%= type %> value);
 
 // Returns the number of items in the list.
 size_t ll_count_<%= suffix %>(<%= ll_t %> *list);
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,4 +1,9 @@
 // ll_str.h is an automatically generated file. Do not edit directly.
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 
@@ -55,3 +60,8 @@ char* ll_remove_str(ll_str_t *list, size_t index);
 
 // Returns the number of items in the list.
 size_t ll_count_str(ll_str_t *list);
+
+
+#ifdef __cplusplus
+}
+#endif

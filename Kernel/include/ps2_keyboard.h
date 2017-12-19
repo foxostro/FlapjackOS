@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <interfaces/keyboard_interface.h>
 
 #define BUFFER_SIZE (32)
@@ -31,3 +35,7 @@ _Static_assert(offsetof(ps2_keyboard_t, get_event) == offsetof(keyboard_interfac
 
 // Initializes the keyboard device and driver.
 keyboard_interface_t* ps2_keyboard_init(void);
+
+#ifdef __cplusplus
+}
+#endif

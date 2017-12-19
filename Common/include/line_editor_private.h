@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <ll_str.h>
 #include <line_editor.h>
@@ -29,3 +33,7 @@ _Static_assert(offsetof(line_editor_impl_t, set_prompt) == offsetof(line_editor_
 
 _Static_assert(offsetof(line_editor_impl_t, add_history) == offsetof(line_editor_t, add_history),
     "Incorrect offset prevents correct casting behavior when casting between types.");
+
+#ifdef __cplusplus
+}
+#endif

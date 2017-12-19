@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <interfaces/console_interface.h>
 #include <interfaces/keyboard_interface.h>
@@ -38,3 +42,8 @@ typedef struct line_editor_interface {
 // prompt -- Prompt string to display on the console.
 line_editor_t* line_editor_init(console_interface_t *console,
                                 keyboard_interface_t *keyboard);
+
+
+#ifdef __cplusplus
+}
+#endif

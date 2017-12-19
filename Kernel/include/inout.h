@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 // Reads 1 byte from given port.
@@ -19,3 +23,7 @@ void outw(uint16_t port, uint16_t val);
 
 // Writes 4 bytes to target port.
 void outd(uint16_t port, uint32_t val);
+
+#ifdef __cplusplus
+}
+#endif

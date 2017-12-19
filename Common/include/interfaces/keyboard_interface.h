@@ -1,6 +1,10 @@
 // Abstract interface for access to the keyboard.
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
     KEYCODE_A = 0,
     KEYCODE_B,
@@ -164,3 +168,7 @@ typedef struct keyboard_interface {
     // Blocks on the next key event and returns it in the specified event structure.
     void (*get_event)(struct keyboard_interface *this, keyboard_event_t *output);
 } keyboard_interface_t;
+
+#ifdef __cplusplus
+}
+#endif
