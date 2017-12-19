@@ -43,11 +43,11 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-void ps2_keyboard_device::enqueue(keyboard_event_t *event)
+void ps2_keyboard_device::enqueue(const keyboard_event &event)
 {
     // Drop keyboard input if the buffer is full.
     if (count < BUFFER_SIZE) {
-        memcpy(&ring_buffer[enqueue_pos], event, sizeof(keyboard_event_t));
+        ring_buffer[enqueue_pos] = event;
         enqueue_pos++;
 
         if (enqueue_pos >= BUFFER_SIZE) {
@@ -58,7 +58,7 @@ void ps2_keyboard_device::enqueue(keyboard_event_t *event)
     }
 }
 
-bool ps2_keyboard_device::dequeue(keyboard_event_t *event)
+bool ps2_keyboard_device::dequeue(keyboard_event &event)
 {
     if(count == 0) {
         return false;
@@ -66,7 +66,7 @@ bool ps2_keyboard_device::dequeue(keyboard_event_t *event)
 
     count--;
 
-    memcpy(event, &ring_buffer[dequeue_pos], sizeof(keyboard_event_t));
+    event = ring_buffer[dequeue_pos];
     dequeue_pos++;
 
     if(dequeue_pos >= BUFFER_SIZE) {
@@ -92,17 +92,14 @@ void ps2_keyboard_device::clear_input(void)
     }
 }
 
-bool ps2_keyboard_device::step_state_machine(keyboard_driver_state_t *state, keyboard_event_t *output)
+bool ps2_keyboard_device::step_state_machine(keyboard_driver_state &state, keyboard_event &output)
 {
-    assert(state);
-    assert(output);
-
     unsigned scancode = inb(KEYBOARD_DATA_PORT);
 
-    bool escape = (*state == PROCESSING_ESCAPE_CODE);
+    bool escape = (state == PROCESSING_ESCAPE_CODE);
 
     if (scancode == 0xE0) {
-        *state = PROCESSING_ESCAPE_CODE;
+        state = PROCESSING_ESCAPE_CODE;
         return true;
     }
 
@@ -111,15 +108,15 @@ bool ps2_keyboard_device::step_state_machine(keyboard_driver_state_t *state, key
         escape ? g_scancodes_break_escape : g_scancodes_break
     };
 
-    const keycode_key_state_t states[] = { PRESSED, RELEASED };
+    const keycode_key_state states[] = { PRESSED, RELEASED };
 
     for(size_t i = 0, n = sizeof(scancode_sets) / sizeof(*scancode_sets); i < n; ++i) {
         const uint8_t *scancodes = scancode_sets[i];
 
         for (keycode_t key = 0; key < KEYCODE_MAX; ++key) {
             if (scancode == scancodes[key]) {
-                output->key = key;
-                output->state = states[i];
+                output.key = key;
+                output.state = states[i];
                 return false;
             }
         }
@@ -133,13 +130,10 @@ bool ps2_keyboard_device::step_state_machine(keyboard_driver_state_t *state, key
 
 void ps2_keyboard_device::int_handler()
 {
-    keyboard_driver_state_t state = IDLE;
+    keyboard_driver_state state = IDLE;
+    keyboard_event event;
 
-    keyboard_event_t event;
-    event.state = RELEASED;
-    event.key = KEYCODE_MAX;
-
-    for (size_t i = 0; i < MAX_SCANCODE_BYTES && step_state_machine(&state, &event); ++i);
+    for (size_t i = 0; i < MAX_SCANCODE_BYTES && step_state_machine(state, event); ++i);
 
     if (event.key < KEYCODE_MAX) {
         key_state[event.key] = event.state;
@@ -154,13 +148,13 @@ void ps2_keyboard_device::int_handler()
         // new thread can execute is through an interrupt which invokes the
         // scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
-        enqueue(&event);
+        enqueue(event);
     }
 }
 
-void ps2_keyboard_device::get_event(keyboard_event_t *event)
+keyboard_event ps2_keyboard_device::get_event()
 {
-    assert(event);
+    keyboard_event event;
 
     bool have_a_key = false;
 
@@ -175,6 +169,8 @@ void ps2_keyboard_device::get_event(keyboard_event_t *event)
         enable_interrupts();
         hlt();
     }
+
+    return event;
 }
 
 ps2_keyboard_device::ps2_keyboard_device()

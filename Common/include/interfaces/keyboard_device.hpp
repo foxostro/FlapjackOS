@@ -130,22 +130,29 @@ enum {
     KEYCODE_MAX
 };
 
-typedef unsigned keycode_t;
+using keycode_t = unsigned;
 
-typedef enum {
+enum keycode_key_state {
     PRESSED, RELEASED
-} keycode_key_state_t;
+};
 
-typedef struct {
+struct keyboard_event {
     // Identifies which button on the keyboard corresponds to this event.
     keycode_t key;
 
     // The new state of the key with this event, e.g., PRESSED or RELEASED.
-    keycode_key_state_t state;
+    keycode_key_state state;
 
     // The ASCII character associated with the key press, or zero if none.
     char ch;
-} keyboard_event_t;
+
+    // Default constructor.
+    keyboard_event()
+     : key(KEYCODE_MAX),
+       state(RELEASED),
+       ch(0)
+    {}
+};
 
 class keyboard_device {
 public:
@@ -162,5 +169,5 @@ public:
 
     // Gets the next key event.
     // Blocks on the next key event and returns it in the specified event structure.
-    virtual void get_event(keyboard_event_t *output) = 0;
+    virtual keyboard_event get_event() = 0;
 };

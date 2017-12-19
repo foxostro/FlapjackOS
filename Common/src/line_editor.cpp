@@ -149,8 +149,7 @@ char * line_editor::getline()
     size_t cursor_col_offset = con->get_cursor_col();
 
     while (!have_a_newline) {
-        keyboard_event_t event;
-        kb.get_event(&event);
+        keyboard_event event = kb.get_event();
 
         if (event.state != PRESSED) {
             continue;

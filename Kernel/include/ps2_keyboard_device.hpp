@@ -6,26 +6,26 @@
 class ps2_keyboard_device : public keyboard_device {
     static constexpr size_t BUFFER_SIZE = 32;
 
-    typedef enum {
+    enum keyboard_driver_state {
         IDLE,
         PROCESSING_ESCAPE_CODE
-    } keyboard_driver_state_t;
+    };
 
-    keycode_key_state_t key_state[KEYCODE_MAX];
-    keyboard_event_t ring_buffer[BUFFER_SIZE];
+    keycode_key_state key_state[KEYCODE_MAX];
+    keyboard_event ring_buffer[BUFFER_SIZE]; // TODO: Extract this ring buffer to its own class.
     size_t dequeue_pos;
     size_t enqueue_pos;
     size_t count;
 
-    void enqueue(keyboard_event_t *event);
-    bool dequeue(keyboard_event_t *event);
+    void enqueue(const keyboard_event &event);
+    bool dequeue(keyboard_event &event); // TOOD: This is an excellent place for an optional.
     void clear_input();
-    bool step_state_machine(keyboard_driver_state_t *state, keyboard_event_t *output);
+    bool step_state_machine(keyboard_driver_state &state, keyboard_event &output); // TODO: Extract this state machine to its own class.
 
 public:
     ps2_keyboard_device();
 
     void int_handler() override;
     const char* keycode_name(keycode_t key) override;
-    void get_event(keyboard_event_t *output) override;
+    keyboard_event get_event() override;
 };
