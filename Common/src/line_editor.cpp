@@ -5,8 +5,6 @@
 #include <cassert>
 #include <algorithm>
 
-// #include <console_printf.h>
-
 line_editor::~line_editor()
 {
     while (ll_count_str(history) > 0) {
@@ -18,17 +16,15 @@ line_editor::~line_editor()
     free(prompt);
 }
 
-line_editor::line_editor(console_interface_t *_console,
-                         keyboard_device &_keyboard)
- : con(_console),
-   kb(_keyboard),
+line_editor::line_editor(console_device &console,
+                         keyboard_device &keyboard)
+ : con(console),
+   kb(keyboard),
    prompt_size(0),
    prompt(NULL),
    history(ll_init_str()),
    history_cursor(-1)
 {
-    assert(_console);
-
     static const char default_prompt[] = ">";
     set_prompt(sizeof(default_prompt), default_prompt);
 }
@@ -45,17 +41,17 @@ void line_editor::backspace(char *buffer,
         // Slide all input one character to the left.
         for (size_t i = cursor_col; i < count; ++i) {
             buffer[i] = buffer[i+1];
-            con->draw_char(cursor_row, i + cursor_col_offset,
-                           con->get_char(cursor_row, i + cursor_col_offset + 1));
+            con.draw_char(cursor_row, i + cursor_col_offset,
+                          con.get_char(cursor_row, i + cursor_col_offset + 1));
         }
-        con->draw_char(cursor_row, count + cursor_col_offset, con->make_char(' '));
+        con.draw_char(cursor_row, count + cursor_col_offset, con.make_char(' '));
         buffer[count] = '\0';
 
         if (count > 0) {
             count--;
         }
 
-        con->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+        con.set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
     }
 }
 
@@ -71,21 +67,21 @@ void line_editor::type_character(char *buffer,
     //       column. For example, if we type a TAB character then we should step
     //       forward until the next tab-stop.
 
-    if ((count < maxcount) && con->is_acceptable(ch)) {
+    if ((count < maxcount) && con.is_acceptable(ch)) {
         // Slide all input one character to the right.
         if (count > 0 && cursor_col < count-1) {
             for (size_t i = count; i > cursor_col; --i) {
                 buffer[i] = buffer[i-1];
-                con->draw_char(cursor_row, i + cursor_col_offset,
-                               con->get_char(cursor_row, i + cursor_col_offset - 1));
+                con.draw_char(cursor_row, i + cursor_col_offset,
+                              con.get_char(cursor_row, i + cursor_col_offset - 1));
             }
         }
-        con->draw_char(cursor_row, cursor_col + cursor_col_offset, con->make_char(ch));
+        con.draw_char(cursor_row, cursor_col + cursor_col_offset, con.make_char(ch));
         buffer[cursor_col] = ch;
 
         count++;
         cursor_col++;
-        con->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+        con.set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
     }
 }
 
@@ -135,10 +131,10 @@ char * line_editor::getline()
     size_t maxcount = std::min(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
     history_cursor = -1;
-    con->puts(prompt);
-    con->putchar(' ');
-    size_t cursor_row = con->get_cursor_row();
-    size_t cursor_col_offset = con->get_cursor_col();
+    con.puts(prompt);
+    con.putchar(' ');
+    size_t cursor_row = con.get_cursor_row();
+    size_t cursor_col_offset = con.get_cursor_col();
 
     while (!have_a_newline) {
         keyboard_event event = kb.get_event();
@@ -157,7 +153,7 @@ char * line_editor::getline()
             case KEYCODE_LEFT_ARROW:
                 if (cursor_col > 0) {
                     cursor_col--;
-                    con->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    con.set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -167,7 +163,7 @@ char * line_editor::getline()
             case KEYCODE_RIGHT_ARROW:
                 if (cursor_col < count) {
                     cursor_col++;
-                    con->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    con.set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -224,8 +220,8 @@ char * line_editor::getline()
                     case '\n':
                         buffer[count] = '\0';
                         cursor_col = count;
-                        con->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
-                        con->putchar('\n');
+                        con.set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                        con.putchar('\n');
                         have_a_newline = true;
                         break;
 
@@ -273,8 +269,4 @@ void line_editor::add_history(const char *line_of_history)
     the_copy[n] = 0;
 
     ll_push_front_str(history, the_copy);
-
-    // for (int i = 0, n = (int)ll_count_str(history); i < n; ++i) {
-    //     console_printf(con, "history %d -- %s\n", i, ll_at_str(history, i));
-    // }
 }

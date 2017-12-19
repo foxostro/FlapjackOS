@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.6)
 
 set(CORE_INCLUDE_FILES
-    "include/console.h"
+    "include/vga_console_device.hpp"
     "include/ltr.h"
     "include/seg.h"
     "include/isr_install.h"
     "include/halt.h"
     "include/idt.h"
-    "include/backtrace.h"
+    "include/backtrace.hpp"
     "include/misc.h"
     "include/timer_device.hpp"
     "include/pit_timer_device.hpp"
@@ -49,9 +49,9 @@ set(SOURCE_FILES
 # These cannot be used in unit tests on the host because they cannot be built
 # for the host architecture.
 set(PLATFORM_SPECIFIC_SOURCE_FILES
-    "src/backtrace.c"
+    "src/backtrace.cpp"
     "src/backtrace_asm.S"
-    "src/console.c"
+    "src/vga_console_device.cpp"
     "src/gdt_asm.S"
     "src/halt.S"
     "src/idt_asm.S"
@@ -61,7 +61,7 @@ set(PLATFORM_SPECIFIC_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
     "src/kernel.cpp"
     "src/ltr.S"
-    "src/panic.c"
+    "src/panic.cpp"
     "src/pic.c"
     "src/pit_timer_device.cpp"
     )

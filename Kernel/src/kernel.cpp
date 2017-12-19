@@ -11,16 +11,16 @@
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
-#include <console.h>
-#include <console_printf.h>
+#include <console_printf.hpp>
 #include <inout.h>
 #include <halt.h>
 #include <panic.h>
-#include <backtrace.h>
+#include <backtrace.hpp>
 #include <line_editor.hpp>
 #include <multiboot.h>
 #include <malloc/malloc_zone.h>
 
+#include <vga_console_device.hpp>
 #include <pit_timer_device.hpp>
 #include <ps2_keyboard_device.hpp>
 
@@ -28,7 +28,7 @@
 // Besides this, it's really only for use in panic() because it severely
 // clutters the interface of assert() and panic() if we are reqired to pass down
 // the console interface.
-console_interface_t g_console;
+console_device *g_console = NULL;
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
@@ -194,8 +194,6 @@ extern "C"
 __attribute__((noreturn))
 void kernel_main(multiboot_info_t *mb_info, void *istack)
 {
-    console_interface_t *console = &g_console;
-
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
     memset(&s_tss, 0, sizeof(s_tss));
@@ -217,14 +215,19 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // interrupts.
     pic_init();
 
-    // Initialize the console output driver.
-    get_console_interface(console);
-    console->init((vgachar_t *)0xB8000);
-
+    // Initialize the VGA console output driver.
+    // The driver lives in the kernel stack since we haven't initialized the
+    // kernel heap yet.
+    vga_console_device vga_console;
+    g_console = &vga_console;
+    g_console->clear();
+    
     // Initialize malloc, &c.
-    console_printf(console, "%u KiB low memory, %u MiB high memory\n",
-                   mb_info->mem_lower, mb_info->mem_upper/1024);
     initialize_kernel_heap(mb_info);
+
+    // Initialize the real VGA console output driver.
+    console_printf(*g_console, "%u KiB low memory, %u MiB high memory\n",
+                   mb_info->mem_lower, mb_info->mem_upper/1024);
 
     // Initialize the PS/2 keyboard driver.
     s_keyboard = new ps2_keyboard_device();
@@ -240,17 +243,14 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     {
-        line_editor ed(console, *s_keyboard);
+        line_editor ed(*g_console, *s_keyboard);
         while (true) {
             char *buffer = ed.getline();
             ed.add_history(buffer);
-            console_printf(console, "Got: %s\n", buffer);
+            console_printf(*g_console, "Got: %s\n", buffer);
             free(buffer);
         }
     }
-
-    delete s_keyboard;
-    delete s_timer;
 
     panic("We should never reach this point.");
     __builtin_unreachable();

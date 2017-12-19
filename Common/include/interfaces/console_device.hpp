@@ -1,13 +1,8 @@
 // Abstract interface for a VGA console output driver.
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstddef>
+#include <cstdint>
 
 enum vgacolor_t {
     BLACK    = 0x0,
@@ -27,59 +22,49 @@ enum vgacolor_t {
     YELLOW   = 0xE,
     WHITE    = 0xF
 };
- 
-typedef struct {
+
+struct vgachar_t {
     uint16_t ch:8;
     uint16_t fg:4;
     uint16_t bg:3;
     uint16_t blink:1;
-} vgachar_t;
-
-#ifdef __cplusplus
+};
 static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
-#else
-_Static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
-#endif
 
-#define CONSOLE_WIDTH   (80)
-#define CONSOLE_HEIGHT  (25)
+constexpr unsigned CONSOLE_WIDTH  = 80;
+constexpr unsigned CONSOLE_HEIGHT = 25;
 
-typedef struct {
-    // Initializes and clears the console.
-    // addr -- The address of the VGA text buffer.
-    void (*init)(vgachar_t * const addr);
+class console_device {
+public:
+    virtual ~console_device() = default;
 
     // Clears the console to the current background color.
-    void (*clear)(void);
+    virtual void clear() = 0;
 
     // Draws the specified character at the specified position in the console buffer.
-    void (*draw_char)(size_t row, size_t col, vgachar_t ch);
+    virtual void draw_char(size_t row, size_t col, vgachar_t ch) = 0;
 
     // Gets the character at the specified position of the console buffer.
-    vgachar_t (*get_char)(size_t row, size_t col);
+    virtual vgachar_t get_char(size_t row, size_t col) const = 0;
 
     // Returns a VGA character in the current color for the specified ASCII char.
-    vgachar_t (*make_char)(char ch);
+    virtual vgachar_t make_char(char ch) const = 0;
 
     // Returns true if the console can accept the given character for printing.
     // This includes so-called isprint characters as well as characters like
     // BACKSPACE and NEWLINE which can also affect console output.
-    bool (*is_acceptable)(char ch);
+    virtual bool is_acceptable(char ch) const = 0;
 
     // Puts a character at the next place on the console.
-    void (*putchar)(char ch);
+    virtual void putchar(char ch) = 0;
 
     // Puts the string at the next position on the console.
-    void (*puts)(const char *s);
+    virtual void puts(const char *s) = 0;
 
     // Moves the hardware cursor to the specified position.
     // If the cursor is placed outside the visible console then it will be hidden.
-    void (*set_cursor_position)(size_t row, size_t col);
+    virtual void set_cursor_position(size_t row, size_t col) = 0;
 
-    size_t (*get_cursor_row)(void);
-    size_t (*get_cursor_col)(void);
-} console_interface_t;
-
-#ifdef __cplusplus
-}
-#endif
+    virtual size_t get_cursor_row() const = 0;
+    virtual size_t get_cursor_col() const = 0;
+};

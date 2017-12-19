@@ -14,9 +14,9 @@ set(SOURCE_FILES
     "include/flapjack_libc/stdlib.h" "src/stdlib.c"
 
     "include/line_editor.hpp" "src/line_editor.cpp"
-    "include/console_printf.h" "src/console_printf.c"
+    "include/console_printf.hpp" "src/console_printf.cpp"
 
-    "include/interfaces/console_interface.h"
+    "include/interfaces/console_device.hpp"
     "include/interfaces/keyboard_device.hpp"
 
     "include/ll_str.h" "src/ll_str.c" # generated

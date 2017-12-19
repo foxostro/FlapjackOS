@@ -7,7 +7,6 @@
 #include <interrupt_asm.h>
 #include <halt.h>
 #include <inout.h>
-#include <console.h>
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
 constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;

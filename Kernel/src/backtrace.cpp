@@ -1,11 +1,13 @@
-#include <console_printf.h>
+#include <console_printf.hpp>
 
 // Maximum number of stack frames in a backtrace.
-#define MAXFRAMES (16)
+constexpr size_t MAXFRAMES = 16;
 
-unsigned* get_ebp(void); // defined in backtrace_asm.S
+extern "C" {
+    unsigned* get_ebp(void); // defined in backtrace_asm.S
+}
 
-void backtrace(const console_interface_t *console)
+void backtrace(console_device &console)
 {
     unsigned frame;
     unsigned * ebp;
