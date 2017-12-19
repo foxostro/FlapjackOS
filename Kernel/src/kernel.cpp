@@ -185,7 +185,7 @@ static malloc_interface_t* initialize_kernel_heap(multiboot_info_t *mb_info)
 }
 
 __attribute__((noreturn))
-void kernel_main(multiboot_info_t *mb_info, void *istack)
+extern "C" void kernel_main(multiboot_info_t *mb_info, void *istack)
 {
     console_interface_t *console = &g_console;
 

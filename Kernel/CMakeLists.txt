@@ -59,7 +59,7 @@ set(PLATFORM_SPECIFIC_SOURCE_FILES
     "src/interrupt_asm.S"
     "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c"
     "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
-    "src/kernel.c"
+    "src/kernel.cpp"
     "src/ltr.S"
     "src/panic.c"
     "src/pic.c"
