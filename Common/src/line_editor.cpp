@@ -3,18 +3,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 
 // #include <console_printf.h>
-
-#define MIN(a, b) \
-   ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-      _a < _b ? _a : _b; })
-
-#define MAX(a, b) \
-   ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-      _a > _b ? _a : _b; })
 
 line_editor::~line_editor()
 {
@@ -141,7 +132,7 @@ char * line_editor::getline()
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
     size_t prompt_len = strnlen(prompt, prompt_size);
-    size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
+    size_t maxcount = std::min(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
     history_cursor = -1;
     con->puts(prompt);
