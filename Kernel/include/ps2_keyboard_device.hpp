@@ -3,9 +3,9 @@
 #include <interfaces/keyboard_device.hpp>
 #include <stddef.h>
 
-#define BUFFER_SIZE (32)
-
 class ps2_keyboard_device : public keyboard_device {
+    static constexpr size_t BUFFER_SIZE = 32;
+
     typedef enum {
         IDLE,
         PROCESSING_ESCAPE_CODE

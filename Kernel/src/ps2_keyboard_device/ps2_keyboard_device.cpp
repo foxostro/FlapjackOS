@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define KEYBOARD_DATA_PORT     (0x60)
-#define KEYBOARD_CONTROL_PORT  (0x64)
-#define MAX_SCANCODE_BYTES     (6)
+constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
+constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;
+constexpr unsigned MAX_SCANCODE_BYTES = 6;
 
 static const uint8_t g_scancodes_make[KEYCODE_MAX] = {
 #include "keyboard_scancodes_make.inc"
@@ -139,7 +139,7 @@ void ps2_keyboard_device::int_handler()
     event.state = RELEASED;
     event.key = KEYCODE_MAX;
 
-    for (int i = 0; i < MAX_SCANCODE_BYTES && step_state_machine(&state, &event); ++i);
+    for (size_t i = 0; i < MAX_SCANCODE_BYTES && step_state_machine(&state, &event); ++i);
 
     if (event.key < KEYCODE_MAX) {
         key_state[event.key] = event.state;
