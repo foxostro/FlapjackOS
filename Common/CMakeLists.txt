@@ -5,7 +5,7 @@ set(SOURCE_FILES
     "include/flapjack_libc/string.h" "src/string.c"
     "include/flapjack_libc/stdio.h" "src/stdio.c"
     "include/flapjack_libc/stdlib.h" "src/stdlib.c"
-    "include/line_editor.h" "include/line_editor_private.h" "src/line_editor.c"
+    "include/line_editor.hpp" "src/line_editor.cpp"
     "include/console_printf.h" "src/console_printf.c"
     "include/interfaces/console_interface.h"
     "include/interfaces/keyboard_interface.h"
