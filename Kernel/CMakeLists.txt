@@ -28,8 +28,8 @@ set(ISR_ERB_FILES
 source_group("ISR Template Files" FILES ${ISR_ERB_FILES})
 
 set(PS2_KEYBOARD_FILES
-    "include/ps2_keyboard.h"
-    "src/ps2_keyboard/ps2_keyboard.c"
+    "include/ps2_keyboard.hpp"
+    "src/ps2_keyboard/ps2_keyboard.cpp"
     "src/ps2_keyboard/keyboard_scancodes_make_escaped.inc"
     "src/ps2_keyboard/keyboard_scancodes_break.inc"
     "src/ps2_keyboard/keyboard_keycode_ascii_uppercase.inc"

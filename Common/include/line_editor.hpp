@@ -1,15 +1,15 @@
 #pragma once
 
 #include <stddef.h>
-#include <interfaces/console_interface.h>
-#include <interfaces/keyboard_interface.h>
 #include <ll_str.h>
+#include <interfaces/console_interface.h>
+#include <interfaces/keyboard.hpp>
 
 // This can be used to read lines of user input from the terminal and provides
 // useful UI affordances such as nice editing functionality, a prompt, history,
 class line_editor {
-    console_interface_t *console;
-    keyboard_interface_t *keyboard;
+    console_interface_t *con;
+    keyboard &kb;
     size_t prompt_size;
     char *prompt;
     ll_str_t *history;
@@ -42,14 +42,13 @@ public:
 
     // Constructor.
     // and such.
-    // console -- The console where we display characters.
-    // keyboard -- The keyboard which gives us user input.
-    line_editor(console_interface_t *console,
-                keyboard_interface_t *keyboard);
+    // con -- The console device where we display characters.
+    // kb -- The keyboard device which gives us user input.
+    line_editor(console_interface_t *con, keyboard &kb);
 
     // Prompt for one line of user input on the console.
     // Returns a string containing the line of user input.
-    // The stirng will have been allocated via malloc.
+    // The string will have been allocated via malloc.
     // It is the responsibility of the caller to free this string when finished.
     char* getline();
 

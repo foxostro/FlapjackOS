@@ -1,9 +1,8 @@
 #pragma once
 
-class timer
-{
+class timer {
 public:
-	virtual ~timer() = default;
+    virtual ~timer() = default;
 
     // Timer interrupt handler. Called by the interrupt dispatcher.
     virtual void int_handler() = 0;

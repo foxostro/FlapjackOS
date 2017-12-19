@@ -1,10 +1,6 @@
 // Abstract interface for access to the keyboard.
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 enum {
     KEYCODE_A = 0,
     KEYCODE_B,
@@ -151,24 +147,20 @@ typedef struct {
     char ch;
 } keyboard_event_t;
 
-typedef struct keyboard_interface {
-    // Free memory associated with the keyboard object.
-    void (*destroy)(struct keyboard_interface *self);
+class keyboard {
+public:
+    virtual ~keyboard() = default;
 
     // Keyboard interrupt handler.
     // To be called when the keyboard interrupt fires. Implements the lower half of
     // the keyboard driver.
     // This is only meaningful when used in the kernel implementation.
-    void (*int_handler)(struct keyboard_interface *self);
+    virtual void int_handler() = 0;
 
     // Returns the name of the given key code.
-    const char* (*keycode_name)(keycode_t key);
+    virtual const char* keycode_name(keycode_t key) = 0;
 
     // Gets the next key event.
     // Blocks on the next key event and returns it in the specified event structure.
-    void (*get_event)(struct keyboard_interface *self, keyboard_event_t *output);
-} keyboard_interface_t;
-
-#ifdef __cplusplus
-}
-#endif
+    virtual void get_event(keyboard_event_t *output) = 0;
+};

@@ -9,6 +9,13 @@
 #define TIMER_LEAP_TICKS_10ms    (41)
 
 class pit_timer : public timer {
+    unsigned clock_ticks;
+    unsigned clock_seconds;
+    unsigned leap_counter;
+    unsigned timer_rate;
+    unsigned timer_leap_interval;
+    unsigned timer_leap_ticks;
+
 public:
     // Configure the PIT timer. Set the rate of timer interrupts.
     // timer_rate -- clock cycles between timer interrupts
@@ -25,12 +32,4 @@ public:
     void int_handler() override;
     unsigned ticks() override;
     unsigned seconds() override;
-
-private:
-    unsigned clock_ticks;
-    unsigned clock_seconds;
-    unsigned leap_counter;
-    unsigned timer_rate;
-    unsigned timer_leap_interval;
-    unsigned timer_leap_ticks;
 };

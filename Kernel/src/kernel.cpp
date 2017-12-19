@@ -10,7 +10,6 @@
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
-#include <ps2_keyboard.h>
 #include <console.h>
 #include <console_printf.h>
 #include <inout.h>
@@ -22,6 +21,7 @@
 #include <malloc/malloc_zone.h>
 
 #include <pit_timer.hpp>
+#include <ps2_keyboard.hpp>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
@@ -32,7 +32,7 @@ console_interface_t g_console;
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
-static keyboard_interface_t *s_keyboard;
+static keyboard *s_keyboard;
 static timer *s_timer;
 
 // This is marked with "C" linkage because we call it from the assembly code
@@ -58,7 +58,7 @@ void interrupt_dispatch(unsigned interrupt_number,
 
     switch (interrupt_number) {
         case IDT_KEY:
-            s_keyboard->int_handler(s_keyboard);
+            s_keyboard->int_handler();
             break;
 
         case IDT_TIMER:
@@ -226,7 +226,7 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     initialize_kernel_heap(mb_info);
 
     // Initialize the PS/2 keyboard driver.
-    s_keyboard = ps2_keyboard_init();
+    s_keyboard = new ps2_keyboard();
 
     // Configure the PIT timer chip so that it fires an interrupt every 10ms.
     s_timer = new pit_timer(TIMER_RATE_10ms,
@@ -239,7 +239,7 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     {
-        line_editor ed(console, s_keyboard);
+        line_editor ed(console, *s_keyboard);
         while (true) {
             char *buffer = ed.getline();
             ed.add_history(buffer);
