@@ -10,7 +10,6 @@
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
-#include <pit_timer.h>
 #include <ps2_keyboard.h>
 #include <console.h>
 #include <console_printf.h>
@@ -22,6 +21,8 @@
 #include <multiboot.h>
 #include <malloc/malloc_zone.h>
 
+#include <pit_timer.hpp>
+
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
 // clutters the interface of assert() and panic() if we are reqired to pass down
@@ -32,7 +33,7 @@ static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
 static keyboard_interface_t *s_keyboard;
-static timer_interface_t *s_timer;
+static timer *s_timer;
 
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.
@@ -61,7 +62,7 @@ void interrupt_dispatch(unsigned interrupt_number,
             break;
 
         case IDT_TIMER:
-            s_timer->int_handler(s_timer);
+            s_timer->int_handler();
             break;
 
         case IDT_DE:
@@ -228,9 +229,9 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     s_keyboard = ps2_keyboard_init();
 
     // Configure the PIT timer chip so that it fires an interrupt every 10ms.
-    s_timer = pit_timer_init(TIMER_RATE_10ms,
-                             TIMER_LEAP_INTERVAL_10ms,
-                             TIMER_LEAP_TICKS_10ms);
+    s_timer = new pit_timer(TIMER_RATE_10ms,
+                            TIMER_LEAP_INTERVAL_10ms,
+                            TIMER_LEAP_TICKS_10ms);
 
     // After this point, interrupts will start firing.
     enable_interrupts();

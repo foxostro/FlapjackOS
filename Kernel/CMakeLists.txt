@@ -9,8 +9,8 @@ set(CORE_INCLUDE_FILES
     "include/idt.h"
     "include/backtrace.h"
     "include/misc.h"
-    "include/interfaces/timer_interface.h"
-    "include/pit_timer.h"
+    "include/timer.hpp"
+    "include/pit_timer.hpp"
     "include/pic.h"
     "include/ctypes.h"
     "include/panic.h"
@@ -63,7 +63,7 @@ set(PLATFORM_SPECIFIC_SOURCE_FILES
     "src/ltr.S"
     "src/panic.c"
     "src/pic.c"
-    "src/pit_timer.c"
+    "src/pit_timer.cpp"
     )
 source_group("Platform-specific" FILES ${PLATFORM_SPECIFIC_SOURCE_FILES})
 
