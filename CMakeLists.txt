@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-project(FlapjackOS C)
+project(FlapjackOS)
 
 enable_language(ASM)
 
@@ -26,6 +26,15 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+# Let's stick strictly to the C++11 standard.
+# Why this instead of C++17? Well, my cross-compiler doesn't support it, and I
+# don't care to spend the time to address that. In any case, we don't have
+# access to the standard library so most of the C++17 features are not useful to
+# us in FlapjackOS.
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Setup compiler flags before building the subdirectories.
 if(CMAKE_CROSSCOMPILING)
 
@@ -38,8 +47,11 @@ if(CMAKE_CROSSCOMPILING)
     # optimizer silliness which might break the kernel or make debugging things
     # more difficult. In the future, I should enable -O2 and fix anything that
     # breaks.
-    set(CMAKE_C_FLAGS "-ffreestanding -O0 -Wall -Wextra -Werror")
+    set(CMAKE_C_FLAGS "-nostdlib -ffreestanding -O0 -Wall -Wextra -Werror")
     set(CMAKE_C_LINK_FLAGS "-ffreestanding -O0 -nostdlib")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
 
 else()
 
@@ -47,6 +59,7 @@ else()
     # In this case, define a flag to indicate we are doing testing and choose
     # some rather standard compiler flags.
     set(CMAKE_C_FLAGS "-g -O0 -Wall -Wextra -Werror -DTESTING")
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
     # If we're building natively then we want to build tests.
     enable_testing()

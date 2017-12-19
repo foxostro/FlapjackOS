@@ -10,6 +10,7 @@ set(SOURCE_FILES
     "include/interfaces/console_interface.h"
     "include/interfaces/keyboard_interface.h"
     "include/ll_str.h" "src/ll_str.c" # generated
+    "src/c_plus_plus_support.cpp"
     )
 include_directories("include")
 add_library(Common STATIC ${SOURCE_FILES})
