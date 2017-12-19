@@ -19,7 +19,7 @@
 #define STRLEN  strlen
 #endif
 
-void* MEMCPY(void * restrict dst, const void * restrict src, size_t n);
+void* MEMCPY(void *dst, const void *src, size_t n);
 void* MEMMOVE(void *dst, const void *src, size_t n);
 void* MEMSET(void *s, int value, size_t n);
 

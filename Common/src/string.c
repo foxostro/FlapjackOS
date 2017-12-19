@@ -14,7 +14,7 @@ size_t STRNLEN(const char *s, size_t maxlen)
     return c;
 }
 
-void* MEMCPY(void * restrict dst, const void * restrict src, size_t n)
+void* MEMCPY(void *dst, const void *src, size_t n)
 {
     // We could do better, but this works.
 

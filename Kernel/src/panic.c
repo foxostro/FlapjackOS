@@ -9,7 +9,7 @@
 extern console_interface_t g_console; // defined in kernel.c
 
 __attribute__((noreturn))
-void panic(const char * restrict fmt, ...)
+void panic(const char *fmt, ...)
 {
     disable_interrupts();
 
@@ -27,7 +27,7 @@ void panic(const char * restrict fmt, ...)
 }
 
 __attribute__((noreturn))
-void panic2(const char * restrict message,
+void panic2(const char *message,
             unsigned edi,
             unsigned esi,
             unsigned ebp,

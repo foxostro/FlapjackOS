@@ -24,13 +24,13 @@
 //
 // Returns the number of characters that would have been output if the size had
 // not been limited.
-size_t VSNPRINTF(char * restrict str,
+size_t VSNPRINTF(char *str,
                  size_t size,
-                 const char * restrict format,
+                 const char *format,
                  va_list args);
 
 // Wraps vsnprintf to allow the use of a variable number of arguments.
-size_t SNPRINTF(char * restrict str,
+size_t SNPRINTF(char *str,
                 size_t size,
-                const char * restrict format,
+                const char *format,
                 ...);

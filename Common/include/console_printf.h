@@ -9,7 +9,7 @@ extern "C" {
 
 // Formats a string and prints directly to the VGA console.
 size_t console_printf(const console_interface_t *console,
-                      const char * restrict fmt, ...);
+                      const char *fmt, ...);
 
 #ifdef __cplusplus
 }

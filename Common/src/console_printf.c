@@ -3,7 +3,7 @@
 #include <string.h>
 #include "console_printf.h"
 
-size_t console_printf(const console_interface_t *console, const char * restrict fmt, ...)
+size_t console_printf(const console_interface_t *console, const char *fmt, ...)
 {
     char buffer[128] = {0};
 

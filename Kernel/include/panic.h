@@ -5,10 +5,10 @@ extern "C" {
 #endif
 
 __attribute__((noreturn))
-void panic(const char * restrict fmt, ...);
+void panic(const char *fmt, ...);
 
 __attribute__((noreturn))
-void panic2(const char * restrict message,
+void panic2(const char *message,
             unsigned edi,
             unsigned esi,
             unsigned ebp,

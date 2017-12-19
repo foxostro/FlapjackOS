@@ -32,7 +32,7 @@ static size_t insert_char(char c, char **str, size_t *size)
     return 1;
 }
 
-static size_t insert_string(const char * restrict value, char **str, size_t *size)
+static size_t insert_string(const char *value, char **str, size_t *size)
 {
     size_t i = 0;
 
@@ -48,7 +48,7 @@ static size_t insert_string(const char * restrict value, char **str, size_t *siz
     return i;
 }
 
-static size_t insert_int(int value, unsigned base, const char * restrict digits, char **str, size_t *size)
+static size_t insert_int(int value, unsigned base, const char *digits, char **str, size_t *size)
 {
     size_t i = 0;
     bool negative = value < 0;
@@ -76,7 +76,7 @@ static size_t insert_int(int value, unsigned base, const char * restrict digits,
     return i;
 }
 
-static size_t insert_uint(unsigned value, unsigned base, const char * restrict digits, char **str, size_t *size)
+static size_t insert_uint(unsigned value, unsigned base, const char *digits, char **str, size_t *size)
 {
     char tmp[32] = {0};
 
@@ -128,9 +128,9 @@ static size_t insert_pointer(uintptr_t pvalue, char **str, size_t *size)
     return i;
 }
 
-size_t VSNPRINTF(char * restrict buf,
+size_t VSNPRINTF(char *buf,
                  size_t size,
-                 const char * restrict fmt,
+                 const char *fmt,
                  va_list args)
 {
     size_t i = 0;
@@ -198,7 +198,7 @@ size_t VSNPRINTF(char * restrict buf,
     return i;
 }
 
-size_t SNPRINTF(char * restrict str, size_t size, const char * restrict fmt, ...)
+size_t SNPRINTF(char *str, size_t size, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
