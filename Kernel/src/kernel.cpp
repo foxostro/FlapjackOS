@@ -229,9 +229,9 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     s_keyboard = new ps2_keyboard_device();
 
     // Configure the PIT timer chip so that it fires an interrupt every 10ms.
-    s_timer = new pit_timer_device(TIMER_RATE_10ms,
-                                   TIMER_LEAP_INTERVAL_10ms,
-                                   TIMER_LEAP_TICKS_10ms);
+    s_timer = new pit_timer_device(pit_timer_device::TIMER_RATE_10ms,
+                                   pit_timer_device::TIMER_LEAP_INTERVAL_10ms,
+                                   pit_timer_device::TIMER_LEAP_TICKS_10ms);
 
     // After this point, interrupts will start firing.
     enable_interrupts();

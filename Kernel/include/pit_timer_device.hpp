@@ -3,11 +3,6 @@
 #include <stddef.h>
 #include <timer_device.hpp>
 
-#define CLOCK_FREQUENCY          (1193182) // Clock cycles per second.
-#define TIMER_RATE_10ms          (11931)
-#define TIMER_LEAP_INTERVAL_10ms (50)
-#define TIMER_LEAP_TICKS_10ms    (41)
-
 class pit_timer_device : public timer_device {
     unsigned clock_ticks;
     unsigned clock_seconds;
@@ -17,6 +12,11 @@ class pit_timer_device : public timer_device {
     unsigned timer_leap_ticks;
 
 public:
+    static constexpr unsigned CLOCK_FREQUENCY          = 1193182; // Clock cycles per second.
+    static constexpr unsigned TIMER_RATE_10ms          = 11931;
+    static constexpr unsigned TIMER_LEAP_INTERVAL_10ms = 50;
+    static constexpr unsigned TIMER_LEAP_TICKS_10ms    = 41;
+
     // Configure the PIT timer. Set the rate of timer interrupts.
     // timer_rate -- clock cycles between timer interrupts
     // leap_interval -- Every few timer interrupts, it may be necessary to add

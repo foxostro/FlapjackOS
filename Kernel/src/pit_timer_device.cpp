@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define TIMER_PERIOD_IO_PORT (0x40)
-#define TIMER_MODE_IO_PORT   (0x43)
-#define TIMER_SQUARE_WAVE    (0x36)
+constexpr unsigned TIMER_PERIOD_IO_PORT = 0x40;
+constexpr unsigned TIMER_MODE_IO_PORT   = 0x43;
+constexpr unsigned TIMER_SQUARE_WAVE    = 0x36;
 
 void pit_timer_device::int_handler()
 {
