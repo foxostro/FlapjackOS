@@ -35,6 +35,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(COMMON_COMPILER_FLAGS "-O0 -Wall -Wextra -Werror")
+
 # Setup compiler flags before building the subdirectories.
 if(CMAKE_CROSSCOMPILING)
 
@@ -47,10 +49,10 @@ if(CMAKE_CROSSCOMPILING)
     # optimizer silliness which might break the kernel or make debugging things
     # more difficult. In the future, I should enable -O2 and fix anything that
     # breaks.
-    set(CMAKE_C_FLAGS "-nostdlib -ffreestanding -O0 -Wall -Wextra -Werror")
-    set(CMAKE_C_LINK_FLAGS "-ffreestanding -O0 -nostdlib")
+    set(CMAKE_C_FLAGS "-nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
+    set(CMAKE_C_LINK_FLAGS "-nostdlib -ffreestanding")
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-rtti")
     set(CMAKE_CXX_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
 
 else()
@@ -58,8 +60,8 @@ else()
     # When the target system is the host system, we are building natively.
     # In this case, define a flag to indicate we are doing testing and choose
     # some rather standard compiler flags.
-    set(CMAKE_C_FLAGS "-g -O0 -Wall -Wextra -Werror -DTESTING")
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+    set(CMAKE_C_FLAGS "-g -DTESTING ${COMMON_COMPILER_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-rtti")
 
     # If we're building natively then we want to build tests.
     enable_testing()
