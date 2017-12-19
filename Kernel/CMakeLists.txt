@@ -12,7 +12,6 @@ set(CORE_INCLUDE_FILES
     "include/timer_device.hpp"
     "include/pit_timer_device.hpp"
     "include/pic.h"
-    "include/ctypes.h"
     "include/panic.h"
     "include/interrupt_asm.h"
     "include/inout.h"
