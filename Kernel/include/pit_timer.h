@@ -13,10 +13,10 @@ extern "C" {
 #define TIMER_LEAP_TICKS_10ms    (41)
 
 typedef struct pit_timer {
-    void (*int_handler)(struct pit_timer *this);
-    unsigned (*ticks)(struct pit_timer *this);
-    unsigned (*seconds)(struct pit_timer *this);
-    void (*destroy)(struct pit_timer *this);
+    void (*int_handler)(struct pit_timer *self);
+    unsigned (*ticks)(struct pit_timer *self);
+    unsigned (*seconds)(struct pit_timer *self);
+    void (*destroy)(struct pit_timer *self);
 
     unsigned clock_ticks;
     unsigned clock_seconds;

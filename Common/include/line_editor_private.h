@@ -9,10 +9,10 @@ extern "C" {
 #include <line_editor.h>
 
 typedef struct line_editor_impl {
-    void (*destroy)(struct line_editor_impl *this);
-    char* (*getline)(struct line_editor_impl *this);
-    void (*set_prompt)(struct line_editor_impl *this, size_t prompt_size, const char *prompt);
-    void (*add_history)(struct line_editor_impl *this, const char *history);
+    void (*destroy)(struct line_editor_impl *self);
+    char* (*getline)(struct line_editor_impl *self);
+    void (*set_prompt)(struct line_editor_impl *self, size_t prompt_size, const char *prompt);
+    void (*add_history)(struct line_editor_impl *self, const char *history);
 
     console_interface_t *console;
     keyboard_interface_t *keyboard;

@@ -10,24 +10,24 @@ extern "C" {
 
 typedef struct line_editor_interface {
     // Frees memory associated with the line_editor object.
-    void (*destroy)(struct line_editor_interface *this);
+    void (*destroy)(struct line_editor_interface *self);
 
     // Prompt for one line of user input on the console.
     // Returns a string containing the line of user input.
     // It is the responsibility of the caller to free this string when finished.
     // It will have been allocated using the allocator originally passed to
     // line_editor_init().
-    char* (*getline)(struct line_editor_interface *this);
+    char* (*getline)(struct line_editor_interface *self);
 
     // Change the prompt displayed at the beginning of the line.
     // The specified string is copied and so the buffer is not required to live
     // past the call to this method.
-    void (*set_prompt)(struct line_editor_interface *this,
+    void (*set_prompt)(struct line_editor_interface *self,
                        size_t prompt_size,
                        const char *prompt);
 
     // Add a line to the editor history.
-    void (*add_history)(struct line_editor_interface *this,
+    void (*add_history)(struct line_editor_interface *self,
                         const char *history);
 } line_editor_t;
 

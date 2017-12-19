@@ -9,10 +9,10 @@ extern "C" {
 #define BUFFER_SIZE (32)
 
 typedef struct ps2_keyboard {
-    void (*destroy)(struct ps2_keyboard *this);
-    void (*int_handler)(struct ps2_keyboard *this);
+    void (*destroy)(struct ps2_keyboard *self);
+    void (*int_handler)(struct ps2_keyboard *self);
     const char* (*keycode_name)(keycode_t key);
-    void (*get_event)(struct ps2_keyboard *this, keyboard_event_t *output);
+    void (*get_event)(struct ps2_keyboard *self, keyboard_event_t *output);
 
     keycode_key_state_t key_state[KEYCODE_MAX];
     keyboard_event_t ring_buffer[BUFFER_SIZE];

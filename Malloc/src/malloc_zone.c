@@ -8,9 +8,9 @@
 #define ALIGN 4
 #define MIN_SPLIT_SIZE (sizeof(malloc_block_t))
 
-static void* malloc_zone_malloc(malloc_zone_t *this, size_t size);
-static void malloc_zone_free(malloc_zone_t *this, void *ptr);
-static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size);
+static void* malloc_zone_malloc(malloc_zone_t *self, size_t size);
+static void malloc_zone_free(malloc_zone_t *self, void *ptr);
+static void* malloc_zone_realloc(malloc_zone_t *self, void *ptr, size_t new_size);
 
 static inline size_t round_up_block_size(size_t size)
 {
@@ -78,9 +78,9 @@ malloc_interface_t* malloc_zone_init(void *start, size_t size)
     return (malloc_interface_t *)zone;
 }
 
-static void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
+static void* malloc_zone_malloc(malloc_zone_t *self, size_t size)
 {
-    assert(this);
+    assert(self);
 
     // Blocks for allocations are always multiples of four bytes in size.
     // This ensures that blocks are always aligned on four byte boundaries
@@ -90,7 +90,7 @@ static void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
     malloc_block_t *best = NULL;
 
     // Get the smallest free block that is large enough to satisfy the request.
-    for (malloc_block_t *block = this->head; block; block = block->next) {
+    for (malloc_block_t *block = self->head; block; block = block->next) {
         if (block->size >= size
             && !block->inuse
             && (!best || (block->size < best->size))) {
@@ -108,9 +108,9 @@ static void* malloc_zone_malloc(malloc_zone_t *this, size_t size)
     return (void *)best + sizeof(malloc_block_t);
 }
 
-static void malloc_zone_free(malloc_zone_t *this, void *ptr)
+static void malloc_zone_free(malloc_zone_t *self, void *ptr)
 {
-    assert(this);
+    assert(self);
 
     if (!ptr) {
         return; // do nothing
@@ -122,7 +122,7 @@ static void malloc_zone_free(malloc_zone_t *this, void *ptr)
     // If we cannot find it then the calling code has an error in it.
 #ifndef NDEBUG
     bool found_it = false;
-    for (malloc_block_t *iter = this->head; iter; iter = iter->next) {
+    for (malloc_block_t *iter = self->head; iter; iter = iter->next) {
         if (iter == block) {
             found_it = true;
         }
@@ -173,12 +173,12 @@ static void malloc_zone_free(malloc_zone_t *this, void *ptr)
 // 
 // If size is zero and ptr is not NULL, a new minimum-sized object is
 // allocated and the original object is freed.
-static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size)
+static void* malloc_zone_realloc(malloc_zone_t *self, void *ptr, size_t new_size)
 {
-    assert(this);
+    assert(self);
 
     if (!ptr) {
-        return malloc_zone_malloc(this, new_size);
+        return malloc_zone_malloc(self, new_size);
     }
 
     malloc_block_t *block = ptr - sizeof(malloc_block_t);
@@ -188,7 +188,7 @@ static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size
     // If we cannot find it then the calling code has an error in it.
 #ifndef NDEBUG
     bool found_it = false;
-    for (malloc_block_t *iter = this->head; iter; iter = iter->next) {
+    for (malloc_block_t *iter = self->head; iter; iter = iter->next) {
         if (iter == block) {
             found_it = true;
         }
@@ -197,8 +197,8 @@ static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size
 #endif
 
     if (new_size == 0) {
-        malloc_zone_free(this, ptr);
-        return malloc_zone_malloc(this, 0);
+        malloc_zone_free(self, ptr);
+        return malloc_zone_malloc(self, 0);
     }
 
     // Blocks for allocations are always multiples of four bytes in size.
@@ -236,10 +236,10 @@ static void* malloc_zone_realloc(malloc_zone_t *this, void *ptr, size_t new_size
     }
 
     // Can we allocate a new block of memory for the resized allocation?
-    void *new_alloc = malloc_zone_malloc(this, new_size);
+    void *new_alloc = malloc_zone_malloc(self, new_size);
     if (new_alloc) {
         memcpy(ptr, new_alloc, block->size);
-        malloc_zone_free(this, ptr);
+        malloc_zone_free(self, ptr);
         return new_alloc;
     }
 

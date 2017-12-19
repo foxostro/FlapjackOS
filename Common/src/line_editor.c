@@ -15,17 +15,17 @@
       __typeof__ (b) _b = (b); \
       _a > _b ? _a : _b; })
 
-static void line_editor_destroy(line_editor_impl_t *this)
+static void line_editor_destroy(line_editor_impl_t *self)
 {
-    while (ll_count_str(this->history) > 0) {
-        char *history = ll_remove_str(this->history, 0);
+    while (ll_count_str(self->history) > 0) {
+        char *history = ll_remove_str(self->history, 0);
         free(history);
     }
-    ll_destroy_str(this->history);
+    ll_destroy_str(self->history);
 
-    free(this->prompt);
+    free(self->prompt);
 
-    free(this);
+    free(self);
 }
 
 static void backspace(console_interface_t *console,
@@ -122,30 +122,30 @@ static void replace_entire_line(char *replacement,
 }
 
 // Prompt for one line of user input on the console.
-static char * line_editor_getline(line_editor_impl_t *this)
+static char * line_editor_getline(line_editor_impl_t *self)
 {
-    assert(this);
-    assert(this->console);
-    assert(this->keyboard);
-    assert(this->prompt);
+    assert(self);
+    assert(self->console);
+    assert(self->keyboard);
+    assert(self->prompt);
 
     static const size_t buffer_size = 512;
     char *buffer = malloc(buffer_size);
 
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
-    size_t prompt_len = strnlen(this->prompt, this->prompt_size);
+    size_t prompt_len = strnlen(self->prompt, self->prompt_size);
     size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
-    this->history_cursor = -1;
-    this->console->puts(this->prompt);
-    this->console->putchar(' ');
-    size_t cursor_row = this->console->get_cursor_row();
-    size_t cursor_col_offset = this->console->get_cursor_col();
+    self->history_cursor = -1;
+    self->console->puts(self->prompt);
+    self->console->putchar(' ');
+    size_t cursor_row = self->console->get_cursor_row();
+    size_t cursor_col_offset = self->console->get_cursor_col();
 
     while (!have_a_newline) {
         keyboard_event_t event;
-        this->keyboard->get_event(this->keyboard, &event);
+        self->keyboard->get_event(self->keyboard, &event);
 
         if (event.state != PRESSED) {
             continue;
@@ -161,7 +161,7 @@ static char * line_editor_getline(line_editor_impl_t *this)
             case KEYCODE_LEFT_ARROW:
                 if (cursor_col > 0) {
                     cursor_col--;
-                    this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    self->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -171,7 +171,7 @@ static char * line_editor_getline(line_editor_impl_t *this)
             case KEYCODE_RIGHT_ARROW:
                 if (cursor_col < count) {
                     cursor_col++;
-                    this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                    self->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                 }
                 break;
 
@@ -179,11 +179,11 @@ static char * line_editor_getline(line_editor_impl_t *this)
                 // fall through
 
             case KEYCODE_DOWN_ARROW:
-                if (this->history_cursor > 0) {
-                    this->history_cursor--;
-                    char *history = ll_at_str(this->history, this->history_cursor);
+                if (self->history_cursor > 0) {
+                    self->history_cursor--;
+                    char *history = ll_at_str(self->history, self->history_cursor);
                     replace_entire_line(history,
-                                        this->console,
+                                        self->console,
                                         buffer,
                                         maxcount,
                                         &count,
@@ -198,13 +198,13 @@ static char * line_editor_getline(line_editor_impl_t *this)
 
             case KEYCODE_UP_ARROW:
                 {
-                    int history_count = (int)ll_count_str(this->history);
-                    if (this->history_cursor+1 < history_count) {
-                        this->history_cursor++;
+                    int history_count = (int)ll_count_str(self->history);
+                    if (self->history_cursor+1 < history_count) {
+                        self->history_cursor++;
 
-                        char *history = ll_at_str(this->history, this->history_cursor);
+                        char *history = ll_at_str(self->history, self->history_cursor);
                         replace_entire_line(history,
-                                            this->console,
+                                            self->console,
                                             buffer,
                                             maxcount,
                                             &count,
@@ -216,11 +216,11 @@ static char * line_editor_getline(line_editor_impl_t *this)
                 break;
 
             default:
-                this->history_cursor = -1;
+                self->history_cursor = -1;
 
                 switch (ch) {
                     case '\b':
-                        backspace(this->console,
+                        backspace(self->console,
                                   buffer,
                                   &count,
                                   &cursor_col,
@@ -231,13 +231,13 @@ static char * line_editor_getline(line_editor_impl_t *this)
                     case '\n':
                         buffer[count] = '\0';
                         cursor_col = count;
-                        this->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
-                        this->console->putchar('\n');
+                        self->console->set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
+                        self->console->putchar('\n');
                         have_a_newline = true;
                         break;
 
                     default:
-                        type_character(this->console,
+                        type_character(self->console,
                                        buffer,
                                        maxcount,
                                        &count,
@@ -255,28 +255,28 @@ static char * line_editor_getline(line_editor_impl_t *this)
 }
 
 // Change the prompt displayed at the beginning of the line.
-static void line_editor_set_prompt(line_editor_impl_t *this,
+static void line_editor_set_prompt(line_editor_impl_t *self,
                                    size_t prompt_size, const char *prompt)
 {
-    assert(this);
+    assert(self);
     assert(prompt_size > 0);
     assert(prompt);
 
-    free(this->prompt);
+    free(self->prompt);
 
     // Let's always allocate one more byte then requested just to make sure we
     // always have a nul-terminator at the end of the string.
-    this->prompt = malloc(prompt_size+1);
-    memset(this->prompt, 0, prompt_size+1);
-    memcpy(this->prompt, prompt, prompt_size);
-    this->prompt_size = prompt_size;
+    self->prompt = malloc(prompt_size+1);
+    memset(self->prompt, 0, prompt_size+1);
+    memcpy(self->prompt, prompt, prompt_size);
+    self->prompt_size = prompt_size;
 }
 
 // Add a line to the editor history.
-static void line_editor_add_history(line_editor_impl_t *this,
+static void line_editor_add_history(line_editor_impl_t *self,
                                     const char *line_of_history)
 {
-    assert(this);
+    assert(self);
     assert(line_of_history);
 
     size_t n = strlen(line_of_history) + 1;
@@ -284,10 +284,10 @@ static void line_editor_add_history(line_editor_impl_t *this,
     memcpy(the_copy, line_of_history, n);
     the_copy[n] = 0;
 
-    ll_push_front_str(this->history, the_copy);
+    ll_push_front_str(self->history, the_copy);
 
-    // for (int i = 0, n = (int)ll_count_str(this->history); i < n; ++i) {
-    //     console_printf(this->console, "history %d -- %s\n", i, ll_at_str(this->history, i));
+    // for (int i = 0, n = (int)ll_count_str(self->history); i < n; ++i) {
+    //     console_printf(self->console, "history %d -- %s\n", i, ll_at_str(self->history, i));
     // }
 }
 
@@ -298,22 +298,22 @@ line_editor_t* line_editor_init(console_interface_t *console,
     assert(console);
     assert(keyboard);
 
-    line_editor_impl_t *this = malloc(sizeof(line_editor_impl_t));
+    line_editor_impl_t *self = malloc(sizeof(line_editor_impl_t));
 
-    this->destroy = line_editor_destroy;
-    this->getline = line_editor_getline;
-    this->set_prompt = line_editor_set_prompt;
-    this->add_history = line_editor_add_history;
+    self->destroy = line_editor_destroy;
+    self->getline = line_editor_getline;
+    self->set_prompt = line_editor_set_prompt;
+    self->add_history = line_editor_add_history;
 
-    this->console = console;
-    this->keyboard = keyboard;
-    this->prompt_size = 0;
-    this->prompt = NULL;
-    this->history = ll_init_str();
-    this->history_cursor = -1;
+    self->console = console;
+    self->keyboard = keyboard;
+    self->prompt_size = 0;
+    self->prompt = NULL;
+    self->history = ll_init_str();
+    self->history_cursor = -1;
 
     static const char default_prompt[] = ">";
-    line_editor_set_prompt(this, sizeof(default_prompt), default_prompt);
+    line_editor_set_prompt(self, sizeof(default_prompt), default_prompt);
 
-    return (line_editor_t *)this;
+    return (line_editor_t *)self;
 }
