@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stddef.h>
 #include <timer_device.hpp>
 
 class pit_timer_device : public timer_device {

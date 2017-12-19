@@ -1,11 +1,17 @@
 #pragma once
 
 #ifdef __cplusplus
+#include <cstdarg>
+#include <cstddef>
+
 extern "C" {
-#endif
+
+#else
 
 #include <stdarg.h>
 #include <stddef.h>
+
+#endif
 
 #ifdef TESTING
 #define VSNPRINTF  flapjack_vsnprintf

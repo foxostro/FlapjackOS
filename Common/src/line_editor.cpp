@@ -1,8 +1,9 @@
 #include <line_editor.hpp>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+
 // #include <console_printf.h>
 
 #define MIN(a, b) \

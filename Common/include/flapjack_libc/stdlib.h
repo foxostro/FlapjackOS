@@ -1,10 +1,17 @@
 #pragma once
 
 #ifdef __cplusplus
+
+#include <cstddef>
 extern "C" {
-#endif
+
+#else
 
 #include <stddef.h>
+
+#endif
+
+
 #include <interfaces/malloc_interface.h>
 
 #ifdef TESTING
@@ -23,6 +30,7 @@ void FREE(void *ptr);
 
 // Sets the allocator to use for the malloc family of functions.
 void set_global_allocator(malloc_interface_t *allocator);
+
 
 #ifdef __cplusplus
 }

@@ -6,7 +6,12 @@ extern "C" {
 
 #ifdef TESTING
 
+#ifdef __cplusplus
+#include <cstdlib>
+#else
 #include <stdlib.h>
+#endif
+
 #define assert(expr) ((void)((expr) ? 0 : (abort(), 0)))
 
 #else // TESTING

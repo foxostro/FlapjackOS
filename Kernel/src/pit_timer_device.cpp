@@ -1,10 +1,8 @@
 #include <pit_timer_device.hpp>
-#include <stdint.h>
+
 #include <pic.h>
 #include <inout.h>
 #include <misc.h>
-#include <stdlib.h>
-#include <assert.h>
 
 constexpr unsigned TIMER_PERIOD_IO_PORT = 0x40;
 constexpr unsigned TIMER_MODE_IO_PORT   = 0x43;

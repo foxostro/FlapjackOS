@@ -1,15 +1,25 @@
 cmake_minimum_required(VERSION 3.6)
 
 set(SOURCE_FILES
+    "include/flapjack_libc/cassert"
+    "include/flapjack_libc/cctype"
+    "include/flapjack_libc/cstdio"
+    "include/flapjack_libc/cstdlib"
+    "include/flapjack_libc/cstring"
+
     "include/flapjack_libc/assert.h"
     "include/flapjack_libc/string.h" "src/string.c"
     "include/flapjack_libc/stdio.h" "src/stdio.c"
     "include/flapjack_libc/stdlib.h" "src/stdlib.c"
+
     "include/line_editor.hpp" "src/line_editor.cpp"
     "include/console_printf.h" "src/console_printf.c"
+
     "include/interfaces/console_interface.h"
     "include/interfaces/keyboard_device.hpp"
+
     "include/ll_str.h" "src/ll_str.c" # generated
+
     "src/c_plus_plus_support.cpp"
     )
 include_directories("include")

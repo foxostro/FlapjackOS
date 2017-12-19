@@ -1,15 +1,13 @@
 #include <ps2_keyboard_device.hpp>
-#include <stdint.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <inout.h>
-#include <console.h>
-#include <ctypes.h>
+#include <cstdlib>
+#include <climits>
+#include <cstring>
+#include <cassert>
+
 #include <interrupt_asm.h>
 #include <halt.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <inout.h>
+#include <console.h>
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
 constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <interfaces/keyboard_device.hpp>
-#include <stddef.h>
+#include <cstddef>
 
 class ps2_keyboard_device : public keyboard_device {
     static constexpr size_t BUFFER_SIZE = 32;

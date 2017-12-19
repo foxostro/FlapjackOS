@@ -1,10 +1,16 @@
 #pragma once
 
 #ifdef __cplusplus
+
+#include <cstddef>
 extern "C" {
-#endif
+
+#else
 
 #include <stddef.h>
+
+#endif
+
 
 // To prevent name collisions between symbols here and in the host's C standard
 // library, we hide the FlapjackOS symbols behind macros. When building for unit
@@ -29,6 +35,7 @@ void* MEMSET(void *s, int value, size_t n);
 
 size_t STRNLEN(const char *s, size_t maxlen);
 size_t STRLEN(const char *s);
+
 
 #ifdef __cplusplus
 }

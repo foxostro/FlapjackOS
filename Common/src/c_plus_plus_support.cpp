@@ -1,5 +1,5 @@
 #include "flapjack_libc/assert.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 // The C++ runtime needs this function in case a pure virtual function call is
 // made. Though, that should not be possible, anyhow.

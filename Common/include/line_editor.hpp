@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
+
 #include <ll_str.h>
 #include <interfaces/console_interface.h>
 #include <interfaces/keyboard_device.hpp>
