@@ -17,7 +17,12 @@ typedef struct {
     uint8_t flags:4;
     uint8_t base_24_31;
 } gdt_entry_t;
+
+#ifdef __cplusplus
+static_assert(8 == sizeof(gdt_entry_t), "each GDT entry is eight bytes");
+#else
 _Static_assert(8 == sizeof(gdt_entry_t), "each GDT entry is eight bytes");
+#endif
 
 void gdt_create_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit,
                       bool gr, bool sz, bool pr, unsigned privl, bool ex,

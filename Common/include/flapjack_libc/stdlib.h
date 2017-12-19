@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <interfaces/malloc_interface.h>
 
@@ -19,3 +23,7 @@ void FREE(void *ptr);
 
 // Sets the allocator to use for the malloc family of functions.
 void set_global_allocator(malloc_interface_t *allocator);
+
+#ifdef __cplusplus
+}
+#endif

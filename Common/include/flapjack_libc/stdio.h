@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdarg.h>
 #include <stddef.h>
 
@@ -34,3 +38,7 @@ size_t SNPRINTF(char *str,
                 size_t size,
                 const char *format,
                 ...);
+
+#ifdef __cplusplus
+}
+#endif

@@ -21,18 +21,6 @@ typedef struct ps2_keyboard {
     size_t count;
 } ps2_keyboard_t;
 
-_Static_assert(offsetof(ps2_keyboard_t, destroy) == offsetof(keyboard_interface_t, destroy),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(ps2_keyboard_t, int_handler) == offsetof(keyboard_interface_t, int_handler),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(ps2_keyboard_t, keycode_name) == offsetof(keyboard_interface_t, keycode_name),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(ps2_keyboard_t, get_event) == offsetof(keyboard_interface_t, get_event),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
 // Initializes the keyboard device and driver.
 keyboard_interface_t* ps2_keyboard_init(void);
 

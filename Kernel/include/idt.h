@@ -48,7 +48,12 @@ typedef struct {
     uint8_t p:1;         // present bit, set to zero for unused interrupts
     uint16_t offset_2;   // offset bits 16..31
 } idt_entry_t;
+
+#ifdef __cplusplus
+static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
+#else
 _Static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
+#endif
 
 
 // Returns a pointer to the beginning of the installed IDT.

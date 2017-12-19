@@ -22,18 +22,6 @@ typedef struct line_editor_impl {
     int history_cursor;
 } line_editor_impl_t;
 
-_Static_assert(offsetof(line_editor_impl_t, destroy) == offsetof(line_editor_t, destroy),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(line_editor_impl_t, getline) == offsetof(line_editor_t, getline),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(line_editor_impl_t, set_prompt) == offsetof(line_editor_t, set_prompt),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(line_editor_impl_t, add_history) == offsetof(line_editor_t, add_history),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
 #ifdef __cplusplus
 }
 #endif

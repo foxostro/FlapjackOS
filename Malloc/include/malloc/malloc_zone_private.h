@@ -23,15 +23,6 @@ typedef struct malloc_zone {
     malloc_block_t *head;
 } malloc_zone_t;
 
-_Static_assert(offsetof(malloc_zone_t, malloc) == offsetof(malloc_interface_t, malloc),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(malloc_zone_t, realloc) == offsetof(malloc_interface_t, realloc),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(malloc_zone_t, free) == offsetof(malloc_interface_t, free),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
 #ifdef __cplusplus
 }
 #endif

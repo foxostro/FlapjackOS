@@ -26,18 +26,6 @@ typedef struct pit_timer {
     unsigned timer_leap_ticks;
 } pit_timer_t;
 
-_Static_assert(offsetof(pit_timer_t, int_handler) == offsetof(timer_interface_t, int_handler),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(pit_timer_t, ticks) == offsetof(timer_interface_t, ticks),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(pit_timer_t, seconds) == offsetof(timer_interface_t, seconds),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
-_Static_assert(offsetof(pit_timer_t, destroy) == offsetof(timer_interface_t, destroy),
-    "Incorrect offset prevents correct casting behavior when casting between types.");
-
 // Configure the PIT timer. Set the rate of timer interrupts.
 // timer_rate -- clock cycles between timer interrupts
 // leap_interval -- Every few timer interrupts, it may be necessary to add

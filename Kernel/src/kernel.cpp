@@ -34,6 +34,9 @@ static idt_entry_t s_idt[IDT_MAX];
 static keyboard_interface_t *s_keyboard;
 static timer_interface_t *s_timer;
 
+// This is marked with "C" linkage because we call it from the assembly code
+// ISR stubs in isr_wrapper_asm.S.
+extern "C"
 void interrupt_dispatch(unsigned interrupt_number,
                         unsigned edi,
                         unsigned esi,
@@ -184,8 +187,10 @@ static malloc_interface_t* initialize_kernel_heap(multiboot_info_t *mb_info)
     return allocator;
 }
 
+// This is marked with "C" linkage because we call it from assembly in boot.S.
+extern "C"
 __attribute__((noreturn))
-extern "C" void kernel_main(multiboot_info_t *mb_info, void *istack)
+void kernel_main(multiboot_info_t *mb_info, void *istack)
 {
     console_interface_t *console = &g_console;
 

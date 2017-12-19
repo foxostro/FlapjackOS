@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 // To prevent name collisions between symbols here and in the host's C standard
@@ -25,3 +29,7 @@ void* MEMSET(void *s, int value, size_t n);
 
 size_t STRNLEN(const char *s, size_t maxlen);
 size_t STRLEN(const char *s);
+
+#ifdef __cplusplus
+}
+#endif

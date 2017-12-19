@@ -34,7 +34,12 @@ typedef struct {
     uint16_t bg:3;
     uint16_t blink:1;
 } vgachar_t;
+
+#ifdef __cplusplus
+static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
+#else
 _Static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
+#endif
 
 #define CONSOLE_WIDTH   (80)
 #define CONSOLE_HEIGHT  (25)
