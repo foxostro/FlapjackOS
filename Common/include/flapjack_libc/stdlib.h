@@ -1,18 +1,14 @@
 #pragma once
 
 #ifdef __cplusplus
-
 #include <cstddef>
-extern "C" {
-
 #else
-
 #include <stddef.h>
-
 #endif
 
-
-#include <common/malloc_interface.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef TESTING
 #define MALLOC  flapjack_malloc
@@ -27,10 +23,6 @@ extern "C" {
 void* MALLOC(size_t size);
 void* REALLOC(void *ptr, size_t size);
 void FREE(void *ptr);
-
-// Sets the allocator to use for the malloc family of functions.
-void set_global_allocator(malloc_interface_t *allocator);
-
 
 #ifdef __cplusplus
 }

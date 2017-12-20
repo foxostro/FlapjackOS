@@ -1,5 +1,6 @@
 #include <common/line_editor.hpp>
 #include <common/console_printf.hpp>
+#include <malloc/malloc_zone.hpp>
 
 #include <seg.h>
 #include <gdt.h>
@@ -14,7 +15,6 @@
 #include <panic.h>
 #include <backtrace.hpp>
 #include <multiboot.h>
-#include <malloc/malloc_zone.h>
 
 #include <vga_console_device.hpp>
 #include <pit_timer_device.hpp>
@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <new>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
@@ -184,7 +185,7 @@ static void call_global_constructors()
     }
 }
 
-static malloc_interface_t* initialize_kernel_heap(multiboot_info_t *mb_info)
+static allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
 {
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
     if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
@@ -202,9 +203,9 @@ static malloc_interface_t* initialize_kernel_heap(multiboot_info_t *mb_info)
     uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
 
     // Initialize the kernel heap allocator using the memory region we identified above.
-    malloc_interface_t *allocator = malloc_zone_init((void *)heapBeginAddr, heapLen);
-    set_global_allocator(allocator);
-    return allocator;
+    allocator *alloc = malloc_zone::create(heapBeginAddr, heapLen);
+    set_global_allocator(alloc);
+    return alloc;
 }
 
 // This is marked with "C" linkage because we call it from assembly in boot.S.

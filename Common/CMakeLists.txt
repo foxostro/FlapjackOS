@@ -6,18 +6,20 @@ set(SOURCE_FILES
     "include/flapjack_libc/cstdio"
     "include/flapjack_libc/cstdlib"
     "include/flapjack_libc/cstring"
-    "include/flapjack_libc/algorithm"
+    "include/flapjack_libc/new"
 
     "include/flapjack_libc/assert.h"
     "include/flapjack_libc/string.h" "src/string.c"
     "include/flapjack_libc/stdio.h" "src/stdio.c"
-    "include/flapjack_libc/stdlib.h" "src/stdlib.c"
+    "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
 
     "include/common/line_editor.hpp" "src/line_editor.cpp"
     "include/common/console_printf.hpp" "src/console_printf.cpp"
     "include/common/linked_list.hpp"
     "include/common/console_device.hpp"
     "include/common/keyboard_device.hpp"
+    "include/common/allocator.hpp"
+    "include/common/minmax.hpp"
 
     "src/c_plus_plus_support.cpp"
     )

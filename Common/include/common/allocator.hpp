@@ -1,16 +1,16 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstddef>
 
-#include <stddef.h>
+// Abstract interface for a generic memory allocator.
+class allocator {
+public:
+    virtual ~allocator() = default;
 
-typedef struct malloc_interface {
     // Allocates a block of memory of the given size from the malloc zone.
     // May return NULL if the request cannot be satisfied.
     // If size is zero a new minimum-sized object is allocated.
-    void* (*malloc)(struct malloc_interface *self, size_t size);
+    virtual void* malloc(size_t size) = 0;
 
     // Tries to change the size of the allocation pointed to by ptr to size,
     // and returns the address of the new allocation. This may move the
@@ -25,13 +25,9 @@ typedef struct malloc_interface {
     // 
     // If size is zero and ptr is not NULL, a new minimum-sized object is
     // allocated and the original object is freed.
-    void* (*realloc)(struct malloc_interface *self, void *ptr, size_t new_size);
+    virtual void* realloc(void *ptr, size_t new_size) = 0;
 
     // Deallocates a memory allocation pointed to be ptr. If ptr is NULL then
     // no operation is performed.
-    void (*free)(struct malloc_interface *self, void *ptr);
-} malloc_interface_t;
-
-#ifdef __cplusplus
-}
-#endif
+    virtual void free(void *ptr) = 0;
+};
