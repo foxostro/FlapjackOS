@@ -1,8 +1,9 @@
+#include <common/console_device.hpp>
+#include <common/console_printf.hpp>
+
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <interfaces/console_device.hpp>
-#include "console_printf.hpp"
 
 size_t console_printf(console_device &console, const char *fmt, ...)
 {

@@ -1,7 +1,5 @@
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
+#include <common/line_editor.hpp>
+#include <common/console_printf.hpp>
 
 #include <seg.h>
 #include <gdt.h>
@@ -11,18 +9,21 @@
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
-#include <console_printf.hpp>
 #include <inout.h>
 #include <halt.h>
 #include <panic.h>
 #include <backtrace.hpp>
-#include <line_editor.hpp>
 #include <multiboot.h>
 #include <malloc/malloc_zone.h>
 
 #include <vga_console_device.hpp>
 #include <pit_timer_device.hpp>
 #include <ps2_keyboard_device.hpp>
+
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely

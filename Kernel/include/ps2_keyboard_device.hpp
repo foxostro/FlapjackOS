@@ -1,6 +1,6 @@
 #pragma once
 
-#include <interfaces/keyboard_device.hpp>
+#include <common/keyboard_device.hpp>
 #include <cstddef>
 
 class ps2_keyboard_device : public keyboard_device {

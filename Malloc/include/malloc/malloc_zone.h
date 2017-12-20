@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 #include <stddef.h>
-#include <interfaces/malloc_interface.h>
+#include <common/malloc_interface.h>
 
 // Initializes the malloc zone using the specified region of memory.
 // Returns the address of the malloc zone structure stored within that

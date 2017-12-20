@@ -1,9 +1,9 @@
-#include <line_editor.hpp>
+#include <common/line_editor.hpp>
+#include <common/minmax.hpp>
 
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <algorithm>
 
 line_editor::~line_editor()
 {
@@ -127,7 +127,7 @@ char * line_editor::getline()
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
     size_t prompt_len = strnlen(prompt, prompt_size);
-    size_t maxcount = std::min(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
+    size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
     history_cursor = -1;
     con.puts(prompt);

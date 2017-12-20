@@ -13,12 +13,11 @@ set(SOURCE_FILES
     "include/flapjack_libc/stdio.h" "src/stdio.c"
     "include/flapjack_libc/stdlib.h" "src/stdlib.c"
 
-    "include/line_editor.hpp" "src/line_editor.cpp"
-    "include/console_printf.hpp" "src/console_printf.cpp"
+    "include/common/line_editor.hpp" "src/line_editor.cpp"
+    "include/common/console_printf.hpp" "src/console_printf.cpp"
     "include/common/linked_list.hpp"
-
-    "include/interfaces/console_device.hpp"
-    "include/interfaces/keyboard_device.hpp"
+    "include/common/console_device.hpp"
+    "include/common/keyboard_device.hpp"
 
     "src/c_plus_plus_support.cpp"
     )

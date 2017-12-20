@@ -1,6 +1,6 @@
 #include "flapjack_libc/stdlib.h"
 #include "flapjack_libc/assert.h"
-#include <interfaces/malloc_interface.h>
+#include <common/malloc_interface.h>
 
 static malloc_interface_t *g_allocator = NULL;
 

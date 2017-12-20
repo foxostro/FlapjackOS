@@ -1,4 +1,4 @@
-#include <console_printf.hpp>
+#include <common/console_printf.hpp>
 
 // Maximum number of stack frames in a backtrace.
 constexpr size_t MAXFRAMES = 16;

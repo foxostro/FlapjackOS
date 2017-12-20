@@ -1,6 +1,6 @@
 #include <cstdio>
-#include <interfaces/console_device.hpp>
-#include <console_printf.hpp>
+#include <common/console_device.hpp>
+#include <common/console_printf.hpp>
 #include <halt.h>
 #include <interrupt_asm.h>
 #include <backtrace.hpp>

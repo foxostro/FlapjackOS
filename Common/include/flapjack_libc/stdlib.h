@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 
-#include <interfaces/malloc_interface.h>
+#include <common/malloc_interface.h>
 
 #ifdef TESTING
 #define MALLOC  flapjack_malloc

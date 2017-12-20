@@ -1,6 +1,6 @@
 #pragma once
 
-#include <interfaces/console_device.hpp>
+#include <common/console_device.hpp>
 
 class vga_console_device : public console_device {
     size_t cursor_row, cursor_col,

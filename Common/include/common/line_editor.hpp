@@ -3,8 +3,8 @@
 #include <cstddef>
 
 #include <common/linked_list.hpp>
-#include <interfaces/console_device.hpp>
-#include <interfaces/keyboard_device.hpp>
+#include <common/console_device.hpp>
+#include <common/keyboard_device.hpp>
 
 // This can be used to read lines of user input from the terminal and provides
 // useful UI affordances such as nice editing functionality, a prompt, history,
