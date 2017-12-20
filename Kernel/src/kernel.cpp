@@ -166,6 +166,23 @@ void interrupt_dispatch(unsigned interrupt_number,
     }
 }
 
+static void call_global_constructors()
+{
+    extern char start_ctors[];
+    extern char end_ctors[];
+
+    for (char *ctor = start_ctors;
+         ctor < end_ctors;
+         ctor += sizeof(void *)) {
+
+        // Read the address from the table, interpret as a function pointer,
+        // and then execute the ctor.
+        void *value = *((void **)ctor);
+        void (*ctor_function_pointer)() = (void (*)())(value);
+        ctor_function_pointer();
+    }
+}
+
 static malloc_interface_t* initialize_kernel_heap(multiboot_info_t *mb_info)
 {
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
@@ -221,7 +238,14 @@ void kernel_main(multiboot_info_t *mb_info, void *istack)
     vga_console_device vga_console;
     g_console = &vga_console;
     g_console->clear();
-    
+
+    // The kernel must call global constructors itself as we have no runtime
+    // support beyond what we implement ourselves.
+    // We want to call this as early as possible after booting. However, we also
+    // want the constructors to be able to at least panic() on error. So, call
+    // this after initializing interrupts and after initializing the console.
+    call_global_constructors();
+
     // Initialize malloc, &c.
     initialize_kernel_heap(mb_info);
 
