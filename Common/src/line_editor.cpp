@@ -7,11 +7,11 @@
 
 line_editor::~line_editor()
 {
-    while (ll_count_str(history) > 0) {
-        char *str = ll_remove_str(history, 0);
+    // TODO: Use a string object here instead of bare char-star.
+    while (!history.empty()) {
+        char *str = history.remove(0);
         free(str);
     }
-    ll_destroy_str(history);
 
     free(prompt);
 }
@@ -22,7 +22,6 @@ line_editor::line_editor(console_device &console,
    kb(keyboard),
    prompt_size(0),
    prompt(NULL),
-   history(ll_init_str()),
    history_cursor(-1)
 {
     static const char default_prompt[] = ">";
@@ -173,7 +172,7 @@ char * line_editor::getline()
             case KEYCODE_DOWN_ARROW:
                 if (history_cursor > 0) {
                     history_cursor--;
-                    char *str = ll_at_str(history, history_cursor);
+                    char *str = history.at(history_cursor);
                     replace_entire_line(str,
                                         buffer,
                                         maxcount,
@@ -189,11 +188,11 @@ char * line_editor::getline()
 
             case KEYCODE_UP_ARROW:
                 {
-                    int history_count = (int)ll_count_str(history);
+                    int history_count = history.count();
                     if (history_cursor+1 < history_count) {
                         history_cursor++;
 
-                        char *str = ll_at_str(history, history_cursor);
+                        char *str = history.at(history_cursor);
                         replace_entire_line(str,
                                             buffer,
                                             maxcount,
@@ -268,5 +267,5 @@ void line_editor::add_history(const char *line_of_history)
     memcpy(the_copy, line_of_history, n);
     the_copy[n] = 0;
 
-    ll_push_front_str(history, the_copy);
+    history.push_front(the_copy);
 }

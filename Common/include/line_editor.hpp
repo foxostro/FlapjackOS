@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include <ll_str.h>
+#include <common/linked_list.hpp>
 #include <interfaces/console_device.hpp>
 #include <interfaces/keyboard_device.hpp>
 
@@ -13,7 +13,7 @@ class line_editor {
     keyboard_device &kb;
     size_t prompt_size;
     char *prompt;
-    ll_str_t *history;
+    linked_list<char*> history;
     int history_cursor;
 
     void backspace(char *buffer,
