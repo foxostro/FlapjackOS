@@ -1,9 +1,9 @@
 #include "flapjack_libc/stdlib.h"
 #include "flapjack_libc/assert.h"
 #include "flapjack_libc/new"
-#include <common/allocator.hpp>
+#include <common/memory_allocator.hpp>
 
-static allocator *g_allocator = nullptr;
+static memory_allocator *g_allocator = nullptr;
 
 extern "C"
 void* MALLOC(size_t size)
@@ -27,7 +27,7 @@ void FREE(void *ptr)
 }
 
 // Sets the allocator to use for the malloc family of functions.
-void set_global_allocator(allocator *a)
+void set_global_allocator(memory_allocator *a)
 {
     assert(a);
     g_allocator = a;

@@ -185,7 +185,7 @@ static void call_global_constructors()
     }
 }
 
-static allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
+static memory_allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
 {
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
     if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
@@ -203,7 +203,7 @@ static allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
     uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
 
     // Initialize the kernel heap allocator using the memory region we identified above.
-    allocator *alloc = malloc_zone::create(heapBeginAddr, heapLen);
+    memory_allocator *alloc = malloc_zone::create(heapBeginAddr, heapLen);
     set_global_allocator(alloc);
     return alloc;
 }

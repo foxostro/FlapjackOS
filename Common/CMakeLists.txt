@@ -18,7 +18,7 @@ set(SOURCE_FILES
     "include/common/linked_list.hpp"
     "include/common/console_device.hpp"
     "include/common/keyboard_device.hpp"
-    "include/common/allocator.hpp"
+    "include/common/memory_allocator.hpp"
     "include/common/minmax.hpp"
     )
 

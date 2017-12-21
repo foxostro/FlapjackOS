@@ -3,9 +3,9 @@
 #include <cstddef>
 
 // Abstract interface for a generic memory allocator.
-class allocator {
+class memory_allocator {
 public:
-    virtual ~allocator() = default;
+    virtual ~memory_allocator() = default;
 
     // Allocates a block of memory of the given size from the malloc zone.
     // May return NULL if the request cannot be satisfied.

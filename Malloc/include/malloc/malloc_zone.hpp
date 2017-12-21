@@ -2,7 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <common/allocator.hpp>
+#include <common/memory_allocator.hpp>
 
 struct malloc_block {
     malloc_block *prev;
@@ -11,7 +11,7 @@ struct malloc_block {
     bool inuse;
 };
 
-class malloc_zone : public allocator {
+class malloc_zone : public memory_allocator {
 public:
     // Initializes the malloc zone using the specified region of memory.
     // Allocations from the zone will always be taken from this memory region.
