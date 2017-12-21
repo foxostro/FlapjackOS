@@ -108,9 +108,6 @@ if(CMAKE_CROSSCOMPILING)
 
 else(CMAKE_CROSSCOMPILING)
 
-    include_directories(${CHECK_INCLUDE_DIRS})
-    link_directories(${CHECK_LIBRARIES_DIR})
-
     add_executable(KernelTest
                    ${SOURCE_FILES}
                    "test/test_gdt.cpp"
@@ -121,7 +118,6 @@ else(CMAKE_CROSSCOMPILING)
     target_link_libraries(KernelTest
                           ${COMMON_LIBRARIES}
                           ${MALLOC_LIBRARIES}
-                          ${CHECK_LIBRARIES}
                           )
 
     add_test(KernelTest ${CMAKE_CURRENT_BINARY_DIR}/KernelTest)

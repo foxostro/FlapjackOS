@@ -3,8 +3,6 @@ project(FlapjackOS)
 
 enable_language(ASM)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
-
 # Function to generate source code from a template file.
 function(GenerateSourceFromTemplate
          TEMPLATE_FILENAME
@@ -64,8 +62,8 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
     # If we're building natively then we want to build tests.
+    # Tests are defined in each library.
     enable_testing()
-    find_package(Check REQUIRED)
 
 endif()
 

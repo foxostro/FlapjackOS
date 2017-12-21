@@ -21,11 +21,12 @@ set(SOURCE_FILES
     "include/common/allocator.hpp"
     "include/common/minmax.hpp"
     )
-include_directories("include")
 
 if(CMAKE_CROSSCOMPILING)
 list(APPEND SOURCE_FILES "src/c_plus_plus_support.cpp")
 endif(CMAKE_CROSSCOMPILING)
+
+include_directories("include")
 
 add_library(Common STATIC ${SOURCE_FILES})
 
@@ -35,9 +36,6 @@ if(CMAKE_CROSSCOMPILING)
 
 else(CMAKE_CROSSCOMPILING)
 
-    include_directories(${CHECK_INCLUDE_DIRS})
-    link_directories(${CHECK_LIBRARIES_DIR})
-
     add_executable(CommonTest
                    "test/test_string.cpp"
                    "test/test_stdio.cpp"
@@ -46,7 +44,6 @@ else(CMAKE_CROSSCOMPILING)
 
     target_link_libraries(CommonTest
                           Common
-                          ${CHECK_LIBRARIES}
                           )
 
     add_test(CommonTest ${CMAKE_CURRENT_BINARY_DIR}/CommonTest)
