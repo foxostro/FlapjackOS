@@ -1,20 +1,20 @@
 #include "flapjack_libc/string.h"
 
-size_t STRLEN(const char *s)
+extern "C" size_t STRLEN(const char *s)
 {
     size_t c = 0;
     if (s) for (; *s; ++c, ++s);
     return c;
 }
 
-size_t STRNLEN(const char *s, size_t maxlen)
+extern "C" size_t STRNLEN(const char *s, size_t maxlen)
 {
     size_t c = 0;
     if (s) for (; c < maxlen && *s; ++c, ++s);
     return c;
 }
 
-void* MEMCPY(void *dst, const void *src, size_t n)
+extern "C" void* MEMCPY(void *dst, const void *src, size_t n)
 {
     // We could do better, but this works.
 
@@ -25,7 +25,7 @@ void* MEMCPY(void *dst, const void *src, size_t n)
     return dst;
 }
 
-void* MEMMOVE(void *dst, const void *src, size_t n)
+extern "C" void* MEMMOVE(void *dst, const void *src, size_t n)
 {
     // We could do better, but this works.
 
@@ -64,7 +64,7 @@ int memcmp(const void *s1, const void *s2, size_t n)
 }
 #endif
 
-void* MEMSET(void *dst, int value, size_t n)
+extern "C" void* MEMSET(void *dst, int value, size_t n)
 {
     for (size_t i = 0; i < n; ++i) {
         ((char *)dst)[i] = (unsigned char)value;

@@ -1,12 +1,12 @@
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
 
 #include "flapjack_libc/ctype.h"
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/stdio.h"
 
+// TODO: Move SWAP() to own header as header as library template function?
 #define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
 
 static const char digits_lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -128,10 +128,10 @@ static size_t insert_pointer(uintptr_t pvalue, char **str, size_t *size)
     return i;
 }
 
-size_t VSNPRINTF(char *buf,
-                 size_t size,
-                 const char *fmt,
-                 va_list args)
+extern "C" size_t VSNPRINTF(char *buf,
+                            size_t size,
+                            const char *fmt,
+                            va_list args)
 {
     size_t i = 0;
     char *str = buf;
@@ -198,7 +198,7 @@ size_t VSNPRINTF(char *buf,
     return i;
 }
 
-size_t SNPRINTF(char *str, size_t size, const char *fmt, ...)
+extern "C" size_t SNPRINTF(char *str, size_t size, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

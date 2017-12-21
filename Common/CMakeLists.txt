@@ -9,8 +9,8 @@ set(SOURCE_FILES
     "include/flapjack_libc/new"
 
     "include/flapjack_libc/assert.h"
-    "include/flapjack_libc/string.h" "src/string.c"
-    "include/flapjack_libc/stdio.h" "src/stdio.c"
+    "include/flapjack_libc/string.h" "src/string.cpp"
+    "include/flapjack_libc/stdio.h" "src/stdio.cpp"
     "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
 
     "include/common/line_editor.hpp" "src/line_editor.cpp"
@@ -39,9 +39,9 @@ else(CMAKE_CROSSCOMPILING)
     link_directories(${CHECK_LIBRARIES_DIR})
 
     add_executable(CommonTest
-                   "test/test_string.c"
-                   "test/test_stdio.c"
-                   "test/test_main.c"
+                   "test/test_string.cpp"
+                   "test/test_stdio.cpp"
+                   "test/test_main.cpp"
                    )
 
     target_link_libraries(CommonTest
