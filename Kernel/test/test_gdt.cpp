@@ -1,12 +1,14 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <check.h>
-#include <string.h>
+#include "catch.hpp"
+
+#include <cstdio>
+#include <cstddef>
+#include <cstring>
 
 #include <seg.h>
 #include <gdt.h>
 #include <misc.h>
+
+#define VERBOSE 0
 
 // See <http://wiki.osdev.org/GDT_Tutorial> which was consulted to write this test code.
 
@@ -26,7 +28,11 @@
                      SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
                      SEG_PRIV(0)     | SEG_CODE_EXRD
 
-void print_bits(size_t const size, void const * const ptr)
+
+
+#if VERBOSE
+
+static void print_bits(size_t const size, void const * const ptr)
 {
     unsigned char *b = (unsigned char*) ptr;
     unsigned char byte;
@@ -42,7 +48,7 @@ void print_bits(size_t const size, void const * const ptr)
     }
 }
 
-void print_dwords(size_t count, uint32_t *ptr)
+static void print_dwords(size_t count, uint32_t *ptr)
 {
     while(count--)
     {
@@ -50,7 +56,7 @@ void print_dwords(size_t count, uint32_t *ptr)
     }   
 }
 
-void print_gdt_entry(gdt_entry_t *entry)
+static void print_gdt_entry(gdt_entry_t *entry)
 {
     uint32_t base = (entry->base_0_15) | (entry->base_16_23 << 16) | (entry->base_24_31 << 24);
     uint32_t limit = (entry->limit_0_15) | (entry->limit_16_19 << 16);
@@ -74,7 +80,11 @@ void print_gdt_entry(gdt_entry_t *entry)
     printf("flags\t%x\n", entry->flags);
 }
 
-uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag)
+#endif
+
+
+
+static uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag)
 {
     uint64_t descriptor;
  
@@ -94,7 +104,9 @@ uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag)
     return descriptor;
 }
 
-START_TEST(test_gdt_layout_0)
+
+
+TEST_CASE("test_gdt_layout_0", "[gdt]")
 {
     uint64_t expected = create_descriptor(0, 0, 0);
     gdt_entry_t entry;
@@ -109,11 +121,10 @@ START_TEST(test_gdt_layout_0)
                      false,      // dc
                      false,      // rw
                      false);     // ac
-    ck_assert(!memcmp(&expected, &entry, sizeof(expected)));
+    REQUIRE(!memcmp(&expected, &entry, sizeof(expected)));
 }
-END_TEST
 
-START_TEST(test_gdt_layout_1)
+TEST_CASE("test_gdt_layout_1", "[gdt]")
 {
     uint64_t expected = create_descriptor(0, 0x000fffff, GDT_CODE_PL0);
     gdt_entry_t entry;
@@ -128,11 +139,10 @@ START_TEST(test_gdt_layout_1)
                      false,      // dc
                      true,       // rw
                      false);     // ac
-    ck_assert(!memcmp(&expected, &entry, sizeof(expected)));
+    REQUIRE(!memcmp(&expected, &entry, sizeof(expected)));
 }
-END_TEST
 
-START_TEST(test_gdt_layout_2)
+TEST_CASE("test_gdt_layout_2", "[gdt]")
 {
     uint32_t expected[] = { // This hand-crafted GDT establishes a flat memory mapping.
         0x00000000, // 0
@@ -152,7 +162,7 @@ START_TEST(test_gdt_layout_2)
     memset(gdt, 0, sizeof(gdt));
     gdt_create_flat_mapping(gdt, sizeof(gdt), 0x00100930);
 
-#if 0
+#if VERBOSE
     printf("expected gdt:\n");
     gdt_entry_t *expected_gdt = (gdt_entry_t *)expected;
     for(int i = 0; i < 6; ++i) {
@@ -169,26 +179,5 @@ START_TEST(test_gdt_layout_2)
     printf("\n");
 #endif
     
-    ck_assert(!memcmp(gdt, expected, sizeof(expected)));
-}
-END_TEST
-
-static const struct { char *name; void *fn; } tests[] = {
-    { "test_gdt_layout_0", test_gdt_layout_0 },
-    { "test_gdt_layout_1", test_gdt_layout_1 },
-    { "test_gdt_layout_2", test_gdt_layout_2 },
-};
-static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
-
-Suite* test_suite_gdt(void)
-{
-    Suite *suite = suite_create(__FUNCTION__);
-
-    for (size_t i = 0; i < num_tests; ++i) {
-        TCase *testCase = tcase_create(tests[i].name);
-        _tcase_add_test(testCase, tests[i].fn, tests[i].name, 0, 0, 0, 1);
-        suite_add_tcase(suite, testCase);        
-    }
-
-    return suite;
+    REQUIRE(!memcmp(gdt, expected, sizeof(expected)));
 }

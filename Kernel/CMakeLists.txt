@@ -113,9 +113,9 @@ else(CMAKE_CROSSCOMPILING)
 
     add_executable(KernelTest
                    ${SOURCE_FILES}
-                   "test/test_gdt.c"
-                   "test/test_idt.c"
-                   "test/test_main.c"
+                   "test/test_gdt.cpp"
+                   "test/test_idt.cpp"
+                   "test/test_main.cpp"
                    )
 
     target_link_libraries(KernelTest

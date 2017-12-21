@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <check.h>
+#include "catch.hpp"
+
+#include <cstdio>
+#include <cstddef>
 
 #include <seg.h>
 #include <idt.h>
@@ -23,7 +23,7 @@ idt_entry_t* idt_base(void)
 // direct bit manipulation and check to make sure it's the same as the one get
 // out of idt_build_entry(). This gives assurance that the memory layout of the
 // bitfields in idt_entry_t is correct.
-START_TEST(test_trap_gate)
+TEST_CASE("test_trap_gate", "[idt]")
 {
     unsigned DPL = 0;
     unsigned offset = 0xdeadbeef;
@@ -43,24 +43,5 @@ START_TEST(test_trap_gate)
     idt_entry_t entry;
     idt_build_entry(&entry, offset, TRAP_GATE, DPL);
 
-    ck_assert(!memcmp(&entry, &entry_expected, sizeof(entry_expected)));
-}
-END_TEST
-
-static const struct { char *name; void *fn; } tests[] = {
-    { "test_trap_gate", test_trap_gate },
-};
-static const size_t num_tests = sizeof(tests) / sizeof(tests[0]);
-
-Suite* test_suite_idt(void)
-{
-    Suite *suite = suite_create(__FUNCTION__);
-
-    for (size_t i = 0; i < num_tests; ++i) {
-        TCase *testCase = tcase_create(tests[i].name);
-        _tcase_add_test(testCase, tests[i].fn, tests[i].name, 0, 0, 0, 1);
-        suite_add_tcase(suite, testCase);        
-    }
-
-    return suite;
+    REQUIRE(!memcmp(&entry, &entry_expected, sizeof(entry_expected)));
 }
