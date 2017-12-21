@@ -18,22 +18,17 @@ target_link_libraries(Malloc
                       ${COMMON_LIBRARIES}
                       )
 
-# TODO: Fix Malloc unit tests.
-# if(NOT CMAKE_CROSSCOMPILING)
-#
-#     include_directories(${CHECK_INCLUDE_DIRS})
-#     link_directories(${CHECK_LIBRARIES_DIR})
-#
-#     add_executable(MallocTest
-#                    "test/test_malloc_zone.c"
-#                    "test/test_main.c"
-#                    )
-#
-#     target_link_libraries(MallocTest
-#                           Malloc
-#                           ${CHECK_LIBRARIES}
-#                           )
-#
-#     add_test(MallocTest ${CMAKE_CURRENT_BINARY_DIR}/MallocTest)
-#
-# endif(NOT CMAKE_CROSSCOMPILING)
+if(NOT CMAKE_CROSSCOMPILING)
+
+    add_executable(MallocTest
+                   "test/test_malloc_zone.cpp"
+                   "test/test_main.cpp"
+                   )
+
+    target_link_libraries(MallocTest
+                          Malloc
+                          )
+
+    add_test(MallocTest ${CMAKE_CURRENT_BINARY_DIR}/MallocTest)
+
+endif(NOT CMAKE_CROSSCOMPILING)

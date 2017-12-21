@@ -20,10 +20,13 @@ set(SOURCE_FILES
     "include/common/keyboard_device.hpp"
     "include/common/allocator.hpp"
     "include/common/minmax.hpp"
-
-    "src/c_plus_plus_support.cpp"
     )
 include_directories("include")
+
+if(CMAKE_CROSSCOMPILING)
+list(APPEND SOURCE_FILES "src/c_plus_plus_support.cpp")
+endif(CMAKE_CROSSCOMPILING)
+
 add_library(Common STATIC ${SOURCE_FILES})
 
 if(CMAKE_CROSSCOMPILING)

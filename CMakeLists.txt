@@ -61,13 +61,15 @@ else()
     # In this case, define a flag to indicate we are doing testing and choose
     # some rather standard compiler flags.
     set(CMAKE_C_FLAGS "-g -DTESTING ${COMMON_COMPILER_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-rtti")
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
     # If we're building natively then we want to build tests.
     enable_testing()
     find_package(Check REQUIRED)
 
 endif()
+
+include_directories("3rdParty")
 
 add_subdirectory("Common")
 set(COMMON_LIBRARIES Common)

@@ -21,6 +21,10 @@ public:
     void* realloc(void *ptr, size_t new_size) override;
     void free(void *ptr) override;
 
+#ifdef TESTING
+    malloc_block* head() { return _head; };
+#endif
+
 private:
     malloc_zone();
 
