@@ -63,6 +63,7 @@ set(PLATFORM_SPECIFIC_SOURCE_FILES
     "src/panic.cpp"
     "src/pic.c"
     "src/pit_timer_device.cpp"
+    "src/boot.S"
     )
 source_group("Platform-specific" FILES ${PLATFORM_SPECIFIC_SOURCE_FILES})
 
