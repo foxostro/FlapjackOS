@@ -89,6 +89,11 @@ set(MALLOC_LIBRARIES Malloc)
 set(MALLOC_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/Malloc")
 set(MALLOC_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Malloc/include")
 
+add_subdirectory("KernelPlatformSupport")
+set(KERNEL_PLATFORM_SUPPORT_LIBRARIES KernelPlatformSupport)
+set(KERNEL_PLATFORM_SUPPORT_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/KernelPlatformSupport")
+set(KERNEL_PLATFORM_SUPPORT_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/KernelPlatformSupport/include")
+
 add_subdirectory("Kernel")
 set(KERNEL_LIBRARIES Kernel)
 set(KERNEL_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/Kernel")
@@ -102,14 +107,6 @@ if(CMAKE_CROSSCOMPILING)
     include_directories(${KERNEL_INCLUDE_DIRS})
     link_directories(${KERNEL_LIBRARIES_DIRS})
 
-    # The kernel binary image is built using only static libraries, with no
-    # source code. Really, what we're doing is linking exisitng code together in
-    # a way that produces a multiboot compliant kernel.
-    # 
-    # However, CMake demands the target have at least one source file.
-    # Use an empty file.
-    file(WRITE "${CMAKE_BINARY_DIR}/dummy.c" "")
-
     # The layout file specifies how the linker puts together the binary image.
     set(KERNEL_LAYOUT_FILE "${PROJECT_SOURCE_DIR}/kernel.ld")
 
@@ -117,7 +114,7 @@ if(CMAKE_CROSSCOMPILING)
     # can actually be directly booted by Qemu.
     set(KERNEL_BIN "kernel.bin")
     set(KERNEL_LINK_FLAGS "-m32 -march=i386 -T ${KERNEL_LAYOUT_FILE}")
-    add_executable(${KERNEL_BIN} "${CMAKE_BINARY_DIR}/dummy.c")
+    add_executable(${KERNEL_BIN} boot.S)
     set_target_properties(${KERNEL_BIN} PROPERTIES LINK_DEPENDS ${KERNEL_LAYOUT_FILE})
     target_link_libraries(${KERNEL_BIN}
                           ${KERNEL_LIBRARIES}
@@ -137,7 +134,7 @@ if(CMAKE_CROSSCOMPILING)
     add_custom_command(
         OUTPUT ${CMAKE_PROJECT_NAME}.iso
         COMMAND ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso
-        DEPENDS "${CMAKE_SOURCE_DIR}/grub.cfg"
+        DEPENDS ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg"
         COMMENT "Build the bootable ISO."
         VERBATIM
     )

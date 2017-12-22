@@ -1,24 +1,21 @@
 #include <common/console_printf.hpp>
+#include <get_ebp.h>
 
 // Maximum number of stack frames in a backtrace.
 constexpr size_t MAXFRAMES = 16;
 
-extern "C" {
-    unsigned* get_ebp(void); // defined in backtrace_asm.S
-}
-
 void backtrace(console_device &console)
 {
-    unsigned frame;
-    unsigned * ebp;
+    size_t frame;
+    uintptr_t * ebp;
 
     ebp = get_ebp();
 
     console_printf(console, "Back Trace:\n");
     for (frame = 0; frame < MAXFRAMES; ++frame) {
-        unsigned eip;
+        uintptr_t eip;
 
-        if(ebp == NULL) {
+        if(ebp == nullptr) {
             // We set ebp to zero at the root stack frame.
             break;
         }
@@ -30,7 +27,7 @@ void backtrace(console_device &console)
             break;
         }
 
-        ebp = (unsigned *)(ebp[0]);
+        ebp = (uintptr_t *)(ebp[0]);
         console_printf(console, "[%p]\n", eip);
     }
 

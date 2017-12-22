@@ -1,11 +1,12 @@
 #pragma once
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void disable_interrupts(void);
-void enable_interrupts(void);
+uintptr_t* get_ebp(void);
 
 #ifdef __cplusplus
 }

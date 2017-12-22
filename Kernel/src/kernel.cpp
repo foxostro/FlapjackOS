@@ -1,5 +1,6 @@
 #include <common/line_editor.hpp>
 #include <common/console_printf.hpp>
+#include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
 
 #include <seg.h>
@@ -24,7 +25,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <new>
 
 // This global is used for access to the console in the interrupt dispatcher.
 // Besides this, it's really only for use in panic() because it severely
@@ -211,18 +211,18 @@ static memory_allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
 // This is marked with "C" linkage because we call it from assembly in boot.S.
 extern "C"
 __attribute__((noreturn))
-void kernel_main(multiboot_info_t *mb_info, void *istack)
+void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
 {
     // Setup the initial Task State Segment. The kernel uses one TSS between all
     // tasks and performs software task switching.
     memset(&s_tss, 0, sizeof(s_tss));
     s_tss.ss0 = SEGSEL_KERNEL_DS;
-    s_tss.esp0 = (uint32_t)istack;
+    s_tss.esp0 = istack;
     s_tss.iomap = sizeof(s_tss);
 
     // Setup the Global Descriptor Table. The kernel uses a flat memory map.
     memset(s_gdt, 0, sizeof(s_gdt));
-    gdt_create_flat_mapping(s_gdt, sizeof(s_gdt), (uint32_t)&s_tss);
+    gdt_create_flat_mapping(s_gdt, sizeof(s_gdt), (uintptr_t)&s_tss);
     lgdt(s_gdt, sizeof(s_gdt) - 1);
     load_task_register();
 

@@ -1,34 +1,18 @@
 cmake_minimum_required(VERSION 3.6)
 
-set(CORE_INCLUDE_FILES
-    "include/vga_console_device.hpp"
-    "include/ltr.h"
-    "include/seg.h"
-    "include/isr_install.h"
-    "include/halt.h"
-    "include/idt.h"
-    "include/backtrace.hpp"
+set(SOURCE_FILES
     "include/misc.h"
-    "include/timer_device.hpp"
-    "include/pit_timer_device.hpp"
-    "include/pic.h"
-    "include/panic.h"
-    "include/interrupt_asm.h"
-    "include/inout.h"
     "include/tss.h"
-    "include/gdt.h"
-    )
-source_group("Headers" FILES ${CORE_INCLUDE_FILES})
-
-set(ISR_ERB_FILES
-    "src/isr_install.c.erb"
-    "src/isr_wrapper_asm.S.erb"
-    )
-source_group("ISR Template Files" FILES ${ISR_ERB_FILES})
-
-set(PS2_KEYBOARD_FILES
-    "include/ps2_keyboard_device.hpp"
-    "src/ps2_keyboard_device/ps2_keyboard_device.cpp"
+    "include/idt.h" "src/idt.c"
+    "include/gdt.h" "src/gdt.c"
+    "include/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c"
+    "include/backtrace.hpp" "src/backtrace.cpp"
+    "include/panic.h" "src/panic.cpp"
+    "include/pic.h" "src/pic.c"
+    "include/timer_device.hpp"
+    "include/pit_timer_device.hpp" "src/pit_timer_device.cpp"
+    "include/ps2_keyboard_device.hpp" "src/ps2_keyboard_device/ps2_keyboard_device.cpp"
+    "include/vga_console_device.hpp" "src/vga_console_device.cpp"
     "src/ps2_keyboard_device/keyboard_scancodes_make_escaped.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_break.inc"
     "src/ps2_keyboard_device/keyboard_keycode_ascii_uppercase.inc"
@@ -36,91 +20,43 @@ set(PS2_KEYBOARD_FILES
     "src/ps2_keyboard_device/keyboard_keycode_ascii_lowercase.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
-    )
-source_group("PS2 Keyboard Driver" FILES ${PS2_KEYBOARD_FILES})
-
-set(SOURCE_FILES
-    "src/gdt.c"
-    "src/idt.c"
-    )
-
-# Platform specific source files for the kernel.
-# These cannot be used in unit tests on the host because they cannot be built
-# for the host architecture.
-set(PLATFORM_SPECIFIC_SOURCE_FILES
-    "src/backtrace.cpp"
-    "src/backtrace_asm.S"
-    "src/vga_console_device.cpp"
-    "src/gdt_asm.S"
-    "src/halt.S"
-    "src/idt_asm.S"
-    "src/inout.S"
-    "src/interrupt_asm.S"
-    "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c"
-    "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
     "src/kernel.cpp"
-    "src/ltr.S"
-    "src/panic.cpp"
-    "src/pic.c"
-    "src/pit_timer_device.cpp"
-    "src/boot.S"
-    )
-source_group("Platform-specific" FILES ${PLATFORM_SPECIFIC_SOURCE_FILES})
-
-set(ALL_PLATFORM_SPECIFIC_SOURCE_FILES
-    ${CORE_INCLUDE_FILES}
-    ${ISR_ERB_FILES}
-    ${PS2_KEYBOARD_FILES}
-    ${SOURCE_FILES}
-    ${PLATFORM_SPECIFIC_SOURCE_FILES}
     )
 
+GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_install.c.erb"
+                           "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c")
 
 include_directories("include"
                     ${COMMON_INCLUDE_DIRS}
                     ${MALLOC_INCLUDE_DIRS}
+                    ${KERNEL_PLATFORM_SUPPORT_INCLUDE_DIRS}
                     )
 
 link_directories(${COMMON_LIBRARIES_DIR}
                  ${MALLOC_LIBRARIES_DIRS}
+                 ${KERNEL_PLATFORM_SUPPORT_LIBRARIES_DIR}
                  )
 
-GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_install.c.erb"
-                           "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c")
-GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_wrapper_asm.S.erb"
-                           "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")
+add_library(Kernel STATIC ${SOURCE_FILES})
 
-# We can only build the kernel static library when cross-compiling to the target
-# architecture. Also, it's not very testable since it will try to actually make
-# low-level calls not permitted in userspace. So, we build a small test program
-# which uses only a small subset of the source files here.
-#
-# TODO: I'd like to break each testable component off into it's own static
-# library and give it its own unittest suite. See how I've done this with
-# libCommon and Malloc for details.
-if(CMAKE_CROSSCOMPILING)
+target_link_libraries(Kernel
+                      ${COMMON_LIBRARIES}
+                      ${MALLOC_LIBRARIES}
+                      ${KERNEL_PLATFORM_SUPPORT_LIBRARIES}
+                      )
 
-    add_library(Kernel STATIC ${ALL_PLATFORM_SPECIFIC_SOURCE_FILES})
-
-    target_link_libraries(Kernel
-                          ${COMMON_LIBRARIES}
-                          ${MALLOC_LIBRARIES}
-                          )
-
-else(CMAKE_CROSSCOMPILING)
+if (NOT CMAKE_CROSSCOMPILING)
 
     add_executable(KernelTest
-                   ${SOURCE_FILES}
                    "test/test_gdt.cpp"
                    "test/test_idt.cpp"
                    "test/test_main.cpp"
                    )
 
     target_link_libraries(KernelTest
-                          ${COMMON_LIBRARIES}
-                          ${MALLOC_LIBRARIES}
+                          Kernel
                           )
 
     add_test(KernelTest ${CMAKE_CURRENT_BINARY_DIR}/KernelTest)
 
-endif(CMAKE_CROSSCOMPILING)
+endif (NOT CMAKE_CROSSCOMPILING)

@@ -7,13 +7,6 @@
 #include <idt.h>
 #include <misc.h>
 
-idt_entry_t g_idt[IDT_MAX];
-
-idt_entry_t* idt_base(void)
-{
-    return g_idt;
-}
-
 // Useful for installing Trap Gates
 #define DPL_FIELD(DPL)    (unsigned)( ((DPL) & 0x03) << 13 )
 #define TRAP_GATE_WORD_1  0x8F00

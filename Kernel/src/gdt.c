@@ -24,7 +24,9 @@ void gdt_create_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit,
     entry->base_24_31  = (base  & 0b11111111000000000000000000000000) >> 24;
 }
 
-void gdt_create_flat_mapping(gdt_entry_t *gdt, __attribute__((unused)) size_t size, uint32_t tss)
+void gdt_create_flat_mapping(gdt_entry_t *gdt,
+                             __attribute__((unused)) size_t size,
+                             uintptr_t tss)
 {
     gdt_create_entry(&gdt[0],
                      0x00000000, // base
@@ -39,7 +41,7 @@ void gdt_create_flat_mapping(gdt_entry_t *gdt, __attribute__((unused)) size_t si
                      false);     // ac
 
     gdt_create_entry(&gdt[SEGSEL_KERNEL_TSS_IDX],
-                     tss,        // base
+                     (uint32_t)tss,// base
                      0x67,       // limit
                      false,      // gr
                      false,      // sz

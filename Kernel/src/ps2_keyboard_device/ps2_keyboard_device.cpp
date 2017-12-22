@@ -9,7 +9,7 @@
 #include <inout.h>
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
-constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;
+//constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;
 constexpr unsigned MAX_SCANCODE_BYTES = 6;
 
 static const uint8_t g_scancodes_make[KEYCODE_MAX] = {

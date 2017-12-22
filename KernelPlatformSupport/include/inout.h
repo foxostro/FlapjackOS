@@ -1,10 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
 
 // Reads 1 byte from given port.
 uint8_t inb(uint16_t port);

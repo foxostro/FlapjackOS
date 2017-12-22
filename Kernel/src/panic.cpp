@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdarg>
 #include <common/console_device.hpp>
 #include <common/console_printf.hpp>
 #include <halt.h>

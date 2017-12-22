@@ -1,0 +1,11 @@
+// isr_wrapper.c is an automatically generated file. Do not edit directly.
+
+// The CPU pushes an error code on the stack for the following ISR wrappers.
+<% [8, 10..14].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+void isr_wrapper_<%= isr %>(void) {}
+<% end %>
+
+// The CPU does not push an error code for the following ISR wrappers.
+<% [0..7, 9, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
+void isr_wrapper_<%= isr %>(void) {}
+<% end %>

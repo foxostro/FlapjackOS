@@ -7,6 +7,7 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <gdt_asm.h>
 
 typedef struct {
     uint16_t limit_0_15;
@@ -29,10 +30,7 @@ void gdt_create_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit,
                       bool dc, bool rw, bool ac);
 
 // Loads a four entry GDT that establishes a basic flat mapping.
-void gdt_create_flat_mapping(gdt_entry_t *gdt, size_t size, uint32_t tss);
-
-// Loads a new GDT.
-void lgdt(void *gdt, unsigned limit);
+void gdt_create_flat_mapping(gdt_entry_t *gdt, size_t size, uintptr_t tss);
 
 #ifdef __cplusplus
 }
