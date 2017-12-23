@@ -129,7 +129,10 @@ keyboard_event ps2_keyboard_device::get_event()
         // an interrupt which invokes the scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
         disable_interrupts();
-        have_a_key = events.dequeue(event);
+        have_a_key = !events.empty();
+        if (have_a_key) {
+            event = events.dequeue();
+        }
         enable_interrupts();
         hlt();
     }

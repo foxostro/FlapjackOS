@@ -2,6 +2,7 @@
 
 #include <common/keyboard_device.hpp>
 #include <cstddef>
+#include <cassert>
 
 template<typename TYPE, size_t BUFFER_SIZE>
 class ring_buffer {
@@ -11,14 +12,14 @@ class ring_buffer {
     size_t count;
     
 public:
-    bool enqueue(TYPE event)
+    bool enqueue(TYPE value)
     {
         // Drop it on the floor if the buffer is full.
         if (count >= BUFFER_SIZE) {
             return false;
         }
 
-        buffer[enqueue_pos] = event;
+        buffer[enqueue_pos] = value;
         enqueue_pos++;
 
         if (enqueue_pos >= BUFFER_SIZE) {
@@ -30,23 +31,26 @@ public:
         return true;
     }
 
-    // TOOD: This would be an excellent place to use an optional.
-    bool dequeue(TYPE &event)
+    bool empty() const
     {
-        if(count == 0) {
-            return false;
-        }
+        return count == 0;
+    }
+
+    TYPE dequeue()
+    {
+        assert(!empty());
 
         count--;
 
-        event = buffer[dequeue_pos]; // TODO: Use something like std::move() here?
+        // TODO: Use something like std::move() here?
+        TYPE value = buffer[dequeue_pos];
         dequeue_pos++;
 
         if(dequeue_pos >= BUFFER_SIZE) {
             dequeue_pos = 0;
         }
 
-        return true;
+        return value;
     }
 
     ring_buffer() : dequeue_pos(0), enqueue_pos(0), count(0) {}
