@@ -39,6 +39,7 @@ if(CMAKE_CROSSCOMPILING)
 else(CMAKE_CROSSCOMPILING)
 
     add_executable(CommonTest
+                   "test/test_ring_buffer.cpp"
                    "test/test_linked_list.cpp"
                    "test/test_string.cpp"
                    "test/test_stdio.cpp"

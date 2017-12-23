@@ -4,68 +4,81 @@
 #include <cstdint>
 #include <cassert>
 
-// Statically allocated ring buffer collection.
+// Statically allocated ring buffer.
 // This is designed to be appropriate for use in an interrupt context.
 template<typename TYPE, size_t BUFFER_SIZE>
 class ring_buffer {
-    TYPE buffer[BUFFER_SIZE];
-    size_t dequeue_pos;
-    size_t enqueue_pos;
-    size_t count;
+    static_assert(BUFFER_SIZE>0, "BUFFER_SIZE must be greater than zero");
+    TYPE _buffer[BUFFER_SIZE];
+    size_t _dequeue_pos;
+    size_t _enqueue_pos;
+    size_t _count;
     
 public:
-    // Enqueues the specified value into the ring buffer.
+    // Enqueues the specified value into the ring _buffer.
     // Returns true if this was successful, and false otherwise.
-    // This may fail if the ring buffer is full.
+    // This may fail if the ring _buffer is full.
     bool enqueue(TYPE value)
     {
-        // Drop it on the floor if the buffer is full.
+        // Drop it on the floor if the _buffer is full.
         if (full()) {
             return false;
         }
 
-        buffer[enqueue_pos] = value;
-        enqueue_pos++;
+        _buffer[_enqueue_pos] = value;
+        _enqueue_pos++;
 
-        if (enqueue_pos >= BUFFER_SIZE) {
-            enqueue_pos = 0;
+        if (_enqueue_pos >= BUFFER_SIZE) {
+            _enqueue_pos = 0;
         }
 
-        count++;
+        _count++;
 
         return true;
     }
 
-    // Dequeues and returns the next item in the ring buffer.
-    // This cannot be called if the ring buffer is empty.
+    // Dequeues and returns the next item in the ring _buffer.
+    // This cannot be called if the ring _buffer is empty.
     TYPE dequeue()
     {
         assert(!empty());
 
-        count--;
+        _count--;
 
         // TODO: Use something like std::move() here?
-        TYPE value = buffer[dequeue_pos];
-        dequeue_pos++;
+        TYPE value = _buffer[_dequeue_pos];
+        _dequeue_pos++;
 
-        if(dequeue_pos >= BUFFER_SIZE) {
-            dequeue_pos = 0;
+        if(_dequeue_pos >= BUFFER_SIZE) {
+            _dequeue_pos = 0;
         }
 
         return value;
     }
 
-    // Returns true if the ring buffer is empty.
+    // Returns true if the ring _buffer is empty.
     bool empty() const
     {
-        return count == 0;
+        return _count == 0;
     }
 
-    // Returns true if the ring buffer is at capacity.
+    // Returns true if the ring _buffer is at capacity.
     bool full() const
     {
-        return count >= BUFFER_SIZE;
+        return _count >= BUFFER_SIZE;
     }
 
-    ring_buffer() : dequeue_pos(0), enqueue_pos(0), count(0) {}
+    // Returns the number of elements in the ring _buffer;
+    size_t count() const
+    {
+        return _count;
+    }
+
+    // Returns the maximum capacity of the ring _buffer;
+    size_t capacity() const
+    {
+        return BUFFER_SIZE;
+    }
+
+    ring_buffer() : _dequeue_pos(0), _enqueue_pos(0), _count(0) {}
 };
