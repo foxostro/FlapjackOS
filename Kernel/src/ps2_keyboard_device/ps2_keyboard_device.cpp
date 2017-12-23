@@ -40,39 +40,6 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-void ps2_keyboard_device::enqueue(const keyboard_event &event)
-{
-    // Drop keyboard input if the buffer is full.
-    if (count < BUFFER_SIZE) {
-        ring_buffer[enqueue_pos] = event;
-        enqueue_pos++;
-
-        if (enqueue_pos >= BUFFER_SIZE) {
-            enqueue_pos = 0;
-        }
-
-        count++;
-    }
-}
-
-bool ps2_keyboard_device::dequeue(keyboard_event &event)
-{
-    if(count == 0) {
-        return false;
-    }
-
-    count--;
-
-    event = ring_buffer[dequeue_pos];
-    dequeue_pos++;
-
-    if(dequeue_pos >= BUFFER_SIZE) {
-        dequeue_pos = 0;
-    }
-
-    return true;
-}
-
 const char* ps2_keyboard_device::keycode_name(keycode_t key)
 {
     if (key < KEYCODE_MAX) {
@@ -145,7 +112,7 @@ void ps2_keyboard_device::int_handler()
         // new thread can execute is through an interrupt which invokes the
         // scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
-        enqueue(event);
+        events.enqueue(event);
     }
 }
 
@@ -162,7 +129,7 @@ keyboard_event ps2_keyboard_device::get_event()
         // an interrupt which invokes the scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
         disable_interrupts();
-        have_a_key = dequeue(event);
+        have_a_key = events.dequeue(event);
         enable_interrupts();
         hlt();
     }
@@ -171,12 +138,7 @@ keyboard_event ps2_keyboard_device::get_event()
 }
 
 ps2_keyboard_device::ps2_keyboard_device()
- : dequeue_pos(0),
-   enqueue_pos(0),
-   count(0)
 {
-    memset(ring_buffer, 0, sizeof(ring_buffer));
-
     for (size_t i = 0; i < KEYCODE_MAX; ++i) {
         key_state[i] = RELEASED;
     }
