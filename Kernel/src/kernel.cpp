@@ -35,8 +35,8 @@ console_device *g_console = NULL;
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
-static keyboard_device *s_keyboard;
-static timer_device *s_timer;
+static ps2_keyboard_device *s_keyboard;
+static pit_timer_device *s_timer;
 
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <timer_device.hpp>
+#include <common/interrupt_handler.hpp>
 
-class pit_timer_device : public timer_device {
+class pit_timer_device : public timer_device, public interrupt_handler {
     unsigned clock_ticks;
     unsigned clock_seconds;
     unsigned leap_counter;
@@ -28,7 +29,9 @@ public:
                      int leap_interval,
                      int leap_ticks);
 
+    // Timer interrupt handler. To be called when the timer interrupt fires.
     void int_handler() override;
+
     unsigned ticks() override;
     unsigned seconds() override;
 };

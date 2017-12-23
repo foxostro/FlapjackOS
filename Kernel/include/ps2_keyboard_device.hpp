@@ -1,9 +1,10 @@
 #pragma once
 
 #include <common/keyboard_device.hpp>
+#include <common/interrupt_handler.hpp>
 #include <common/ring_buffer.hpp>
 
-class ps2_keyboard_device : public keyboard_device {
+class ps2_keyboard_device : public keyboard_device, public interrupt_handler {
     enum keyboard_driver_state {
         IDLE,
         PROCESSING_ESCAPE_CODE
@@ -18,7 +19,11 @@ class ps2_keyboard_device : public keyboard_device {
 public:
     ps2_keyboard_device();
 
+    // Keyboard interrupt handler.
+    // Implements the lower half of PS/2 keyboard driver. To be called when the
+    // keyboard interrupt fires.
     void int_handler() override;
+
     const char* keycode_name(keycode_t key) override;
     keyboard_event get_event() override;
 };

@@ -158,12 +158,6 @@ class keyboard_device {
 public:
     virtual ~keyboard_device() = default;
 
-    // Keyboard interrupt handler.
-    // To be called when the keyboard interrupt fires. Implements the lower half of
-    // the keyboard driver.
-    // This is only meaningful when used in the kernel implementation.
-    virtual void int_handler() = 0;
-
     // Returns the name of the given key code.
     virtual const char* keycode_name(keycode_t key) = 0;
 
