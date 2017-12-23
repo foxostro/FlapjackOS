@@ -16,6 +16,7 @@ set(SOURCE_FILES
     "include/common/line_editor.hpp" "src/line_editor.cpp"
     "include/common/console_printf.hpp" "src/console_printf.cpp"
     "include/common/linked_list.hpp"
+    "include/common/ring_buffer.hpp"
     "include/common/console_device.hpp"
     "include/common/keyboard_device.hpp"
     "include/common/global_allocator.hpp"
