@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <cassert>
-#include <string>
+#include <cstring>
 
 TEST_CASE("test_strlen", "[String]")
 {
