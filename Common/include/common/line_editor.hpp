@@ -5,15 +5,15 @@
 #include <common/linked_list.hpp>
 #include <common/console_device.hpp>
 #include <common/keyboard_device.hpp>
+#include <common/byte_buffer.hpp>
 
 // This can be used to read lines of user input from the terminal and provides
 // useful UI affordances such as nice editing functionality, a prompt, history,
 class line_editor {
     console_device &con;
     keyboard_device &kb;
-    size_t prompt_size;
-    char *prompt;
-    linked_list<char*> history;
+    byte_buffer prompt;
+    linked_list<byte_buffer> history;
     int history_cursor;
 
     void backspace(char *buffer,
@@ -49,15 +49,11 @@ public:
 
     // Prompt for one line of user input on the console.
     // Returns a string containing the line of user input.
-    // The string will have been allocated via malloc.
-    // It is the responsibility of the caller to free this string when finished.
-    char* getline();
+    byte_buffer getline();
 
     // Change the prompt displayed at the beginning of the line.
-    // The specified string is copied and so the buffer is not required to live
-    // past the call to this method.
-    void set_prompt(size_t prompt_size, const char *prompt);
+    void set_prompt(byte_buffer new_prompt);
 
-    // Add a line to the editor history.
-    void add_history(const char *history);
+    // Add a line to the editor's history.
+    void add_history(byte_buffer history_entry);
 };

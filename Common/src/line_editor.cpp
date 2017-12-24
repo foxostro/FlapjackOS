@@ -5,27 +5,15 @@
 #include <cstring>
 #include <cassert>
 
-line_editor::~line_editor()
-{
-    // TODO: Use a string object here instead of bare char-star.
-    while (!history.empty()) {
-        char *str = history.remove(0);
-        free(str);
-    }
-
-    free(prompt);
-}
+line_editor::~line_editor() = default;
 
 line_editor::line_editor(console_device &console,
                          keyboard_device &keyboard)
  : con(console),
    kb(keyboard),
-   prompt_size(0),
-   prompt(NULL),
    history_cursor(-1)
 {
-    static const char default_prompt[] = ">";
-    set_prompt(sizeof(default_prompt), default_prompt);
+    set_prompt(">");
 }
 
 void line_editor::backspace(char *buffer,
@@ -117,20 +105,18 @@ void line_editor::replace_entire_line(char *replacement,
 }
 
 // Prompt for one line of user input on the console.
-char * line_editor::getline()
+byte_buffer line_editor::getline()
 {
-    assert(prompt);
-
     static const size_t buffer_size = 512;
     char *buffer = (char *)malloc(buffer_size);
 
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
-    size_t prompt_len = strnlen(prompt, prompt_size);
+    size_t prompt_len = strnlen(prompt.data(), prompt.size());
     size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
 
     history_cursor = -1;
-    con.puts(prompt);
+    con.puts(prompt.data());
     con.putchar(' ');
     size_t cursor_row = con.get_cursor_row();
     size_t cursor_col_offset = con.get_cursor_col();
@@ -172,8 +158,8 @@ char * line_editor::getline()
             case KEYCODE_DOWN_ARROW:
                 if (history_cursor > 0) {
                     history_cursor--;
-                    char *str = history.at(history_cursor);
-                    replace_entire_line(str,
+                    byte_buffer history_line = history.at(history_cursor);
+                    replace_entire_line(history_line.data(),
                                         buffer,
                                         maxcount,
                                         count,
@@ -192,8 +178,8 @@ char * line_editor::getline()
                     if (history_cursor+1 < history_count) {
                         history_cursor++;
 
-                        char *str = history.at(history_cursor);
-                        replace_entire_line(str,
+                        byte_buffer history_line = history.at(history_cursor);
+                        replace_entire_line(history_line.data(),
                                             buffer,
                                             maxcount,
                                             count,
@@ -238,34 +224,21 @@ char * line_editor::getline()
         } // switch (key)
     } // while
 
-    return buffer;
+    auto result = byte_buffer(buffer_size, buffer);
+
+    free(buffer);
+
+    return result;
 }
 
 // Change the prompt displayed at the beginning of the line.
-void line_editor::set_prompt(size_t new_prompt_size, const char *new_prompt)
+void line_editor::set_prompt(byte_buffer new_prompt)
 {
-    assert(new_prompt_size > 0);
-    assert(new_prompt);
-
-    free(prompt);
-
-    // Let's always allocate one more byte then requested just to make sure we
-    // always have a nul-terminator at the end of the string.
-    prompt_size = new_prompt_size;
-    prompt = (char *)malloc(prompt_size+1);
-    memset(prompt, 0, prompt_size+1);
-    memcpy(prompt, new_prompt, prompt_size);
+    prompt = new_prompt;
 }
 
 // Add a line to the editor history.
-void line_editor::add_history(const char *line_of_history)
+void line_editor::add_history(byte_buffer history_entry)
 {
-    assert(line_of_history);
-
-    size_t n = strlen(line_of_history) + 1;
-    char *the_copy = (char *)malloc(n);
-    memcpy(the_copy, line_of_history, n);
-    the_copy[n] = 0;
-
-    history.push_front(the_copy);
+    history.push_front(history_entry);
 }

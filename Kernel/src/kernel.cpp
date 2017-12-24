@@ -271,10 +271,9 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     {
         line_editor ed(*g_console, *s_keyboard);
         while (true) {
-            char *buffer = ed.getline();
-            ed.add_history(buffer);
-            console_printf(*g_console, "Got: %s\n", buffer);
-            free(buffer);
+            byte_buffer user_input = ed.getline();
+            console_printf(*g_console, "Got: %s\n", user_input.data());
+            ed.add_history(user_input);
         }
     }
 

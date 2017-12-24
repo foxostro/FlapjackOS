@@ -39,7 +39,7 @@ public:
     linked_list() : _head(nullptr), _count(0) {}
 
     // Inserts an item at the tail of the linked list.
-    void push_back(const Type &value)
+    void push_back(Type value)
     {
         _count++;
         linked_list_node *node = new linked_list_node(value);
@@ -54,7 +54,7 @@ public:
     }
 
     // Inserts an item at the head of the linked list.
-    void push_front(const Type &value)
+    void push_front(Type value)
     {
         _count++;
         linked_list_node *node = new linked_list_node(value);
