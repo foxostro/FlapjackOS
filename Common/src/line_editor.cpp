@@ -13,7 +13,7 @@ line_editor::line_editor(console_device &console,
    kb(keyboard),
    history_cursor(-1)
 {
-    set_prompt(">");
+    set_prompt(vector<char>(strlen(">")+1, ">"));
 }
 
 void line_editor::backspace(char *buffer,
