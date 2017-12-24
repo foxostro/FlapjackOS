@@ -3,31 +3,33 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <utility> // for std::move()
 
-class byte_buffer {
-    char *_data;
+template<typename Type>
+class vector {
+    Type *_data;
     size_t _size;
 
 public:
-    ~byte_buffer()
+    ~vector()
     {
         delete[] _data;
     }
 
     // Default constructor. Initializes an empty buffer.
-    byte_buffer()
+    vector()
      : _data(nullptr), _size(0)
     {}
 
     // Allocates memory for a buffer of the specified size.
-    byte_buffer(size_t size)
+    vector(size_t size)
      : _data(nullptr), _size(size)
     {
         _data = new char[size];
     }
 
     // Copies the provided buffer.
-    byte_buffer(size_t size, const char *src)
+    vector(size_t size, const char *src)
      : _data(nullptr), _size(size)
     {
         _data = new char[size];
@@ -35,17 +37,17 @@ public:
     }
 
     // Copies the provided string.
-    byte_buffer(const char *src)
-     : byte_buffer(strlen(src), src)
+    vector(const char *src)
+     : vector(strlen(src), src)
     {}
 
     // Copy constructor.
-    byte_buffer(const byte_buffer &other)
-     : byte_buffer(other._size, other._data)
+    vector(const vector &other)
+     : vector(other._size, other._data)
     {}
 
     // Move constructor.
-    byte_buffer(byte_buffer &&other)
+    vector(vector &&other)
      : _data(other._data), _size(other._size)
     {
         other._data = nullptr;
@@ -53,19 +55,22 @@ public:
     }
 
     // Copy-assignment operator.
-    byte_buffer& operator=(const byte_buffer &other)
+    vector& operator=(const vector &other)
     {
         delete[] _data;
 
         _data = new char[_size];
         _size = other._size;
-        memcpy(_data, other._data, _size);
+
+        for (size_t i = 0; i < _size; ++i) {
+            _data[i] = std::move(other._data[i]);
+        }
 
         return *this;
     }
 
     // Move-assignment operator.
-    byte_buffer& operator=(byte_buffer &&other)
+    vector& operator=(vector &&other)
     {
         delete[] _data;
 

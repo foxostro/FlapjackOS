@@ -17,6 +17,7 @@ set(SOURCE_FILES
     "include/common/console_printf.hpp" "src/console_printf.cpp"
     "include/common/linked_list.hpp"
     "include/common/ring_buffer.hpp"
+    "include/common/vector.hpp"
     "include/common/console_device.hpp"
     "include/common/interrupt_handler.hpp"
     "include/common/keyboard_device.hpp"

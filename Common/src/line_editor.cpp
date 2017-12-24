@@ -105,15 +105,15 @@ void line_editor::replace_entire_line(char *replacement,
 }
 
 // Prompt for one line of user input on the console.
-byte_buffer line_editor::getline()
+vector<char> line_editor::getline()
 {
-    static const size_t buffer_size = 512;
-    char *buffer = (char *)malloc(buffer_size);
-
     bool have_a_newline = false;
     size_t count = 0, cursor_col = 0;
     size_t prompt_len = strnlen(prompt.data(), prompt.size());
+
+    static const size_t buffer_size = 512;
     size_t maxcount = MIN(CONSOLE_WIDTH - prompt_len - 1, buffer_size);
+    vector<char> user_input(maxcount);
 
     history_cursor = -1;
     con.puts(prompt.data());
@@ -158,9 +158,9 @@ byte_buffer line_editor::getline()
             case KEYCODE_DOWN_ARROW:
                 if (history_cursor > 0) {
                     history_cursor--;
-                    byte_buffer history_line = history.at(history_cursor);
+                    vector<char> history_line = history.at(history_cursor);
                     replace_entire_line(history_line.data(),
-                                        buffer,
+                                        user_input.data(),
                                         maxcount,
                                         count,
                                         cursor_col,
@@ -178,9 +178,9 @@ byte_buffer line_editor::getline()
                     if (history_cursor+1 < history_count) {
                         history_cursor++;
 
-                        byte_buffer history_line = history.at(history_cursor);
+                        vector<char> history_line = history.at(history_cursor);
                         replace_entire_line(history_line.data(),
-                                            buffer,
+                                            user_input.data(),
                                             maxcount,
                                             count,
                                             cursor_col,
@@ -195,7 +195,7 @@ byte_buffer line_editor::getline()
 
                 switch (ch) {
                     case '\b':
-                        backspace(buffer,
+                        backspace(user_input.data(),
                                   count,
                                   cursor_col,
                                   cursor_row,
@@ -203,7 +203,7 @@ byte_buffer line_editor::getline()
                         break;
 
                     case '\n':
-                        buffer[count] = '\0';
+                        user_input[count] = '\0';
                         cursor_col = count;
                         con.set_cursor_position(cursor_row, cursor_col + cursor_col_offset);
                         con.putchar('\n');
@@ -211,7 +211,7 @@ byte_buffer line_editor::getline()
                         break;
 
                     default:
-                        type_character(buffer,
+                        type_character(user_input.data(),
                                        maxcount,
                                        count,
                                        cursor_col,
@@ -224,21 +224,17 @@ byte_buffer line_editor::getline()
         } // switch (key)
     } // while
 
-    auto result = byte_buffer(buffer_size, buffer);
-
-    free(buffer);
-
-    return result;
+    return user_input;
 }
 
 // Change the prompt displayed at the beginning of the line.
-void line_editor::set_prompt(byte_buffer new_prompt)
+void line_editor::set_prompt(vector<char> new_prompt)
 {
     prompt = new_prompt;
 }
 
 // Add a line to the editor history.
-void line_editor::add_history(byte_buffer history_entry)
+void line_editor::add_history(vector<char> history_entry)
 {
     history.push_front(history_entry);
 }
