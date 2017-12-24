@@ -11,16 +11,15 @@ line_editor::line_editor(console_device &console,
                          keyboard_device &keyboard)
  : con(console),
    kb(keyboard),
-   history_cursor(-1)
+   history_cursor(-1),
+   cursor_row(0),
+   cursor_col(0),
+   cursor_col_offset(0)
 {
     set_prompt(vector<char>(strlen(">")+1, ">"));
 }
 
-void line_editor::backspace(char *buffer,
-                            size_t &count,
-                            size_t &cursor_col,
-                            size_t cursor_row,
-                            size_t cursor_col_offset)
+void line_editor::backspace(char *buffer, size_t &count)
 {
     if (cursor_col > 0) {
         cursor_col--;
@@ -45,9 +44,6 @@ void line_editor::backspace(char *buffer,
 void line_editor::type_character(char *buffer,
                                  size_t maxcount,
                                  size_t &count,
-                                 size_t &cursor_col,
-                                 size_t cursor_row,
-                                 size_t cursor_col_offset,
                                  char ch)
 {
     // TODO: It's not a given that typing one character always moves forward one
@@ -75,20 +71,13 @@ void line_editor::type_character(char *buffer,
 void line_editor::replace_entire_line(char *replacement,
                                       char *buffer,
                                       size_t maxcount,
-                                      size_t &count,
-                                      size_t &cursor_col,
-                                      size_t cursor_row,
-                                      size_t cursor_col_offset)
+                                      size_t &count)
 {
     size_t n = strlen(replacement);
 
     // Backspace the entire current line.
     for (size_t i = 0; i < n; ++i) {
-        backspace(buffer,
-                  count,
-                  cursor_col,
-                  cursor_row,
-                  cursor_col_offset);
+        backspace(buffer, count);
     }
 
     // Re-type the history line.
@@ -97,9 +86,6 @@ void line_editor::replace_entire_line(char *replacement,
         type_character(buffer,
                        maxcount,
                        count,
-                       cursor_col,
-                       cursor_row,
-                       cursor_col_offset,
                        ch);
     }
 }
@@ -108,7 +94,7 @@ void line_editor::replace_entire_line(char *replacement,
 vector<char> line_editor::getline()
 {
     bool have_a_newline = false;
-    size_t count = 0, cursor_col = 0;
+    size_t count = 0;
     size_t prompt_len = strnlen(prompt.data(), prompt.size());
 
     static const size_t buffer_size = 512;
@@ -118,8 +104,10 @@ vector<char> line_editor::getline()
     history_cursor = -1;
     con.puts(prompt.data());
     con.putchar(' ');
-    size_t cursor_row = con.get_cursor_row();
-    size_t cursor_col_offset = con.get_cursor_col();
+
+    cursor_col = 0;
+    cursor_row = con.get_cursor_row();
+    cursor_col_offset = con.get_cursor_col();
 
     while (!have_a_newline) {
         keyboard_event event = kb.get_event();
@@ -162,10 +150,7 @@ vector<char> line_editor::getline()
                     replace_entire_line(history_line.data(),
                                         user_input.data(),
                                         maxcount,
-                                        count,
-                                        cursor_col,
-                                        cursor_row,
-                                        cursor_col_offset);
+                                        count);
                 } 
                 break;
 
@@ -182,10 +167,7 @@ vector<char> line_editor::getline()
                         replace_entire_line(history_line.data(),
                                             user_input.data(),
                                             maxcount,
-                                            count,
-                                            cursor_col,
-                                            cursor_row,
-                                            cursor_col_offset);
+                                            count);
                     }
                 } 
                 break;
@@ -195,11 +177,7 @@ vector<char> line_editor::getline()
 
                 switch (ch) {
                     case '\b':
-                        backspace(user_input.data(),
-                                  count,
-                                  cursor_col,
-                                  cursor_row,
-                                  cursor_col_offset);
+                        backspace(user_input.data(), count);
                         break;
 
                     case '\n':
@@ -214,9 +192,6 @@ vector<char> line_editor::getline()
                         type_character(user_input.data(),
                                        maxcount,
                                        count,
-                                       cursor_col,
-                                       cursor_row,
-                                       cursor_col_offset,
                                        ch);
                         break;
                 } // switch (ch)

@@ -15,28 +15,21 @@ class line_editor {
     vector<char> prompt;
     linked_list<vector<char>> history;
     int history_cursor;
+    size_t cursor_row;
+    size_t cursor_col;
+    size_t cursor_col_offset;
 
-    void backspace(char *buffer,
-                   size_t &count,
-                   size_t &cursor_col,
-                   size_t cursor_row,
-                   size_t cursor_col_offset);
+    void backspace(char *buffer, size_t &count);
 
     void type_character(char *buffer,
                         size_t maxcount,
                         size_t &count,
-                        size_t &cursor_col,
-                        size_t cursor_row,
-                        size_t cursor_col_offset,
                         char ch);
 
     void replace_entire_line(char *replacement,
                              char *buffer,
                              size_t maxcount,
-                             size_t &count,
-                             size_t &cursor_col,
-                             size_t cursor_row,
-                             size_t cursor_col_offset);
+                             size_t &count);
 
 public:
     ~line_editor();
