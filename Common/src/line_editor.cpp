@@ -174,7 +174,7 @@ vector<char> line_editor::getline()
 
             case KEYCODE_UP_ARROW:
                 {
-                    int history_count = history.count();
+                    int history_count = history.size();
                     if (history_cursor+1 < history_count) {
                         history_cursor++;
 
