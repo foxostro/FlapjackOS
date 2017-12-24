@@ -208,25 +208,31 @@ public:
     // Inserts an item at the end of the collection.
     void push_back(value_type value)
     {
-        increase_capacity_for_insertion();
-        new (data() + _count) value_type(value);
-        _count++;
+        insert(_count, value);
     }
 
     // Inserts an item at the beginning of the collection.
     // All existing items are moved to make room at the beginning.
     void push_front(value_type value)
     {
+        insert(0, value);
+    }
+
+    // Inserts an item at the specified index of the collection.
+    // All existing items are moved toward the end to make room.
+    void insert(size_type index, value_type value)
+    {
+        assert(index >= 0 && index <= _count);
+
         increase_capacity_for_insertion();
 
-        // Make room at the front.
-        for (size_type i = _count; i > 0; --i) {
+        for (size_type i = _count; i > index; --i) {
             value_type &prev = data()[i-1];
             new (data() + i) value_type(std::move(prev));
             prev.~value_type();
         }
 
-        new (data()) value_type(value);
+        new (data() + index) value_type(value);
         _count++;
     }
 
