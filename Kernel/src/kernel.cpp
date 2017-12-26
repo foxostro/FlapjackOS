@@ -17,7 +17,7 @@
 #include <backtrace.hpp>
 #include <multiboot.h>
 
-#include <vga_console_device.hpp>
+#include <vga_text_display_device.hpp>
 #include <pit_timer_device.hpp>
 #include <ps2_keyboard_device.hpp>
 
@@ -236,12 +236,12 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // Initialize the VGA text console output driver.
     // The driver lives in the kernel stack since we haven't initialized the
     // kernel heap yet.
-    vga_console_device vga_console;
-    vga_console.clear();
+    vga_text_display_device vga;
+    vga.clear();
 
     // Initialize the text terminal, built on top of the VGA text display, and
     // make it available to other sub-systems which rely on it globally.
-    text_terminal term(vga_console);
+    text_terminal term(vga);
     g_terminal = &term;
 
     // The kernel must call global constructors itself as we have no runtime

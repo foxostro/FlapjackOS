@@ -1,8 +1,9 @@
 #pragma once
 
-#include <common/console_device.hpp>
+#include <common/text_display_device.hpp>
 
-class vga_console_device : public console_device {
+// VGA text display output driver.
+class vga_text_display_device : public text_display_device {
     size_t cursor_row, cursor_col,
            curr_fg, curr_bg;
 
@@ -17,7 +18,7 @@ class vga_console_device : public console_device {
 
 public:
 	// Constructor.
-    vga_console_device();
+    vga_text_display_device();
 
     void clear() override;
     void draw_char(size_t row, size_t col, vgachar_t ch) override;

@@ -1,4 +1,3 @@
-// VGA console output driver.
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
@@ -7,7 +6,7 @@
 #include <inout.h>
 #include <misc.h>
 
-#include <vga_console_device.hpp>
+#include <vga_text_display_device.hpp>
 
 constexpr unsigned CRTC_IDX_REG         = 0x3d4;
 constexpr unsigned CRTC_DATA_REG        = 0x3d5;
@@ -28,14 +27,14 @@ inline void vga_text_buffer_set(vgachar_t ch, size_t index)
     g_vga_text_buffer[index] = value;
 }
 
-vga_console_device::vga_console_device()
+vga_text_display_device::vga_text_display_device()
  : cursor_row(0),
    cursor_col(0),
    curr_fg(LGRAY),
    curr_bg(BLACK)
 {}
 
-void vga_console_device::clear()
+void vga_text_display_device::clear()
 {
     for (size_t row = 0; row < CONSOLE_HEIGHT; row++) {
         for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
@@ -49,7 +48,7 @@ void vga_console_device::clear()
     set_cursor_position(0, 0);
 }
 
-void vga_console_device::draw_char(size_t row, size_t col, vgachar_t ch)
+void vga_text_display_device::draw_char(size_t row, size_t col, vgachar_t ch)
 {
     if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH && isprint(ch.ch)) {
         const size_t index = row * CONSOLE_WIDTH + col;
@@ -57,7 +56,7 @@ void vga_console_device::draw_char(size_t row, size_t col, vgachar_t ch)
     }
 }
 
-vgachar_t vga_console_device::get_char(size_t row, size_t col) const
+vgachar_t vga_text_display_device::get_char(size_t row, size_t col) const
 {
     if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH) {
         const size_t index = row * CONSOLE_WIDTH + col;
@@ -67,7 +66,7 @@ vgachar_t vga_console_device::get_char(size_t row, size_t col) const
     }
 }
 
-vgachar_t vga_console_device::make_char(char ch) const
+vgachar_t vga_text_display_device::make_char(char ch) const
 {
     vgachar_t r;
     r.blink = 0;
@@ -77,7 +76,7 @@ vgachar_t vga_console_device::make_char(char ch) const
     return r;
 }
 
-void vga_console_device::set_cursor_position(size_t row, size_t col)
+void vga_text_display_device::set_cursor_position(size_t row, size_t col)
 {
     unsigned short offset = row*CONSOLE_WIDTH + col;
 
@@ -90,12 +89,12 @@ void vga_console_device::set_cursor_position(size_t row, size_t col)
     outb(CRTC_DATA_REG, WORD_UPPER_BYTE(offset));
 }
 
-size_t vga_console_device::get_cursor_row() const
+size_t vga_text_display_device::get_cursor_row() const
 {
     return cursor_row;
 }
 
-size_t vga_console_device::get_cursor_col() const
+size_t vga_text_display_device::get_cursor_col() const
 {
     return cursor_col;
 }

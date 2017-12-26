@@ -5,7 +5,7 @@
 
 text_terminal::~text_terminal() = default;
 
-text_terminal::text_terminal(console_device &disp)
+text_terminal::text_terminal(text_display_device &disp)
  : display(disp), cursor_row(0), cursor_col(0)
 {}
 

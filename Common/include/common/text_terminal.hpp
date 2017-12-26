@@ -1,12 +1,12 @@
 #pragma once
 
-#include <common/console_device.hpp>
+#include <common/text_display_device.hpp>
 #include <common/vector.hpp>
 
 // A text terminal displays lines of text on a text console display.
 class text_terminal {
     static const int TAB_WIDTH = 8;
-    console_device &display;
+    text_display_device &display;
     int cursor_row, cursor_col;
 
     void move_back_one(int &row, int &col);
@@ -18,7 +18,7 @@ public:
     ~text_terminal();
 
     // Constructor.
-    text_terminal(console_device &display);
+    text_terminal(text_display_device &display);
 
     // Puts a character on the display at the current cursor position.
     // Increments the cursor to the next position. This may wrap the cursor to

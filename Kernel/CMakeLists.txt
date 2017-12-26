@@ -12,7 +12,7 @@ set(SOURCE_FILES
     "include/timer_device.hpp"
     "include/pit_timer_device.hpp" "src/pit_timer_device.cpp"
     "include/ps2_keyboard_device.hpp" "src/ps2_keyboard_device/ps2_keyboard_device.cpp"
-    "include/vga_console_device.hpp" "src/vga_console_device.cpp"
+    "include/vga_text_display_device.hpp" "src/vga_text_display_device.cpp"
     "src/ps2_keyboard_device/keyboard_scancodes_make_escaped.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_break.inc"
     "src/ps2_keyboard_device/keyboard_keycode_ascii_uppercase.inc"

@@ -18,7 +18,7 @@ set(SOURCE_FILES
     "include/common/linked_list.hpp"
     "include/common/ring_buffer.hpp"
     "include/common/vector.hpp"
-    "include/common/console_device.hpp"
+    "include/common/text_display_device.hpp"
     "include/common/interrupt_handler.hpp"
     "include/common/keyboard_device.hpp"
     "include/common/global_allocator.hpp"
