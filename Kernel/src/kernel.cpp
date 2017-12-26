@@ -32,6 +32,7 @@
 // clutters the interface of assert() and panic() if we are reqired to pass down
 // the console interface.
 console_device *g_console = NULL;
+text_terminal *g_terminal = NULL;
 
 static gdt_entry_t s_gdt[6];
 static tss_struct_t s_tss;
@@ -242,6 +243,9 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     g_console = &vga_console;
     g_console->clear();
 
+    text_terminal term(*g_console);
+    g_terminal = &term;
+
     // The kernel must call global constructors itself as we have no runtime
     // support beyond what we implement ourselves.
     // We want to call this as early as possible after booting. However, we also
@@ -253,8 +257,8 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     initialize_kernel_heap(mb_info);
 
     // Initialize the real VGA console output driver.
-    console_printf(*g_console, "%u KiB low memory, %u MiB high memory\n",
-                   mb_info->mem_lower, mb_info->mem_upper/1024);
+    term.printf("%u KiB low memory, %u MiB high memory\n",
+                mb_info->mem_lower, mb_info->mem_upper/1024);
 
     // Initialize the PS/2 keyboard driver.
     s_keyboard = new ps2_keyboard_device();
@@ -269,18 +273,11 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
 
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
-    {
-        g_console->clear();
-        text_terminal term(*g_console);
-        for (int i = 0; i < 60; ++i) {
-            term.printf("%d\n", i);
-        }
-        halt_forever();
-
-        line_editor ed(*g_console, *s_keyboard);
+    {        
+        line_editor ed(term, *s_keyboard);
         while (true) {
             vector<char> user_input = ed.getline();
-            console_printf(*g_console, "Got: %s\n", user_input.data());
+            term.printf("Got: %s\n", user_input.data());
             ed.add_history(user_input);
         }
     }
