@@ -9,6 +9,29 @@ text_terminal::text_terminal(console_device &disp)
  : display(disp), cursor_row(0), cursor_col(0)
 {}
 
+void text_terminal::move_back_one(int &row, int &col)
+{
+    if (col == 0 && row == 0) {
+        return;
+    }
+
+    if (col == 0) {
+        col = CONSOLE_WIDTH-1;
+
+        if (row > 0) {
+            row--;
+        }
+    } else {
+        col--;
+    }
+}
+
+void text_terminal::backspace(int &row, int &col)
+{
+    move_back_one(row, col);
+    display.draw_char(row, col, display.make_char(' '));
+}
+
 void text_terminal::newline(int &row, int &col)
 {
     if (row == (int)CONSOLE_HEIGHT-1) {
@@ -46,19 +69,18 @@ void text_terminal::putchar(char ch)
     int col = get_cursor_col();
 
     switch (ch) {
+        case '\b':
+            backspace(row, col);
+            break;
+
         case '\n':
             newline(row, col);
             break;
 
         case '\t':
-        {
-            int n = TAB_WIDTH - (col % TAB_WIDTH);
-            if (n > (int)CONSOLE_WIDTH) {
-                newline(row, col);
-            } else for (int i = 0; i < n; ++i) {
-                enter_character(row, col, ' ');
-            }
-        } break;
+            // TODO: better handling of tab character
+            enter_character(row, col, ' ');
+            break;
 
         default:
             enter_character(row, col, ch);
@@ -79,7 +101,7 @@ void text_terminal::puts(vector<char> &str)
 {
     for (int i = 0; i < str.size(); ++i) {
         const char ch = str[i];
-        if (ch == '\0') {
+        if (ch == 0) {
             break;
         }
         putchar(ch);

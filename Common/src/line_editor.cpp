@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <cctype>
 
 line_editor::~line_editor() = default;
 
@@ -67,24 +68,35 @@ vector<char> line_editor::getline()
             default:
                 switch (ch) {
                     case '\b':
-                        // TODO: backspace
+                        if (user_input.size() > 0) {
+                            user_input.pop_back();
+                            term.putchar('\b');
+                        }
                         break;
 
                     case '\n':
-                        user_input.push_back('\0');
                         term.putchar('\n');
                         have_a_newline = true;
                         break;
 
+                    case '\t':
+                        // TODO: better handling of the tab character
+                        user_input.push_back(' ');
+                        term.putchar(' ');
+                        break;
+
                     default:
-                        user_input.push_back(ch);
-                        term.putchar(ch);
+                        if (isprint(ch)) {
+                            user_input.push_back(ch);
+                            term.putchar(ch);
+                        }
                         break;
                 } // switch (ch)
                 break;
         } // switch (key)
     } // while
 
+    user_input.push_back('\0');
     return user_input;
 }
 

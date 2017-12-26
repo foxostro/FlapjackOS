@@ -9,6 +9,8 @@ class text_terminal {
     console_device &display;
     int cursor_row, cursor_col;
 
+    void move_back_one(int &row, int &col);
+    void backspace(int &row, int &col);
     void newline(int &row, int &col);
     void enter_character(int &row, int &col, char ch);
 

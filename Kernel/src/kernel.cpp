@@ -275,7 +275,9 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
         line_editor ed(term, *s_keyboard);
         while (true) {
             vector<char> user_input = ed.getline();
-            term.printf("Got: %s\n", user_input.data());
+            term.puts("Got: ");
+            term.puts(user_input);
+            term.puts("\n");
             ed.add_history(user_input);
         }
     }
