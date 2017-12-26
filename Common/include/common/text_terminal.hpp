@@ -45,4 +45,7 @@ public:
 
     int get_cursor_row() const;
     int get_cursor_col() const;
+
+    void move_cursor_left();
+    void move_cursor_right();
 };

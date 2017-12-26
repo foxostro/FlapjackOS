@@ -142,3 +142,27 @@ int text_terminal::get_cursor_col() const
 {
     return cursor_col;
 }
+
+void text_terminal::move_cursor_left()
+{
+    move_back_one(cursor_row, cursor_col);
+    set_cursor_position(cursor_row, cursor_col);
+}
+
+void text_terminal::move_cursor_right()
+{
+    if (cursor_col >= (int)CONSOLE_WIDTH || cursor_row >= (int)CONSOLE_HEIGHT) {
+        return;
+    }
+
+    cursor_col++;
+    if (cursor_col == (int)CONSOLE_WIDTH) {
+        if (cursor_row < (int)CONSOLE_HEIGHT-1) {
+            cursor_row++;
+        }
+
+        cursor_col = 0;
+    }
+
+    set_cursor_position(cursor_row, cursor_col);
+}

@@ -25,6 +25,7 @@ vector<char> line_editor::getline()
     term.putchar(' ');
 
     vector<char> user_input;
+    vector<char>::size_type linear_cursor = 0;
 
     while (!have_a_newline) {
         keyboard_event event = kb.get_event();
@@ -41,14 +42,20 @@ vector<char> line_editor::getline()
                 // fall through
 
             case KEYCODE_LEFT_ARROW:
-                // TODO: left arrow
+                if (linear_cursor > 0) {
+                    linear_cursor--;
+                    term.move_cursor_left();
+                }
                 break;
 
             case KEYCODE_NUMPAD_6:
                 // fall through
 
             case KEYCODE_RIGHT_ARROW:
-                // TODO: right arrow
+                if (linear_cursor < (user_input.size()-1)) {
+                    linear_cursor++;
+                    term.move_cursor_right();
+                }
                 break;
 
             case KEYCODE_NUMPAD_2:
@@ -69,8 +76,9 @@ vector<char> line_editor::getline()
                 switch (ch) {
                     case '\b':
                         if (user_input.size() > 0) {
-                            user_input.pop_back();
+                            user_input.remove(linear_cursor-1);
                             term.putchar('\b');
+                            linear_cursor--;
                         }
                         break;
 
@@ -81,13 +89,16 @@ vector<char> line_editor::getline()
 
                     case '\t':
                         // TODO: better handling of the tab character
-                        user_input.push_back(' ');
-                        term.putchar(' ');
                         break;
 
                     default:
                         if (isprint(ch)) {
-                            user_input.push_back(ch);
+                            if (linear_cursor < user_input.size()) {
+                                user_input[linear_cursor] = ch;
+                            } else {
+                                user_input.push_back(ch);
+                            }
+                            linear_cursor++;
                             term.putchar(ch);
                         }
                         break;
