@@ -1,5 +1,4 @@
 #include <common/line_editor.hpp>
-#include <common/console_printf.hpp>
 #include <common/text_terminal.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
@@ -27,11 +26,9 @@
 #include <cstdlib>
 #include <cstring>
 
-// This global is used for access to the console in the interrupt dispatcher.
-// Besides this, it's really only for use in panic() because it severely
-// clutters the interface of assert() and panic() if we are reqired to pass down
-// the console interface.
-console_device *g_console = NULL;
+// We pass the terminal around globally becuase it severely clutters the
+// interface of assert() and panic() if we are reqired to pass the terminal
+// around literally everywhere.
 text_terminal *g_terminal = NULL;
 
 static gdt_entry_t s_gdt[6];
@@ -236,14 +233,15 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // interrupts.
     pic_init();
 
-    // Initialize the VGA console output driver.
+    // Initialize the VGA text console output driver.
     // The driver lives in the kernel stack since we haven't initialized the
     // kernel heap yet.
     vga_console_device vga_console;
-    g_console = &vga_console;
-    g_console->clear();
+    vga_console.clear();
 
-    text_terminal term(*g_console);
+    // Initialize the text terminal, built on top of the VGA text display, and
+    // make it available to other sub-systems which rely on it globally.
+    text_terminal term(vga_console);
     g_terminal = &term;
 
     // The kernel must call global constructors itself as we have no runtime

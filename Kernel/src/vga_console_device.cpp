@@ -13,7 +13,6 @@ constexpr unsigned CRTC_IDX_REG         = 0x3d4;
 constexpr unsigned CRTC_DATA_REG        = 0x3d5;
 constexpr unsigned CRTC_CURSOR_LSB_IDX  = 15;
 constexpr unsigned CRTC_CURSOR_MSB_IDX  = 14;
-constexpr unsigned TAB_WIDTH            = 8;
 
 volatile uint16_t *g_vga_text_buffer = (uint16_t *)0xB8000;
 
@@ -76,91 +75,6 @@ vgachar_t vga_console_device::make_char(char ch) const
     r.bg = curr_bg;
     r.ch = ch;
     return r;
-}
-
-void vga_console_device::newline()
-{
-    if (cursor_row == CONSOLE_HEIGHT-1) {
-        for (size_t row = 1; row <= CONSOLE_HEIGHT; row++) {
-            for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
-                vgachar_t ch = get_char(row, col);
-                draw_char(row - 1, col, ch);
-            }
-        }
-    } else {
-        cursor_row++;
-    }
-
-    cursor_col = 0;
-
-    for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
-        draw_char(cursor_row, col, space_character());
-    }
-}
-
-void vga_console_device::tab()
-{
-    cursor_col += TAB_WIDTH - (cursor_col % TAB_WIDTH);
-}
-
-void vga_console_device::backspace()
-{
-    if (cursor_col == 0) {
-        cursor_col = CONSOLE_WIDTH;
-
-        if (cursor_row > 0) {
-            cursor_row--;
-        }
-    } else {
-        cursor_col--;
-    }
-
-    draw_char(cursor_row, cursor_col, space_character());
-}
-
-bool vga_console_device::is_acceptable(char ch) const
-{
-    return isprint(ch) || (ch == '\n') || (ch == '\t') || (ch == '\b');
-}
-
-void vga_console_device::putchar(char ch)
-{
-    if (!is_acceptable(ch)) {
-        return;
-    }
-
-    switch (ch) {
-        case '\n':
-            newline();
-            break;
-
-        case '\t':
-            tab();
-            break;
-            
-        case '\b':
-            backspace();
-            break;
-            
-        default:
-            draw_char(cursor_row, cursor_col, make_char(ch));
-
-            if (cursor_col == CONSOLE_WIDTH) {
-                newline();
-            }
-
-            cursor_col++;
-            break;
-    }
-
-    set_cursor_position(cursor_row, cursor_col);
-}
-
-void vga_console_device::puts(const char *s)
-{
-    while (*s) {
-        putchar(*s++);
-    }
 }
 
 void vga_console_device::set_cursor_position(size_t row, size_t col)

@@ -51,17 +51,6 @@ public:
     // Returns a VGA character in the current color for the specified ASCII char.
     virtual vgachar_t make_char(char ch) const = 0;
 
-    // Returns true if the console can accept the given character for printing.
-    // This includes so-called isprint characters as well as characters like
-    // BACKSPACE and NEWLINE which can also affect console output.
-    virtual bool is_acceptable(char ch) const = 0;
-
-    // Puts a character at the next place on the console.
-    virtual void putchar(char ch) = 0;
-
-    // Puts the string at the next position on the console.
-    virtual void puts(const char *s) = 0;
-
     // Moves the hardware cursor to the specified position.
     // If the cursor is placed outside the visible console then it will be hidden.
     virtual void set_cursor_position(size_t row, size_t col) = 0;

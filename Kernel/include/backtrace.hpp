@@ -1,4 +1,4 @@
 #pragma once
 
-class console_device;
-void backtrace(console_device &console);
+class text_terminal;
+void backtrace(text_terminal &term);

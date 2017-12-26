@@ -1,6 +1,7 @@
 #include <common/text_terminal.hpp>
 #include <cstdarg>
 #include <cstdio>
+#include <cctype>
 
 text_terminal::~text_terminal() = default;
 
@@ -30,10 +31,12 @@ void text_terminal::newline(int &row, int &col)
 
 void text_terminal::enter_character(int &row, int &col, char ch)
 {
-    display.draw_char(row, col, display.make_char(ch));
-    col++;
-    if (col == (int)CONSOLE_WIDTH) {
-        newline(row, col);
+    if (isprint(ch)) {
+        display.draw_char(row, col, display.make_char(ch));
+        col++;
+        if (col == (int)CONSOLE_WIDTH) {
+            newline(row, col);
+        }
     }
 }
 
@@ -75,7 +78,11 @@ void text_terminal::puts(const char *s)
 void text_terminal::puts(vector<char> &str)
 {
     for (int i = 0; i < str.size(); ++i) {
-        putchar(str[i]);
+        const char ch = str[i];
+        if (ch == '\0') {
+            break;
+        }
+        putchar(ch);
     }
 }
 
