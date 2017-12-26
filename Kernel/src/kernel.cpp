@@ -1,5 +1,6 @@
 #include <common/line_editor.hpp>
 #include <common/console_printf.hpp>
+#include <common/text_terminal.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
 
@@ -269,6 +270,13 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     {
+        g_console->clear();
+        text_terminal term(*g_console);
+        for (int i = 0; i < 60; ++i) {
+            term.printf("%d\n", i);
+        }
+        halt_forever();
+
         line_editor ed(*g_console, *s_keyboard);
         while (true) {
             vector<char> user_input = ed.getline();

@@ -1,4 +1,3 @@
-// Abstract interface for a VGA console output driver.
 #pragma once
 
 #include <cstddef>
@@ -34,6 +33,8 @@ static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 b
 constexpr unsigned CONSOLE_WIDTH  = 80;
 constexpr unsigned CONSOLE_HEIGHT = 25;
 
+// A console is a physical device which displays a grid of monospace text.
+// An example of a console is a VGA display in text mode.
 class console_device {
 public:
     virtual ~console_device() = default;

@@ -14,6 +14,7 @@ set(SOURCE_FILES
     "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
 
     "include/common/line_editor.hpp" "src/line_editor.cpp"
+    "include/common/text_terminal.hpp" "src/text_terminal.cpp"
     "include/common/console_printf.hpp" "src/console_printf.cpp"
     "include/common/linked_list.hpp"
     "include/common/ring_buffer.hpp"
