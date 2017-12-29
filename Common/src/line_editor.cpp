@@ -44,7 +44,7 @@ vector<char> line_editor::getline()
             case KEYCODE_LEFT_ARROW:
                 if (linear_cursor > 0) {
                     linear_cursor--;
-                    term.move_cursor_left();
+                    //term.move_cursor_left();
                 }
                 break;
 
@@ -54,7 +54,7 @@ vector<char> line_editor::getline()
             case KEYCODE_RIGHT_ARROW:
                 if (linear_cursor < (user_input.size()-1)) {
                     linear_cursor++;
-                    term.move_cursor_right();
+                    //term.move_cursor_right();
                 }
                 break;
 

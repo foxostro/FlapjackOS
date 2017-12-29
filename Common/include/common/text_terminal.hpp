@@ -1,24 +1,44 @@
 #pragma once
 
 #include <common/text_display_device.hpp>
+#include <common/text_line.hpp>
 #include <common/vector.hpp>
 
 // A text terminal displays lines of text on a text console display.
 class text_terminal {
-    static const int TAB_WIDTH = 8;
+    // Displays monospace text on the screen.
     text_display_device &display;
+
+    // Lines of text in the terminal.
+    vector<text_line> lines;
+
+    // The row and column of the display where the cursor sits.
     int cursor_row, cursor_col;
 
-    void move_back_one(int &row, int &col);
-    void backspace(int &row, int &col);
-    void newline(int &row, int &col);
-    void enter_character(int &row, int &col, char ch);
+    // Increments the cursor appropriately for typing the specified character
+    // at the specified row and column of the terminal.
+    void increment_cursor(int &row, int &col, char ch);
+
+    // Repaint the specified line of text on the specified row of the display.
+    void repaint_line(int row, text_line &line);
 
 public:
     ~text_terminal();
 
     // Constructor.
     text_terminal(text_display_device &display);
+
+    // Inserts a character on the terminal at the specified row and column.
+    // This may cause characters on the terminal following this position to be
+    // displaced.
+    //
+    // The cursor is unaffected.
+    //
+    // - Non-printable characters are ignored.
+    // - Tab characters ('\t') may be wider than one column.
+    // - The backspace character ('\b') deletes a line of text from the console
+    //   and moves the cursor to the previous position.
+    void insert_char(int row, int col, char ch);
 
     // Puts a character on the display at the current cursor position.
     // Increments the cursor to the next position. This may wrap the cursor to
@@ -35,17 +55,8 @@ public:
     void puts(const char *str);
 
     // Puts each character in the string to the terminal.
-    void puts(vector<char> &str);
+    void puts(const vector<char> &str);
 
     // Prints a formatted string to the terminal.
     int printf(const char *fmt, ...);
-
-    // Moves the cursor to the specified position on the display.
-    void set_cursor_position(int row, int col);
-
-    int get_cursor_row() const;
-    int get_cursor_col() const;
-
-    void move_cursor_left();
-    void move_cursor_right();
 };

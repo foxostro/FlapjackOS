@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <common/terminal_metrics.hpp>
 
 enum vgacolor_t {
     BLACK    = 0x0,
@@ -29,9 +30,6 @@ struct vgachar_t {
     uint16_t blink:1;
 };
 static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
-
-constexpr unsigned CONSOLE_WIDTH  = 80;
-constexpr unsigned CONSOLE_HEIGHT = 25;
 
 // A text display device is a physical device which displays a grid of monospace
 // text. An example of a console is a VGA display in text mode.
