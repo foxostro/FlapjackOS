@@ -196,10 +196,12 @@ public:
             internal_type *new_data = new internal_type[new_capacity];
 
             for (size_type i = 0; i < _count; ++i) {
-                ((value_type &)new_data[i]) = std::move(data()[i]);
+                new ((value_type *)new_data + i) value_type(std::move(data()[i]));
             }
 
-            delete[] _data;
+            if (_data) {
+                delete[] _data;
+            }
             _data = new_data;
             _capacity = new_capacity;
         }
