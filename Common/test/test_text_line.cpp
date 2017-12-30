@@ -1,41 +1,25 @@
 #include "catch.hpp"
 
 #include <common/text_line.hpp>
-#include <common/terminal_metrics.hpp>
-#include <string>
+#include <common/text_buffer.hpp>
+#include <cstdio>
 
-TEST_CASE("Count columns, regular characters", "[text_line]")
+TEST_CASE("Insert individual characters", "[text_line]")
 {
-    text_buffer text;
-    text.insert("The quick brown fox jumped over the lazy dog.");
+    constexpr int WIDTH = 80;
+    vector<char> expected(WIDTH);
+    for (int i = 0; i < WIDTH; ++i) {
+        expected[i] = 'a';
+    }    
 
-    text_line line(&text, TAB_WIDTH);
-    line.begin.set(0);
-    line.end.set(strlen("The quick brown fox jumped over the lazy dog.")-1);
+    text_line line(WIDTH, 8);
 
-    REQUIRE(line.columns() == 45);
-}
+    for (int i = 0; i < WIDTH; ++i) {
+        REQUIRE(line.push_back('a') == true);
+    }
 
-TEST_CASE("Count columns, include tabs", "[text_line]")
-{
-    text_buffer text;
-    text.insert("\ta\tb");
+    REQUIRE(line.push_back('a') == false);
 
-    text_line line(&text, TAB_WIDTH);
-    line.begin.set(0);
-    line.end.set(strlen("\ta\tb")-1);
-
-    REQUIRE(line.columns() == 17);
-}
-
-TEST_CASE("Get line data", "[text_line]")
-{
-    text_buffer text;
-    text.insert("The quick brown fox jumped over the lazy dog.");
-
-    text_line line(&text, TAB_WIDTH);
-    line.begin.set(0);
-    line.end.set(strlen("The quick brown fox jumped over the lazy dog.")-1);
-
-    REQUIRE(std::string(line.get().data()) == "The quick brown fox jumped over the lazy dog.");
+    REQUIRE(line.columns() == WIDTH);
+    REQUIRE(line.get() == expected);
 }

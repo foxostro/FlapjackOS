@@ -28,8 +28,20 @@ TEST_CASE("Break text into lines", "[text_terminal]")
     const vector<text_line> lines = term.get_lines();
 
     REQUIRE(lines.size() == 4);
-    REQUIRE(std::string(lines[0].get().data()) == "The quick brown fox jumped over the lazy dog.");
-    REQUIRE(std::string(lines[1].get().data()) == "foo\tbar\tbaz");
-    REQUIRE(std::string(lines[2].get().data()) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(std::string(lines[3].get().data()) == "aaaaa");
+
+    const char *ex0 = "The quick brown fox jumped over the lazy dog.";
+    INFO(ex0);
+    REQUIRE(lines[0].get() == vector<char>(strlen(ex0), ex0));
+
+    const char *ex1 = "foo\tbar\tbaz";
+    INFO(ex1);
+    REQUIRE(lines[1].get() == vector<char>(strlen(ex1), ex1));
+
+    const char *ex2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    INFO(ex2);
+    REQUIRE(lines[2].get() == vector<char>(strlen(ex2), ex2));
+
+    const char *ex3 = "aaaaa";
+    INFO(ex3);
+    REQUIRE(lines[3].get() == vector<char>(strlen(ex3), ex3));
 }
