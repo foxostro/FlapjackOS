@@ -1,4 +1,6 @@
 #include <common/text_terminal.hpp>
+#include <common/text_display_device.hpp>
+#include <common/text_line.hpp>
 #include <cstdarg>
 #include <cstdio>
 #include <cctype>
@@ -6,47 +8,71 @@
 text_terminal::~text_terminal() = default;
 
 text_terminal::text_terminal(text_display_device &disp)
- : display(disp),
-   lines(CONSOLE_HEIGHT),
-   cursor_row(0),
-   cursor_col(0)
+ : _display(disp)
 {}
 
-void text_terminal::insert_char(int row, int col, char ch)
+void text_terminal::draw() const
 {
-    assert(row >= 0);
-    assert(row < CONSOLE_HEIGHT);
-    assert(col >= 0);
-    assert(col < CONSOLE_WIDTH);
+    vector<text_line> lines = get_lines();
 
-    auto &line = lines[row];
-    line.insert(line.pos_for_col(col), ch);
-    repaint_line(row, line);
+    _display.clear();
+
+    for (int row = 0; row < CONSOLE_HEIGHT; ++row) {
+        int i = (lines.size() - CONSOLE_HEIGHT) + row;
+        lines[i].draw(_display, row);
+    }
+}
+
+vector<text_line> text_terminal::get_lines() const
+{
+    ::printf("text_terminal::get_lines()\n");
+
+    vector<text_line> lines;
+
+    text_buffer::size_type i = 0;
+
+    while (i < _buffer.size()-1) {
+        ::printf("getting a new line... i=%d\n", i);
+        text_line line(&_buffer, TAB_WIDTH);
+        line.begin.set(i);
+        
+        // Move the end of the line until we reach the edge of the display, or
+        // the end of the buffer.
+        while (i < _buffer.size()-1) {
+            line.end.set(++i);
+
+            if (line.columns() > CONSOLE_WIDTH) {
+                // Too big. Undo the increment and emit the line.
+                line.end.set(--i);
+                ::printf("found line limits; i=%d\n", i);
+                break;
+            }
+        }
+
+        // Emit the line.
+        ::printf("emit line: \"%s\"\n", line.get().data());
+        lines.push_back(line);
+    }
+
+    return lines;
 }
 
 void text_terminal::putchar(char ch)
 {
-    insert_char(cursor_row, cursor_col, ch);
-    increment_cursor(cursor_row, cursor_col, ch);
-    display.set_cursor_position(cursor_row, cursor_col);
+    _buffer.insert(ch);
+    draw();
 }
 
 void text_terminal::puts(const char *s)
 {
-    while (*s) {
-        putchar(*s++);
-    }
+    _buffer.insert(s);
+    draw();
 }
 
-void text_terminal::puts(const vector<char> &str)
+void text_terminal::puts(const vector<char> &s)
 {
-    for (int i = 0; i < str.size(); ++i) {
-        const char ch = str[i];
-        if (ch == 0) {
-            break;
-        }
-        putchar(ch);
-    }
+    _buffer.insert(s);
+    draw();
 }
 
 int text_terminal::printf(const char *fmt, ...)
@@ -61,25 +87,4 @@ int text_terminal::printf(const char *fmt, ...)
     puts(buffer);
 
     return r;
-}
-
-void text_terminal::increment_cursor(int &row, int &col, char ch)
-{
-    col += text_line::step_for_char(TAB_WIDTH, row, ch);
-    if (col >= CONSOLE_WIDTH) {
-        col = 0;
-        row++;
-    }
-}
-
-void text_terminal::repaint_line(int row, text_line &line)
-{
-    for (int i = 0; i < CONSOLE_WIDTH; ++i) {
-        display.draw_char(row, i, display.make_char(' '));
-    }
-    line.for_each_col([this, row](int col, int width, char ch){
-        for (int i = 0; i < width; ++i) {
-            display.draw_char(row, col+i, display.make_char(ch));
-        }
-    });
 }

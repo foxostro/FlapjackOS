@@ -1,5 +1,6 @@
 #include <common/text_line.hpp>
 #include <common/terminal_metrics.hpp>
+#include <common/text_display_device.hpp>
 #include <cassert>
 #include <cctype>
 
@@ -16,75 +17,55 @@ int text_line::step_for_char(int tab_width, int col, char ch)
     return delta;
 }
 
-text_line::text_line()
- : text_line(CONSOLE_WIDTH, TAB_WIDTH)
-{}
-
-text_line::text_line(int max_columns, int tab_width)
- : _max_columns(max_columns), _tab_width(tab_width)
+text_line::text_line(const text_buffer *owner, int tab_width)
+ : _owner(owner),
+   _tab_width(tab_width),
+   begin(owner),
+   end(owner)
 {
-    assert(max_columns > 0);
-    assert(tab_width > 0);
+    assert(_owner);
+    assert(tab_width >= 0);
 }
 
-const vector<char>& text_line::data() const
+void text_line::draw(text_display_device &display, int row) const
 {
-    return _data;
+    assert(begin.as_index() <= end.as_index());
+
+    int col = 0;
+
+    for (text_buffer::size_type i = begin.as_index(); i <= end.as_index(); ++i) {
+        const char ch = _owner->at(i);
+        display.draw_char(row, col, display.make_char(ch));
+        col += step_for_char(_tab_width, col, ch);
+    }
 }
 
 int text_line::columns() const
 {
-    return for_each_col([](int,int,char){});
-}
+    assert(begin.as_index() <= end.as_index());
 
-vector<char> text_line::insert(int position, char ch)
-{
-    vector<char> chars(1);
-    chars[0] = ch;
-    return insert(position, chars);
-}
+    int col = 0;
 
-vector<char> text_line::insert(int position, vector<char> chars)
-{
-    assert(position >= 0 && position <= _data.size());
-
-    for (int i = 0, n = chars.size(); i < n; ++i) {
-        _data.insert(position, chars.pop_back());
+    for (text_buffer::size_type i = begin.as_index(); i <= end.as_index(); ++i) {
+        assert(i >= 0 && i < _owner->size());
+        col += step_for_char(_tab_width, col, _owner->at(i));
     }
 
-    // Find the position of the last character after the maximum column.
-    int char_pos = 0;
-    for_each_col([this, &char_pos](int col, int, char){
-        if (col < _max_columns) {
-            char_pos++;
-        }
-    });
-
-    // Take the characters after the maximum column and move them to `overflow'.
-    vector<char> overflow;
-    for (int i = char_pos; i < _data.size(); ++i) {
-        overflow.push_back(_data[i]);
-    }
-    while (_data.size() > char_pos) {
-        _data.pop_back();
-    }
-
-    return overflow;
+    return col;
 }
 
-void text_line::remove(int position)
+vector<char> text_line::get() const
 {
-    assert(position >= 0 && position < _data.size());
-    _data.remove(position);
-}
+    assert(begin.as_index() <= end.as_index());
 
-int text_line::pos_for_col(int col) const
-{
-    int pos = 0;
-    for_each_col([&pos, col](int column, int, char){
-        if (column <= col) {
-            ++pos;
-        }
-    });
-    return pos;
+    vector<char> data;
+
+    for (text_buffer::size_type i = begin.as_index(); i <= end.as_index(); ++i) {
+        const char ch = _owner->at(i);
+        data.push_back(ch);
+    }
+
+    data.push_back('\0');
+
+    return data;
 }

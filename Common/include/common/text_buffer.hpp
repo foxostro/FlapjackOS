@@ -12,13 +12,17 @@ public:
     // discarded. An index is measured from the beginning of the buffer and
     // is the natural way of addressing the internal character array.
     class cursor_position {
-        const text_buffer &_owner;
+        const text_buffer *_owner;
         vector<value_type>::size_type _position;
 
     public:
         // Constructor.
         // Constructs a position at the end of the buffer.
-        cursor_position(const text_buffer &owner);
+        cursor_position(const text_buffer *owner);
+
+        // Constructor.
+        // Constructs a position from the specified index.
+        cursor_position(const text_buffer *owner, size_type index);
 
         // Moves the cursor to the next position.
         // If the cursor is already at the end of the buffer then this does
@@ -66,6 +70,12 @@ public:
 
     // Gets the number of characters in the text buffer.
     size_type size() const;
+
+    // Gets the index'th character of the text buffer.
+    value_type& at(size_type i);
+
+    // Gets the index'th character of the text buffer.
+    value_type at(size_type i) const;
 
     // Gets the index'th character of the text buffer.
     value_type& operator[](size_type index);

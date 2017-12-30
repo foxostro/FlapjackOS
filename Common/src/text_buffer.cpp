@@ -1,9 +1,18 @@
 #include <common/text_buffer.hpp>
 #include <cctype>
 
-text_buffer::cursor_position::cursor_position(const text_buffer &owner)
+text_buffer::cursor_position::cursor_position(const text_buffer *owner)
  : _owner(owner), _position(0)
-{}
+{
+    assert(owner);
+}
+
+text_buffer::cursor_position::cursor_position(const text_buffer *owner, size_type index)
+ : _owner(owner), _position(0)
+{
+    assert(owner);
+    set(index);
+}
 
 bool text_buffer::cursor_position::move_forward()
 {
@@ -17,7 +26,7 @@ bool text_buffer::cursor_position::move_forward()
 
 bool text_buffer::cursor_position::move_backward()
 {
-    if (_position == _owner.size()) {
+    if (_position == _owner->size()) {
         return false;
     } else {
         _position++;
@@ -27,20 +36,20 @@ bool text_buffer::cursor_position::move_backward()
 
 text_buffer::size_type text_buffer::cursor_position::as_index() const
 {
-    const text_buffer::size_type index = _owner.size() - _position;
-    assert(index >= 0 && index <= _owner.size());
+    const text_buffer::size_type index = _owner->size() - _position;
+    assert(index >= 0 && index <= _owner->size());
     return index;
 }
 
 void text_buffer::cursor_position::set(size_type index)
 {
-    assert(index >= 0 && index <= _owner.size());
-    _position = _owner.size() - index;
+    assert(index >= 0 && index <= _owner->size());
+    _position = _owner->size() - index;
 }
 
 text_buffer::~text_buffer() = default;
 
-text_buffer::text_buffer() : _cursor(*this) {}
+text_buffer::text_buffer() : _cursor(this) {}
 
 text_buffer::cursor_position& text_buffer::get_cursor()
 {
@@ -54,7 +63,7 @@ void text_buffer::insert(char c)
             _data.remove(_cursor.as_index() - 1);
             _cursor.move_backward();
         }
-    } else if (isprint(c)) {
+    } else if (isprint(c) || c == '\t' || c == '\n') {
         _data.insert(_cursor.as_index(), c);
         _cursor.move_forward();
     }
@@ -87,6 +96,16 @@ text_buffer::value_type& text_buffer::operator[](size_type i)
 }
 
 text_buffer::value_type text_buffer::operator[](size_type i) const
+{
+    return _data[i];
+}
+
+text_buffer::value_type& text_buffer::at(size_type i)
+{
+    return _data[i];
+}
+
+text_buffer::value_type text_buffer::at(size_type i) const
 {
     return _data[i];
 }

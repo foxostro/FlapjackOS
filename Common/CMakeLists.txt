@@ -43,6 +43,7 @@ if(CMAKE_CROSSCOMPILING)
 else(CMAKE_CROSSCOMPILING)
 
     add_executable(CommonTest
+                   "test/test_text_terminal.cpp"
                    "test/test_text_buffer.cpp"
                    "test/test_text_line.cpp"
                    "test/test_vector.cpp"
