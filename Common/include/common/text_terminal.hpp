@@ -15,8 +15,7 @@ class text_terminal {
     ring_buffer<text_line, CONSOLE_HEIGHT> _logical_lines;
 
     // The position of the cursor in logical space.
-    int _logical_cursor_row;
-    //int _logical_cursor_col
+    int _logical_cursor_row, _logical_cursor_col;
 
     void _putchar(char ch);
 

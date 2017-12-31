@@ -13,6 +13,8 @@ class text_line {
     int _cached_num_display_rows, _cached_num_display_cols;
 
 public:
+    using size_type = ring_buffer<char, MAXLINE>::size_type;
+
     // The number of columns this character will take up.
     static int step_for_char(int tab_width, int col, char ch);
 
@@ -46,6 +48,12 @@ public:
     // text line.
     void measure(int &out_rows, int &out_columns) const;
 
+    // Convert the specified logical position to a physical position, relative
+    // to this row.
+    // For example, the logical row is always zero because it is relative-
+    // addressed to this row.
+    void convert(int &row, int &col) const;
+
     // Gets the characters in the text line.
     // The string is nul-terminated.
     vector<char> str() const;
@@ -56,16 +64,12 @@ public:
     // The character must not be a newline, '\n'.
     bool push_back(char ch);
 
+    // Gets the number of characters in the text line.
+    size_type size() const;
+
     // Indicates line needs to be redrawn.
     bool dirty;
 
-    int get_cached_num_display_rows() const
-    {
-        return _cached_num_display_rows;
-    }
-
-    int get_cached_num_display_cols() const
-    {
-        return _cached_num_display_cols;
-    }
+    int get_cached_num_display_rows() const;
+    int get_cached_num_display_cols() const;
 };

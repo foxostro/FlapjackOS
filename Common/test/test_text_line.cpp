@@ -32,5 +32,5 @@ TEST_CASE("Insert characters into text_line", "[text_line]")
     line.measure(rows, cols);
 
     REQUIRE(cols == CONSOLE_WIDTH);
-    REQUIRE(rows == 3);
+    REQUIRE(rows == 4);
 }

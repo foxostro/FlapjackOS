@@ -10,17 +10,19 @@ text_terminal::~text_terminal() = default;
 
 text_terminal::text_terminal(text_display_device &disp)
  : _display(disp),
-   _logical_cursor_row(0)
-   // ,_logical_cursor_col(0)
+   _logical_cursor_row(0),
+   _logical_cursor_col(0)
 {}
 
 void text_terminal::draw()
 {
+    int cursor_offset = 0;
+
     // Count the number of display lines needed to show all logical lines.
     int rows_needed = 0;
     for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
         const auto& line = _logical_lines[i];
-        rows_needed += line.get_cached_num_display_rows() + 1;
+        rows_needed += line.get_cached_num_display_rows();
     }
 
     // Start drawing above the top of the display so that the bottom lines
@@ -38,7 +40,10 @@ void text_terminal::draw()
         if (line.dirty) {
             line.draw(_display, row);
         }
-        row += line.get_cached_num_display_rows() + 1;
+        if (i == _logical_cursor_row) {
+            cursor_offset = row;
+        }
+        row += line.get_cached_num_display_rows();
     }
 
     // Clear the remainder of the display.
@@ -48,6 +53,13 @@ void text_terminal::draw()
             _display.draw_char(row, col, space);
         }
     }
+
+    // Set the hardware cursor position using physical display coords.
+    int phys_row = _logical_cursor_row;
+    int phys_col = _logical_cursor_col;
+    _logical_lines[_logical_cursor_row].convert(phys_row, phys_col);
+    phys_row += cursor_offset;
+    _display.set_cursor_position(phys_row, phys_col);
 }
 
 void text_terminal::_putchar(char ch)
@@ -56,6 +68,7 @@ void text_terminal::_putchar(char ch)
         text_line line(CONSOLE_WIDTH, TAB_WIDTH);
         _logical_lines.push_back(line);
         _logical_cursor_row = 0;
+        _logical_cursor_col = 0;
     }
 
     if (ch == '\n') {
@@ -73,6 +86,7 @@ void text_terminal::_putchar(char ch)
 
         _logical_lines.push_back(line);
         _logical_cursor_row++;
+        _logical_cursor_col = 0;
     } else {
         // TODO: insert at the logical-cursor-column position
         // TODO: handle backspace too
@@ -83,6 +97,7 @@ void text_terminal::_putchar(char ch)
         line.measure(rows, cols);
 
         line.push_back(ch);
+        _logical_cursor_col = line.size();
 
         if (rows != line.get_cached_num_display_rows()) {
             // Mark all subsequent lines as dirty because we are now overflowing

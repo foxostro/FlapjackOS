@@ -13,9 +13,11 @@
 // the front or the back ends.
 template<typename TYPE, int CAPACITY>
 class ring_buffer {
+public:
     using value_type = TYPE;
     using size_type = int;
 
+private:
     static_assert(CAPACITY > 0, "CAPACITY must be greater than zero.");
     using internal_type = typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type;
 

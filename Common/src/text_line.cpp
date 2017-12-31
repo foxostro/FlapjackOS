@@ -126,7 +126,33 @@ void text_line::measure(int &out_rows, int &out_columns) const
     }
 
     out_columns = max_col;
-    out_rows = row;
+    out_rows = row + 1;
+}
+
+void text_line::convert(int &out_row, int &out_col) const
+{
+    int logi_col = out_col;
+
+    int col = 0, row = 0;
+
+    for (int i = 0; i < _data.size(); ++i) {
+        char ch = _data[i];
+        int step = step_for_char(_tab_width, col, ch);
+
+        if (i == logi_col) {
+            goto done;
+        }
+
+        col += step;
+        if (col >= _max_columns) {
+            col = 0;
+            row++;
+        }
+    }
+
+done:
+    out_row = row;
+    out_col = col;
 }
 
 vector<char> text_line::str() const
@@ -146,4 +172,19 @@ bool text_line::push_back(char ch)
     dirty = true;
     measure(_cached_num_display_rows, _cached_num_display_cols);
     return r;
+}
+
+text_line::size_type text_line::size() const
+{
+    return _data.size();
+}
+
+int text_line::get_cached_num_display_rows() const
+{
+    return _cached_num_display_rows;
+}
+
+int text_line::get_cached_num_display_cols() const
+{
+    return _cached_num_display_cols;
 }

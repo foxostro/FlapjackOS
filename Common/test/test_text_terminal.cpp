@@ -219,7 +219,7 @@ TEST_CASE("scrolling when logical lines overflow physical lines", "[text_termina
         "i=22\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n"
         "i=23\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n"
         "i=24\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n"
-        "i=25"
+        "i=25\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
         );
 
     // Make sure logical lines look correct.
@@ -227,33 +227,38 @@ TEST_CASE("scrolling when logical lines overflow physical lines", "[text_termina
         const auto &lines = term.get_logical_lines();
         REQUIRE(lines.size() == CONSOLE_HEIGHT);
         REQUIRE(std::string(lines[0].str().data()) == "i=1\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab");
-        REQUIRE(std::string(lines[CONSOLE_HEIGHT-1].str().data()) == "i=25");
+        REQUIRE(std::string(lines[CONSOLE_HEIGHT-1].str().data()) == "i=25\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab");
     }
 
     // Make sure physical lines look correct.
-    REQUIRE(dummy_display.get_line( 0) == "i=13    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line( 1) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line( 2) == "i=14    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line( 3) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line( 4) == "i=15    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line( 5) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line( 6) == "i=16    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line( 7) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line( 8) == "i=17    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line( 9) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(10) == "i=18    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(11) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(12) == "i=19    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(13) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(14) == "i=20    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(15) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(16) == "i=21    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(17) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(18) == "i=22    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(19) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(20) == "i=23    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(21) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(22) == "i=24    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    REQUIRE(dummy_display.get_line(23) == "aaaaaaab                                                                        ");
-    REQUIRE(dummy_display.get_line(24) == "i=25                                                                            ");
+    REQUIRE(dummy_display.get_line( 0) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line( 1) == "i=14    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line( 2) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line( 3) == "i=15    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line( 4) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line( 5) == "i=16    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line( 6) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line( 7) == "i=17    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line( 8) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line( 9) == "i=18    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(10) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(11) == "i=19    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(12) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(13) == "i=20    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(14) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(15) == "i=21    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(16) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(17) == "i=22    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(18) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(19) == "i=23    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(20) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(21) == "i=24    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(22) == "aaaaaaab                                                                        ");
+    REQUIRE(dummy_display.get_line(23) == "i=25    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    REQUIRE(dummy_display.get_line(24) == "aaaaaaab                                                                        ");
+
+    // And make sure the cursor position has been correctly translated from a
+    // logical cursor position to a physical cursor position.
+    REQUIRE(dummy_display.get_cursor_col() == 8);
+    REQUIRE(dummy_display.get_cursor_row() == CONSOLE_HEIGHT-1);
 }
