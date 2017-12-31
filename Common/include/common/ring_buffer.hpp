@@ -3,32 +3,49 @@
 #include <cstddef>
 #include <cstdint>
 #include <cassert>
+#include <utility> // for std::move()
+#include <type_traits> // for std::aligned_storage
+#include <new> // for placement-new
 
 // Statically allocated ring buffer.
 // This is designed to be appropriate for use in an interrupt context.
-template<typename TYPE, size_t BUFFER_SIZE>
+template<typename TYPE, int CAPACITY>
 class ring_buffer {
-    static_assert(BUFFER_SIZE>0, "BUFFER_SIZE must be greater than zero");
-    TYPE _buffer[BUFFER_SIZE];
-    size_t _dequeue_pos;
-    size_t _enqueue_pos;
-    size_t _count;
+    using value_type = TYPE;
+    using size_type = int;
+
+    static_assert(CAPACITY > 0, "CAPACITY must be greater than zero.");
+    using internal_type = typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type;
+
+    internal_type _buffer[CAPACITY];
+    size_type _dequeue_pos;
+    size_type _enqueue_pos;
+    size_type _count;
     
 public:
-    // Enqueues the specified value into the ring _buffer.
+    ~ring_buffer()
+    {
+        while (!empty()) {
+            dequeue();
+        }
+    }
+
+    ring_buffer() : _dequeue_pos(0), _enqueue_pos(0), _count(0) {}
+
+    // Enqueues the specified value into the ring_buffer.
     // Returns true if this was successful, and false otherwise.
-    // This may fail if the ring _buffer is full.
-    bool enqueue(TYPE value)
+    // This may fail if the ring_buffer is full.
+    bool enqueue(value_type value)
     {
         // Drop it on the floor if the _buffer is full.
         if (full()) {
             return false;
         }
 
-        _buffer[_enqueue_pos] = value;
+        new ((value_type *)_buffer + _enqueue_pos) value_type(value);
         _enqueue_pos++;
 
-        if (_enqueue_pos >= BUFFER_SIZE) {
+        if (_enqueue_pos >= CAPACITY) {
             _enqueue_pos = 0;
         }
 
@@ -37,48 +54,47 @@ public:
         return true;
     }
 
-    // Dequeues and returns the next item in the ring _buffer.
-    // This cannot be called if the ring _buffer is empty.
-    TYPE dequeue()
+    // Dequeues and returns the next item in the ring_buffer.
+    // This cannot be called if the ring_buffer is empty.
+    value_type dequeue()
     {
         assert(!empty());
 
         _count--;
 
-        // TODO: Use something like std::move() here?
-        TYPE value = _buffer[_dequeue_pos];
+        value_type *ptr = (value_type *)_buffer + _dequeue_pos;
+        value_type value = std::move(*ptr);
+        ptr->~value_type();
         _dequeue_pos++;
 
-        if(_dequeue_pos >= BUFFER_SIZE) {
+        if(_dequeue_pos >= CAPACITY) {
             _dequeue_pos = 0;
         }
 
         return value;
     }
 
-    // Returns true if the ring _buffer is empty.
+    // Returns true if the ring_buffer is empty.
     bool empty() const
     {
         return _count == 0;
     }
 
-    // Returns true if the ring _buffer is at capacity.
+    // Returns true if the ring_buffer is at capacity.
     bool full() const
     {
-        return _count >= BUFFER_SIZE;
+        return _count >= CAPACITY;
     }
 
-    // Returns the number of elements in the ring _buffer;
+    // Returns the number of elements in the ring_buffer;
     size_t count() const
     {
         return _count;
     }
 
-    // Returns the maximum capacity of the ring _buffer;
+    // Returns the maximum capacity of the ring_buffer;
     size_t capacity() const
     {
-        return BUFFER_SIZE;
+        return CAPACITY;
     }
-
-    ring_buffer() : _dequeue_pos(0), _enqueue_pos(0), _count(0) {}
 };
