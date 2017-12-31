@@ -8,8 +8,9 @@
 #include <type_traits> // for std::aligned_storage
 #include <new> // for placement-new
 
-// Statically allocated ring buffer.
-// This is designed to be appropriate for use in an interrupt context.
+// Statically allocated ring buffer with a fixed capacity.
+// This is a double-ended queue which can be expanded and contracted at both
+// the front or the back ends.
 template<typename TYPE, int CAPACITY>
 class ring_buffer {
     using value_type = TYPE;
