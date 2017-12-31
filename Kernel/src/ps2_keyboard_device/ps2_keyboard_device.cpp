@@ -131,7 +131,8 @@ keyboard_event ps2_keyboard_device::get_event()
         disable_interrupts();
         have_a_key = !events.empty();
         if (have_a_key) {
-            event = events.pop_front();
+            event = events.front();
+            events.pop_front();
         }
         enable_interrupts();
         hlt();

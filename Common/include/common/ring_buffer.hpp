@@ -211,34 +211,26 @@ public:
         return true;
     }
 
-    // Pops an item off the back of the ring_buffer, and returns it.
+    // Pops an item off the back of the ring_buffer.
     // This cannot be called if the ring_buffer is empty.
-    value_type pop_back()
+    void pop_back()
     {
         assert(!empty());
-
         value_type *ptr = (value_type *)_buffer + _back_pos;
-        value_type value = std::move(*ptr);
         ptr->~value_type();
         _back_pos--;
         _count--;
-
-        return value;
     }
 
-    // Pops an item off the front of the ring_buffer, and returns it.
+    // Pops an item off the front of the ring_buffer.
     // This cannot be called if the ring_buffer is empty.
-    value_type pop_front()
+    void pop_front()
     {
         assert(!empty());
-
         value_type *ptr = (value_type *)_buffer + _front_pos;
-        value_type value = std::move(*ptr);
         ptr->~value_type();
         _front_pos++;
         _count--;
-
-        return value;
     }
 
     // Returns true if the ring_buffer is empty.

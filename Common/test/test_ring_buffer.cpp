@@ -93,19 +93,19 @@ TEST_CASE("Push back, pop front", "[ring_buffer]")
         REQUIRE(buffer.full());
         REQUIRE(buffer.size() == buffer.capacity());
 
-        REQUIRE(buffer.pop_front() == 0);
+        buffer.pop_front();
         print_buffer("buffer.pop_front()", buffer);
         // [ 1, 2 ]
         REQUIRE(buffer.front() == 1);
         REQUIRE(buffer.back() == 2);
 
-        REQUIRE(buffer.pop_front() == 1);
+        buffer.pop_front();
         print_buffer("buffer.pop_front()", buffer);
         // [ 2 ]
         REQUIRE(buffer.front() == 2);
         REQUIRE(buffer.back() == 2);
 
-        REQUIRE(buffer.pop_front() == 2);
+        buffer.pop_front();
         print_buffer("buffer.pop_front()", buffer);
         // [ ]
         REQUIRE(buffer.empty());
@@ -114,31 +114,6 @@ TEST_CASE("Push back, pop front", "[ring_buffer]")
 
     // Make sure destructors get called for each element.
     REQUIRE((count_ctor + count_ctor_move + count_ctor_copy) == count_dtor);
-}
-
-TEST_CASE("Push front", "[ring_buffer]")
-{
-    ring_buffer<whatever, 3> buffer;
-    REQUIRE(buffer.push_front(0));
-    print_buffer("buffer.push_front(0)", buffer);
-    // [ 0 ]
-    REQUIRE(buffer.size() == 1);
-    REQUIRE(buffer.front() == 0);
-    REQUIRE(buffer.back() == 0);
-
-    REQUIRE(buffer.push_front(1));
-    print_buffer("buffer.push_front(1)", buffer);
-    // [ 1, 0 ]
-    REQUIRE(buffer.size() == 2);
-    REQUIRE(buffer.front() == 1);
-    REQUIRE(buffer.back() == 0);
-
-    REQUIRE(buffer.push_front(2));
-    print_buffer("buffer.push_front(2)", buffer);
-    // [ 2, 1, 0 ]
-    REQUIRE(buffer.size() == 3);
-    REQUIRE(buffer.front() == 2);
-    REQUIRE(buffer.back() == 0);
 }
 
 TEST_CASE("Push front, pop back", "[ring_buffer]")
@@ -167,19 +142,19 @@ TEST_CASE("Push front, pop back", "[ring_buffer]")
     REQUIRE(buffer.full());
     REQUIRE(buffer.size() == buffer.capacity());
 
-    REQUIRE(buffer.pop_back() == 0);
+    buffer.pop_back();
     print_buffer("buffer.pop_back()", buffer);
     // [ 1, 2 ]
     REQUIRE(buffer.front() == 2);
     REQUIRE(buffer.back() == 1);
 
-    REQUIRE(buffer.pop_back() == 1);
+    buffer.pop_back();
     print_buffer("buffer.pop_back()", buffer);
     // [ 2 ]
     REQUIRE(buffer.front() == 2);
     REQUIRE(buffer.back() == 2);
 
-    REQUIRE(buffer.pop_back() == 2);
+    buffer.pop_back();
     print_buffer("buffer.pop_back()", buffer);
     // [ ]
     REQUIRE(buffer.empty());
