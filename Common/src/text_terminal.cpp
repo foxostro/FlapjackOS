@@ -16,16 +16,29 @@ text_terminal::text_terminal(text_display_device &disp)
 
 void text_terminal::draw()
 {
-    // TODO: scroll the display if we can't fit everything.
+    // Count the number of display lines needed to show all logical lines.
+    int rows_needed = 0;
+    for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
+        const auto& line = _logical_lines[i];
+        rows_needed += line.get_cached_num_display_rows() + 1;
+    }
 
-    int row = 0;
+    // Start drawing above the top of the display so that the bottom lines
+    // appear on screen.
+    int row;
+    if (rows_needed >= CONSOLE_HEIGHT) {
+        row = CONSOLE_HEIGHT - rows_needed;
+    } else {
+        row = 0;
+    }
+
+    // Draw all dirty lines. Skip all non-dirty lines to save time.
     for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
         auto& line = _logical_lines[i];
         if (line.dirty) {
-            row = line.draw(_display, row);
-        } else {
-            row += line.get_cached_num_display_rows() + 1;
+            line.draw(_display, row);
         }
+        row += line.get_cached_num_display_rows() + 1;
     }
 
     // Clear the remainder of the display.
@@ -50,6 +63,7 @@ void text_terminal::_putchar(char ch)
 
         if (_logical_lines.full()) {
             _logical_lines.pop_front();
+            _logical_cursor_row--;
 
             // Mark all lines as dirty because we have to scroll.
             for (int i = 0; i < _logical_lines.size(); ++i) {
