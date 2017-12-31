@@ -88,7 +88,7 @@ class ring_buffer {
         }
     };
 
-    circular_index index_at(size_type index)
+    circular_index index_at(size_type index) const
     {
         assert(index >= 0 && index < _count);
         circular_index cursor(_front_pos);
@@ -112,6 +112,9 @@ public:
     }
 
     ring_buffer() : _front_pos(0), _back_pos(0), _count(0) {}
+
+    circular_index get_front_pos() const { return _front_pos; }; // TODO: REMOVE ME
+    circular_index get_back_pos() const { return _back_pos; };
 
     // Returns the element at the front of the buffer.
     value_type& front()
@@ -218,7 +221,9 @@ public:
         assert(!empty());
         value_type *ptr = (value_type *)_buffer + _back_pos;
         ptr->~value_type();
-        _back_pos--;
+        if (size() != 1) {
+            _back_pos--;
+        }
         _count--;
     }
 
@@ -229,7 +234,9 @@ public:
         assert(!empty());
         value_type *ptr = (value_type *)_buffer + _front_pos;
         ptr->~value_type();
-        _front_pos++;
+        if (size() != 1) {
+            _front_pos++;
+        }
         _count--;
     }
 

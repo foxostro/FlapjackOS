@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <common/ring_buffer.hpp>
+#include <common/keyboard_device.hpp>
 #include <cstdio>
 
 #define VERBOSE 0
@@ -60,6 +61,7 @@ static void print_buffer(const char *tag, const T &buffer)
                  (i < (buffer.size()-1)) ? ", " : " ");
     }
     ::printf("]\n");
+    ::printf("front=%d, back=%d\n", (int)buffer.get_front_pos(), (int)buffer.get_back_pos());
 }
 #else
 template<typename T>
@@ -159,4 +161,61 @@ TEST_CASE("Push front, pop back", "[ring_buffer]")
     // [ ]
     REQUIRE(buffer.empty());
     REQUIRE(buffer.size() == 0);
+}
+
+TEST_CASE("repeated", "[ring_buffer]")
+{
+    ring_buffer<whatever, 10> buffer;
+
+    // Push front, pop back
+    for (int i = 0; i < 2; ++i) {
+        REQUIRE(buffer.size() == 0);
+        REQUIRE(buffer.push_front(0));
+        print_buffer("buffer.push_front(0)", buffer);
+        REQUIRE(buffer.size() == 1);
+        REQUIRE(buffer.front() == 0);
+        REQUIRE(buffer.back() == 0);
+        buffer.pop_back();
+        print_buffer("buffer.pop_back()", buffer);
+        REQUIRE(buffer.size() == 0);
+    }
+
+    // Push back, pop front
+    for (int i = 0; i < 2; ++i) {
+        REQUIRE(buffer.size() == 0);
+        REQUIRE(buffer.push_back(0));
+        print_buffer("buffer.push_back(0)", buffer);
+        REQUIRE(buffer.size() == 1);
+        REQUIRE(buffer.front() == 0);
+        REQUIRE(buffer.back() == 0);
+        buffer.pop_front();
+        print_buffer("buffer.pop_front()", buffer);
+        REQUIRE(buffer.size() == 0);
+    }
+
+    // Push front, pop front
+    for (int i = 0; i < 2; ++i) {
+        REQUIRE(buffer.size() == 0);
+        REQUIRE(buffer.push_front(0));
+        print_buffer("buffer.push_front(0)", buffer);
+        REQUIRE(buffer.size() == 1);
+        REQUIRE(buffer.front() == 0);
+        REQUIRE(buffer.back() == 0);
+        buffer.pop_front();
+        print_buffer("buffer.pop_front()", buffer);
+        REQUIRE(buffer.size() == 0);
+    }
+
+    // Push back, pop back
+    for (int i = 0; i < 2; ++i) {
+        REQUIRE(buffer.size() == 0);
+        REQUIRE(buffer.push_back(0));
+        print_buffer("buffer.push_back(0)", buffer);
+        REQUIRE(buffer.size() == 1);
+        REQUIRE(buffer.front() == 0);
+        REQUIRE(buffer.back() == 0);
+        buffer.pop_back();
+        print_buffer("buffer.pop_back()", buffer);
+        REQUIRE(buffer.size() == 0);
+    }
 }
