@@ -25,7 +25,9 @@ text_line::text_line()
 {}
 
 text_line::text_line(int max_columns, int tab_width)
- : _max_columns(max_columns), _tab_width(tab_width)
+ : _max_columns(max_columns),
+   _tab_width(tab_width),
+   dirty(true)
 {
     assert(max_columns > 0);
     assert(tab_width > 0);
@@ -34,13 +36,15 @@ text_line::text_line(int max_columns, int tab_width)
 text_line::text_line(const text_line &line)
  : _data(line._data),
    _max_columns(line._max_columns),
-   _tab_width(line._tab_width)
+   _tab_width(line._tab_width),
+   dirty(true)
 {}
 
 text_line::text_line(text_line &&line)
  : _data(std::move(line._data)),
    _max_columns(line._max_columns),
-   _tab_width(line._tab_width)
+   _tab_width(line._tab_width),
+   dirty(true)
 {}
 
 text_line& text_line::operator=(const text_line &other)
@@ -49,6 +53,7 @@ text_line& text_line::operator=(const text_line &other)
         _data = other._data;
         _max_columns = other._max_columns;
         _tab_width = other._tab_width;
+        dirty = other.dirty;
     }
 
     return *this;
@@ -60,13 +65,16 @@ text_line& text_line::operator=(text_line &&other)
         _data = std::move(other._data);
         _max_columns = other._max_columns;
         _tab_width = other._tab_width;
+        dirty = other.dirty;
     }
 
     return *this;
 }
 
-int text_line::draw(text_display_device &display, int row) const
+int text_line::draw(text_display_device &display, int row)
 {
+    dirty = false;
+
     int col = 0;
 
     for (int i = 0; i < _data.size(); ++i) {
@@ -124,5 +132,7 @@ vector<char> text_line::str() const
 bool text_line::push_back(char ch)
 {
     assert(ch != '\n');
-    return _data.push_back(ch);
+    bool r = _data.push_back(ch);
+    dirty = true;
+    return r;
 }

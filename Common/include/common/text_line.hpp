@@ -39,7 +39,7 @@ public:
 
     // Draws the text line at the specified line of the display.
     // Returns the display line where the next logical line should be placed.
-    int draw(text_display_device &display, int row) const;
+    int draw(text_display_device &display, int row);
 
     // Count the number of columns and rows on the display needed to display the
     // text line.
@@ -54,4 +54,7 @@ public:
     // and this call returns false.
     // The character must not be a newline, '\n'.
     bool push_back(char ch);
+
+    // Indicates line needs to be redrawn.
+    bool dirty;
 };

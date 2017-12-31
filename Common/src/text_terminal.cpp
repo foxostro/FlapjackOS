@@ -14,15 +14,18 @@ text_terminal::text_terminal(text_display_device &disp)
    // ,_logical_cursor_col(0)
 {}
 
-void text_terminal::draw() const
+void text_terminal::draw()
 {
-    // TODO: draw only what has changed.
     // TODO: scroll the display if we can't fit everything.
 
     int row = 0;
     for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
-        const auto& line = _logical_lines[i];
-        row = line.draw(_display, row);
+        auto& line = _logical_lines[i];
+        if (line.dirty) {
+            row = line.draw(_display, row);
+        } else {
+            row += line.get_cached_num_display_rows() + 1;
+        }
     }
 
     // Clear the remainder of the display.
@@ -47,6 +50,11 @@ void text_terminal::_putchar(char ch)
 
         if (_logical_lines.full()) {
             _logical_lines.pop_front();
+
+            // Mark all lines as dirty because we have to scroll.
+            for (int i = 0; i < _logical_lines.size(); ++i) {
+                _logical_lines[i].dirty = true;
+            }
         }
 
         _logical_lines.push_back(line);
@@ -55,7 +63,20 @@ void text_terminal::_putchar(char ch)
         // TODO: insert at the logical-cursor-column position
         // TODO: handle backspace too
         auto &line = _logical_lines[_logical_cursor_row];
+
+        int rows = line.get_cached_num_display_rows();
+        int cols = line.get_cached_num_display_cols();
+        line.measure(rows, cols);
+
         line.push_back(ch);
+
+        if (rows != line.get_cached_num_display_rows()) {
+            // Mark all subsequent lines as dirty because we are now overflowing
+            // into an additional display line.
+            for (int i = _logical_cursor_row; i < _logical_lines.size(); ++i) {
+                _logical_lines[i].dirty = true;
+            }
+        }
     }
 }
 

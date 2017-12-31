@@ -27,7 +27,7 @@ public:
     text_terminal(text_display_device &display);
 
     // Draws the terminal on the display.
-    void draw() const;
+    void draw();
 
     // Puts a character on the display at the current cursor position.
     // Increments the cursor to the next position. This may wrap the cursor to
