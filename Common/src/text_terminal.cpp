@@ -64,6 +64,9 @@ void text_terminal::draw()
 
 void text_terminal::_putchar(char ch)
 {
+    bool previous_are_dirty_too = false;
+    bool subsequent_are_dirty_too = false;
+
     if (_logical_lines.empty()) {
         text_line line(CONSOLE_WIDTH, TAB_WIDTH);
         _logical_lines.push_back(line);
@@ -78,15 +81,18 @@ void text_terminal::_putchar(char ch)
             _logical_lines.pop_front();
             _logical_cursor_row--;
 
-            // Mark all lines as dirty because we have to scroll.
-            for (int i = 0; i < _logical_lines.size(); ++i) {
-                _logical_lines[i].dirty = true;
-            }
+            // Mark all previous lines as dirty because we are scrolling and
+            // they will also be affected.
+            previous_are_dirty_too = true;
         }
 
         _logical_lines.push_back(line);
         _logical_cursor_row++;
         _logical_cursor_col = 0;
+
+        // Since we added a line, all subsequent lines will have moved and
+        // should be redrawn.
+        subsequent_are_dirty_too = true;
     } else {
         // TODO: insert at the logical-cursor-column position
         // TODO: handle backspace too
@@ -102,9 +108,19 @@ void text_terminal::_putchar(char ch)
         if (rows != line.get_cached_num_display_rows()) {
             // Mark all subsequent lines as dirty because we are now overflowing
             // into an additional display line.
-            for (int i = _logical_cursor_row; i < _logical_lines.size(); ++i) {
-                _logical_lines[i].dirty = true;
-            }
+            subsequent_are_dirty_too = true;
+        }
+    }
+
+    if (previous_are_dirty_too) {
+        for (int i = 0; i <=_logical_cursor_row; ++i) {
+            _logical_lines[i].dirty = true;
+        }
+    }
+
+    if (subsequent_are_dirty_too) {
+        for (int i = _logical_cursor_row; i < _logical_lines.size(); ++i) {
+            _logical_lines[i].dirty = true;
         }
     }
 }
