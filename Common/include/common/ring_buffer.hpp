@@ -14,7 +14,7 @@
 template<typename TYPE, int CAPACITY>
 class ring_buffer {
     using value_type = TYPE;
-    using size_type = size_t;
+    using size_type = int;
 
     static_assert(CAPACITY > 0, "CAPACITY must be greater than zero.");
     using internal_type = typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type;
@@ -254,13 +254,13 @@ public:
     }
 
     // Returns the number of elements in the ring_buffer;
-    size_t size() const
+    size_type size() const
     {
         return _count;
     }
 
     // Returns the maximum capacity of the ring_buffer;
-    size_t capacity() const
+    size_type capacity() const
     {
         return CAPACITY;
     }

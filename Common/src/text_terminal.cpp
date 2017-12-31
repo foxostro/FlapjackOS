@@ -9,16 +9,20 @@
 text_terminal::~text_terminal() = default;
 
 text_terminal::text_terminal(text_display_device &disp)
- : _display(disp)
+ : _display(disp),
+   _logical_cursor_row(0)
+   // ,_logical_cursor_col(0)
 {}
 
 void text_terminal::draw() const
 {
-    vector<text_line> lines = get_lines();
+    // TODO: draw only what has changed.
+    // TODO: scroll the display if we can't fit everything.
 
     int row = 0;
-    for (int i = MAX(lines.size() - CONSOLE_HEIGHT, 0); i < lines.size(); ++i) {
-        lines[i].draw(_display, row++);
+    for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
+        const auto& line = _logical_lines[i];
+        row = line.draw(_display, row);
     }
 
     // Clear the remainder of the display.
@@ -30,62 +34,50 @@ void text_terminal::draw() const
     }
 }
 
-vector<text_line> text_terminal::get_lines() const
+void text_terminal::_putchar(char ch)
 {
-    vector<text_line> lines;
-
-    text_buffer::size_type i = 0;
-
-    while (i < _buffer.size()) {
+    if (_logical_lines.empty()) {
         text_line line(CONSOLE_WIDTH, TAB_WIDTH);
-
-        // Insert into the line until it's full.
-        bool done = false;
-        while (!done) {
-            if (i >= _buffer.size()) {
-                // We've reached the end of the buffer and there's nothing left.
-                done = true;
-            } else {
-                const char ch = _buffer[i];
-                
-                if (ch == '\n') {
-                    // Start a new line on '\n'. Consume the character too.
-                    ++i;
-                    done = true;
-                } else if (line.push_back(ch)) {
-                    // We were able to fit the character into the line.
-                    // Keep going.
-                    ++i;
-                } else {
-                    // We were not able to fit the character into the line.
-                    // We'll emit the line we have now and start a new one.
-                    done = true;
-                }
-            }
-        }
-
-        // Emit the line.
-        lines.push_back(std::move(line));
+        _logical_lines.push_back(line);
+        _logical_cursor_row = 0;
     }
 
-    return lines;
+    if (ch == '\n') {
+        text_line line(CONSOLE_WIDTH, TAB_WIDTH);
+
+        if (_logical_lines.full()) {
+            _logical_lines.pop_front();
+        }
+
+        _logical_lines.push_back(line);
+        _logical_cursor_row++;
+    } else {
+        // TODO: insert at the logical-cursor-column position
+        // TODO: handle backspace too
+        auto &line = _logical_lines[_logical_cursor_row];
+        line.push_back(ch);
+    }
 }
 
 void text_terminal::putchar(char ch)
 {
-    _buffer.insert(ch);
+    _putchar(ch);
     draw();
 }
 
 void text_terminal::puts(const char *s)
 {
-    _buffer.insert(s);
+    while (*s) {
+        _putchar(*s++);
+    }
     draw();
 }
 
 void text_terminal::puts(const vector<char> &s)
 {
-    _buffer.insert(s);
+    for (vector<char>::size_type i = 0; i < s.size(); ++i) {
+        _putchar(s[i]);
+    }
     draw();
 }
 

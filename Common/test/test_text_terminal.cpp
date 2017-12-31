@@ -4,44 +4,100 @@
 #include <common/text_display_device.hpp>
 
 class dummy_text_display_device : public text_display_device {
+    vgachar_t _buffer[CONSOLE_WIDTH*CONSOLE_HEIGHT];
+    size_t _row, _col;
+
 public:
-    void clear() override {}
-    void draw_char(size_t, size_t, vgachar_t) override {}
-    vgachar_t get_char(size_t, size_t) const override { return vgachar_t(); }
-    vgachar_t make_char(char) const override { return vgachar_t(); }
-    void set_cursor_position(size_t, size_t) override {}
-    size_t get_cursor_row() const override { return 0; }
-    size_t get_cursor_col() const override { return 0; }
+    dummy_text_display_device()
+    {
+        clear();
+    }
+
+    void clear() override
+    {
+        memset(_buffer, 0, sizeof(_buffer));
+    }
+
+    void draw_char(size_t row, size_t col, vgachar_t ch) override
+    {
+        if (row < CONSOLE_HEIGHT && col < CONSOLE_WIDTH) {
+            size_t i = col + CONSOLE_WIDTH * row;
+            assert(i < CONSOLE_WIDTH * CONSOLE_HEIGHT);
+            _buffer[i] = ch;
+        }
+    }
+
+    vgachar_t get_char(size_t row, size_t col) const override
+    {
+        size_t i = col + CONSOLE_WIDTH * row;
+        assert(i < CONSOLE_WIDTH * CONSOLE_HEIGHT);
+        return _buffer[i];
+    }
+
+    vgachar_t make_char(char ch) const override
+    {
+        vgachar_t r;
+        r.blink = 0;
+        r.fg = WHITE;
+        r.bg = BLACK;
+        r.ch = ch;
+        return r;
+    }
+
+    void set_cursor_position(size_t row, size_t col) override
+    {
+        _row = row;
+        _col = col;
+    }
+
+    size_t get_cursor_row() const override { return _row; }
+    size_t get_cursor_col() const override { return _col; }
+
+    std::string get_line(size_t row)
+    {
+        std::string str;
+        for (size_t col = 0; col < CONSOLE_WIDTH; ++col) {
+            str += get_char(row, col).ch;
+        }
+        return str;
+    }
 };
 
-TEST_CASE("Break text into lines", "[text_terminal]")
+TEST_CASE("text_terminal::puts", "[text_terminal]")
 {
     dummy_text_display_device dummy_display;
     text_terminal term(dummy_display);
 
-    term.get_buffer().insert(
+    term.puts(
         "The quick brown fox jumped over the lazy dog.\n"
         "foo\tbar\tbaz\n"
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         );
 
-    const vector<text_line> lines = term.get_lines();
+    // Make sure logical lines look correct.
+    {
+        const auto &lines = term.get_logical_lines();
 
-    REQUIRE(lines.size() == 4);
+        const char *ex0 = "The quick brown fox jumped over the lazy dog.";
+        const char *ex1 = "foo\tbar\tbaz";
+        const char *ex2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-    const char *ex0 = "The quick brown fox jumped over the lazy dog.";
-    INFO(ex0);
-    REQUIRE(lines[0].get() == vector<char>(strlen(ex0), ex0));
+        REQUIRE(lines.size() == 3);
+        REQUIRE(std::string(lines[0].str().data()) == ex0);
+        REQUIRE(std::string(lines[1].str().data()) == ex1);
+        REQUIRE(std::string(lines[2].str().data()) == ex2);
+    }
 
-    const char *ex1 = "foo\tbar\tbaz";
-    INFO(ex1);
-    REQUIRE(lines[1].get() == vector<char>(strlen(ex1), ex1));
-
-    const char *ex2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    INFO(ex2);
-    REQUIRE(lines[2].get() == vector<char>(strlen(ex2), ex2));
-
-    const char *ex3 = "aaaaa";
-    INFO(ex3);
-    REQUIRE(lines[3].get() == vector<char>(strlen(ex3), ex3));
+    // Make sure physical lines look correct.
+    {
+        const char *ex0 = "The quick brown fox jumped over the lazy dog.                                   ";
+        const char *ex1 = "foo     bar     baz                                                             ";
+        const char *ex2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        const char *ex3 = "aaaaa                                                                           ";
+        
+        REQUIRE(dummy_display.get_line(0) == ex0);
+        REQUIRE(dummy_display.get_line(1) == ex1);
+        REQUIRE(dummy_display.get_line(2) == ex2);
+        REQUIRE(dummy_display.get_line(3) == ex3);
+    }
 }

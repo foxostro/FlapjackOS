@@ -1,11 +1,13 @@
 #pragma once
 
+#include <common/ring_buffer.hpp>
 #include <common/vector.hpp>
+#include <common/terminal_metrics.hpp>
 
 class text_display_device;
 
 class text_line {
-    vector<char> _data;
+    ring_buffer<char, MAXLINE> _data;
     int _max_columns;
     int _tab_width;
 
@@ -36,21 +38,20 @@ public:
     text_line& operator=(text_line &&other);
 
     // Draws the text line at the specified line of the display.
-    void draw(text_display_device &display, int row) const;
+    // Returns the display line where the next logical line should be placed.
+    int draw(text_display_device &display, int row) const;
 
-    // Count the columns needed to represent the text line.
-    int columns() const;
-
-    // Gets the characters in the text line.
-    // The string is not nul-terminated.
-    const vector<char>& get() const;
+    // Count the number of columns and rows on the display needed to display the
+    // text line.
+    void measure(int &out_rows, int &out_columns) const;
 
     // Gets the characters in the text line.
     // The string is nul-terminated.
     vector<char> str() const;
 
-    // Inserts a character at the end of the the line.
+    // Inserts a character at the end of the line.
     // If the character won't fit on the line then the line remains unmodified
     // and this call returns false.
+    // The character must not be a newline, '\n'.
     bool push_back(char ch);
 };

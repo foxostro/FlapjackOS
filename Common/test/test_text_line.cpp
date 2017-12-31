@@ -2,24 +2,35 @@
 
 #include <common/text_line.hpp>
 #include <common/text_buffer.hpp>
+#include <common/terminal_metrics.hpp>
 #include <cstdio>
 
-TEST_CASE("Insert individual characters", "[text_line]")
+TEST_CASE("Insert characters into text_line", "[text_line]")
 {
-    constexpr int WIDTH = 80;
-    vector<char> expected(WIDTH);
-    for (int i = 0; i < WIDTH; ++i) {
-        expected[i] = 'a';
-    }    
+    constexpr vector<char>::size_type WIDTH = MAXLINE;
 
-    text_line line(WIDTH, 8);
+    vector<char> expected;
+    for (vector<char>::size_type i = 0; i < WIDTH; ++i) {
+        expected.push_back('a');
+    }
+    expected.push_back(0);
 
-    for (int i = 0; i < WIDTH; ++i) {
+    text_line line(CONSOLE_WIDTH, TAB_WIDTH);
+
+    for (vector<char>::size_type i = 0; i < WIDTH; ++i) {
         REQUIRE(line.push_back('a') == true);
     }
 
+    // We can't fit any more characters into the line.
     REQUIRE(line.push_back('a') == false);
+    
+    // Make sure the line contains the data we expect.
+    REQUIRE(std::string(line.str().data()) == std::string(expected.data()));
 
-    REQUIRE(line.columns() == WIDTH);
-    REQUIRE(line.get() == expected);
+    // The logical line spans several display lines.
+    int rows = 0, cols = 0;
+    line.measure(rows, cols);
+
+    REQUIRE(cols == CONSOLE_WIDTH);
+    REQUIRE(rows == 3);
 }

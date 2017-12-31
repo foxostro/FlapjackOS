@@ -1,6 +1,7 @@
 #include <common/text_line.hpp>
 #include <common/terminal_metrics.hpp>
 #include <common/text_display_device.hpp>
+#include <common/minmax.hpp>
 #include <cassert>
 #include <cctype>
 
@@ -64,64 +65,64 @@ text_line& text_line::operator=(text_line &&other)
     return *this;
 }
 
-void text_line::draw(text_display_device &display, int row) const
+int text_line::draw(text_display_device &display, int row) const
 {
     int col = 0;
 
     for (int i = 0; i < _data.size(); ++i) {
-        const char ch = _data[i];
-        const auto vgachar = display.make_char(ch);
+        char ch = _data[i];
         int step = step_for_char(_tab_width, col, ch);
+        vgachar_t vgachar = display.make_char((ch=='\t') ? ' ' : ch);
+        
         for (int j = 0; j < step; ++j) {
             display.draw_char(row, col + j, vgachar);
         }
+
         col += step;
+        if (col > CONSOLE_WIDTH) {
+            col = 0;
+            row++;
+        }
     }
 
     const auto space = display.make_char(' ');
     for (; col < _max_columns; ++col) {
         display.draw_char(row, col, space);
     }
+
+    return row + 1;
 }
 
-int text_line::columns() const
+void text_line::measure(int &out_rows, int &out_columns) const
 {
-    int col = 0;
+    int col = 0, max_col = 0, row = 0;
 
     for (int i = 0; i < _data.size(); ++i) {
         const char ch = _data[i];
         col += step_for_char(_tab_width, col, ch);
+        if (col > CONSOLE_WIDTH) {
+            max_col = MAX(max_col, MIN(col, CONSOLE_WIDTH));
+            col = 0;
+            row++;
+        }
     }
 
-    return col;
-}
-
-const vector<char>& text_line::get() const
-{
-    return _data;
+    out_columns = max_col;
+    out_rows = row;
 }
 
 vector<char> text_line::str() const
 {
-    vector<char> s(_data);
-    s.push_back(0);
-    return s;
+    vector<char> chars;
+    for (int i = 0; i < _data.size(); ++i) {
+        chars.push_back(_data[i]);
+    }
+    chars.push_back(0);
+    return chars;
 }
 
 bool text_line::push_back(char ch)
 {
-    int col = 0;
-
-    for (int i = 0; i < _data.size(); ++i) {
-        col += step_for_char(_tab_width, col, _data[i]);
-    }
-
-    col += step_for_char(_tab_width, col, ch);
-
-    if (col <= _max_columns) {
-        _data.push_back(ch);
-        return true;
-    } else {
-        return false;
-    }
+    assert(ch != '\n');
+    return _data.push_back(ch);
 }
