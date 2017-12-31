@@ -73,13 +73,13 @@ int text_line::draw(text_display_device &display, int row) const
         char ch = _data[i];
         int step = step_for_char(_tab_width, col, ch);
         vgachar_t vgachar = display.make_char((ch=='\t') ? ' ' : ch);
-        
-        for (int j = 0; j < step; ++j) {
-            display.draw_char(row, col + j, vgachar);
+
+        for (int j = col; j < MIN(col+step, _max_columns); ++j) {
+            display.draw_char(row, j, vgachar);
         }
 
         col += step;
-        if (col > CONSOLE_WIDTH) {
+        if (col >= _max_columns) {
             col = 0;
             row++;
         }
@@ -100,8 +100,8 @@ void text_line::measure(int &out_rows, int &out_columns) const
     for (int i = 0; i < _data.size(); ++i) {
         const char ch = _data[i];
         col += step_for_char(_tab_width, col, ch);
-        if (col > CONSOLE_WIDTH) {
-            max_col = MAX(max_col, MIN(col, CONSOLE_WIDTH));
+        if (col >= _max_columns) {
+            max_col = MAX(max_col, MIN(col, _max_columns));
             col = 0;
             row++;
         }
