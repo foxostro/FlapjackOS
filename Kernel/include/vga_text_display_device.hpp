@@ -4,8 +4,8 @@
 
 // VGA text display output driver.
 class vga_text_display_device : public text_display_device {
-    size_t cursor_row, cursor_col,
-           curr_fg, curr_bg;
+    point2_t cursor_pos;
+    size_t curr_fg, curr_bg;
 
     inline vgachar_t space_character() const
     {
@@ -21,10 +21,9 @@ public:
     vga_text_display_device();
 
     void clear() override;
-    void draw_char(size_t row, size_t col, vgachar_t ch) override;
-    vgachar_t get_char(size_t row, size_t col) const override;
+    void draw_char(point2_t pos, vgachar_t ch) override;
+    vgachar_t get_char(point2_t pos) const override;
     vgachar_t make_char(char ch) const override;
-    void set_cursor_position(size_t row, size_t col) override;
-    size_t get_cursor_row() const override;
-    size_t get_cursor_col() const override;
+    void set_cursor_position(point2_t pos) override;
+    point2_t get_cursor_position() const override;
 };

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <common/terminal_metrics.hpp>
+#include <common/vec2.hpp>
 
 enum vgacolor_t {
     BLACK    = 0x0,
@@ -41,12 +42,10 @@ public:
     virtual void clear() = 0;
 
     // Draws the specified character at the specified position in the console buffer.
-    // TODO: package the position into a point2_t for draw_char()
-    virtual void draw_char(size_t row, size_t col, vgachar_t ch) = 0;
+    virtual void draw_char(point2_t pos, vgachar_t ch) = 0;
 
     // Gets the character at the specified position of the console buffer.
-    // TODO: package the position into a point2_t for get_char()
-    virtual vgachar_t get_char(size_t row, size_t col) const = 0;
+    virtual vgachar_t get_char(point2_t pos) const = 0;
 
     // Returns a VGA character in the current color for the specified ASCII char.
     virtual vgachar_t make_char(char ch) const = 0;
@@ -54,9 +53,8 @@ public:
     // Moves the hardware cursor to the specified position.
     // If the cursor is placed outside the visible console then it will be hidden.
     // TODO: package the position into a point2_t for set_cursor_position()
-    virtual void set_cursor_position(size_t row, size_t col) = 0;
+    virtual void set_cursor_position(point2_t pos) = 0;
 
-    // TODO: package the position into a point2_t for get_cursor_{row,col}
-    virtual size_t get_cursor_row() const = 0;
-    virtual size_t get_cursor_col() const = 0;
+    // Gets the row and column of the display on which the cursor was placed.
+    virtual point2_t get_cursor_position() const = 0;
 };

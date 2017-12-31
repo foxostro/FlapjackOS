@@ -28,38 +28,34 @@ inline void vga_text_buffer_set(vgachar_t ch, size_t index)
 }
 
 vga_text_display_device::vga_text_display_device()
- : cursor_row(0),
-   cursor_col(0),
+ : cursor_pos{0,0},
    curr_fg(LGRAY),
    curr_bg(BLACK)
 {}
 
 void vga_text_display_device::clear()
 {
-    for (size_t row = 0; row < CONSOLE_HEIGHT; row++) {
-        for (size_t col = 0; col < CONSOLE_WIDTH; col++) {
-            draw_char(row, col, make_char(' '));
+    for (point2_t pos{0,0}; pos.y < CONSOLE_HEIGHT; pos.y++) {
+        for (pos.x = 0; pos.x < CONSOLE_WIDTH; pos.x++) {
+            draw_char(pos, make_char(' '));
         }
     }
 
-    cursor_row = 0;
-    cursor_col = 0;
-
-    set_cursor_position(0, 0);
+    set_cursor_position({0, 0});
 }
 
-void vga_text_display_device::draw_char(size_t row, size_t col, vgachar_t ch)
+void vga_text_display_device::draw_char(point2_t pos, vgachar_t ch)
 {
-    if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH && isprint(ch.ch)) {
-        const size_t index = row * CONSOLE_WIDTH + col;
+    if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH && isprint(ch.ch)) {
+        const size_t index = pos.y * CONSOLE_WIDTH + pos.x;
         vga_text_buffer_set(ch, index);
     }
 }
 
-vgachar_t vga_text_display_device::get_char(size_t row, size_t col) const
+vgachar_t vga_text_display_device::get_char(point2_t pos) const
 {
-    if (row <= CONSOLE_HEIGHT && col <= CONSOLE_WIDTH) {
-        const size_t index = row * CONSOLE_WIDTH + col;
+    if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH) {
+        const size_t index = pos.y * CONSOLE_WIDTH + pos.x;
         return vga_text_buffer_get(index);
     } else {
         return space_character();
@@ -76,9 +72,11 @@ vgachar_t vga_text_display_device::make_char(char ch) const
     return r;
 }
 
-void vga_text_display_device::set_cursor_position(size_t row, size_t col)
+void vga_text_display_device::set_cursor_position(point2_t pos)
 {
-    unsigned short offset = row*CONSOLE_WIDTH + col;
+    cursor_pos = pos;
+
+    unsigned short offset = pos.y*CONSOLE_WIDTH + pos.x;
 
     // Send the least significant byte of the offset.
     outb(CRTC_IDX_REG, CRTC_CURSOR_LSB_IDX);
@@ -89,12 +87,7 @@ void vga_text_display_device::set_cursor_position(size_t row, size_t col)
     outb(CRTC_DATA_REG, WORD_UPPER_BYTE(offset));
 }
 
-size_t vga_text_display_device::get_cursor_row() const
+point2_t vga_text_display_device::get_cursor_position() const
 {
-    return cursor_row;
-}
-
-size_t vga_text_display_device::get_cursor_col() const
-{
-    return cursor_col;
+    return cursor_pos;
 }

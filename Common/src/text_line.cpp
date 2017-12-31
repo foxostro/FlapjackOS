@@ -88,7 +88,7 @@ int text_line::draw(text_display_device &display, int row)
         vgachar_t vgachar = display.make_char((ch=='\t') ? ' ' : ch);
 
         for (int j = col; j < MIN(col+step, _max_columns); ++j) {
-            display.draw_char(row, j, vgachar);
+            display.draw_char(point2_t{j, row}, vgachar);
         }
 
         col += step;
@@ -100,7 +100,7 @@ int text_line::draw(text_display_device &display, int row)
 
     const auto space = display.make_char(' ');
     for (; col < _max_columns; ++col) {
-        display.draw_char(row, col, space);
+        display.draw_char(point2_t{col, row}, space);
     }
 
     return row + 1;

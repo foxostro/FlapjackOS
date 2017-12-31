@@ -49,14 +49,14 @@ void text_terminal::draw()
     auto space = _display.make_char(' ');
     for (; row < CONSOLE_HEIGHT; ++row) {
         for (int col = 0; col < CONSOLE_WIDTH; ++col) {
-            _display.draw_char(row, col, space);
+            _display.draw_char(point2_t{col, row}, space);
         }
     }
 
     // Set the hardware cursor position using physical display coords.
     point2_t phys_cursor = _logical_lines[_logical_cursor.y].convert(_logical_cursor.x);
     phys_cursor.y += cursor_offset;
-    _display.set_cursor_position(phys_cursor.y, phys_cursor.x);
+    _display.set_cursor_position(phys_cursor);
 }
 
 void text_terminal::_putchar(char ch)

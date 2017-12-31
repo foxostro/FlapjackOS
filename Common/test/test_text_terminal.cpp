@@ -5,7 +5,7 @@
 
 class dummy_text_display_device : public text_display_device {
     vgachar_t _buffer[CONSOLE_WIDTH*CONSOLE_HEIGHT];
-    size_t _row, _col;
+    point2_t _cursor;
 
 public:
     dummy_text_display_device()
@@ -18,18 +18,18 @@ public:
         memset(_buffer, 0, sizeof(_buffer));
     }
 
-    void draw_char(size_t row, size_t col, vgachar_t ch) override
+    void draw_char(point2_t pos, vgachar_t ch) override
     {
-        if (row < CONSOLE_HEIGHT && col < CONSOLE_WIDTH) {
-            size_t i = col + CONSOLE_WIDTH * row;
+        if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH) {
+            size_t i = pos.x + CONSOLE_WIDTH * pos.y;
             assert(i < CONSOLE_WIDTH * CONSOLE_HEIGHT);
             _buffer[i] = ch;
         }
     }
 
-    vgachar_t get_char(size_t row, size_t col) const override
+    vgachar_t get_char(point2_t pos) const override
     {
-        size_t i = col + CONSOLE_WIDTH * row;
+        size_t i = pos.x + CONSOLE_WIDTH * pos.y;
         assert(i < CONSOLE_WIDTH * CONSOLE_HEIGHT);
         return _buffer[i];
     }
@@ -44,20 +44,23 @@ public:
         return r;
     }
 
-    void set_cursor_position(size_t row, size_t col) override
+    void set_cursor_position(point2_t pos) override
     {
-        _row = row;
-        _col = col;
+        _cursor = pos;
     }
 
-    size_t get_cursor_row() const override { return _row; }
-    size_t get_cursor_col() const override { return _col; }
+    point2_t get_cursor_position() const override
+    {
+        return _cursor;
+    }
 
     std::string get_line(size_t row)
     {
+        assert(row < CONSOLE_HEIGHT);
         std::string str;
-        for (size_t col = 0; col < CONSOLE_WIDTH; ++col) {
-            str += get_char(row, col).ch;
+        point2_t pos{0, (int)row};
+        for (pos.x = 0; pos.x < CONSOLE_WIDTH; ++pos.x) {
+            str += get_char(pos).ch;
         }
         return str;
     }
@@ -259,6 +262,6 @@ TEST_CASE("scrolling when logical lines overflow physical lines", "[text_termina
 
     // And make sure the cursor position has been correctly translated from a
     // logical cursor position to a physical cursor position.
-    REQUIRE(dummy_display.get_cursor_col() == 8);
-    REQUIRE(dummy_display.get_cursor_row() == CONSOLE_HEIGHT-1);
+    REQUIRE(dummy_display.get_cursor_position().x == 8);
+    REQUIRE(dummy_display.get_cursor_position().y == CONSOLE_HEIGHT-1);
 }
