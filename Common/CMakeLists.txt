@@ -14,7 +14,6 @@ set(SOURCE_FILES
     "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
 
     "include/common/line_editor.hpp" "src/line_editor.cpp"
-    "include/common/text_buffer.hpp" "src/text_buffer.cpp"
     "include/common/text_line.hpp" "src/text_line.cpp"
     "include/common/text_terminal.hpp" "src/text_terminal.cpp"
     "include/common/linked_list.hpp"
@@ -45,7 +44,6 @@ else(CMAKE_CROSSCOMPILING)
 
     add_executable(CommonTest
                    "test/test_text_terminal.cpp"
-                   "test/test_text_buffer.cpp"
                    "test/test_text_line.cpp"
                    "test/test_vector.cpp"
                    "test/test_ring_buffer.cpp"
