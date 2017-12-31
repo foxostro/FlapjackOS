@@ -10,6 +10,7 @@ class text_line {
     ring_buffer<char, MAXLINE> _data;
     int _max_columns;
     int _tab_width;
+    int _cached_num_display_rows, _cached_num_display_cols;
 
 public:
     // The number of columns this character will take up.
@@ -57,4 +58,14 @@ public:
 
     // Indicates line needs to be redrawn.
     bool dirty;
+
+    int get_cached_num_display_rows() const
+    {
+        return _cached_num_display_rows;
+    }
+
+    int get_cached_num_display_cols() const
+    {
+        return _cached_num_display_cols;
+    }
 };

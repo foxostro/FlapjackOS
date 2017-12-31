@@ -27,6 +27,8 @@ text_line::text_line()
 text_line::text_line(int max_columns, int tab_width)
  : _max_columns(max_columns),
    _tab_width(tab_width),
+   _cached_num_display_rows(0),
+   _cached_num_display_cols(0),
    dirty(true)
 {
     assert(max_columns > 0);
@@ -37,6 +39,8 @@ text_line::text_line(const text_line &line)
  : _data(line._data),
    _max_columns(line._max_columns),
    _tab_width(line._tab_width),
+   _cached_num_display_rows(line._cached_num_display_rows),
+   _cached_num_display_cols(line._cached_num_display_cols),
    dirty(true)
 {}
 
@@ -44,6 +48,8 @@ text_line::text_line(text_line &&line)
  : _data(std::move(line._data)),
    _max_columns(line._max_columns),
    _tab_width(line._tab_width),
+   _cached_num_display_rows(line._cached_num_display_rows),
+   _cached_num_display_cols(line._cached_num_display_cols),
    dirty(true)
 {}
 
@@ -53,6 +59,8 @@ text_line& text_line::operator=(const text_line &other)
         _data = other._data;
         _max_columns = other._max_columns;
         _tab_width = other._tab_width;
+        _cached_num_display_rows = other._cached_num_display_rows;
+        _cached_num_display_cols = other._cached_num_display_cols;
         dirty = other.dirty;
     }
 
@@ -65,6 +73,8 @@ text_line& text_line::operator=(text_line &&other)
         _data = std::move(other._data);
         _max_columns = other._max_columns;
         _tab_width = other._tab_width;
+        _cached_num_display_rows = other._cached_num_display_rows;
+        _cached_num_display_cols = other._cached_num_display_cols;
         dirty = other.dirty;
     }
 
@@ -134,5 +144,6 @@ bool text_line::push_back(char ch)
     assert(ch != '\n');
     bool r = _data.push_back(ch);
     dirty = true;
+    measure(_cached_num_display_rows, _cached_num_display_cols);
     return r;
 }
