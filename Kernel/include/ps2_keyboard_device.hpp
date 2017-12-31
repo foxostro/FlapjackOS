@@ -17,6 +17,7 @@ class ps2_keyboard_device : public keyboard_device, public interrupt_handler {
     bool step_state_machine(keyboard_driver_state &state, keyboard_event &output); // TODO: Extract this state machine to its own class.
 
 public:
+    virtual ~ps2_keyboard_device() noexcept;
     ps2_keyboard_device();
 
     // Keyboard interrupt handler.

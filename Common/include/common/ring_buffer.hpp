@@ -26,7 +26,7 @@ public:
     ~ring_buffer()
     {
         while (!empty()) {
-            dequeue();
+            pop_front();
         }
     }
 
@@ -35,7 +35,7 @@ public:
     // Enqueues the specified value into the ring_buffer.
     // Returns true if this was successful, and false otherwise.
     // This may fail if the ring_buffer is full.
-    bool enqueue(value_type value)
+    bool push_back(value_type value)
     {
         // Drop it on the floor if the _buffer is full.
         if (full()) {
@@ -56,7 +56,7 @@ public:
 
     // Dequeues and returns the next item in the ring_buffer.
     // This cannot be called if the ring_buffer is empty.
-    value_type dequeue()
+    value_type pop_front()
     {
         assert(!empty());
 
@@ -87,7 +87,7 @@ public:
     }
 
     // Returns the number of elements in the ring_buffer;
-    size_t count() const
+    size_t size() const
     {
         return _count;
     }

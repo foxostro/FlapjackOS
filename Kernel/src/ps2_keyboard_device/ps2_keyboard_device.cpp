@@ -112,7 +112,7 @@ void ps2_keyboard_device::int_handler()
         // new thread can execute is through an interrupt which invokes the
         // scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
-        events.enqueue(event);
+        events.push_back(event);
     }
 }
 
@@ -131,7 +131,7 @@ keyboard_event ps2_keyboard_device::get_event()
         disable_interrupts();
         have_a_key = !events.empty();
         if (have_a_key) {
-            event = events.dequeue();
+            event = events.pop_front();
         }
         enable_interrupts();
         hlt();
@@ -146,3 +146,5 @@ ps2_keyboard_device::ps2_keyboard_device()
         key_state[i] = RELEASED;
     }
 }
+
+ps2_keyboard_device::~ps2_keyboard_device() noexcept = default;

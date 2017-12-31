@@ -156,7 +156,7 @@ struct keyboard_event {
 
 class keyboard_device {
 public:
-    virtual ~keyboard_device() = default;
+    virtual ~keyboard_device() noexcept = default;
 
     // Returns the name of the given key code.
     virtual const char* keycode_name(keycode_t key) = 0;

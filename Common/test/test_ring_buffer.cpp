@@ -6,7 +6,7 @@ TEST_CASE("Initialize an empty buffer", "[ring_buffer]")
 {
     constexpr size_t N = 10;
     ring_buffer<int, N> buffer;
-    REQUIRE(buffer.count() == 0);
+    REQUIRE(buffer.size() == 0);
     REQUIRE(buffer.empty());
     REQUIRE(buffer.capacity() == N);
 }
@@ -17,7 +17,7 @@ TEST_CASE("Enqueue until full, dequeue until empty", "[ring_buffer]")
 {
     class whatever {
         int value;
-        
+
     public:
 
         ~whatever()
@@ -53,18 +53,18 @@ TEST_CASE("Enqueue until full, dequeue until empty", "[ring_buffer]")
         // Enqueue until full. Dequeue until empty.
         // Do this a few times to ensure we cross the internal buffer's boundary.
         for (size_t i = 0; i < 3; ++i) {
-            REQUIRE(buffer.enqueue(0));
-            REQUIRE(buffer.enqueue(1));
-            REQUIRE(buffer.enqueue(2));
-            REQUIRE(!buffer.enqueue(3));
+            REQUIRE(buffer.push_back(0));
+            REQUIRE(buffer.push_back(1));
+            REQUIRE(buffer.push_back(2));
+            REQUIRE(!buffer.push_back(3));
             REQUIRE(buffer.full());
-            REQUIRE(buffer.count() == buffer.capacity());
+            REQUIRE(buffer.size() == buffer.capacity());
 
-            REQUIRE(buffer.dequeue() == 0);
-            REQUIRE(buffer.dequeue() == 1);
-            REQUIRE(buffer.dequeue() == 2);
+            REQUIRE(buffer.pop_front() == 0);
+            REQUIRE(buffer.pop_front() == 1);
+            REQUIRE(buffer.pop_front() == 2);
             REQUIRE(buffer.empty());
-            REQUIRE(buffer.count() == 0);
+            REQUIRE(buffer.size() == 0);
         }
     }
 
