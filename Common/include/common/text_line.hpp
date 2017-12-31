@@ -16,9 +16,13 @@ class text_line {
 
     // The maximum number of columns in the physical display. We use this to
     // control wrapping of text across multiple display lines.
+    // TODO: Maybe get this from the display and store a reference to the
+    //       display instead?
     int _max_columns;
 
     // The width of a tab character on the physical display.
+    // TODO: Maybe get this from the display and store a reference to the
+    //       display instead?
     int _tab_width;
 
     // When we change the contents of the text line, we measure the number of

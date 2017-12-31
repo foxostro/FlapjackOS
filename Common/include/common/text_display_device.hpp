@@ -41,9 +41,11 @@ public:
     virtual void clear() = 0;
 
     // Draws the specified character at the specified position in the console buffer.
+    // TODO: package the position into a point2_t for draw_char()
     virtual void draw_char(size_t row, size_t col, vgachar_t ch) = 0;
 
     // Gets the character at the specified position of the console buffer.
+    // TODO: package the position into a point2_t for get_char()
     virtual vgachar_t get_char(size_t row, size_t col) const = 0;
 
     // Returns a VGA character in the current color for the specified ASCII char.
@@ -51,8 +53,10 @@ public:
 
     // Moves the hardware cursor to the specified position.
     // If the cursor is placed outside the visible console then it will be hidden.
+    // TODO: package the position into a point2_t for set_cursor_position()
     virtual void set_cursor_position(size_t row, size_t col) = 0;
 
+    // TODO: package the position into a point2_t for get_cursor_{row,col}
     virtual size_t get_cursor_row() const = 0;
     virtual size_t get_cursor_col() const = 0;
 };
