@@ -21,7 +21,7 @@ void text_terminal::draw()
     int rows_needed = 0;
     for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
         const auto& line = _logical_lines[i];
-        rows_needed += line.get_cached_num_display_rows();
+        rows_needed += line.get_cached_display_size().height;
     }
 
     // Start drawing above the top of the display so that the bottom lines
@@ -42,7 +42,7 @@ void text_terminal::draw()
         if (i == _logical_cursor.y) {
             cursor_offset = row;
         }
-        row += line.get_cached_num_display_rows();
+        row += line.get_cached_display_size().height;
     }
 
     // Clear the remainder of the display.
@@ -54,11 +54,9 @@ void text_terminal::draw()
     }
 
     // Set the hardware cursor position using physical display coords.
-    int phys_row = _logical_cursor.y;
-    int phys_col = _logical_cursor.x;
-    _logical_lines[_logical_cursor.y].convert(phys_row, phys_col);
-    phys_row += cursor_offset;
-    _display.set_cursor_position(phys_row, phys_col);
+    point2_t phys_cursor = _logical_lines[_logical_cursor.y].convert(_logical_cursor.x);
+    phys_cursor.y += cursor_offset;
+    _display.set_cursor_position(phys_cursor.y, phys_cursor.x);
 }
 
 void text_terminal::_putchar(char ch)
@@ -97,14 +95,12 @@ void text_terminal::_putchar(char ch)
         // TODO: handle backspace too
         auto &line = _logical_lines[_logical_cursor.y];
 
-        int rows = line.get_cached_num_display_rows();
-        int cols = line.get_cached_num_display_cols();
-        line.measure(rows, cols);
+        size2_t old_phys_size = line.get_cached_display_size();
 
         line.push_back(ch);
         _logical_cursor.x = line.size();
 
-        if (rows != line.get_cached_num_display_rows()) {
+        if (old_phys_size != line.get_cached_display_size()) {
             // Mark all subsequent lines as dirty because we are now overflowing
             // into an additional display line.
             subsequent_are_dirty_too = true;

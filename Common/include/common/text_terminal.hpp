@@ -15,8 +15,10 @@ class text_terminal {
     // physical lines on the display if they're too long to fit.
     ring_buffer<text_line, CONSOLE_HEIGHT> _logical_lines;
 
-    // The position of the cursor in logical space.
-    ivec2 _logical_cursor;
+    // The logical position of the cursor. This is the logical line on which
+    // the cursor resides and the logical column within that line. This can be
+    // mapped to a physical cursor position through the convert() method.
+    point2_t _logical_cursor;
 
     void _putchar(char ch);
 

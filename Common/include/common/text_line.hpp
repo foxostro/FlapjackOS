@@ -3,14 +3,27 @@
 #include <common/ring_buffer.hpp>
 #include <common/vector.hpp>
 #include <common/terminal_metrics.hpp>
+#include <common/vec2.hpp>
 
 class text_display_device;
 
+// A logical line of text in the terminal. This is a sequence of characters.
+// In the terminal, these are separated by line breaks. Though, each logical
+// line may flow across several physical display lines if they're long enough.
 class text_line {
+    // The characters in the logical line. This is limited to MAXLINE chars.
     ring_buffer<char, MAXLINE> _data;
+
+    // The maximum number of columns in the physical display. We use this to
+    // control wrapping of text across multiple display lines.
     int _max_columns;
+
+    // The width of a tab character on the physical display.
     int _tab_width;
-    int _cached_num_display_rows, _cached_num_display_cols;
+
+    // When we change the contents of the text line, we measure the number of
+    // physical lines and rows needed to display the logical line.
+    size2_t _cached_display_size;
 
 public:
     using size_type = ring_buffer<char, MAXLINE>::size_type;
@@ -44,15 +57,14 @@ public:
     // Returns the display line where the next logical line should be placed.
     int draw(text_display_device &display, int row);
 
-    // Count the number of columns and rows on the display needed to display the
+    // Count the number of columns and rows on the display needed to draw the
     // text line.
-    void measure(int &out_rows, int &out_columns) const;
+    size2_t measure() const;
 
     // Convert the specified logical position to a physical position, relative
-    // to this row.
-    // For example, the logical row is always zero because it is relative-
-    // addressed to this row.
-    void convert(int &row, int &col) const;
+    // to this row. We do not specify the logical row, because we're always
+    // referring to this row.
+    point2_t convert(int logi_col) const;
 
     // Gets the characters in the text line.
     // The string is nul-terminated.
@@ -70,6 +82,7 @@ public:
     // Indicates line needs to be redrawn.
     bool dirty;
 
-    int get_cached_num_display_rows() const;
-    int get_cached_num_display_cols() const;
+    // When we change the contents of the text line, we measure the number of
+    // physical lines and rows needed to display the logical line.
+    size2_t get_cached_display_size() const;
 };

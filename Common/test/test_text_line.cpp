@@ -28,9 +28,8 @@ TEST_CASE("Insert characters into text_line", "[text_line]")
     REQUIRE(std::string(line.str().data()) == std::string(expected.data()));
 
     // The logical line spans several display lines.
-    int rows = 0, cols = 0;
-    line.measure(rows, cols);
+    size2_t phys_size = line.measure();
 
-    REQUIRE(cols == CONSOLE_WIDTH);
-    REQUIRE(rows == 4);
+    REQUIRE(phys_size.width == CONSOLE_WIDTH);
+    REQUIRE(phys_size.height == 4);
 }

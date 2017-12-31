@@ -27,8 +27,7 @@ text_line::text_line()
 text_line::text_line(int max_columns, int tab_width)
  : _max_columns(max_columns),
    _tab_width(tab_width),
-   _cached_num_display_rows(0),
-   _cached_num_display_cols(0),
+   _cached_display_size{0, 0},
    dirty(true)
 {
     assert(max_columns > 0);
@@ -39,8 +38,7 @@ text_line::text_line(const text_line &line)
  : _data(line._data),
    _max_columns(line._max_columns),
    _tab_width(line._tab_width),
-   _cached_num_display_rows(line._cached_num_display_rows),
-   _cached_num_display_cols(line._cached_num_display_cols),
+   _cached_display_size(line._cached_display_size),
    dirty(true)
 {}
 
@@ -48,8 +46,7 @@ text_line::text_line(text_line &&line)
  : _data(std::move(line._data)),
    _max_columns(line._max_columns),
    _tab_width(line._tab_width),
-   _cached_num_display_rows(line._cached_num_display_rows),
-   _cached_num_display_cols(line._cached_num_display_cols),
+   _cached_display_size(line._cached_display_size),
    dirty(true)
 {}
 
@@ -59,8 +56,7 @@ text_line& text_line::operator=(const text_line &other)
         _data = other._data;
         _max_columns = other._max_columns;
         _tab_width = other._tab_width;
-        _cached_num_display_rows = other._cached_num_display_rows;
-        _cached_num_display_cols = other._cached_num_display_cols;
+        _cached_display_size = other._cached_display_size;
         dirty = other.dirty;
     }
 
@@ -73,8 +69,7 @@ text_line& text_line::operator=(text_line &&other)
         _data = std::move(other._data);
         _max_columns = other._max_columns;
         _tab_width = other._tab_width;
-        _cached_num_display_rows = other._cached_num_display_rows;
-        _cached_num_display_cols = other._cached_num_display_cols;
+        _cached_display_size = other._cached_display_size;
         dirty = other.dirty;
     }
 
@@ -111,7 +106,7 @@ int text_line::draw(text_display_device &display, int row)
     return row + 1;
 }
 
-void text_line::measure(int &out_rows, int &out_columns) const
+size2_t text_line::measure() const
 {
     int col = 0, max_col = 0, row = 0;
 
@@ -125,14 +120,11 @@ void text_line::measure(int &out_rows, int &out_columns) const
         }
     }
 
-    out_columns = max_col;
-    out_rows = row + 1;
+    return size2_t{max_col, row + 1};
 }
 
-void text_line::convert(int &out_row, int &out_col) const
+point2_t text_line::convert(int logi_col) const
 {
-    int logi_col = out_col;
-
     int col = 0, row = 0;
 
     for (int i = 0; i < _data.size(); ++i) {
@@ -151,8 +143,7 @@ void text_line::convert(int &out_row, int &out_col) const
     }
 
 done:
-    out_row = row;
-    out_col = col;
+    return point2_t{col, row};
 }
 
 vector<char> text_line::str() const
@@ -170,7 +161,7 @@ bool text_line::push_back(char ch)
     assert(ch != '\n');
     bool r = _data.push_back(ch);
     dirty = true;
-    measure(_cached_num_display_rows, _cached_num_display_cols);
+    _cached_display_size = measure();
     return r;
 }
 
@@ -179,12 +170,7 @@ text_line::size_type text_line::size() const
     return _data.size();
 }
 
-int text_line::get_cached_num_display_rows() const
+size2_t text_line::get_cached_display_size() const
 {
-    return _cached_num_display_rows;
-}
-
-int text_line::get_cached_num_display_cols() const
-{
-    return _cached_num_display_cols;
+    return _cached_display_size;
 }
