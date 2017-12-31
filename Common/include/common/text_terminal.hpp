@@ -2,6 +2,7 @@
 
 #include <common/ring_buffer.hpp>
 #include <common/text_line.hpp>
+#include <common/vec2.hpp>
 
 class text_display_device;
 
@@ -15,7 +16,7 @@ class text_terminal {
     ring_buffer<text_line, CONSOLE_HEIGHT> _logical_lines;
 
     // The position of the cursor in logical space.
-    int _logical_cursor_row, _logical_cursor_col;
+    ivec2 _logical_cursor;
 
     void _putchar(char ch);
 

@@ -26,6 +26,7 @@ set(SOURCE_FILES
     "include/common/global_allocator.hpp"
     "include/common/memory_allocator.hpp"
     "include/common/minmax.hpp"
+    "include/common/vec2.hpp"
     )
 
 if(CMAKE_CROSSCOMPILING)

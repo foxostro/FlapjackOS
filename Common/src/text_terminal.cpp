@@ -10,8 +10,7 @@ text_terminal::~text_terminal() = default;
 
 text_terminal::text_terminal(text_display_device &disp)
  : _display(disp),
-   _logical_cursor_row(0),
-   _logical_cursor_col(0)
+   _logical_cursor{0, 0}
 {}
 
 void text_terminal::draw()
@@ -40,7 +39,7 @@ void text_terminal::draw()
         if (line.dirty) {
             line.draw(_display, row);
         }
-        if (i == _logical_cursor_row) {
+        if (i == _logical_cursor.y) {
             cursor_offset = row;
         }
         row += line.get_cached_num_display_rows();
@@ -55,9 +54,9 @@ void text_terminal::draw()
     }
 
     // Set the hardware cursor position using physical display coords.
-    int phys_row = _logical_cursor_row;
-    int phys_col = _logical_cursor_col;
-    _logical_lines[_logical_cursor_row].convert(phys_row, phys_col);
+    int phys_row = _logical_cursor.y;
+    int phys_col = _logical_cursor.x;
+    _logical_lines[_logical_cursor.y].convert(phys_row, phys_col);
     phys_row += cursor_offset;
     _display.set_cursor_position(phys_row, phys_col);
 }
@@ -70,8 +69,8 @@ void text_terminal::_putchar(char ch)
     if (_logical_lines.empty()) {
         text_line line(CONSOLE_WIDTH, TAB_WIDTH);
         _logical_lines.push_back(line);
-        _logical_cursor_row = 0;
-        _logical_cursor_col = 0;
+        _logical_cursor.y = 0;
+        _logical_cursor.x = 0;
     }
 
     if (ch == '\n') {
@@ -79,7 +78,7 @@ void text_terminal::_putchar(char ch)
 
         if (_logical_lines.full()) {
             _logical_lines.pop_front();
-            _logical_cursor_row--;
+            _logical_cursor.y--;
 
             // Mark all previous lines as dirty because we are scrolling and
             // they will also be affected.
@@ -87,8 +86,8 @@ void text_terminal::_putchar(char ch)
         }
 
         _logical_lines.push_back(line);
-        _logical_cursor_row++;
-        _logical_cursor_col = 0;
+        _logical_cursor.y++;
+        _logical_cursor.x = 0;
 
         // Since we added a line, all subsequent lines will have moved and
         // should be redrawn.
@@ -96,14 +95,14 @@ void text_terminal::_putchar(char ch)
     } else {
         // TODO: insert at the logical-cursor-column position
         // TODO: handle backspace too
-        auto &line = _logical_lines[_logical_cursor_row];
+        auto &line = _logical_lines[_logical_cursor.y];
 
         int rows = line.get_cached_num_display_rows();
         int cols = line.get_cached_num_display_cols();
         line.measure(rows, cols);
 
         line.push_back(ch);
-        _logical_cursor_col = line.size();
+        _logical_cursor.x = line.size();
 
         if (rows != line.get_cached_num_display_rows()) {
             // Mark all subsequent lines as dirty because we are now overflowing
@@ -113,13 +112,13 @@ void text_terminal::_putchar(char ch)
     }
 
     if (previous_are_dirty_too) {
-        for (int i = 0; i <=_logical_cursor_row; ++i) {
+        for (int i = 0; i <=_logical_cursor.y; ++i) {
             _logical_lines[i].dirty = true;
         }
     }
 
     if (subsequent_are_dirty_too) {
-        for (int i = _logical_cursor_row; i < _logical_lines.size(); ++i) {
+        for (int i = _logical_cursor.y; i < _logical_lines.size(); ++i) {
             _logical_lines[i].dirty = true;
         }
     }
