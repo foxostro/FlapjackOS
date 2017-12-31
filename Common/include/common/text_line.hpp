@@ -11,19 +11,11 @@ class text_display_device;
 // In the terminal, these are separated by line breaks. Though, each logical
 // line may flow across several physical display lines if they're long enough.
 class text_line {
+    // The logical line is bound to a physical display.
+    text_display_device *_display;
+
     // The characters in the logical line. This is limited to MAXLINE chars.
     ring_buffer<char, MAXLINE> _data;
-
-    // The maximum number of columns in the physical display. We use this to
-    // control wrapping of text across multiple display lines.
-    // TODO: Maybe get this from the display and store a reference to the
-    //       display instead?
-    int _max_columns;
-
-    // The width of a tab character on the physical display.
-    // TODO: Maybe get this from the display and store a reference to the
-    //       display instead?
-    int _tab_width;
 
     // When we change the contents of the text line, we measure the number of
     // physical lines and rows needed to display the logical line.
@@ -39,11 +31,7 @@ public:
     ~text_line();
 
     // Constructor.
-    text_line();
-
-    // Constructor. The line will be enforced to be no more than the
-    // specified number of columns wide.
-    text_line(int max_columns, int tab_width);
+    text_line(text_display_device &display);
 
     // Copy constructor.
     text_line(const text_line &line);
@@ -59,7 +47,7 @@ public:
 
     // Draws the text line at the specified line of the display.
     // Returns the display line where the next logical line should be placed.
-    int draw(text_display_device &display, int row);
+    int draw(int row);
 
     // Count the number of columns and rows on the display needed to draw the
     // text line.
@@ -89,4 +77,16 @@ public:
     // When we change the contents of the text line, we measure the number of
     // physical lines and rows needed to display the logical line.
     size2_t get_cached_display_size() const;
+
+    text_display_device& get_display()
+    {
+        assert(_display);
+        return *_display;
+    }
+
+    const text_display_device& get_display() const
+    {
+        assert(_display);
+        return *_display;
+    }
 };

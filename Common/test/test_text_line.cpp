@@ -1,12 +1,12 @@
 #include "catch.hpp"
 
 #include <common/text_line.hpp>
-#include <common/text_buffer.hpp>
-#include <common/terminal_metrics.hpp>
-#include <cstdio>
+#include "dummy_text_display_device.hpp"
 
 TEST_CASE("Insert characters into text_line", "[text_line]")
 {
+    dummy_text_display_device display;
+
     constexpr vector<char>::size_type WIDTH = MAXLINE;
 
     vector<char> expected;
@@ -15,7 +15,7 @@ TEST_CASE("Insert characters into text_line", "[text_line]")
     }
     expected.push_back(0);
 
-    text_line line(CONSOLE_WIDTH, TAB_WIDTH);
+    text_line line(display);
 
     for (vector<char>::size_type i = 0; i < WIDTH; ++i) {
         REQUIRE(line.push_back('a') == true);

@@ -57,4 +57,10 @@ public:
 
     // Gets the row and column of the display on which the cursor was placed.
     virtual point2_t get_cursor_position() const = 0;
+
+    // Gets the number of columns needed to display a TAB on this display.
+    virtual size_t get_tab_width() const = 0;
+
+    // Gets the number of rows and columns on this display.
+    virtual size2_t dimensions() const = 0;
 };

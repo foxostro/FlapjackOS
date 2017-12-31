@@ -91,3 +91,13 @@ point2_t vga_text_display_device::get_cursor_position() const
 {
     return cursor_pos;
 }
+
+size_t vga_text_display_device::get_tab_width() const
+{
+    return TAB_WIDTH;
+}
+
+size2_t vga_text_display_device::dimensions() const
+{
+    return {CONSOLE_WIDTH, CONSOLE_HEIGHT};
+}

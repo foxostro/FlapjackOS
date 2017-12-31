@@ -37,7 +37,7 @@ void text_terminal::draw()
     for (int i = 0, n = _logical_lines.size(); i < n; ++i) {
         auto& line = _logical_lines[i];
         if (line.dirty) {
-            line.draw(_display, row);
+            line.draw(row);
         }
         if (i == _logical_cursor.y) {
             cursor_offset = row;
@@ -65,14 +65,14 @@ void text_terminal::_putchar(char ch)
     bool subsequent_are_dirty_too = false;
 
     if (_logical_lines.empty()) {
-        text_line line(CONSOLE_WIDTH, TAB_WIDTH);
+        text_line line(_display);
         _logical_lines.push_back(line);
         _logical_cursor.y = 0;
         _logical_cursor.x = 0;
     }
 
     if (ch == '\n') {
-        text_line line(CONSOLE_WIDTH, TAB_WIDTH);
+        text_line line(_display);
 
         if (_logical_lines.full()) {
             _logical_lines.pop_front();

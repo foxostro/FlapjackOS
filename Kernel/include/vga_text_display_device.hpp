@@ -26,4 +26,6 @@ public:
     vgachar_t make_char(char ch) const override;
     void set_cursor_position(point2_t pos) override;
     point2_t get_cursor_position() const override;
+    size_t get_tab_width() const override;
+    size2_t dimensions() const override;
 };
