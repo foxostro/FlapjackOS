@@ -91,13 +91,16 @@ void text_terminal::_putchar(char ch)
         // should be redrawn.
         subsequent_are_dirty_too = true;
     } else {
-        // TODO: insert at the logical-cursor-column position
-        // TODO: handle backspace too
+        // TODO: Insert at the logical-cursor-column position.
         auto &line = _logical_lines[_logical_cursor.y];
 
         size2_t old_phys_size = line.get_cached_display_size();
 
-        line.push_back(ch);
+        if (ch == '\b') {
+            line.pop_back();
+        } else {
+            line.push_back(ch);
+        }        
         _logical_cursor.x = line.size();
 
         if (old_phys_size != line.get_cached_display_size()) {

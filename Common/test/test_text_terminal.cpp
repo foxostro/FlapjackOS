@@ -202,3 +202,33 @@ TEST_CASE("scrolling when logical lines overflow physical lines", "[text_termina
     REQUIRE(dummy_display.get_cursor_position().x == 8);
     REQUIRE(dummy_display.get_cursor_position().y == CONSOLE_HEIGHT-1);
 }
+
+TEST_CASE("putchar backspace", "[text_terminal]")
+{
+    dummy_text_display_device dummy_display;
+    text_terminal term(dummy_display);
+
+    term.puts("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaba");
+
+    REQUIRE(dummy_display.get_line( 0) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab");
+    REQUIRE(dummy_display.get_line( 1) == "a                                                                               ");
+    REQUIRE(dummy_display.get_line( 2) == "                                                                                ");
+    REQUIRE(dummy_display.get_cursor_position().x == 1);
+    REQUIRE(dummy_display.get_cursor_position().y == 1);
+
+    term.putchar('\b');
+
+    REQUIRE(dummy_display.get_line( 0) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab");
+    REQUIRE(dummy_display.get_line( 1) == "                                                                                ");
+    REQUIRE(dummy_display.get_line( 2) == "                                                                                ");
+    REQUIRE(dummy_display.get_cursor_position().x == 0);
+    REQUIRE(dummy_display.get_cursor_position().y == 1);
+
+    term.putchar('\b');
+
+    REQUIRE(dummy_display.get_line( 0) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ");
+    REQUIRE(dummy_display.get_line( 1) == "                                                                                ");
+    REQUIRE(dummy_display.get_line( 2) == "                                                                                ");
+    REQUIRE(dummy_display.get_cursor_position().x == CONSOLE_WIDTH-1);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+}

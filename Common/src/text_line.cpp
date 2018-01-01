@@ -105,8 +105,8 @@ size2_t text_line::measure() const
     for (int i = 0; i < _data.size(); ++i) {
         const char ch = _data[i];
         col += step_for_char(tab_width, col, ch);
+        max_col = MAX(max_col, MIN(col, max_columns));
         if (col >= max_columns) {
-            max_col = MAX(max_col, MIN(col, max_columns));
             col = 0;
             row++;
         }
@@ -153,10 +153,20 @@ vector<char> text_line::str() const
 bool text_line::push_back(char ch)
 {
     assert(ch != '\n');
+    assert(ch != '\b');
     bool r = _data.push_back(ch);
     dirty = true;
     _cached_display_size = measure();
     return r;
+}
+
+void text_line::pop_back()
+{
+    if (!_data.empty()) {
+        _data.pop_back();
+        dirty = true;
+        _cached_display_size = measure();
+    }
 }
 
 text_line::size_type text_line::size() const

@@ -240,6 +240,7 @@ public:
 
     // Removes the index'th element of the collection.
     // Returns the value of the removed element.
+    // TODO: Change return value to "void" to avoid copying the old value.
     value_type remove(size_type index)
     {
         assert(index >= 0 && index < _count);
@@ -261,6 +262,7 @@ public:
 
     // Removes the last element of the collection.
     // Returns the value of the removed element.
+    // TODO: Change return value to "void" to avoid copying the old value.
     value_type pop_back()
     {
         return remove(size()-1);
@@ -268,6 +270,7 @@ public:
 
     // Removes the first element of the collection.
     // Returns the value of the removed element.
+    // TODO: Change return value to "void" to avoid copying the old value.
     value_type pop_front()
     {
         return remove(0);

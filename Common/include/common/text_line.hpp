@@ -68,10 +68,15 @@ public:
     // The character must not be a newline, '\n'.
     bool push_back(char ch);
 
+    // Pops an character off the back of the line.
+    // If the line is empty then this does nothing.
+    void pop_back();
+
     // Gets the number of characters in the text line.
     size_type size() const;
 
     // Indicates line needs to be redrawn.
+    // TODO: put some methods around `dirty'
     bool dirty;
 
     // When we change the contents of the text line, we measure the number of
