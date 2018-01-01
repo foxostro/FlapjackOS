@@ -232,3 +232,22 @@ TEST_CASE("putchar backspace", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().x == CONSOLE_WIDTH-1);
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
+
+TEST_CASE("backspace over a tab character", "[text_terminal]")
+{
+    dummy_text_display_device dummy_display;
+    text_terminal term(dummy_display);
+
+    term.puts("a\tb");
+
+    REQUIRE(dummy_display.get_line( 0) == "a       b                                                                       ");
+    REQUIRE(dummy_display.get_cursor_position().x == 9);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.putchar('\b');
+    term.putchar('\b');
+
+    REQUIRE(dummy_display.get_line( 0) == "a                                                                               ");
+    REQUIRE(dummy_display.get_cursor_position().x == 1);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+}
