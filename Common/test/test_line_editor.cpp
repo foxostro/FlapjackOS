@@ -37,6 +37,8 @@ TEST_CASE("line_editor basic input", "[line_editor]")
     line.push_back('\0');
     expected.push_back('\0');
     REQUIRE(std::string(line.data()) == std::string(expected.data()));
+
+    REQUIRE(display.get_line( 0) == "> hello                                                                         ");
 }
 
 TEST_CASE("line_editor backspace at the end", "[line_editor]")
@@ -84,9 +86,7 @@ TEST_CASE("line_editor backspace at the end", "[line_editor]")
 
     vector<char> line = ed.getline();
 
-    line.push_back('\0');
-    expected.push_back('\0');
-    REQUIRE(std::string(line.data()) == std::string(expected.data()));
+    REQUIRE(display.get_line( 0) == "> f                                                                             ");
 }
 
 TEST_CASE("line_editor left and right arrows", "[line_editor]")
@@ -133,4 +133,6 @@ TEST_CASE("line_editor left and right arrows", "[line_editor]")
     line.push_back('\0');
     expected.push_back('\0');
     REQUIRE(std::string(line.data()) == std::string(expected.data()));
+
+    REQUIRE(display.get_line( 0) == "> hello                                                                         ");
 }

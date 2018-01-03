@@ -97,11 +97,16 @@ void text_terminal::_putchar(char ch)
         size2_t old_phys_size = line.get_cached_display_size();
 
         if (ch == '\b') {
-            line.pop_back();
+            if (_logical_cursor.x > 0) {
+                line.remove(_logical_cursor.x-1);
+                _logical_cursor.x--;
+            }
         } else {
-            line.push_back(ch);
-        }        
-        _logical_cursor.x = line.size();
+            line.insert(_logical_cursor.x, ch);
+            if (_logical_cursor.x < line.size()) {
+                _logical_cursor.x++;
+            }
+        }
 
         if (old_phys_size != line.get_cached_display_size()) {
             // Mark all subsequent lines as dirty because we are now overflowing

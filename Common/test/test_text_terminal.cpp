@@ -252,18 +252,70 @@ TEST_CASE("backspace over a tab character", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
 
+TEST_CASE("move cursor left", "[text_terminal]")
+{
+    dummy_text_display_device dummy_display;
+    text_terminal term(dummy_display);
+
+    term.puts("b");
+    term.move_cursor_left();
+    term.putchar('a');
+
+    REQUIRE(dummy_display.get_line( 0) == "ab                                                                              ");
+    REQUIRE(dummy_display.get_cursor_position().x == 1);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+}
+
 TEST_CASE("move cursor left and right", "[text_terminal]")
 {
     dummy_text_display_device dummy_display;
     text_terminal term(dummy_display);
 
-    term.puts("hal");
+    term.puts("b");
     term.move_cursor_left();
-    term.putchar('\b');
-    term.putchar('e');
+    term.putchar('a');
     term.move_cursor_right();
-    term.puts("lo");
+    term.putchar('c');
 
+    REQUIRE(dummy_display.get_line( 0) == "abc                                                                             ");
+    REQUIRE(dummy_display.get_cursor_position().x == 3);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+}
+
+TEST_CASE("edit the middle of a line", "[text_terminal]")
+{
+    dummy_text_display_device dummy_display;
+    text_terminal term(dummy_display);
+
+    term.puts("hal");
+    REQUIRE(dummy_display.get_line( 0) == "hal                                                                             ");
+    REQUIRE(dummy_display.get_cursor_position().x == 3);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.move_cursor_left();
+    REQUIRE(dummy_display.get_cursor_position().x == 2);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.putchar('\b');
+    REQUIRE(dummy_display.get_line( 0) == "hl                                                                              ");
+    REQUIRE(dummy_display.get_cursor_position().x == 1);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.putchar('e');
+    REQUIRE(dummy_display.get_line( 0) == "hel                                                                             ");
+    REQUIRE(dummy_display.get_cursor_position().x == 2);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.move_cursor_right();
+    REQUIRE(dummy_display.get_cursor_position().x == 3);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.putchar('l');
+    REQUIRE(dummy_display.get_line( 0) == "hell                                                                            ");
+    REQUIRE(dummy_display.get_cursor_position().x == 4);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+
+    term.putchar('o');
     REQUIRE(dummy_display.get_line( 0) == "hello                                                                           ");
     REQUIRE(dummy_display.get_cursor_position().x == 5);
     REQUIRE(dummy_display.get_cursor_position().y == 0);
