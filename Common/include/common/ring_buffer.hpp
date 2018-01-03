@@ -302,6 +302,10 @@ public:
             new (curr) value_type(std::move(*next));
         }
 
+        if (size() != 1) {
+            _back_pos--;
+        }
+
         _count--;
     }
 

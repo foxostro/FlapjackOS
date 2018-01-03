@@ -91,19 +91,17 @@ void text_terminal::_putchar(char ch)
         // should be redrawn.
         subsequent_are_dirty_too = true;
     } else {
-        // TODO: Insert at the logical-cursor-column position.
         auto &line = _logical_lines[_logical_cursor.y];
 
         size2_t old_phys_size = line.get_cached_display_size();
 
         if (ch == '\b') {
             if (_logical_cursor.x > 0) {
-                line.remove(_logical_cursor.x-1);
-                _logical_cursor.x--;
+                line.remove(--_logical_cursor.x);
             }
         } else {
-            line.insert(_logical_cursor.x, ch);
-            if (_logical_cursor.x < line.size()) {
+            // If the line is full then no insertion is performed.
+            if (line.insert(_logical_cursor.x, ch)) {
                 _logical_cursor.x++;
             }
         }

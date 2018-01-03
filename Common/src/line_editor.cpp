@@ -52,7 +52,7 @@ vector<char> line_editor::getline()
                 // fall through
 
             case KEYCODE_RIGHT_ARROW:
-                if (linear_cursor < (user_input.size()-1)) {
+                if (linear_cursor < user_input.size()) {
                     linear_cursor++;
                     term.move_cursor_right();
                 }
@@ -76,9 +76,8 @@ vector<char> line_editor::getline()
                 switch (ch) {
                     case '\b':
                         if (user_input.size() > 0) {
-                            user_input.remove(linear_cursor-1);
+                            user_input.remove(--linear_cursor);
                             term.putchar('\b');
-                            linear_cursor--;
                         }
                         break;
 
@@ -92,13 +91,8 @@ vector<char> line_editor::getline()
                         break;
 
                     default:
-                        if (isprint(ch)) {
-                            if (linear_cursor < user_input.size()) {
-                                user_input[linear_cursor] = ch;
-                            } else {
-                                user_input.push_back(ch);
-                            }
-                            linear_cursor++;
+                        if (isprint(ch) && user_input.size() < MAXLINE) {
+                            user_input.insert(linear_cursor++, ch);
                             term.putchar(ch);
                         }
                         break;
