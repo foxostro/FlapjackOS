@@ -9,8 +9,14 @@
 #include <new> // for placement-new
 
 // Statically allocated ring buffer with a fixed capacity.
+//
 // This is a double-ended queue which can be expanded and contracted at both
-// the front or the back ends.
+// the front or the back ends. It also provides API for random access and for
+// insert/delete at arbitrary positions in the queue.
+//
+// ring_buffer is not a vector-like or array-like container because elements are
+// not guaranteed to be contiguous in memory. However, you can often use it like
+// a vector that happens to be statically allocated.
 template<typename TYPE, int CAPACITY>
 class ring_buffer {
 public:
