@@ -57,4 +57,12 @@ public:
     {
         return _logical_lines;
     }
+
+    // Moves the cursor to the left.
+    // If the cursor is at the beginning of the line then this does nothing.
+    void move_cursor_left();
+
+    // Moves the cursor to the right.
+    // If the cursor is at the end of the line then this does nothing.
+    void move_cursor_right();
 };

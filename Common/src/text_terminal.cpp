@@ -158,3 +158,20 @@ int text_terminal::printf(const char *fmt, ...)
 
     return r;
 }
+
+void text_terminal::move_cursor_left()
+{
+    if (_logical_cursor.x > 0) {
+        _logical_cursor.x--;
+        draw();
+    }
+}
+
+void text_terminal::move_cursor_right()
+{
+    const auto &line = _logical_lines[_logical_cursor.y];
+    if (_logical_cursor.x < line.size()) {
+        _logical_cursor.x++;
+        draw();
+    }
+}

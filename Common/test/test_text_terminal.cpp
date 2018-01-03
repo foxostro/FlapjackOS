@@ -251,3 +251,20 @@ TEST_CASE("backspace over a tab character", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().x == 1);
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
+
+TEST_CASE("move cursor left and right", "[text_terminal]")
+{
+    dummy_text_display_device dummy_display;
+    text_terminal term(dummy_display);
+
+    term.puts("hal");
+    term.move_cursor_left();
+    term.putchar('\b');
+    term.putchar('e');
+    term.move_cursor_right();
+    term.puts("lo");
+
+    REQUIRE(dummy_display.get_line( 0) == "hello                                                                           ");
+    REQUIRE(dummy_display.get_cursor_position().x == 5);
+    REQUIRE(dummy_display.get_cursor_position().y == 0);
+}
