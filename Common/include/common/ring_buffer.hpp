@@ -93,7 +93,7 @@ private:
 
     circular_index index_at(size_type index) const
     {
-        assert(index >= 0 && index < _count);
+        assert(index >= 0 && index <= _count);
         circular_index cursor(_front_pos);
         for (size_type i = 0; i < index; ++i) {
             ++cursor;
@@ -192,7 +192,7 @@ public:
         }
 
         _count++;
-        new ((value_type *)_buffer + _back_pos) value_type(value);
+        new ((value_type *)_buffer + _back_pos) value_type(std::move(value));
 
         return true;
     }
@@ -212,7 +212,7 @@ public:
         }
 
         _count++;
-        new ((value_type *)_buffer + _front_pos) value_type(value);
+        new ((value_type *)_buffer + _front_pos) value_type(std::move(value));
 
         return true;
     }
@@ -240,6 +240,68 @@ public:
         if (size() != 1) {
             _front_pos++;
         }
+        _count--;
+    }
+
+    // Inserts an item at the specified index of the ring_buffer.
+    // Moves item toward the back to make room.
+    // Returns true if this was successful, and false otherwise.
+    // This may fail if there is not enough space.
+    bool insert(size_type index, value_type value)
+    {
+        assert(index >= 0 && index <= size());
+
+        if (full()) {
+            return false;
+        }
+
+        if (index == 0) {
+            return push_front(std::move(value));
+        }
+
+        if (index == size()) {
+            return push_back(std::move(value));
+        }
+
+        _back_pos++;
+
+        for (size_type i = _count; i > index; --i) {
+            value_type *prev = (value_type *)_buffer + index_at(i-1);
+            value_type *curr = (value_type *)_buffer + index_at(i+0);
+            new (curr) value_type(std::move(*prev));
+            prev->~value_type();
+        }
+
+        new ((value_type *)_buffer + index_at(index)) value_type(std::move(value));
+        _count++;
+
+        return true;
+    }
+
+    // Removes the index'th element of the ring_buffer.
+    // Moves item from the back toward the front to fill the hole.
+    void remove(size_type index)
+    {
+        assert(!empty());
+        assert(index >= 0 && index < size());
+
+        if (index == 0) {
+            pop_front();
+            return;
+        }
+
+        if (index == size()-1) {
+            pop_back();
+            return;
+        }
+
+        for (size_type i = index; i < _count-1; ++i) {
+            value_type *curr = (value_type *)_buffer + index_at(i+0);
+            value_type *next = (value_type *)_buffer + index_at(i+1);
+            curr->~value_type();
+            new (curr) value_type(std::move(*next));
+        }
+
         _count--;
     }
 

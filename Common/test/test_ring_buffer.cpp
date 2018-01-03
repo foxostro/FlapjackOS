@@ -219,3 +219,51 @@ TEST_CASE("repeated", "[ring_buffer]")
         REQUIRE(buffer.size() == 0);
     }
 }
+
+TEST_CASE("insert", "[ring_buffer]")
+{
+    ring_buffer<whatever, 3> buffer;
+
+    REQUIRE(buffer.insert(0, whatever(0)) == true);
+    REQUIRE(buffer.size() == 1);
+    REQUIRE(buffer[0] == 0);
+
+    REQUIRE(buffer.insert(1, whatever(2)) == true);
+    REQUIRE(buffer.size() == 2);
+    REQUIRE(buffer[0] == 0);
+    REQUIRE(buffer[1] == 2);
+
+    REQUIRE(buffer.insert(1, whatever(1)) == true);
+    REQUIRE(buffer.size() == 3);
+    REQUIRE(buffer[0] == 0);
+    REQUIRE(buffer[1] == 1);
+    REQUIRE(buffer[2] == 2);
+
+    REQUIRE(buffer.full());
+    REQUIRE(buffer.insert(0, whatever(3)) == false);
+}
+
+TEST_CASE("remove", "[ring_buffer]")
+{
+    ring_buffer<whatever, 3> buffer;
+
+    buffer.push_back(0);
+    buffer.push_back(1);
+    buffer.push_back(2);
+    REQUIRE(buffer.size() == 3);
+    REQUIRE(buffer[0] == 0);
+    REQUIRE(buffer[1] == 1);
+    REQUIRE(buffer[2] == 2);
+
+    buffer.remove(1);
+    REQUIRE(buffer.size() == 2);
+    REQUIRE(buffer[0] == 0);
+    REQUIRE(buffer[1] == 2);
+
+    buffer.remove(1);
+    REQUIRE(buffer.size() == 1);
+    REQUIRE(buffer[0] == 0);
+
+    buffer.remove(0);
+    REQUIRE(buffer.size() == 0);
+}

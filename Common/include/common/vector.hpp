@@ -221,7 +221,7 @@ public:
     }
 
     // Inserts an item at the specified index of the collection.
-    // All existing items are moved toward the end to make room.
+    // All existing items are moved toward the back to make room.
     void insert(size_type index, value_type value)
     {
         assert(index >= 0 && index <= _count);
