@@ -140,14 +140,6 @@ void text_terminal::puts(const char *s)
     draw();
 }
 
-void text_terminal::puts(const vector<char> &s)
-{
-    for (vector<char>::size_type i = 0; i < s.size(); ++i) {
-        _putchar(s[i]);
-    }
-    draw();
-}
-
 int text_terminal::printf(const char *fmt, ...)
 {
     char buffer[128] = {0};

@@ -109,9 +109,7 @@ private:
 public:
     ~ring_buffer()
     {
-        while (!empty()) {
-            pop_front();
-        }
+        clear();
     }
 
     ring_buffer() : _front_pos(0), _back_pos(0), _count(0) {}
@@ -175,6 +173,14 @@ public:
     const value_type& operator[](size_type i) const
     {
         return at(i);
+    }
+
+    // Removes all elements from the ring_buffer.
+    void clear()
+    {
+        while (!empty()) {
+            pop_front();
+        }
     }
 
     // Pushes an item onto the back of the buffer.

@@ -45,8 +45,15 @@ public:
     // Puts each character in the vector to the terminal.
     void puts(const char *str);
 
-    // Puts each character in the string to the terminal.
-    void puts(const vector<char> &str);
+    // Puts each character in the container to the terminal.
+    template<typename T>
+    void putv(const T &buf)
+    {
+        for (typename T::size_type i = 0, n = buf.size(); i < n; ++i) {
+            _putchar(buf[i]);
+        }
+        draw();
+    }
 
     // Prints a formatted string to the terminal.
     int printf(const char *fmt, ...);

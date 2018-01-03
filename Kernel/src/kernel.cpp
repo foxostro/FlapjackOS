@@ -279,7 +279,7 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
         while (true) {
             vector<char> user_input = ed.getline();
             term.puts("Got: ");
-            term.puts(user_input);
+            term.putv(user_input);
             term.puts("\n");
             ed.add_history(user_input);
         }

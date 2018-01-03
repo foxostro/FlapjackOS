@@ -13,7 +13,7 @@ line_editor::line_editor(text_terminal &t,
  : term(t),
    kb(keyboard)
 {
-    set_prompt(vector<char>(strlen(">")+1, ">"));
+    set_prompt(strlen(">"), ">");
 }
 
 // Prompt for one line of user input on the console.
@@ -21,7 +21,7 @@ vector<char> line_editor::getline()
 {
     bool have_a_newline = false;
 
-    term.puts(prompt);
+    term.putv(prompt);
     term.putchar(' ');
 
     vector<char> user_input;
@@ -90,7 +90,7 @@ vector<char> line_editor::getline()
                     default:
                         if ((isprint(ch) || ch == '\t') &&
                             user_input.size() < MAXLINE) {
-                            
+
                             user_input.insert(linear_cursor++, ch);
                             term.putchar(ch);
                         }
@@ -105,9 +105,13 @@ vector<char> line_editor::getline()
 }
 
 // Change the prompt displayed at the beginning of the line.
-void line_editor::set_prompt(vector<char> new_prompt)
+void line_editor::set_prompt(size_t size, const char *str)
 {
-    prompt = new_prompt;
+    assert(size < (size_t)MAXPROMPT);
+    prompt.clear();
+    for (int i = 0, n = strnlen(str, size); i < n; ++i) {
+        prompt.push_back(str[i]);
+    }
 }
 
 // Add a line to the editor history.
