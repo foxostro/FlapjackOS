@@ -169,6 +169,25 @@ void text_line::pop_back()
     }
 }
 
+bool text_line::insert(size_type index, char ch)
+{
+    assert(ch != '\n');
+    assert(ch != '\b');
+    bool r = _data.insert(index, ch);
+    dirty = true;
+    _cached_display_size = measure();
+    return r;
+}
+
+void text_line::remove(size_type index)
+{
+    if (!_data.empty()) {
+        _data.remove(index);
+        dirty = true;
+        _cached_display_size = measure();
+    }
+}
+
 text_line::size_type text_line::size() const
 {
     return _data.size();

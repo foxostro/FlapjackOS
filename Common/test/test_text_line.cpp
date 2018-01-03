@@ -81,10 +81,67 @@ TEST_CASE("text_line::pop_back, empty line", "[text_line]")
 
 TEST_CASE("text_line::insert", "[text_line]")
 {
-    FAIL();
+    dummy_text_display_device display;
+    text_line line(display);
+    REQUIRE(std::string(line.str().data()) == "");
+
+    line.insert(0, 'a');
+    REQUIRE(std::string(line.str().data()) == "a");
+
+    {
+        size2_t phys_size = line.measure();
+        REQUIRE(phys_size.width == 1);
+        REQUIRE(phys_size.height == 1);
+    }
+
+    line.insert(0, 'b');
+    REQUIRE(std::string(line.str().data()) == "ba");
+
+    line.insert(1, 'c');
+    REQUIRE(std::string(line.str().data()) == "bca");
+
+    {
+        size2_t phys_size = line.measure();
+        REQUIRE(phys_size.width == 3);
+        REQUIRE(phys_size.height == 1);
+    }
 }
 
 TEST_CASE("text_line::remove", "[text_line]")
 {
-    FAIL();
+    dummy_text_display_device display;
+    text_line line(display);
+
+    line.push_back('a');
+    line.push_back('b');
+    line.push_back('c');
+    line.push_back('d');
+    REQUIRE(std::string(line.str().data()) == "abcd");
+
+    {
+        size2_t phys_size = line.measure();
+        REQUIRE(phys_size.width == 4);
+        REQUIRE(phys_size.height == 1);
+    }
+
+    line.remove(0);
+    REQUIRE(std::string(line.str().data()) == "bcd");
+
+    line.remove(1);
+    REQUIRE(std::string(line.str().data()) == "bd");
+
+    line.remove(0);
+    REQUIRE(std::string(line.str().data()) == "d");
+
+    {
+        size2_t phys_size = line.measure();
+        REQUIRE(phys_size.width == 1);
+        REQUIRE(phys_size.height == 1);
+    }
+
+    line.remove(0);
+    REQUIRE(std::string(line.str().data()) == "");
+
+    line.remove(0);
+    REQUIRE(std::string(line.str().data()) == "");
 }

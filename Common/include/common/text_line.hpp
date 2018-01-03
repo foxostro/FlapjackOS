@@ -66,11 +66,21 @@ public:
     // If the character won't fit on the line then the line remains unmodified
     // and this call returns false.
     // The character must not be a newline, '\n'.
+    // Returns true if this was successful, and false otherwise.
+    // This may fail if there is not enough space.
     bool push_back(char ch);
 
     // Pops an character off the back of the line.
     // If the line is empty then this does nothing.
     void pop_back();
+
+    // Inserts a character at the specified index of the line.
+    // Returns true if this was successful, and false otherwise.
+    // This may fail if there is not enough space.
+    bool insert(size_type index, char ch);
+
+    // Removes the index'th character of the line.
+    void remove(size_type index);
 
     // Gets the number of characters in the text line.
     size_type size() const;
