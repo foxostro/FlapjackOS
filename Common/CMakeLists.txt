@@ -43,6 +43,9 @@ if(CMAKE_CROSSCOMPILING)
 else(CMAKE_CROSSCOMPILING)
 
     add_executable(CommonTest
+                   "test/dummy_text_display_device.hpp"
+                   "test/dummy_keyboard_device.hpp"
+                   "test/test_line_editor.cpp"
                    "test/test_text_terminal.cpp"
                    "test/test_text_line.cpp"
                    "test/test_vector.cpp"

@@ -152,6 +152,13 @@ struct keyboard_event {
        state(RELEASED),
        ch(0)
     {}
+
+    // Constructor.
+    keyboard_event(keycode_t k, keycode_key_state s, char c)
+     : key(k),
+       state(s),
+       ch(c)
+    {}
 };
 
 class keyboard_device {
