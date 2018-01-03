@@ -114,8 +114,31 @@ public:
 
     ring_buffer() : _front_pos(0), _back_pos(0), _count(0) {}
 
-    circular_index get_front_pos() const { return _front_pos; }; // TODO: REMOVE ME
-    circular_index get_back_pos() const { return _back_pos; };
+    // Equality operator.
+    bool operator==(const ring_buffer &other) const
+    {
+        if (this == &other) {
+            return true;
+        }
+
+        if (other.size() != size()) {
+            return false;
+        }
+
+        for (size_type i = 0, n = size(); i < n; ++i) {
+            if (other.at(i) != at(i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Not-equality operator.
+    bool operator!=(const ring_buffer &other) const
+    {
+        return !(*this == other);
+    }
 
     // Returns the element at the front of the buffer.
     value_type& front()

@@ -6,10 +6,22 @@
 #include "dummy_keyboard_device.hpp"
 #include <vector>
 
+using line_t = line_editor::line_t;
+
+line_t build_line(size_t size, const char *str)
+{
+    line_t line;
+    for (int i = 0, n = strnlen(str, size); i < n; ++i) {
+        line.push_back(str[i]);
+    }
+    line.push_back('\0');
+    return line;
+}
+
 TEST_CASE("line_editor basic input", "[line_editor]")
 {
     const char *s = "hello";
-    vector<char> expected(strlen(s), s);
+    line_t expected = build_line(strlen(s), s);
 
     dummy_text_display_device display;
     dummy_keyboard_device keyboard;
@@ -32,20 +44,14 @@ TEST_CASE("line_editor basic input", "[line_editor]")
 
     line_editor ed(term, keyboard);
 
-    vector<char> line = ed.getline();
+    line_t line = ed.getline();
 
-    line.push_back('\0');
-    expected.push_back('\0');
-    REQUIRE(std::string(line.data()) == std::string(expected.data()));
-
+    REQUIRE(line == expected);
     REQUIRE(display.get_line( 0) == "> hello                                                                         ");
 }
 
 TEST_CASE("line_editor backspace at the end", "[line_editor]")
 {
-    const char *s = "f";
-    vector<char> expected(strlen(s), s);
-
     dummy_text_display_device display;
     dummy_keyboard_device keyboard;
     text_terminal term(display);
@@ -84,7 +90,7 @@ TEST_CASE("line_editor backspace at the end", "[line_editor]")
 
     line_editor ed(term, keyboard);
 
-    vector<char> line = ed.getline();
+    line_t line = ed.getline();
 
     REQUIRE(display.get_line( 0) == "> f                                                                             ");
 }
@@ -92,7 +98,7 @@ TEST_CASE("line_editor backspace at the end", "[line_editor]")
 TEST_CASE("line_editor left and right arrows", "[line_editor]")
 {
     const char *s = "hello";
-    vector<char> expected(strlen(s), s);
+    line_t expected = build_line(strlen(s), s);
 
     dummy_text_display_device display;
     dummy_keyboard_device keyboard;
@@ -128,11 +134,8 @@ TEST_CASE("line_editor left and right arrows", "[line_editor]")
 
     line_editor ed(term, keyboard);
 
-    vector<char> line = ed.getline();
+    line_t line = ed.getline();
 
-    line.push_back('\0');
-    expected.push_back('\0');
-    REQUIRE(std::string(line.data()) == std::string(expected.data()));
-
+    REQUIRE(line == expected);
     REQUIRE(display.get_line( 0) == "> hello                                                                         ");
 }

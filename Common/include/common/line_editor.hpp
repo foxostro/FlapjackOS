@@ -3,7 +3,6 @@
 #include <cstddef>
 
 #include <common/linked_list.hpp>
-#include <common/vector.hpp>
 #include <common/text_terminal.hpp>
 #include <common/keyboard_device.hpp>
 
@@ -13,12 +12,9 @@ static constexpr int MAXPROMPT = 16;
 // This can be used to read lines of user input from the terminal and provides
 // useful UI affordances such as nice editing functionality, a prompt, history,
 class line_editor {
-    text_terminal &term;
-    keyboard_device &kb;
-    ring_buffer<char, MAXPROMPT> prompt;
-    linked_list<vector<char>> history;
-
 public:
+    using line_t = ring_buffer<char, MAXLINE>;
+
     ~line_editor();
 
     // Constructor.
@@ -29,11 +25,17 @@ public:
 
     // Prompt for one line of user input on the console.
     // Returns a string containing the line of user input.
-    vector<char> getline();
+    line_t getline();
 
     // Change the prompt displayed at the beginning of the line.
     void set_prompt(size_t size, const char *prompt);
 
     // Add a line to the editor's history.
-    void add_history(vector<char> history_entry);
+    void add_history(line_t entry);
+
+private:
+    text_terminal &term;
+    keyboard_device &kb;
+    ring_buffer<char, MAXPROMPT> prompt;
+    linked_list<line_t> history;
 };

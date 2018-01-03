@@ -17,15 +17,15 @@ line_editor::line_editor(text_terminal &t,
 }
 
 // Prompt for one line of user input on the console.
-vector<char> line_editor::getline()
+line_editor::line_t line_editor::getline()
 {
     bool have_a_newline = false;
 
     term.putv(prompt);
     term.putchar(' ');
 
-    vector<char> user_input;
-    vector<char>::size_type linear_cursor = 0;
+    ring_buffer<char, MAXLINE> user_input;
+    ring_buffer<char, MAXLINE>::size_type linear_cursor = 0;
 
     while (!have_a_newline) {
         keyboard_event event = kb.get_event();
@@ -115,7 +115,7 @@ void line_editor::set_prompt(size_t size, const char *str)
 }
 
 // Add a line to the editor history.
-void line_editor::add_history(vector<char> history_entry)
+void line_editor::add_history(line_t entry)
 {
-    history.push_front(history_entry);
+    history.push_front(std::move(entry));
 }

@@ -277,11 +277,11 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
         // }
         line_editor ed(term, *s_keyboard);
         while (true) {
-            vector<char> user_input = ed.getline();
+            auto user_input = ed.getline();
             term.puts("Got: ");
             term.putv(user_input);
             term.puts("\n");
-            ed.add_history(user_input);
+            ed.add_history(std::move(user_input));
         }
     }
 
