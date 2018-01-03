@@ -28,6 +28,7 @@ public:
     line_t getline();
 
     // Change the prompt displayed at the beginning of the line.
+    // The prompt may not be longer than MAXPROMPT characters.
     void set_prompt(size_t size, const char *prompt);
 
     // Add a line to the editor's history.

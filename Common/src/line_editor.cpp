@@ -107,9 +107,8 @@ line_editor::line_t line_editor::getline()
 // Change the prompt displayed at the beginning of the line.
 void line_editor::set_prompt(size_t size, const char *str)
 {
-    assert(size < (size_t)MAXPROMPT);
     prompt.clear();
-    for (int i = 0, n = strnlen(str, size); i < n; ++i) {
+    for (int i = 0, n = MIN(MAXPROMPT, (int)strnlen(str, size)); i < n; ++i) {
         prompt.push_back(str[i]);
     }
 }

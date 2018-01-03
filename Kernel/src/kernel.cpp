@@ -272,9 +272,6 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     {
-        // for (int i = 0; i < 26; ++i) {
-        //     term.printf("i=%d\n", i);
-        // }
         line_editor ed(term, *s_keyboard);
         while (true) {
             auto user_input = ed.getline();
