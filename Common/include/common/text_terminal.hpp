@@ -72,4 +72,7 @@ public:
     // Moves the cursor to the right.
     // If the cursor is at the end of the line then this does nothing.
     void move_cursor_right();
+
+    // Moves the cursor all the way to the end of the line.
+    void move_cursor_to_end();
 };

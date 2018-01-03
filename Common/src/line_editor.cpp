@@ -24,8 +24,9 @@ line_editor::line_t line_editor::getline()
     term.putv(prompt);
     term.putchar(' ');
 
-    ring_buffer<char, MAXLINE> user_input;
-    ring_buffer<char, MAXLINE>::size_type linear_cursor = 0;
+    line_t user_input, stashed_user_input;
+    line_t::size_type linear_cursor = 0;
+    int history_cursor = -1;
 
     while (!have_a_newline) {
         keyboard_event event = kb.get_event();
@@ -62,14 +63,47 @@ line_editor::line_t line_editor::getline()
                 // fall through
 
             case KEYCODE_DOWN_ARROW:
-                // TODO: down arrow
+                if (history_cursor != -1) {
+                    term.move_cursor_to_end();
+                    for (int i = 0, n = user_input.size(); i < n; ++i) {
+                        term.putchar('\b');
+                    }
+                    history_cursor = MAX(history_cursor-1, -1);
+                    if (history_cursor == -1) {
+                        user_input = stashed_user_input;
+                    } else {
+                        user_input = history[history_cursor];
+                    }
+                    for (int i = 0, n = user_input.size(); i < n; ++i) {
+                        term.putchar(user_input[i]);
+                    }
+                    linear_cursor = user_input.size();
+                }
                 break;
 
             case KEYCODE_NUMPAD_8:
                 // fall through
 
             case KEYCODE_UP_ARROW:
-                // TODO: up arrow
+                if (history_cursor < history.size()-1) {
+                    term.move_cursor_to_end();
+                    for (int i = 0, n = user_input.size(); i < n; ++i) {
+                        term.putchar('\b');
+                    }
+                    if (history_cursor == -1) {
+                        stashed_user_input = user_input;
+                    }
+                    history_cursor = MIN(history_cursor+1, history.size()-1);
+                    if (history_cursor == -1) {
+                        user_input = stashed_user_input;
+                    } else {
+                        user_input = history[history_cursor];
+                    }
+                    for (int i = 0, n = user_input.size(); i < n; ++i) {
+                        term.putchar(user_input[i]);
+                    }
+                    linear_cursor = user_input.size();
+                }
                 break;
 
             default:
@@ -100,7 +134,6 @@ line_editor::line_t line_editor::getline()
         } // switch (key)
     } // while
 
-    user_input.push_back('\0');
     return user_input;
 }
 

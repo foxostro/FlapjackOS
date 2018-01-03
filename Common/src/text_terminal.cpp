@@ -170,3 +170,12 @@ void text_terminal::move_cursor_right()
         draw();
     }
 }
+
+void text_terminal::move_cursor_to_end()
+{
+    const auto &line = _logical_lines[_logical_cursor.y];
+    if (_logical_cursor.x != line.size()) {
+        _logical_cursor.x = line.size();
+        draw();
+    }
+}

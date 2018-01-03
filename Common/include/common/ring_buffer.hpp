@@ -112,7 +112,54 @@ public:
         clear();
     }
 
+    // Default constructor.
     ring_buffer() : _front_pos(0), _back_pos(0), _count(0) {}
+
+    // Copy constructor.
+    ring_buffer(const ring_buffer &other)
+     : ring_buffer()
+    {
+        for (size_type i = 0; i < other.size(); ++i) {
+            push_back(other.at(i));
+        }
+    }
+
+    // Move constructor.
+    ring_buffer(ring_buffer &&other)
+     : ring_buffer()
+    {
+        for (size_type i = 0; i < other.size(); ++i) {
+            push_back(std::move(other.at(i)));
+        }
+        other.clear();
+    }
+
+    // Copy-assignment operator.
+    ring_buffer& operator=(const ring_buffer &other)
+    {
+        if (this != &other) {
+            clear();
+            for (size_type i = 0; i < other.size(); ++i) {
+                push_back(other.at(i));
+            }
+        }
+
+        return *this;
+    }
+
+    // Move-assignment operator.
+    ring_buffer& operator=(ring_buffer &&other)
+    {
+        if (this != &other) {
+            clear();
+            for (size_type i = 0; i < other.size(); ++i) {
+                push_back(std::move(other.at(i)));
+            }
+            other.clear();
+        }
+
+        return *this;
+    }
 
     // Equality operator.
     bool operator==(const ring_buffer &other) const
