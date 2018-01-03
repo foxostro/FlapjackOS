@@ -87,11 +87,10 @@ vector<char> line_editor::getline()
                         break;
 
                     case '\t':
-                        // TODO: better handling of the tab character
-                        break;
-
                     default:
-                        if (isprint(ch) && user_input.size() < MAXLINE) {
+                        if ((isprint(ch) || ch == '\t') &&
+                            user_input.size() < MAXLINE) {
+                            
                             user_input.insert(linear_cursor++, ch);
                             term.putchar(ch);
                         }
