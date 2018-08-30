@@ -26,6 +26,17 @@
 #include <cstdlib>
 #include <cstring>
 
+extern "C" char kernel_image_begin[];
+extern "C" char kernel_image_end[];
+extern "C" char kernel_virtual_addr_start[];
+
+// The kernel brk region immediately follows the end of the kernel image.
+// The bootstrap assembly procedure will have ensured that we have enough
+// physical memory mapped into the address space to setup the page frame
+// allocator and any additional page tables we might need to map the rest of
+// physical memory into the kernel memory region.
+static uintptr_t s_kernel_brk = (uintptr_t)kernel_image_end;
+
 // We pass the terminal around globally becuase it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
 // around literally everywhere.
@@ -191,18 +202,16 @@ static memory_allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
         panic("The bootloader did not provide memory information.");
     }
 
-    // The kernel gets the lower 16MB of high memory.
-    // The rest goes to user programs as managed by the frame allocator.
-    static const unsigned PAGE_SIZE = 4096;
-    static const uintptr_t USER_MEM_START = 16*1024*1024;
-    extern char kernel_image_end[];
+    // TODO: search the memory map for free physical pages.
+    // The bootstrap page tables ensure we have a few megabytes of memory mapped
+    // into the address space. Let's use this for a kernel heap.
 
-    // Round up to the nearest frame.
-    uintptr_t heapBeginAddr = ((uintptr_t)kernel_image_end & ~(PAGE_SIZE-1)) + PAGE_SIZE;
-    uintptr_t heapLen = USER_MEM_START - heapBeginAddr;
+    size_t heap_len = s_kernel_brk - (uintptr_t)kernel_virtual_addr_start;
+    uintptr_t heap_begin = s_kernel_brk;
+    s_kernel_brk = (uintptr_t)kernel_virtual_addr_start + 0x800000;
 
-    // Initialize the kernel heap allocator using the memory region we identified above.
-    memory_allocator *alloc = malloc_zone::create(heapBeginAddr, heapLen);
+    // Initialize the kernel heap allocator using the memory identified above.
+    memory_allocator *alloc = malloc_zone::create(heap_begin, heap_len);
     set_global_allocator(alloc);
     return alloc;
 }
