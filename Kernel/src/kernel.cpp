@@ -28,7 +28,11 @@
 
 extern "C" char kernel_image_begin[];
 extern "C" char kernel_image_end[];
-extern "C" char kernel_virtual_addr_start[];
+extern "C" char kernel_rodata_end[];
+extern "C" uint32_t bootstrap_page_directory[];
+
+constexpr uintptr_t KERNEL_VIRTUAL_START_ADDR = 0xC0000000;
+constexpr size_t PAGE_SIZE = 4096;
 
 // The kernel brk region immediately follows the end of the kernel image.
 // The bootstrap assembly procedure will have ensured that we have enough
@@ -195,6 +199,35 @@ static void call_global_constructors()
     }
 }
 
+static void invlpg(void* virtual_address)
+{
+    asm volatile("invlpg (%0)" : : "b"(virtual_address) : "memory");
+}
+
+static void mark_page_readonly(void* virtual_address)
+{
+    constexpr uint32_t PDE_INDEX_SHIFT = 22;
+    constexpr uint32_t PTE_INDEX_SHIFT = 12;
+    constexpr uint32_t PTE_INDEX_MASK = 0x03FF;
+    constexpr uint32_t WRITEABLE = (1 << 1);
+    size_t page_directory_index = (uintptr_t)virtual_address >> PDE_INDEX_SHIFT;
+    size_t page_table_index = (uintptr_t)virtual_address >> PTE_INDEX_SHIFT & PTE_INDEX_MASK;
+    uintptr_t page_table_physical_address = bootstrap_page_directory[page_directory_index] & ~(PAGE_SIZE-1);
+    uint32_t* page_table = (uint32_t*)(KERNEL_VIRTUAL_START_ADDR + page_table_physical_address);
+    uint32_t& pte = page_table[page_table_index];
+    pte = pte & ~WRITEABLE;
+    invlpg(virtual_address);
+}
+
+static void cleanup_kernel_memory_map()
+{
+    for (uintptr_t page = (uintptr_t)kernel_image_begin;
+         page < (uintptr_t)kernel_rodata_end;
+         page += PAGE_SIZE) {
+        mark_page_readonly((void*)page);
+    }
+}
+
 static memory_allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
 {
     // Find contiguous free memory the kernel can freely use, e.g., for a heap.
@@ -206,9 +239,9 @@ static memory_allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
     // The bootstrap page tables ensure we have a few megabytes of memory mapped
     // into the address space. Let's use this for a kernel heap.
 
-    size_t heap_len = s_kernel_brk - (uintptr_t)kernel_virtual_addr_start;
+    size_t heap_len = s_kernel_brk - KERNEL_VIRTUAL_START_ADDR;
     uintptr_t heap_begin = s_kernel_brk;
-    s_kernel_brk = (uintptr_t)kernel_virtual_addr_start + 0x800000;
+    s_kernel_brk = KERNEL_VIRTUAL_START_ADDR + 0x800000;
 
     // Initialize the kernel heap allocator using the memory identified above.
     memory_allocator *alloc = malloc_zone::create(heap_begin, heap_len);
@@ -259,6 +292,8 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // want the constructors to be able to at least panic() on error. So, call
     // this after initializing interrupts and after initializing the console.
     call_global_constructors();
+
+    cleanup_kernel_memory_map();
 
     // Initialize malloc, &c.
     initialize_kernel_heap(mb_info);

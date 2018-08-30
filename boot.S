@@ -109,10 +109,16 @@ hang:
 # soon anyway at which time I won't have to worry about it anymore.
 .section .bss
 .align 4096
+.global bootstrap_page_directory
+.size bootstrap_page_directory, 4096
 bootstrap_page_directory:
 .skip 4096
+.global bootstrap_page_table_1
+.size bootstrap_page_table_1, 4096
 bootstrap_page_table_1:
 .skip 4096
+.global bootstrap_page_table_2
+.size bootstrap_page_table_2, 4096
 bootstrap_page_table_2:
 .skip 4096
 

@@ -26,9 +26,9 @@ SECTIONS
 		*(SORT(.dtors*))
 		end_dtors = .;
 
-		kernel_virtual_addr_start = KERNEL_VIRTUAL_START_ADDR;
-
 		*(.rodata)
+
+		kernel_rodata_end = .;
 	}
 
 	.data ALIGN(4K) : AT(ADDR(.data)-KERNEL_VIRTUAL_START_ADDR)
