@@ -1,4 +1,5 @@
 #include <common/line_editor.hpp>
+#include <common/ring_buffer.hpp>
 #include <common/text_terminal.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
@@ -16,6 +17,9 @@
 #include <panic.h>
 #include <backtrace.hpp>
 #include <multiboot.h>
+#include <brk.hpp>
+#include <creg.h>
+#include <kernel_image_info.hpp>
 
 #include <vga_text_display_device.hpp>
 #include <pit_timer_device.hpp>
@@ -25,21 +29,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
-extern "C" char kernel_image_begin[];
-extern "C" char kernel_image_end[];
-extern "C" char kernel_rodata_end[];
-extern "C" uint32_t bootstrap_page_directory[];
-
-constexpr uintptr_t KERNEL_VIRTUAL_START_ADDR = 0xC0000000;
-constexpr size_t PAGE_SIZE = 4096;
-
-// The kernel brk region immediately follows the end of the kernel image.
-// The bootstrap assembly procedure will have ensured that we have enough
-// physical memory mapped into the address space to setup the page frame
-// allocator and any additional page tables we might need to map the rest of
-// physical memory into the kernel memory region.
-static uintptr_t s_kernel_brk = (uintptr_t)kernel_image_end;
+#define MAGIC_BREAK asm volatile("xchg %bx, %bx")
 
 // We pass the terminal around globally becuase it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
@@ -51,6 +43,26 @@ static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
 static ps2_keyboard_device *s_keyboard;
 static pit_timer_device *s_timer;
+
+// Returns a string interpretation of a page fault error code.
+static const char* get_page_fault_error_string(unsigned error_code)
+{
+    switch (error_code)
+    {
+        case 0b000: return "supervisory process tried to read a non-present page entry";
+        case 0b001: return "supervisory process tried to read a page and caused a protection fault";
+        case 0b010: return "supervisory process tried to write to a non-present page entry";
+        case 0b011: return "supervisory process tried to write a page and caused a protection fault";
+        case 0b100: return "user process tried to read a non-present page entry";
+        case 0b101: return "user process tried to read a page and caused a protection fault";
+        case 0b110: return "user process tried to write to a non-present page entry";
+        case 0b111: return "user process tried to write a page and caused a protection fault";
+        default: return "unknown";
+    }
+}
+
+// Called when a page fault occurs.
+static void page_fault_handler(unsigned error_code);
 
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.
@@ -153,8 +165,7 @@ void interrupt_dispatch(unsigned interrupt_number,
             break;
 
         case IDT_PF:
-            panic2("Page Fault.", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
+            page_fault_handler(error_code);
             break;
 
         case IDT_MF:
@@ -182,6 +193,11 @@ void interrupt_dispatch(unsigned interrupt_number,
     }
 }
 
+// The kernel must call global constructors itself as we have no runtime
+// support beyond what we implement ourselves.
+// We want to call this as early as possible after booting. However, we also
+// want the constructors to be able to at least panic() on error. So, call
+// this after initializing interrupts and after initializing the console.
 static void call_global_constructors()
 {
     extern char start_ctors[];
@@ -204,21 +220,134 @@ static void invlpg(void* virtual_address)
     asm volatile("invlpg (%0)" : : "b"(virtual_address) : "memory");
 }
 
-static void mark_page_readonly(void* virtual_address)
+// Convert the given physical address to a logical address.
+// These addresses are easily converted between physical and virtual as they are
+// always offset by KERNEL_VIRTUAL_START_ADDR.
+static uintptr_t convert_physical_to_logical_address(uintptr_t physical_address)
+{
+    return physical_address + KERNEL_VIRTUAL_START_ADDR;
+}
+
+// Convert the given logical address to a physical address.
+// These addresses are easily converted between physical and virtual as they are
+// always offset by KERNEL_VIRTUAL_START_ADDR.
+static uintptr_t convert_logical_to_physical_address(uintptr_t logical_address)
+{
+    assert(logical_address >= KERNEL_VIRTUAL_START_ADDR);
+    return logical_address - KERNEL_VIRTUAL_START_ADDR;
+}
+
+// Get the index of the page directory associated with the given address.
+static size_t page_directory_index_for_virtual_address(uintptr_t virtual_address)
 {
     constexpr uint32_t PDE_INDEX_SHIFT = 22;
+    return (uint32_t)virtual_address >> PDE_INDEX_SHIFT;
+}
+
+// Get the index of the page table associated with the given address.
+static size_t page_table_index_for_virtual_address(uintptr_t virtual_address)
+{
     constexpr uint32_t PTE_INDEX_SHIFT = 12;
     constexpr uint32_t PTE_INDEX_MASK = 0x03FF;
-    constexpr uint32_t WRITEABLE = (1 << 1);
-    size_t page_directory_index = (uintptr_t)virtual_address >> PDE_INDEX_SHIFT;
-    size_t page_table_index = (uintptr_t)virtual_address >> PTE_INDEX_SHIFT & PTE_INDEX_MASK;
-    uintptr_t page_table_physical_address = bootstrap_page_directory[page_directory_index] & ~(PAGE_SIZE-1);
-    uint32_t* page_table = (uint32_t*)(KERNEL_VIRTUAL_START_ADDR + page_table_physical_address);
+    return (uint32_t)virtual_address >> PTE_INDEX_SHIFT & PTE_INDEX_MASK;
+}
+
+constexpr uint32_t PHYS_MAP_PRESENT = (1 << 0);
+constexpr uint32_t PHYS_MAP_WRITEABLE = (1 << 1);
+
+#define assert_is_page_aligned(address) assert(((address) & (PAGE_SIZE-1)) == 0)
+
+static void map_page(uintptr_t physical_address, uintptr_t virtual_address)
+{
+    assert_is_page_aligned(physical_address);
+    assert_is_page_aligned(virtual_address);
+    uint32_t* page_directory = (uint32_t*)convert_physical_to_logical_address(get_cr3());
+    size_t page_directory_index = page_directory_index_for_virtual_address(virtual_address);
+    size_t page_table_index = page_table_index_for_virtual_address(virtual_address);
+    uint32_t& pde = page_directory[page_directory_index];
+    pde = pde | PHYS_MAP_WRITEABLE | PHYS_MAP_PRESENT;
+    uintptr_t page_table_physical_address = pde & ~(PAGE_SIZE-1);
+    uint32_t* page_table = (uint32_t*)convert_physical_to_logical_address(page_table_physical_address);
     uint32_t& pte = page_table[page_table_index];
-    pte = pte & ~WRITEABLE;
+    pte = physical_address | PHYS_MAP_WRITEABLE | PHYS_MAP_PRESENT;
+    invlpg((void*)virtual_address);
+}
+
+static uintptr_t get_page_for_address(uintptr_t address)
+{
+    return address & ~(PAGE_SIZE-1);
+}
+
+static __attribute__((noreturn))
+void panic_on_unrecoverable_page_fault(uintptr_t faulting_address,
+                                       unsigned error_code)
+{
+    char message[128]={0};
+    snprintf(message, sizeof(message),
+             "Page Fault.\nfaulting_address: %p\nerror: %s (%u)\n",
+              (void*)faulting_address,
+              get_page_fault_error_string(error_code),
+              error_code);
+    panic(message);
+}
+
+static bool does_page_fault_error_have_user_bit_set(unsigned error_code)
+{
+    return (error_code & 0b100) != 0;
+}
+
+static bool does_page_fault_error_have_present_bit_set(unsigned error_code)
+{
+    return (error_code & 0b001) != 0;
+}
+
+static bool is_address_in_dynamic_kernel_heap_region(uintptr_t address)
+{
+    return (address >= (uintptr_t)get_bootstrap_heap_end()) &&
+           (address <= (uintptr_t)get_break_pointer());
+}
+
+static bool is_page_fault_for_unmapped_kernel_heap(uintptr_t faulting_address,
+                                                   unsigned error_code)
+{
+    return !does_page_fault_error_have_user_bit_set(error_code) &&
+           !does_page_fault_error_have_present_bit_set(error_code) &&
+           is_address_in_dynamic_kernel_heap_region(faulting_address);
+}
+
+static void map_unmapped_kernel_heap_page(uintptr_t faulting_address)
+{
+    uintptr_t faulting_page = get_page_for_address(faulting_address);
+    map_page(convert_logical_to_physical_address(faulting_page),
+             faulting_page);
+}
+
+static void page_fault_handler(unsigned error_code)
+{
+    uintptr_t faulting_address = (uintptr_t)get_cr2();
+    if (is_page_fault_for_unmapped_kernel_heap(faulting_address, error_code)) {
+        map_unmapped_kernel_heap_page(faulting_address);
+    } else {
+        panic_on_unrecoverable_page_fault(faulting_address, error_code);
+    }
+}
+
+// Modify the kernel page tables to mark the page associated with the given
+// virtual address as readonly.
+// The address must be in the kernel memory region.
+static void mark_page_readonly(void* virtual_address)
+{
+    size_t page_directory_index = page_directory_index_for_virtual_address((uintptr_t)virtual_address);
+    size_t page_table_index = page_table_index_for_virtual_address((uintptr_t)virtual_address);
+    uintptr_t page_table_physical_address = bootstrap_page_directory[page_directory_index] & ~(PAGE_SIZE-1);
+    uint32_t* page_table = (uint32_t*)convert_physical_to_logical_address(page_table_physical_address);
+    uint32_t& pte = page_table[page_table_index];
+    pte = pte & ~PHYS_MAP_WRITEABLE;
     invlpg(virtual_address);
 }
 
+// Ensure the text and rodata sections are marked readonly.
+// The assembly boot code was sloppy and marked these as writable.
 static void cleanup_kernel_memory_map()
 {
     for (uintptr_t page = (uintptr_t)kernel_image_begin;
@@ -228,23 +357,121 @@ static void cleanup_kernel_memory_map()
     }
 }
 
-static memory_allocator* initialize_kernel_heap(multiboot_info_t *mb_info)
+// Given a memory address, round up to the next page boundary.
+static uintptr_t round_address_up_to_next_page(uintptr_t address)
 {
-    // Find contiguous free memory the kernel can freely use, e.g., for a heap.
+    return (address & ~(PAGE_SIZE-1)) + PAGE_SIZE;
+}
+
+static void align_break_pointer_on_page_boundary()
+{
+    brk((void*)round_address_up_to_next_page((uintptr_t)sbrk(0)));
+}
+
+// Allocate page tables from kernel heap and use them to populate the kernel
+// page directory. The bootstrap page tables have been configured to ensure
+// that enough memory is mapped into the kernel virtual memory space to
+// provide the 4MB of page tables that we need to do this.
+// NOTE: This won't work correctly when using a kernel virtual memory region
+// that is larger than 1GB.
+static void populate_kernel_page_directory()
+{
+    constexpr size_t PAGE_TABLE_SIZE = 4096;
+    constexpr size_t NUMBER_OF_PAGE_DIRECTORY_ENTRIES = 1024;
+
+    align_break_pointer_on_page_boundary();
+
+    size_t number_of_page_tables = NUMBER_OF_PAGE_DIRECTORY_ENTRIES-NUMBER_OF_BOOTSTRAP_PAGE_TABLES;
+    size_t page_table_allocation_size = PAGE_TABLE_SIZE * number_of_page_tables;
+    void* page_table_pointer = bootstrap_sbrk(page_table_allocation_size);
+    uintptr_t page_table_virtual_address = (uintptr_t)page_table_pointer;
+    size_t index_of_first_open_pde = page_directory_index_for_virtual_address(KERNEL_VIRTUAL_START_ADDR + 0x400000*NUMBER_OF_BOOTSTRAP_PAGE_TABLES);
+
+    for (size_t i = index_of_first_open_pde; i < NUMBER_OF_PAGE_DIRECTORY_ENTRIES; ++i) {
+        memset((void*)page_table_virtual_address, 0, PAGE_TABLE_SIZE);
+        uintptr_t page_table_physical_address = convert_logical_to_physical_address(page_table_virtual_address);
+        bootstrap_page_directory[i] = page_table_physical_address | PHYS_MAP_PRESENT;
+        page_table_virtual_address += PAGE_TABLE_SIZE;
+    }
+}
+
+// Enumerate available page frames in the multiboot memory map.
+template<typename Function>
+static void enumerate_page_frames(multiboot_info_t *mb_info, Function &&fn)
+{
     if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
         panic("The bootloader did not provide memory information.");
     }
 
-    // TODO: search the memory map for free physical pages.
-    // The bootstrap page tables ensure we have a few megabytes of memory mapped
-    // into the address space. Let's use this for a kernel heap.
+    multiboot_memory_map_t *entry = (multiboot_memory_map_t *)convert_physical_to_logical_address(mb_info->mmap_addr);
+    multiboot_memory_map_t *limit = entry + mb_info->mmap_length;
 
-    size_t heap_len = s_kernel_brk - KERNEL_VIRTUAL_START_ADDR;
-    uintptr_t heap_begin = s_kernel_brk;
-    s_kernel_brk = KERNEL_VIRTUAL_START_ADDR + 0x800000;
+    while (entry < limit && entry->size>0) {
+        if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            uintptr_t page_frame = entry->base_addr_low;
+            for (size_t length = entry->length_low; length>0; length-=PAGE_SIZE, page_frame+=PAGE_SIZE) {
+                fn(page_frame);
+            }
+        }
 
-    // Initialize the kernel heap allocator using the memory identified above.
-    memory_allocator *alloc = malloc_zone::create(heap_begin, heap_len);
+        entry = (multiboot_memory_map_t*)((uintptr_t)entry + entry->size + sizeof(entry->size));
+    }
+}
+
+// Return true when the page frame is within the bootstrap kernel memory which
+// was mapped in the bootstrap assembly code.
+static bool is_page_frame_acceptable(uintptr_t page_frame)
+{
+    return page_frame >= ((uintptr_t)get_bootstrap_heap_end() - KERNEL_VIRTUAL_START_ADDR);
+}
+
+// Initialize the page frame allocator.
+// The bootstrap page tables have been configured to ensure that enough memory
+// is mapped into the kernel virtual memory space to provide the 4MB for the
+// page frame allocator. This is enough for frames when we have 4GB of physical
+// memory.
+// NOTE: This won't work correctly when we have more thna 4GB of physical memory
+// but a solution to that problem would involve either using PAE or a x86_64
+// kernel. So, it's an acceptable limitation for now.
+constexpr size_t MAX_PAGE_FRAMES = 1048576;
+using page_frame_allocator_t = ring_buffer<uintptr_t, MAX_PAGE_FRAMES>;
+page_frame_allocator_t* g_page_frame_allocator = NULL;
+static void initialize_page_frame_allocator(multiboot_info_t *mb_info)
+{
+    void *page_frame_allocator_address = bootstrap_sbrk(sizeof(page_frame_allocator_t));
+    g_page_frame_allocator = new (page_frame_allocator_address) page_frame_allocator_t;
+    enumerate_page_frames(mb_info, [](uintptr_t page_frame){
+        if (is_page_frame_acceptable(page_frame)) {
+            g_page_frame_allocator->push_back(page_frame);
+        }
+    });
+    g_terminal->printf("Number of free page frames is %u (%uMB)\n", (unsigned)g_page_frame_allocator->size(), (unsigned)g_page_frame_allocator->size()*4/1024);
+}
+
+// Initialize the kernel malloc allocator in kernel heap memory.
+static memory_allocator* initialize_kernel_malloc()
+{
+    // The kernel malloc zone will initially consume all remaining bytes in the
+    // bootstrap heap. This bootstrap start code has ensured this memory is
+    // mapped into the kernel virtual memory space.
+    g_terminal->printf("get_available_bootstrap_heap_bytes() --> %u (%uKB)\n",
+                       get_available_bootstrap_heap_bytes(),
+                       get_available_bootstrap_heap_bytes()/1024);
+
+    constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
+    size_t length = get_available_bootstrap_heap_bytes() + EIGHT_MB;
+    assert(length > 0);
+    g_terminal->printf("Malloc zone size is %u KB.\n", (unsigned)length/1024);
+    uintptr_t begin = (uintptr_t)sbrk(length);
+
+    // TODO: We probably want to instead clear the pages as page faults are
+    //       serviced. However, if we do it this way then we can exercise the
+    //       page fault handler at boot time.
+    g_terminal->printf("Clearing the zone.\n");
+    constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
+    memset((void*)begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
+
+    memory_allocator *alloc = malloc_zone::create(begin, length);
     set_global_allocator(alloc);
     return alloc;
 }
@@ -286,20 +513,14 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     text_terminal term(vga);
     g_terminal = &term;
 
-    // The kernel must call global constructors itself as we have no runtime
-    // support beyond what we implement ourselves.
-    // We want to call this as early as possible after booting. However, we also
-    // want the constructors to be able to at least panic() on error. So, call
-    // this after initializing interrupts and after initializing the console.
     call_global_constructors();
-
     cleanup_kernel_memory_map();
-
-    // Initialize malloc, &c.
-    initialize_kernel_heap(mb_info);
+    populate_kernel_page_directory();
+    initialize_page_frame_allocator(mb_info);
+    initialize_kernel_malloc();
 
     // Initialize the real VGA console output driver.
-    term.printf("%u KiB low memory, %u MiB high memory\n",
+    term.printf("%u KB low memory, %u MB high memory\n",
                 mb_info->mem_lower, mb_info->mem_upper/1024);
 
     // Initialize the PS/2 keyboard driver.

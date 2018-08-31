@@ -230,14 +230,14 @@ struct multiboot_color
 struct multiboot_mmap_entry
 {
     multiboot_uint32_t size;
-    multiboot_uint64_t addr;
-    multiboot_uint64_t len;
+    multiboot_uint32_t base_addr_low,base_addr_high;
+    multiboot_uint32_t length_low,length_high;
+    multiboot_uint32_t type;
 #define MULTIBOOT_MEMORY_AVAILABLE              1
 #define MULTIBOOT_MEMORY_RESERVED               2
 #define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
 #define MULTIBOOT_MEMORY_NVS                    4
 #define MULTIBOOT_MEMORY_BADRAM                 5
-    multiboot_uint32_t type;
 } __attribute__((packed));
 typedef struct multiboot_mmap_entry multiboot_memory_map_t;
 

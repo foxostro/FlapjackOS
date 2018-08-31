@@ -16,8 +16,6 @@
 # responsibility of the assembly boot procedure to setup paging such that the
 # the kernel is mapped into virtual memory starting at this address.
 .set KERNEL_VIRTUAL_START_ADDR, 0xC0000000
-.set KERNEL_VIRTUAL_START_ADDR_PDE_INDEX, (KERNEL_VIRTUAL_START_ADDR >> 22)
-.set KERNEL_VIRTUAL_START_ADDR_PLUS4MB_PDE_INDEX, ((KERNEL_VIRTUAL_START_ADDR+0x400000) >> 22)
 
 .global _start
 .type _start, @function
@@ -41,17 +39,24 @@ _start:
     movl $0x400000, %esi
 #include "fill_page_table.S.inc"
 
+    # Fill out the third bootstrap page table.
+    # EDI holds the physical address of the page table.
+    movl $(bootstrap_page_table_3 - KERNEL_VIRTUAL_START_ADDR), %edi
+    # ESI holds the first physical address to map.
+    movl $0x800000, %esi
+#include "fill_page_table.S.inc"
+
     # Fill out the bootstrap page directory.
     # We use the first page table twice in the page directory in order to effect
     # 1) a direct mapping of the first 4MB of physical memory to the first 4MB
-    # of virtual memory as well as 2) a mapping of the first 4MB of phyiscal
-    # memory to the kernel virtual start address at KERNEL_VIRTUAL_START_ADDR.
-    # It's necessary to map it twice to avoid page faulting when we try to fetch
-    # the next instruction.
-    # We use the second page table only one time in high memory.
+    # of virtual memory as well as 2) a mapping of physical memory to the kernel
+    # virtual start address at KERNEL_VIRTUAL_START_ADDR.
+    # It's necessary to map the first table twice to avoid page faulting when we
+    # try to fetch the next instruction before entering the higher half.
     movl $(bootstrap_page_table_1 - KERNEL_VIRTUAL_START_ADDR + 0x003), bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR + 0
-    movl $(bootstrap_page_table_1 - KERNEL_VIRTUAL_START_ADDR + 0x003), bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR + KERNEL_VIRTUAL_START_ADDR_PDE_INDEX * 4
-    movl $(bootstrap_page_table_2 - KERNEL_VIRTUAL_START_ADDR + 0x003), bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR + KERNEL_VIRTUAL_START_ADDR_PLUS4MB_PDE_INDEX * 4
+    movl $(bootstrap_page_table_1 - KERNEL_VIRTUAL_START_ADDR + 0x003), bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR + ((KERNEL_VIRTUAL_START_ADDR+0x000000) >> 22) * 4
+    movl $(bootstrap_page_table_2 - KERNEL_VIRTUAL_START_ADDR + 0x003), bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR + ((KERNEL_VIRTUAL_START_ADDR+0x400000) >> 22) * 4
+    movl $(bootstrap_page_table_3 - KERNEL_VIRTUAL_START_ADDR + 0x003), bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR + ((KERNEL_VIRTUAL_START_ADDR+0x800000) >> 22) * 4
 
     # Point CR3 to the bootstrap page directory.
     movl $(bootstrap_page_directory - KERNEL_VIRTUAL_START_ADDR), %ecx
@@ -94,32 +99,20 @@ hang:
 .size _start, . - _start
 
 # In order to remap the kernel into higher memory, we need to reserve space
-# for a bootstrap page directory and two page tables. The first page table
-# is used to effect a mapping of the first four megabytes of physical memory
-# to KERNEL_VIRTUAL_START_ADDR. This is assumed (probably a good assumption)
-# to be enough to hold the kernel image at least.
-# The second is to provide mapped free memory for the kernel brk region.
-# This is enough mapped free memory that we can definitely allocate 32KB for the
-# page frame allocator and 4MB for additional page tables. The 32KB is the
-# largest amount of memory necessary when there are 4GB of physical memory in
-# the machine. The 4MB is more than enough to map 1GB of physical memory into
-# the kernel virtual memory region.
-# Note that this scheme fails to work when there is more than 1GB of physical
-# memory in the system. Though, I hope to get a x86_64 kernel up and running
-# soon anyway at which time I won't have to worry about it anymore.
+# for a bootstrap page directory and page tables. We use these to map physical
+# memory into the kernel virtual memory region for the kernel image and for the
+# bootstrap kernel heap.
 .section .bss
 .align 4096
 .global bootstrap_page_directory
 .size bootstrap_page_directory, 4096
 bootstrap_page_directory:
 .skip 4096
-.global bootstrap_page_table_1
-.size bootstrap_page_table_1, 4096
 bootstrap_page_table_1:
 .skip 4096
-.global bootstrap_page_table_2
-.size bootstrap_page_table_2, 4096
 bootstrap_page_table_2:
+.skip 4096
+bootstrap_page_table_3:
 .skip 4096
 
 # Setup a 16KiB stack with 16 byte alignment.

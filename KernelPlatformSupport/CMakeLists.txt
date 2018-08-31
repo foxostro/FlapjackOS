@@ -9,6 +9,7 @@ set(INCLUDE_FILES
     "include/interrupt_asm.h"
     "include/ltr.h"
     "include/seg.h"
+    "include/creg.h"
     )
 
 # By its nature, libKernelPlatformSupport is the pieces of the kernel which are
@@ -24,6 +25,7 @@ if(CMAKE_CROSSCOMPILING)
         "src/i386/interrupt_asm.S"
         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
         "src/i386/ltr.S"
+        "src/i386/creg.S"
         )
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/i386/isr_wrapper_asm.S.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")

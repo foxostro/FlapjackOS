@@ -21,6 +21,7 @@ set(SOURCE_FILES
     "src/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
     "src/kernel.cpp"
+    "src/brk.cpp"
     )
 
 GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_install.c.erb"

@@ -56,7 +56,7 @@ malloc_zone* malloc_zone::create(uintptr_t start, size_t size)
     assert(start);
     assert(size > sizeof(malloc_zone));
 
-    start += (4 - start % 4); // 4 byte alignment
+    //start += (4 - start % 4); // 4 byte alignment
 
     malloc_zone *zone = new ((void *)start) malloc_zone;
 

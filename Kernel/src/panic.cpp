@@ -24,6 +24,7 @@ void panic(const char *fmt, ...)
     g_terminal->puts(buffer);
     g_terminal->puts("\n");
 
+    asm volatile("xchg %bx, %bx");
     halt_forever();
 }
 
