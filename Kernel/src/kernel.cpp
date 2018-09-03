@@ -17,7 +17,7 @@
 #include <panic.h>
 #include <backtrace.hpp>
 #include <multiboot.h>
-#include <brk.hpp> // for kernel_heap_allocator
+#include <kernel_heap_allocator.hpp>
 #include <creg.h>
 #include <kernel_image_info.hpp>
 #include <logical_addressing.hpp>
@@ -290,17 +290,8 @@ static void initialize_page_frame_allocator(multiboot_info_t *mb_info)
 // Initialize the kernel malloc allocator in kernel heap memory.
 static memory_allocator* initialize_kernel_malloc()
 {
-    size_t remaining_bootstrap_memory = s_kernel_heap_allocator.get_available_bootstrap_heap_bytes();
-
-    // The kernel malloc zone will initially consume all remaining bytes in the
-    // bootstrap heap. This bootstrap start code has ensured this memory is
-    // mapped into the kernel virtual memory space.
-    g_terminal->printf("remaining_bootstrap_memory --> %u (%uKB)\n",
-                       remaining_bootstrap_memory,
-                       remaining_bootstrap_memory/1024);
-
     constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
-    size_t length = remaining_bootstrap_memory + EIGHT_MB;
+    size_t length = EIGHT_MB;
     assert(length > 0);
     g_terminal->printf("Malloc zone size is %u KB.\n", (unsigned)length/1024);
     uintptr_t begin = (uintptr_t)s_kernel_heap_allocator.malloc(length);
