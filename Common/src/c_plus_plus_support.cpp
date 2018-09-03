@@ -31,3 +31,8 @@ void operator delete[](void *p)
 {
     free(p);
 }
+
+// C++ runtime support for destructors on globals. TODO: Implement these for real.
+void *__dso_handle;
+extern "C" int __cxa_atexit(void (*)(void *), void *, void *) { return 0; }
+extern "C" void __cxa_finalize(void *) {}

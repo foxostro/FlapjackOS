@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #define assert(expr) ((void)((expr) ? 0 : (abort(), 0)))
+#define MAGIC_BREAK asm volatile("xchg %bx, %bx")
 
 #else // TESTING
 
@@ -20,6 +21,7 @@ extern "C" {
 __attribute__((noreturn)) void panic(const char *fmt, ...);
 
 #define assert(expr) ((void)((expr) ? 0 : (panic("%s:%u: failed assertion `%s'", __FILE__, __LINE__, # expr), 0)))
+#define MAGIC_BREAK
 
 #endif // TESTING
 

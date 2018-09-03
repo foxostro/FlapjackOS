@@ -17,9 +17,10 @@
 #include <panic.h>
 #include <backtrace.hpp>
 #include <multiboot.h>
-#include <brk.hpp>
+#include <brk.hpp> // for kernel_heap_allocator
 #include <creg.h>
 #include <kernel_image_info.hpp>
+#include <logical_addressing.hpp>
 
 #include <vga_text_display_device.hpp>
 #include <pit_timer_device.hpp>
@@ -31,8 +32,6 @@
 #include <cstring>
 #include <cstdio>
 
-#define MAGIC_BREAK asm volatile("xchg %bx, %bx")
-
 // We pass the terminal around globally becuase it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
 // around literally everywhere.
@@ -43,23 +42,7 @@ static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
 static ps2_keyboard_device *s_keyboard;
 static pit_timer_device *s_timer;
-
-// Returns a string interpretation of a page fault error code.
-static const char* get_page_fault_error_string(unsigned error_code)
-{
-    switch (error_code)
-    {
-        case 0b000: return "supervisory process tried to read a non-present page entry";
-        case 0b001: return "supervisory process tried to read a page and caused a protection fault";
-        case 0b010: return "supervisory process tried to write to a non-present page entry";
-        case 0b011: return "supervisory process tried to write a page and caused a protection fault";
-        case 0b100: return "user process tried to read a non-present page entry";
-        case 0b101: return "user process tried to read a page and caused a protection fault";
-        case 0b110: return "user process tried to write to a non-present page entry";
-        case 0b111: return "user process tried to write a page and caused a protection fault";
-        default: return "unknown";
-    }
-}
+static kernel_heap_allocator s_kernel_heap_allocator;
 
 // Called when a page fault occurs.
 static void page_fault_handler(unsigned error_code);
@@ -215,67 +198,21 @@ static void call_global_constructors()
     }
 }
 
-static void invlpg(void* virtual_address)
+// Returns a string interpretation of a page fault error code.
+static const char* get_page_fault_error_string(unsigned error_code)
 {
-    asm volatile("invlpg (%0)" : : "b"(virtual_address) : "memory");
-}
-
-// Convert the given physical address to a logical address.
-// These addresses are easily converted between physical and virtual as they are
-// always offset by KERNEL_VIRTUAL_START_ADDR.
-static uintptr_t convert_physical_to_logical_address(uintptr_t physical_address)
-{
-    return physical_address + KERNEL_VIRTUAL_START_ADDR;
-}
-
-// Convert the given logical address to a physical address.
-// These addresses are easily converted between physical and virtual as they are
-// always offset by KERNEL_VIRTUAL_START_ADDR.
-static uintptr_t convert_logical_to_physical_address(uintptr_t logical_address)
-{
-    assert(logical_address >= KERNEL_VIRTUAL_START_ADDR);
-    return logical_address - KERNEL_VIRTUAL_START_ADDR;
-}
-
-// Get the index of the page directory associated with the given address.
-static size_t page_directory_index_for_virtual_address(uintptr_t virtual_address)
-{
-    constexpr uint32_t PDE_INDEX_SHIFT = 22;
-    return (uint32_t)virtual_address >> PDE_INDEX_SHIFT;
-}
-
-// Get the index of the page table associated with the given address.
-static size_t page_table_index_for_virtual_address(uintptr_t virtual_address)
-{
-    constexpr uint32_t PTE_INDEX_SHIFT = 12;
-    constexpr uint32_t PTE_INDEX_MASK = 0x03FF;
-    return (uint32_t)virtual_address >> PTE_INDEX_SHIFT & PTE_INDEX_MASK;
-}
-
-constexpr uint32_t PHYS_MAP_PRESENT = (1 << 0);
-constexpr uint32_t PHYS_MAP_WRITEABLE = (1 << 1);
-
-#define assert_is_page_aligned(address) assert(((address) & (PAGE_SIZE-1)) == 0)
-
-static void map_page(uintptr_t physical_address, uintptr_t virtual_address)
-{
-    assert_is_page_aligned(physical_address);
-    assert_is_page_aligned(virtual_address);
-    uint32_t* page_directory = (uint32_t*)convert_physical_to_logical_address(get_cr3());
-    size_t page_directory_index = page_directory_index_for_virtual_address(virtual_address);
-    size_t page_table_index = page_table_index_for_virtual_address(virtual_address);
-    uint32_t& pde = page_directory[page_directory_index];
-    pde = pde | PHYS_MAP_WRITEABLE | PHYS_MAP_PRESENT;
-    uintptr_t page_table_physical_address = pde & ~(PAGE_SIZE-1);
-    uint32_t* page_table = (uint32_t*)convert_physical_to_logical_address(page_table_physical_address);
-    uint32_t& pte = page_table[page_table_index];
-    pte = physical_address | PHYS_MAP_WRITEABLE | PHYS_MAP_PRESENT;
-    invlpg((void*)virtual_address);
-}
-
-static uintptr_t get_page_for_address(uintptr_t address)
-{
-    return address & ~(PAGE_SIZE-1);
+    switch (error_code)
+    {
+        case 0b000: return "supervisory process tried to read a non-present page entry";
+        case 0b001: return "supervisory process tried to read a page and caused a protection fault";
+        case 0b010: return "supervisory process tried to write to a non-present page entry";
+        case 0b011: return "supervisory process tried to write a page and caused a protection fault";
+        case 0b100: return "user process tried to read a non-present page entry";
+        case 0b101: return "user process tried to read a page and caused a protection fault";
+        case 0b110: return "user process tried to write to a non-present page entry";
+        case 0b111: return "user process tried to write a page and caused a protection fault";
+        default: return "unknown";
+    }
 }
 
 static __attribute__((noreturn))
@@ -291,108 +228,10 @@ void panic_on_unrecoverable_page_fault(uintptr_t faulting_address,
     panic(message);
 }
 
-static bool does_page_fault_error_have_user_bit_set(unsigned error_code)
-{
-    return (error_code & 0b100) != 0;
-}
-
-static bool does_page_fault_error_have_present_bit_set(unsigned error_code)
-{
-    return (error_code & 0b001) != 0;
-}
-
-static bool is_address_in_dynamic_kernel_heap_region(uintptr_t address)
-{
-    return (address >= (uintptr_t)get_bootstrap_heap_end()) &&
-           (address <= (uintptr_t)get_break_pointer());
-}
-
-static bool is_page_fault_for_unmapped_kernel_heap(uintptr_t faulting_address,
-                                                   unsigned error_code)
-{
-    return !does_page_fault_error_have_user_bit_set(error_code) &&
-           !does_page_fault_error_have_present_bit_set(error_code) &&
-           is_address_in_dynamic_kernel_heap_region(faulting_address);
-}
-
-static void map_unmapped_kernel_heap_page(uintptr_t faulting_address)
-{
-    uintptr_t faulting_page = get_page_for_address(faulting_address);
-    map_page(convert_logical_to_physical_address(faulting_page),
-             faulting_page);
-}
-
 static void page_fault_handler(unsigned error_code)
 {
     uintptr_t faulting_address = (uintptr_t)get_cr2();
-    if (is_page_fault_for_unmapped_kernel_heap(faulting_address, error_code)) {
-        map_unmapped_kernel_heap_page(faulting_address);
-    } else {
-        panic_on_unrecoverable_page_fault(faulting_address, error_code);
-    }
-}
-
-// Modify the kernel page tables to mark the page associated with the given
-// virtual address as readonly.
-// The address must be in the kernel memory region.
-static void mark_page_readonly(void* virtual_address)
-{
-    size_t page_directory_index = page_directory_index_for_virtual_address((uintptr_t)virtual_address);
-    size_t page_table_index = page_table_index_for_virtual_address((uintptr_t)virtual_address);
-    uintptr_t page_table_physical_address = bootstrap_page_directory[page_directory_index] & ~(PAGE_SIZE-1);
-    uint32_t* page_table = (uint32_t*)convert_physical_to_logical_address(page_table_physical_address);
-    uint32_t& pte = page_table[page_table_index];
-    pte = pte & ~PHYS_MAP_WRITEABLE;
-    invlpg(virtual_address);
-}
-
-// Ensure the text and rodata sections are marked readonly.
-// The assembly boot code was sloppy and marked these as writable.
-static void cleanup_kernel_memory_map()
-{
-    for (uintptr_t page = (uintptr_t)kernel_image_begin;
-         page < (uintptr_t)kernel_rodata_end;
-         page += PAGE_SIZE) {
-        mark_page_readonly((void*)page);
-    }
-}
-
-// Given a memory address, round up to the next page boundary.
-static uintptr_t round_address_up_to_next_page(uintptr_t address)
-{
-    return (address & ~(PAGE_SIZE-1)) + PAGE_SIZE;
-}
-
-static void align_break_pointer_on_page_boundary()
-{
-    brk((void*)round_address_up_to_next_page((uintptr_t)sbrk(0)));
-}
-
-// Allocate page tables from kernel heap and use them to populate the kernel
-// page directory. The bootstrap page tables have been configured to ensure
-// that enough memory is mapped into the kernel virtual memory space to
-// provide the 4MB of page tables that we need to do this.
-// NOTE: This won't work correctly when using a kernel virtual memory region
-// that is larger than 1GB.
-static void populate_kernel_page_directory()
-{
-    constexpr size_t PAGE_TABLE_SIZE = 4096;
-    constexpr size_t NUMBER_OF_PAGE_DIRECTORY_ENTRIES = 1024;
-
-    align_break_pointer_on_page_boundary();
-
-    size_t number_of_page_tables = NUMBER_OF_PAGE_DIRECTORY_ENTRIES-NUMBER_OF_BOOTSTRAP_PAGE_TABLES;
-    size_t page_table_allocation_size = PAGE_TABLE_SIZE * number_of_page_tables;
-    void* page_table_pointer = bootstrap_sbrk(page_table_allocation_size);
-    uintptr_t page_table_virtual_address = (uintptr_t)page_table_pointer;
-    size_t index_of_first_open_pde = page_directory_index_for_virtual_address(KERNEL_VIRTUAL_START_ADDR + 0x400000*NUMBER_OF_BOOTSTRAP_PAGE_TABLES);
-
-    for (size_t i = index_of_first_open_pde; i < NUMBER_OF_PAGE_DIRECTORY_ENTRIES; ++i) {
-        memset((void*)page_table_virtual_address, 0, PAGE_TABLE_SIZE);
-        uintptr_t page_table_physical_address = convert_logical_to_physical_address(page_table_virtual_address);
-        bootstrap_page_directory[i] = page_table_physical_address | PHYS_MAP_PRESENT;
-        page_table_virtual_address += PAGE_TABLE_SIZE;
-    }
+    panic_on_unrecoverable_page_fault(faulting_address, error_code);
 }
 
 // Enumerate available page frames in the multiboot memory map.
@@ -422,7 +261,7 @@ static void enumerate_page_frames(multiboot_info_t *mb_info, Function &&fn)
 // was mapped in the bootstrap assembly code.
 static bool is_page_frame_acceptable(uintptr_t page_frame)
 {
-    return page_frame >= ((uintptr_t)get_bootstrap_heap_end() - KERNEL_VIRTUAL_START_ADDR);
+    return page_frame >= ((uintptr_t)s_kernel_heap_allocator.get_bootstrap_heap_end() - KERNEL_VIRTUAL_START_ADDR);
 }
 
 // Initialize the page frame allocator.
@@ -438,7 +277,7 @@ using page_frame_allocator_t = ring_buffer<uintptr_t, MAX_PAGE_FRAMES>;
 page_frame_allocator_t* g_page_frame_allocator = NULL;
 static void initialize_page_frame_allocator(multiboot_info_t *mb_info)
 {
-    void *page_frame_allocator_address = bootstrap_sbrk(sizeof(page_frame_allocator_t));
+    void *page_frame_allocator_address = s_kernel_heap_allocator.malloc(sizeof(page_frame_allocator_t));
     g_page_frame_allocator = new (page_frame_allocator_address) page_frame_allocator_t;
     enumerate_page_frames(mb_info, [](uintptr_t page_frame){
         if (is_page_frame_acceptable(page_frame)) {
@@ -451,22 +290,21 @@ static void initialize_page_frame_allocator(multiboot_info_t *mb_info)
 // Initialize the kernel malloc allocator in kernel heap memory.
 static memory_allocator* initialize_kernel_malloc()
 {
+    size_t remaining_bootstrap_memory = s_kernel_heap_allocator.get_available_bootstrap_heap_bytes();
+
     // The kernel malloc zone will initially consume all remaining bytes in the
     // bootstrap heap. This bootstrap start code has ensured this memory is
     // mapped into the kernel virtual memory space.
-    g_terminal->printf("get_available_bootstrap_heap_bytes() --> %u (%uKB)\n",
-                       get_available_bootstrap_heap_bytes(),
-                       get_available_bootstrap_heap_bytes()/1024);
+    g_terminal->printf("remaining_bootstrap_memory --> %u (%uKB)\n",
+                       remaining_bootstrap_memory,
+                       remaining_bootstrap_memory/1024);
 
     constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
-    size_t length = get_available_bootstrap_heap_bytes() + EIGHT_MB;
+    size_t length = remaining_bootstrap_memory + EIGHT_MB;
     assert(length > 0);
     g_terminal->printf("Malloc zone size is %u KB.\n", (unsigned)length/1024);
-    uintptr_t begin = (uintptr_t)sbrk(length);
+    uintptr_t begin = (uintptr_t)s_kernel_heap_allocator.malloc(length);
 
-    // TODO: We probably want to instead clear the pages as page faults are
-    //       serviced. However, if we do it this way then we can exercise the
-    //       page fault handler at boot time.
     g_terminal->printf("Clearing the zone.\n");
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
     memset((void*)begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
@@ -513,11 +351,10 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     text_terminal term(vga);
     g_terminal = &term;
 
-    call_global_constructors();
-    cleanup_kernel_memory_map();
-    populate_kernel_page_directory();
+    s_kernel_heap_allocator.reset((void*)kernel_image_end);
     initialize_page_frame_allocator(mb_info);
     initialize_kernel_malloc();
+    call_global_constructors();
 
     // Initialize the real VGA console output driver.
     term.printf("%u KB low memory, %u MB high memory\n",
