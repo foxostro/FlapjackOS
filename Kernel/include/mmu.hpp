@@ -2,12 +2,9 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cassert>
 
 #include "logical_addressing.hpp"
-#include "kernel_image_info.hpp" // for PAGE_SIZE
-
-#define assert_is_page_aligned(address) assert(((uintptr_t)(address) & (PAGE_SIZE-1)) == 0)
+#include "page_size.hpp"
 
 constexpr unsigned PHYS_MAP_PRESENT = (1 << 0);
 constexpr unsigned PHYS_MAP_WRITABLE = (1 << 1);

@@ -1,10 +1,8 @@
 #pragma once
 
-// The size of a page of memory.
-// We define this here because we setup the page sizes in boot.S, and because
-// several symbols related to the kernel image depend on a specific page size.
-// See `NUMBER_OF_BOOTSTRAP_PAGE_TABLES' and `BOOTSTRAP_HEAP_END'.
-constexpr size_t PAGE_SIZE = 4096;
+#include <cstddef>
+#include <cstdint>
+#include <page_size.hpp>
 
 // The virtual address of the higher half.
 // This is the beginning of a virtual memory region which maps to contiguous,

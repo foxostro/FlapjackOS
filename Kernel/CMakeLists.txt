@@ -21,8 +21,16 @@ set(SOURCE_FILES
     "src/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
     "src/kernel.cpp"
-    "src/kernel_heap_allocator.cpp"
+    "include/page_size.hpp"
+    "include/kernel_image_info.hpp"
+    "include/kernel_heap_allocator.hpp" "src/kernel_heap_allocator.cpp"
+    "include/kernel_break_allocator.hpp" "src/kernel_break_allocator.cpp"
     "include/mmu.hpp" "src/mmu.cpp"
+    "include/page_frame_allocator.hpp" "src/page_frame_allocator.cpp"
+    "include/page_frame_allocator_factory.hpp" "src/page_frame_allocator_factory.cpp"
+    "include/kernel_page_directory_populate_operation.hpp" "src/kernel_page_directory_populate_operation.cpp"
+    "include/cleanup_kernel_memory_map_operation.hpp" "src/cleanup_kernel_memory_map_operation.cpp"
+    "include/kernel_memory_allocators.hpp" "src/kernel_memory_allocators.cpp"
     )
 
 GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_install.c.erb"

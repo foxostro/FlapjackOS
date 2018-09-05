@@ -1,8 +1,5 @@
 #include <common/line_editor.hpp>
-#include <common/ring_buffer.hpp>
 #include <common/text_terminal.hpp>
-#include <common/global_allocator.hpp>
-#include <malloc/malloc_zone.hpp>
 
 #include <seg.h>
 #include <gdt.h>
@@ -17,10 +14,10 @@
 #include <panic.h>
 #include <backtrace.hpp>
 #include <multiboot.h>
-#include <kernel_heap_allocator.hpp>
 #include <creg.h>
 #include <kernel_image_info.hpp>
 #include <logical_addressing.hpp>
+#include <kernel_memory_allocators.hpp>
 
 #include <vga_text_display_device.hpp>
 #include <pit_timer_device.hpp>
@@ -42,7 +39,7 @@ static tss_struct_t s_tss;
 static idt_entry_t s_idt[IDT_MAX];
 static ps2_keyboard_device *s_keyboard;
 static pit_timer_device *s_timer;
-static kernel_heap_allocator s_kernel_heap_allocator;
+static kernel_memory_allocators *s_allocators;
 
 // Called when a page fault occurs.
 static void page_fault_handler(unsigned error_code);
@@ -234,77 +231,6 @@ static void page_fault_handler(unsigned error_code)
     panic_on_unrecoverable_page_fault(faulting_address, error_code);
 }
 
-// Enumerate available page frames in the multiboot memory map.
-template<typename Function>
-static void enumerate_page_frames(multiboot_info_t *mb_info, Function &&fn)
-{
-    if (!(mb_info->flags & MULTIBOOT_MEMORY_INFO)) {
-        panic("The bootloader did not provide memory information.");
-    }
-
-    multiboot_memory_map_t *entry = (multiboot_memory_map_t *)convert_physical_to_logical_address(mb_info->mmap_addr);
-    multiboot_memory_map_t *limit = entry + mb_info->mmap_length;
-
-    while (entry < limit && entry->size>0) {
-        if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
-            uintptr_t page_frame = entry->base_addr_low;
-            for (size_t length = entry->length_low; length>0; length-=PAGE_SIZE, page_frame+=PAGE_SIZE) {
-                fn(page_frame);
-            }
-        }
-
-        entry = (multiboot_memory_map_t*)((uintptr_t)entry + entry->size + sizeof(entry->size));
-    }
-}
-
-// Return true when the page frame is within the bootstrap kernel memory which
-// was mapped in the bootstrap assembly code.
-static bool is_page_frame_acceptable(uintptr_t page_frame)
-{
-    return page_frame >= ((uintptr_t)s_kernel_heap_allocator.get_bootstrap_heap_end() - KERNEL_VIRTUAL_START_ADDR);
-}
-
-// Initialize the page frame allocator.
-// The bootstrap page tables have been configured to ensure that enough memory
-// is mapped into the kernel virtual memory space to provide the 4MB for the
-// page frame allocator. This is enough for frames when we have 4GB of physical
-// memory.
-// NOTE: This won't work correctly when we have more thna 4GB of physical memory
-// but a solution to that problem would involve either using PAE or a x86_64
-// kernel. So, it's an acceptable limitation for now.
-constexpr size_t MAX_PAGE_FRAMES = 1048576;
-using page_frame_allocator_t = ring_buffer<uintptr_t, MAX_PAGE_FRAMES>;
-page_frame_allocator_t* g_page_frame_allocator = NULL;
-static void initialize_page_frame_allocator(multiboot_info_t *mb_info)
-{
-    void *page_frame_allocator_address = s_kernel_heap_allocator.malloc(sizeof(page_frame_allocator_t));
-    g_page_frame_allocator = new (page_frame_allocator_address) page_frame_allocator_t;
-    enumerate_page_frames(mb_info, [](uintptr_t page_frame){
-        if (is_page_frame_acceptable(page_frame)) {
-            g_page_frame_allocator->push_back(page_frame);
-        }
-    });
-    g_terminal->printf("Number of free page frames is %u (%uMB)\n", (unsigned)g_page_frame_allocator->size(), (unsigned)g_page_frame_allocator->size()*4/1024);
-}
-
-// Initialize the kernel malloc allocator in kernel heap memory.
-static memory_allocator* initialize_kernel_malloc()
-{
-    constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
-    size_t length = EIGHT_MB;
-    assert(length > 0);
-    g_terminal->printf("Malloc zone size is %u KB.\n", (unsigned)length/1024);
-    uintptr_t begin = (uintptr_t)s_kernel_heap_allocator.malloc(length);
-
-    g_terminal->printf("Clearing the zone.\n");
-    constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
-    memset((void*)begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
-
-    memory_allocator *alloc = malloc_zone::create(begin, length);
-    set_global_allocator(alloc);
-    return alloc;
-}
-
 // This is marked with "C" linkage because we call it from assembly in boot.S.
 extern "C"
 __attribute__((noreturn))
@@ -322,6 +248,8 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     gdt_create_flat_mapping(s_gdt, sizeof(s_gdt), (uintptr_t)&s_tss);
     lgdt(s_gdt, sizeof(s_gdt) - 1);
     load_task_register();
+
+    call_global_constructors();
 
     // Setup the Interrupt Descriptor Table. This wires various IRQs up to their
     // handler functions.
@@ -341,15 +269,11 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // make it available to other sub-systems which rely on it globally.
     text_terminal term(vga);
     g_terminal = &term;
-
-    s_kernel_heap_allocator.reset((void*)kernel_image_end);
-    initialize_page_frame_allocator(mb_info);
-    initialize_kernel_malloc();
-    call_global_constructors();
-
-    // Initialize the real VGA console output driver.
-    term.printf("%u KB low memory, %u MB high memory\n",
-                mb_info->mem_lower, mb_info->mem_upper/1024);
+    
+    // The kernel memory allocators must be initialized after the text terminal
+    // (because they print to the screen) and before anything tries to use new
+    // or malloc().
+    s_allocators = kernel_memory_allocators::create(mb_info, term);
 
     // Initialize the PS/2 keyboard driver.
     s_keyboard = new ps2_keyboard_device();
@@ -365,6 +289,7 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     {
+        term.puts("Entering console loop:\n");
         line_editor ed(term, *s_keyboard);
         while (true) {
             auto user_input = ed.getline();

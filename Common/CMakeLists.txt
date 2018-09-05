@@ -26,6 +26,7 @@ set(SOURCE_FILES
     "include/common/memory_allocator.hpp"
     "include/common/minmax.hpp"
     "include/common/vec2.hpp"
+    "include/common/bit_array.hpp" "src/bit_array.cpp"
     )
 
 if(CMAKE_CROSSCOMPILING)
@@ -53,6 +54,7 @@ else(CMAKE_CROSSCOMPILING)
                    "test/test_linked_list.cpp"
                    "test/test_string.cpp"
                    "test/test_stdio.cpp"
+                   "test/test_bit_array.cpp"
                    "test/test_main.cpp"
                    )
 
