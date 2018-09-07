@@ -1,11 +1,12 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_DISPLAY_DEVICE_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_DISPLAY_DEVICE_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <common/terminal_metrics.hpp>
 #include <common/vec2.hpp>
 
-enum vgacolor_t {
+enum VGAColor {
     BLACK    = 0x0,
     BLUE     = 0x1,
     GREEN    = 0x2,
@@ -24,43 +25,45 @@ enum vgacolor_t {
     WHITE    = 0xF
 };
 
-struct vgachar_t {
+struct VGAChar {
     uint16_t ch:8;
     uint16_t fg:4;
     uint16_t bg:3;
     uint16_t blink:1;
 };
-static_assert(sizeof(vgachar_t) == 2, "Characters in the VGA text buffer are 2 bytes.");
+static_assert(sizeof(VGAChar) == 2, "Characters in the VGA text buffer are 2 bytes.");
 
 // A text display device is a physical device which displays a grid of monospace
 // text. An example of a console is a VGA display in text mode.
-class text_display_device {
+class TextDisplayDevice {
 public:
-    virtual ~text_display_device() = default;
+    virtual ~TextDisplayDevice() = default;
 
     // Clears the console to the current background color.
     virtual void clear() = 0;
 
     // Draws the specified character at the specified position in the console buffer.
-    virtual void draw_char(point2_t pos, vgachar_t ch) = 0;
+    virtual void draw_char(Point2 pos, VGAChar ch) = 0;
 
     // Gets the character at the specified position of the console buffer.
-    virtual vgachar_t get_char(point2_t pos) const = 0;
+    virtual VGAChar get_char(Point2 pos) const = 0;
 
     // Returns a VGA character in the current color for the specified ASCII char.
-    virtual vgachar_t make_char(char ch) const = 0;
+    virtual VGAChar make_char(char ch) const = 0;
 
     // Moves the hardware cursor to the specified position.
     // If the cursor is placed outside the visible console then it will be hidden.
-    // TODO: package the position into a point2_t for set_cursor_position()
-    virtual void set_cursor_position(point2_t pos) = 0;
+    // TODO: package the position into a Point2 for set_cursor_position()
+    virtual void set_cursor_position(Point2 pos) = 0;
 
     // Gets the row and column of the display on which the cursor was placed.
-    virtual point2_t get_cursor_position() const = 0;
+    virtual Point2 get_cursor_position() const = 0;
 
     // Gets the number of columns needed to display a TAB on this display.
     virtual size_t get_tab_width() const = 0;
 
     // Gets the number of rows and columns on this display.
-    virtual size2_t dimensions() const = 0;
+    virtual Size2 dimensions() const = 0;
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_DISPLAY_DEVICE_HPP

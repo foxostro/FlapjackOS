@@ -1,7 +1,7 @@
 #include <gdt.h>
 #include <seg.h>
 
-void gdt_create_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit,
+void gdt_create_entry(GDTEntry *entry, uint32_t base, uint32_t limit,
                       bool gr, bool sz, bool pr, unsigned privl, bool ex,
                       bool dc, bool rw, bool ac)
 {
@@ -24,7 +24,7 @@ void gdt_create_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit,
     entry->base_24_31  = (base  & 0b11111111000000000000000000000000) >> 24;
 }
 
-void gdt_create_flat_mapping(gdt_entry_t *gdt,
+void gdt_create_flat_mapping(GDTEntry *gdt,
                              __attribute__((unused)) size_t size,
                              uintptr_t tss)
 {

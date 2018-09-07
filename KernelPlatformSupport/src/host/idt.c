@@ -1,9 +1,9 @@
 #include <stddef.h>
 #include <idt_asm.h>
 
-idt_entry_t g_idt[IDT_MAX];
+IDTEntry g_idt[IDT_MAX];
 
-idt_entry_t* idt_base(void)
+IDTEntry* idt_base(void)
 {
     return g_idt;
 }

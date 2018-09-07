@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_HALT_H
+#define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_HALT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,3 +16,5 @@ void hlt(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_HALT_H

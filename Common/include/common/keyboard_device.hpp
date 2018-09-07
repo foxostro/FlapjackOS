@@ -1,5 +1,7 @@
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_KEYBOARD_DEVICE_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_KEYBOARD_DEVICE_HPP
+
 // Abstract interface for access to the keyboard.
-#pragma once
 
 enum {
     KEYCODE_A = 0,
@@ -136,7 +138,7 @@ enum keycode_key_state {
     PRESSED, RELEASED
 };
 
-struct keyboard_event {
+struct KeyboardEvent {
     // Identifies which button on the keyboard corresponds to this event.
     keycode_t key;
 
@@ -147,28 +149,30 @@ struct keyboard_event {
     char ch;
 
     // Default constructor.
-    keyboard_event()
+    KeyboardEvent()
      : key(KEYCODE_MAX),
        state(RELEASED),
        ch(0)
     {}
 
     // Constructor.
-    keyboard_event(keycode_t k, keycode_key_state s, char c)
+    KeyboardEvent(keycode_t k, keycode_key_state s, char c)
      : key(k),
        state(s),
        ch(c)
     {}
 };
 
-class keyboard_device {
+class KeyboardDevice {
 public:
-    virtual ~keyboard_device() noexcept = default;
+    virtual ~KeyboardDevice() noexcept = default;
 
     // Returns the name of the given key code.
     virtual const char* keycode_name(keycode_t key) = 0;
 
     // Gets the next key event.
     // Blocks on the next key event and returns it in the specified event structure.
-    virtual keyboard_event get_event() = 0;
+    virtual KeyboardEvent get_event() = 0;
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_KEYBOARD_DEVICE_HPP

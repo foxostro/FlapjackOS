@@ -8,7 +8,6 @@ rm -rf "CMakeCache.txt" \
        "Common/FlapjackOS.build/" \
        "Common/cmake_install.cmake" \
        "FlapjackOS.build/" \
-       "FlapjackOS.xcodeproj/" \
        "Kernel/CMakeScripts/" \
        "Kernel/CTestTestfile.cmake" \
        "Kernel/FlapjackOS.build/" \

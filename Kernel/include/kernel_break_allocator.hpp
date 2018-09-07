@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_KERNEL_BREAK_ALLOCATOR_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_BREAK_ALLOCATOR_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -7,7 +8,7 @@
 // Allocates memory in the kernel bootstrap heap.
 // The kernel heap region follows the end of the kernel image. Virtual addresses
 // in this region are physically-contiguous kernel logical addresses.
-class kernel_break_allocator : public memory_allocator {
+class KernelBreakAllocator : public MemoryAllocator {
 public:
     void reset(void *bootstrap_heap_begin);
     void* malloc(size_t size) override;
@@ -29,6 +30,8 @@ public:
     bool is_frame_beyond_bootstrap_heap(uintptr_t page_frame);
 
 private:
-    void* kernel_heap_begin;
-    void* kernel_break;
+    void* kernel_heap_begin_;
+    void* kernel_break_;
 };
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_BREAK_ALLOCATOR_HPP

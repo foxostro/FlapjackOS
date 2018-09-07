@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STRING_H
+#define FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STRING_H
 
 #ifdef __cplusplus
 
@@ -40,3 +41,5 @@ size_t STRLEN(const char *s);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STRING_H

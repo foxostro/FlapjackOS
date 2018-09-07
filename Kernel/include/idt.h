@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_IDT_H
+#define FLAPJACKOS_KERNEL_INCLUDE_IDT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,8 +13,10 @@ extern "C" {
 // offset -- Pointer to the handler function.
 // gate_type -- The type of gate to use for the entry.
 // dpl -- Privilege level for the gate.
-void idt_build_entry(idt_entry_t *entry, uint32_t offset, unsigned gate_type, unsigned dpl);
+void idt_build_entry(IDTEntry *entry, uint32_t offset, unsigned gate_type, unsigned dpl);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_IDT_H

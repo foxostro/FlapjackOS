@@ -3,30 +3,30 @@
 #include <common/text_line.hpp>
 #include "dummy_text_display_device.hpp"
 
-TEST_CASE("text_line::measure, empty line", "[text_line]")
+TEST_CASE("TextLine::measure, empty line", "[TextLine]")
 {
-    dummy_text_display_device display;
-    text_line line(display);
-    size2_t phys_size = line.measure();
+    DummyTextDisplayDevice display;
+    TextLine line(display);
+    Size2 phys_size = line.measure();
     REQUIRE(phys_size.width == 0);
     REQUIRE(phys_size.height == 1);
 }
 
-TEST_CASE("text_line::push_back", "[text_line]")
+TEST_CASE("TextLine::push_back", "[TextLine]")
 {
-    dummy_text_display_device display;
+    DummyTextDisplayDevice display;
 
-    constexpr vector<char>::size_type WIDTH = MAXLINE;
+    constexpr Vector<char>::size_type WIDTH = MAXLINE;
 
-    vector<char> expected;
-    for (vector<char>::size_type i = 0; i < WIDTH; ++i) {
+    Vector<char> expected;
+    for (Vector<char>::size_type i = 0; i < WIDTH; ++i) {
         expected.push_back('a');
     }
     expected.push_back(0);
 
-    text_line line(display);
+    TextLine line(display);
 
-    for (vector<char>::size_type i = 0; i < WIDTH; ++i) {
+    for (Vector<char>::size_type i = 0; i < WIDTH; ++i) {
         REQUIRE(line.push_back('a') == true);
     }
 
@@ -37,17 +37,17 @@ TEST_CASE("text_line::push_back", "[text_line]")
     REQUIRE(std::string(line.str().data()) == std::string(expected.data()));
 
     // The logical line spans several display lines.
-    size2_t phys_size = line.measure();
+    Size2 phys_size = line.measure();
 
     REQUIRE(phys_size.width == display.dimensions().width);
     REQUIRE(phys_size.height == 4);
 }
 
-TEST_CASE("text_line::pop_back", "[text_line]")
+TEST_CASE("TextLine::pop_back", "[TextLine]")
 {
-    size2_t phys_size;
-    dummy_text_display_device display;
-    text_line line(display);
+    Size2 phys_size;
+    DummyTextDisplayDevice display;
+    TextLine line(display);
 
     REQUIRE(line.push_back('H') == true);
     REQUIRE(line.push_back('e') == true);
@@ -70,26 +70,26 @@ TEST_CASE("text_line::pop_back", "[text_line]")
     REQUIRE(phys_size.height == 1);
 }
 
-TEST_CASE("text_line::pop_back, empty line", "[text_line]")
+TEST_CASE("TextLine::pop_back, empty line", "[TextLine]")
 {
-    dummy_text_display_device display;
-    text_line line(display);
+    DummyTextDisplayDevice display;
+    TextLine line(display);
     REQUIRE(std::string(line.str().data()) == "");
     line.pop_back();
     REQUIRE(std::string(line.str().data()) == "");
 }
 
-TEST_CASE("text_line::insert", "[text_line]")
+TEST_CASE("TextLine::insert", "[TextLine]")
 {
-    dummy_text_display_device display;
-    text_line line(display);
+    DummyTextDisplayDevice display;
+    TextLine line(display);
     REQUIRE(std::string(line.str().data()) == "");
 
     line.insert(0, 'a');
     REQUIRE(std::string(line.str().data()) == "a");
 
     {
-        size2_t phys_size = line.measure();
+        Size2 phys_size = line.measure();
         REQUIRE(phys_size.width == 1);
         REQUIRE(phys_size.height == 1);
     }
@@ -101,16 +101,16 @@ TEST_CASE("text_line::insert", "[text_line]")
     REQUIRE(std::string(line.str().data()) == "bca");
 
     {
-        size2_t phys_size = line.measure();
+        Size2 phys_size = line.measure();
         REQUIRE(phys_size.width == 3);
         REQUIRE(phys_size.height == 1);
     }
 }
 
-TEST_CASE("text_line::remove", "[text_line]")
+TEST_CASE("TextLine::remove", "[TextLine]")
 {
-    dummy_text_display_device display;
-    text_line line(display);
+    DummyTextDisplayDevice display;
+    TextLine line(display);
 
     line.push_back('a');
     line.push_back('b');
@@ -119,7 +119,7 @@ TEST_CASE("text_line::remove", "[text_line]")
     REQUIRE(std::string(line.str().data()) == "abcd");
 
     {
-        size2_t phys_size = line.measure();
+        Size2 phys_size = line.measure();
         REQUIRE(phys_size.width == 4);
         REQUIRE(phys_size.height == 1);
     }
@@ -134,7 +134,7 @@ TEST_CASE("text_line::remove", "[text_line]")
     REQUIRE(std::string(line.str().data()) == "d");
 
     {
-        size2_t phys_size = line.measure();
+        Size2 phys_size = line.measure();
         REQUIRE(phys_size.width == 1);
         REQUIRE(phys_size.height == 1);
     }

@@ -1,12 +1,14 @@
-#include <cstdio>
-#include <cstdarg>
+#include <panic.h> // The panic API uses C linkage.
+
 #include <common/text_terminal.hpp>
 #include <halt.h>
 #include <interrupt_asm.h>
 #include <backtrace.hpp>
-#include <panic.h> // The panic API uses C linkage.
 
-extern text_terminal *g_terminal; // defined in kernel.c
+#include <cstdio>
+#include <cstdarg>
+
+extern TextTerminal *g_terminal; // defined in kernel.c
 
 extern "C"
 __attribute__((noreturn))
@@ -43,7 +45,7 @@ void panic2(const char *message,
             unsigned error_code,
             unsigned eip)
 {
-    text_terminal &term = *g_terminal;
+    TextTerminal &term = *g_terminal;
 
     term.printf("Registers:\n");
     term.printf("edi = 0x%x\n", edi);

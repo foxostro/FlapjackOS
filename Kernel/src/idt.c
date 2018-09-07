@@ -1,11 +1,12 @@
-#include <stddef.h>
 #include <idt.h>
 #include <seg.h>
 #include <misc.h>
 
-void idt_build_entry(idt_entry_t *entry, uint32_t offset, unsigned gate_type, unsigned dpl)
+#include <stddef.h>
+
+void idt_build_entry(IDTEntry *entry, uint32_t offset, unsigned gate_type, unsigned dpl)
 {
-    *entry = (idt_entry_t) {
+    *entry = (IDTEntry) {
         .offset_1 = DWORD_LOWER_WORD(offset),
         .selector = SEGSEL_KERNEL_CS,
         .zero = 0,

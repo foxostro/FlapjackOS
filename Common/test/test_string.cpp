@@ -18,7 +18,7 @@ TEST_CASE("test_strlen", "[String]")
 // When the string is NULL then STRLEN returns a length of zero.
 TEST_CASE("test_strlen_null", "[String]")
 {
-    size_t len = STRLEN(NULL);
+    size_t len = STRLEN(nullptr);
     REQUIRE(len == 0);
 }
 
@@ -32,7 +32,7 @@ TEST_CASE("test_strnlen", "[String]")
 // When the string is NULL then STRNLEN returns a length of zero.
 TEST_CASE("test_strnlen_null", "[String]")
 {
-    size_t len = STRNLEN(NULL, 0);
+    size_t len = STRNLEN(nullptr, 0);
     REQUIRE(len == 0);
 }
 
@@ -74,8 +74,8 @@ TEST_CASE("test_memcpy_zerolen", "[String]")
 // src and/or a NULL dst.
 TEST_CASE("test_memcpy_zerolen_null", "[String]")
 {
-    void *r = MEMCPY(NULL, NULL, 0);
-    REQUIRE(r == NULL);
+    void *r = MEMCPY(nullptr, nullptr, 0);
+    REQUIRE(r == nullptr);
 }
 
 // Test that MEMMOVE copies the buffers correctly when buffers do not overlap.
@@ -156,8 +156,8 @@ TEST_CASE("test_memmove_zerolen", "[String]")
 // src and/or a NULL dst.
 TEST_CASE("test_memmove_zerolen_null", "[String]")
 {
-    void *r = MEMMOVE(NULL, NULL, 0);
-    REQUIRE(r == NULL);
+    void *r = MEMMOVE(nullptr, nullptr, 0);
+    REQUIRE(r == nullptr);
 }
 
 // Test that MEMSET correctly sets the buffer values.
@@ -181,6 +181,6 @@ TEST_CASE("test_memset_zerolen", "[String]")
 // When the length is zero and the buffer is NULL then MEMSET does nothing.
 TEST_CASE("test_memset_zerolen_null", "[String]")
 {
-    void *r = MEMSET(NULL, '?', 0);
-    REQUIRE(r == NULL);
+    void *r = MEMSET(nullptr, '?', 0);
+    REQUIRE(r == nullptr);
 }

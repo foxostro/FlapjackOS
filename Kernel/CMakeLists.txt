@@ -23,7 +23,7 @@ set(SOURCE_FILES
     "src/kernel.cpp"
     "include/page_size.hpp"
     "include/kernel_image_info.hpp"
-    "include/kernel_heap_allocator.hpp" "src/kernel_heap_allocator.cpp"
+    "include/kernel_contiguous_memory_allocator.hpp" "src/kernel_contiguous_memory_allocator.cpp"
     "include/kernel_break_allocator.hpp" "src/kernel_break_allocator.cpp"
     "include/mmu.hpp" "src/mmu.cpp"
     "include/page_frame_allocator.hpp" "src/page_frame_allocator.cpp"

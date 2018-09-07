@@ -109,7 +109,7 @@ static uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag)
 TEST_CASE("test_gdt_layout_0", "[gdt]")
 {
     uint64_t expected = create_descriptor(0, 0, 0);
-    gdt_entry_t entry;
+    GDTEntry entry;
     gdt_create_entry(&entry,
                      0x00000000, // base
                      0x00000000, // limit
@@ -127,7 +127,7 @@ TEST_CASE("test_gdt_layout_0", "[gdt]")
 TEST_CASE("test_gdt_layout_1", "[gdt]")
 {
     uint64_t expected = create_descriptor(0, 0x000fffff, GDT_CODE_PL0);
-    gdt_entry_t entry;
+    GDTEntry entry;
     gdt_create_entry(&entry,
                      0x00000000, // base
                      0x000fffff, // limit
@@ -158,7 +158,7 @@ TEST_CASE("test_gdt_layout_2", "[gdt]")
         0x0000ffff, // 5
         0x00cff200,
     };
-    gdt_entry_t gdt[6];
+    GDTEntry gdt[6];
     memset(gdt, 0, sizeof(gdt));
     gdt_create_flat_mapping(gdt, sizeof(gdt), 0x00100930);
 

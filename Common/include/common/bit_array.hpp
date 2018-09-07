@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_BIT_ARRAY_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_BIT_ARRAY_HPP
 
 #include <cstring>
 #include <cassert>
@@ -8,44 +9,44 @@
 // A compact array of bits.
 // Either use the factory method to create this object, or else use
 // placement-new to construct this in a suitable buffer.
-class bit_array {
+class BitArray {
 public:
-    using word_t = unsigned;
-    static constexpr size_t NUMBER_OF_WORD_BITS = sizeof(word_t) * 8;
+    using Word = unsigned;
+    static constexpr size_t NUMBER_OF_WORD_BITS = sizeof(Word) * 8;
     static constexpr int NOT_FOUND = -1;
 
     static size_t calc_number_of_storage_bytes(size_t number_of_bits)
     {
-        return sizeof(bit_array) + (number_of_bits + bit_array::NUMBER_OF_WORD_BITS - 1) / bit_array::NUMBER_OF_WORD_BITS * sizeof(bit_array::word_t);
+        return sizeof(BitArray) + (number_of_bits + BitArray::NUMBER_OF_WORD_BITS - 1) / BitArray::NUMBER_OF_WORD_BITS * sizeof(BitArray::Word);
     }
 
-    static bit_array* create(size_t number_of_bits)
+    static BitArray* create(size_t number_of_bits)
     {
         size_t size = calc_number_of_storage_bytes(number_of_bits);
         char* buffer = new char[size];
         if (buffer) {
-            bit_array *result = new (buffer) bit_array(number_of_bits, size);
+            BitArray *result = new (buffer) BitArray(number_of_bits, size);
             return result;
         } else {
             return nullptr;
         }
     }
 
-    bit_array(size_t number_of_bits, size_t length)
-     : number_of_bits(number_of_bits),
-       length(length)
+    BitArray(size_t number_of_bits, size_t length)
+     : number_of_bits_(number_of_bits),
+       length_(length)
     {
         clear_all();
     }
 
     void clear_all()
     {
-        memset(storage, 0x00, length);
+        memset(storage_, 0x00, length_);
     }
 
     void set_all()
     {
-        memset(storage, 0xFF, length);
+        memset(storage_, 0xFF, length_);
     }
 
     void set(size_t bit_index)
@@ -65,7 +66,7 @@ public:
 
     size_t get_number_of_bits()
     {
-        return number_of_bits;
+        return number_of_bits_;
     }
 
     void set_region(size_t bit_index_begin, size_t length)
@@ -102,13 +103,13 @@ public:
             return slow_scan_backward(begin, desired_value);
         }
 #else
-        return slow_scan_backward(number_of_bits-1, desired_value);
+        return slow_scan_backward(number_of_bits_-1, desired_value);
 #endif        
     }
 
 private:
-    size_t number_of_bits, length;
-    char storage[];
+    size_t number_of_bits_, length_;
+    char storage_[];
 
     size_t get_mask(size_t bit_index)
     {
@@ -117,19 +118,19 @@ private:
 
     char& get_byte(size_t bit_index)
     {
-        assert(bit_index < number_of_bits);
-        assert((bit_index / CHAR_BIT) < length);
-        return storage[bit_index / CHAR_BIT];
+        assert(bit_index < number_of_bits_);
+        assert((bit_index / CHAR_BIT) < length_);
+        return storage_[bit_index / CHAR_BIT];
     }
 
-    word_t* get_words()
+    Word* get_words()
     {
-        return (word_t*)storage;
+        return (Word*)storage_;
     }
 
     size_t get_number_of_words()
     {
-        return number_of_bits / NUMBER_OF_WORD_BITS;
+        return number_of_bits_ / NUMBER_OF_WORD_BITS;
     }
 
     int scan_forwards_to_find_bit_index_of_matching_word(bool desired_value)
@@ -144,7 +145,7 @@ private:
 
     int slow_scan_forward(size_t begin, bool desired_value)
     {
-        for (size_t i = begin; i < number_of_bits; ++i) {
+        for (size_t i = begin; i < number_of_bits_; ++i) {
             if (test(i) == desired_value) {
                 return i;
             }
@@ -173,3 +174,5 @@ private:
         return NOT_FOUND;
     }
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_BIT_ARRAY_HPP

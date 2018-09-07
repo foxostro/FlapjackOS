@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_RING_BUFFER_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_RING_BUFFER_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -14,11 +15,11 @@
 // the front or the back ends. It also provides API for random access and for
 // insert/delete at arbitrary positions in the queue.
 //
-// ring_buffer is not a vector-like or array-like container because elements are
+// RingBuffer is not a vector-like or array-like container because elements are
 // not guaranteed to be contiguous in memory. However, you can often use it like
 // a vector that happens to be statically allocated.
 template<typename TYPE, int CAPACITY>
-class ring_buffer {
+class RingBuffer {
 public:
     using value_type = TYPE;
     using size_type = int;
@@ -29,101 +30,101 @@ private:
 
     // An index into the buffer which wraps around at CAPACITY.
     // This can be incremented, decremented, and cast to size_type.
-    class circular_index {
-        size_type _value;
+    class CircularIndex {
+        size_type value_;
 
     public:
-        circular_index(size_type value) : _value(value) {}
-        circular_index(const circular_index &other) : _value(other._value) {}
+        CircularIndex(size_type value) : value_(value) {}
+        CircularIndex(const CircularIndex &other) : value_(other.value_) {}
 
         operator size_type() const
         {
-            return _value;
+            return value_;
         }
 
-        bool operator==(const circular_index &other) const
+        bool operator==(const CircularIndex &other) const
         {
             if (this == &other) {
                 return true;
             }
 
-            return (other._value == _value);
+            return (other.value_ == value_);
         }
 
-        bool operator!=(const circular_index &other) const
+        bool operator!=(const CircularIndex &other) const
         {
             return !(*this == other);
         }
 
-        circular_index& operator=(const circular_index &other)
+        CircularIndex& operator=(const CircularIndex &other)
         {
             if (this != &other) {
-                _value = other._value;
+                value_ = other.value_;
             }
 
             return *this;
         }
 
-        circular_index& operator++()
+        CircularIndex& operator++()
         {
-            _value = (_value + 1) % CAPACITY;
+            value_ = (value_ + 1) % CAPACITY;
             return *this;
         }
 
-        circular_index operator++(int)
+        CircularIndex operator++(int)
         {
-            _value = (_value + 1) % CAPACITY;
+            value_ = (value_ + 1) % CAPACITY;
             return *this;
         }
 
-        circular_index& operator--()
+        CircularIndex& operator--()
         {
-            if (_value == 0) {
-                _value = CAPACITY - 1;
+            if (value_ == 0) {
+                value_ = CAPACITY - 1;
             } else {
-                _value = (_value - 1) % CAPACITY;
+                value_ = (value_ - 1) % CAPACITY;
             }
             return *this;
         }
 
-        circular_index operator--(int)
+        CircularIndex operator--(int)
         {
-            if (_value == 0) {
-                _value = CAPACITY - 1;
+            if (value_ == 0) {
+                value_ = CAPACITY - 1;
             } else {
-                _value = (_value - 1) % CAPACITY;
+                value_ = (value_ - 1) % CAPACITY;
             }
             return *this;
         }
     };
 
-    circular_index index_at(size_type index) const
+    CircularIndex index_at(size_type index) const
     {
-        assert(index >= 0 && index <= _count);
-        circular_index cursor(_front_pos);
+        assert(index >= 0 && index <= count_);
+        CircularIndex cursor(front_pos_);
         for (size_type i = 0; i < index; ++i) {
             ++cursor;
         }
         return cursor;
     }
 
-    internal_type _buffer[CAPACITY];
-    circular_index _front_pos;
-    circular_index _back_pos;
-    size_type _count;
+    internal_type buffer_[CAPACITY];
+    CircularIndex front_pos_;
+    CircularIndex back_pos_;
+    size_type count_;
     
 public:
-    ~ring_buffer()
+    ~RingBuffer()
     {
         clear();
     }
 
     // Default constructor.
-    ring_buffer() : _front_pos(0), _back_pos(0), _count(0) {}
+    RingBuffer() : front_pos_(0), back_pos_(0), count_(0) {}
 
     // Copy constructor.
-    ring_buffer(const ring_buffer &other)
-     : ring_buffer()
+    RingBuffer(const RingBuffer &other)
+     : RingBuffer()
     {
         for (size_type i = 0; i < other.size(); ++i) {
             push_back(other.at(i));
@@ -131,8 +132,8 @@ public:
     }
 
     // Move constructor.
-    ring_buffer(ring_buffer &&other)
-     : ring_buffer()
+    RingBuffer(RingBuffer &&other)
+     : RingBuffer()
     {
         for (size_type i = 0; i < other.size(); ++i) {
             push_back(std::move(other.at(i)));
@@ -141,7 +142,7 @@ public:
     }
 
     // Copy-assignment operator.
-    ring_buffer& operator=(const ring_buffer &other)
+    RingBuffer& operator=(const RingBuffer &other)
     {
         if (this != &other) {
             clear();
@@ -154,7 +155,7 @@ public:
     }
 
     // Move-assignment operator.
-    ring_buffer& operator=(ring_buffer &&other)
+    RingBuffer& operator=(RingBuffer &&other)
     {
         if (this != &other) {
             clear();
@@ -168,7 +169,7 @@ public:
     }
 
     // Equality operator.
-    bool operator==(const ring_buffer &other) const
+    bool operator==(const RingBuffer &other) const
     {
         if (this == &other) {
             return true;
@@ -188,7 +189,7 @@ public:
     }
 
     // Not-equality operator.
-    bool operator!=(const ring_buffer &other) const
+    bool operator!=(const RingBuffer &other) const
     {
         return !(*this == other);
     }
@@ -197,61 +198,61 @@ public:
     value_type& front()
     {
         assert(!empty());
-        return *((value_type *)_buffer + _front_pos);
+        return *((value_type *)buffer_ + front_pos_);
     }
 
     // Returns the element at the front of the buffer.
     const value_type& front() const
     {
         assert(!empty());
-        return *((value_type *)_buffer + _front_pos);
+        return *((value_type *)buffer_ + front_pos_);
     }
 
     // Returns the element at the back of the buffer.
     value_type& back()
     {
         assert(!empty());
-        return *((value_type *)_buffer + _back_pos);
+        return *((value_type *)buffer_ + back_pos_);
     }
 
     // Returns the element at the back of the buffer.
     const value_type& back() const
     {
         assert(!empty());
-        return *((value_type *)_buffer + _back_pos);
+        return *((value_type *)buffer_ + back_pos_);
     }
 
-    // Returns the i'th element of the ring_buffer.
+    // Returns the i'th element of the RingBuffer.
     // The elements are indexed with zero being the front cursor.
     value_type& at(size_type index)
     {
-        circular_index cursor = index_at(index);
-        return *((value_type *)_buffer + cursor);
+        CircularIndex cursor = index_at(index);
+        return *((value_type *)buffer_ + cursor);
     }
 
-    // Returns the i'th element of the ring_buffer.
+    // Returns the i'th element of the RingBuffer.
     // The elements are indexed with zero being the front cursor.
     const value_type& at(size_type index) const
     {
-        circular_index cursor = index_at(index);
-        return *((value_type *)_buffer + cursor);
+        CircularIndex cursor = index_at(index);
+        return *((value_type *)buffer_ + cursor);
     }
 
-    // Returns the i'th element of the ring_buffer.
+    // Returns the i'th element of the RingBuffer.
     // The elements are indexed with zero being the front cursor.
     value_type& operator[](size_type i)
     {
         return at(i);
     }
 
-    // Returns the i'th element of the ring_buffer.
+    // Returns the i'th element of the RingBuffer.
     // The elements are indexed with zero being the front cursor.
     const value_type& operator[](size_type i) const
     {
         return at(i);
     }
 
-    // Removes all elements from the ring_buffer.
+    // Removes all elements from the RingBuffer.
     void clear()
     {
         while (!empty()) {
@@ -270,11 +271,11 @@ public:
         }
 
         if (!empty()) {
-            _back_pos++;
+            back_pos_++;
         }
 
-        _count++;
-        new ((value_type *)_buffer + _back_pos) value_type(std::move(value));
+        count_++;
+        new ((value_type *)buffer_ + back_pos_) value_type(std::move(value));
 
         return true;
     }
@@ -290,42 +291,42 @@ public:
         }
 
         if (!empty()) {
-            _front_pos--;
+            front_pos_--;
         }
 
-        _count++;
-        new ((value_type *)_buffer + _front_pos) value_type(std::move(value));
+        count_++;
+        new ((value_type *)buffer_ + front_pos_) value_type(std::move(value));
 
         return true;
     }
 
-    // Pops an item off the back of the ring_buffer.
-    // This cannot be called if the ring_buffer is empty.
+    // Pops an item off the back of the RingBuffer.
+    // This cannot be called if the RingBuffer is empty.
     void pop_back()
     {
         assert(!empty());
-        value_type *ptr = (value_type *)_buffer + _back_pos;
+        value_type *ptr = (value_type *)buffer_ + back_pos_;
         ptr->~value_type();
         if (size() != 1) {
-            _back_pos--;
+            back_pos_--;
         }
-        _count--;
+        count_--;
     }
 
-    // Pops an item off the front of the ring_buffer.
-    // This cannot be called if the ring_buffer is empty.
+    // Pops an item off the front of the RingBuffer.
+    // This cannot be called if the RingBuffer is empty.
     void pop_front()
     {
         assert(!empty());
-        value_type *ptr = (value_type *)_buffer + _front_pos;
+        value_type *ptr = (value_type *)buffer_ + front_pos_;
         ptr->~value_type();
         if (size() != 1) {
-            _front_pos++;
+            front_pos_++;
         }
-        _count--;
+        count_--;
     }
 
-    // Inserts an item at the specified index of the ring_buffer.
+    // Inserts an item at the specified index of the RingBuffer.
     // Moves item toward the back to make room.
     // Returns true if this was successful, and false otherwise.
     // This may fail if there is not enough space.
@@ -345,22 +346,22 @@ public:
             return push_back(std::move(value));
         }
 
-        _back_pos++;
+        back_pos_++;
 
-        for (size_type i = _count; i > index; --i) {
-            value_type *prev = (value_type *)_buffer + index_at(i-1);
-            value_type *curr = (value_type *)_buffer + index_at(i+0);
+        for (size_type i = count_; i > index; --i) {
+            value_type *prev = (value_type *)buffer_ + index_at(i-1);
+            value_type *curr = (value_type *)buffer_ + index_at(i+0);
             new (curr) value_type(std::move(*prev));
             prev->~value_type();
         }
 
-        new ((value_type *)_buffer + index_at(index)) value_type(std::move(value));
-        _count++;
+        new ((value_type *)buffer_ + index_at(index)) value_type(std::move(value));
+        count_++;
 
         return true;
     }
 
-    // Removes the index'th element of the ring_buffer.
+    // Removes the index'th element of the RingBuffer.
     // Moves item from the back toward the front to fill the hole.
     void remove(size_type index)
     {
@@ -377,41 +378,43 @@ public:
             return;
         }
 
-        for (size_type i = index; i < _count-1; ++i) {
-            value_type *curr = (value_type *)_buffer + index_at(i+0);
-            value_type *next = (value_type *)_buffer + index_at(i+1);
+        for (size_type i = index; i < count_-1; ++i) {
+            value_type *curr = (value_type *)buffer_ + index_at(i+0);
+            value_type *next = (value_type *)buffer_ + index_at(i+1);
             curr->~value_type();
             new (curr) value_type(std::move(*next));
         }
 
         if (size() != 1) {
-            _back_pos--;
+            back_pos_--;
         }
 
-        _count--;
+        count_--;
     }
 
-    // Returns true if the ring_buffer is empty.
+    // Returns true if the RingBuffer is empty.
     bool empty() const
     {
-        return _count == 0;
+        return count_ == 0;
     }
 
-    // Returns true if the ring_buffer is at capacity.
+    // Returns true if the RingBuffer is at capacity.
     bool full() const
     {
-        return _count >= CAPACITY;
+        return count_ >= CAPACITY;
     }
 
-    // Returns the number of elements in the ring_buffer;
+    // Returns the number of elements in the RingBuffer;
     size_type size() const
     {
-        return _count;
+        return count_;
     }
 
-    // Returns the maximum capacity of the ring_buffer;
+    // Returns the maximum capacity of the RingBuffer;
     size_type capacity() const
     {
         return CAPACITY;
     }
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_RING_BUFFER_HPP

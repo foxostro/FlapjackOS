@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_LOGICAL_ADDRESSING_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_LOGICAL_ADDRESSING_HPP
 
 #include "kernel_image_info.hpp"
 
@@ -18,3 +19,5 @@ inline uintptr_t convert_logical_to_physical_address(uintptr_t logical_address)
     assert(logical_address >= KERNEL_VIRTUAL_START_ADDR);
     return logical_address - KERNEL_VIRTUAL_START_ADDR;
 }
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_LOGICAL_ADDRESSING_HPP

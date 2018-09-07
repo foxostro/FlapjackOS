@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PANIC_H
+#define FLAPJACKOS_KERNEL_INCLUDE_PANIC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,3 +25,5 @@ void panic2(const char *message,
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PANIC_H

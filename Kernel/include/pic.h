@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PIC_H
+#define FLAPJACKOS_KERNEL_INCLUDE_PIC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,3 +18,5 @@ bool pic_clear(unsigned interrupt_number);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PIC_H

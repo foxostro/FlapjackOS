@@ -9,7 +9,7 @@
 // SNPRINTF returns zero when the buffer is null
 TEST_CASE("test_null_buffer", "[stdio]")
 {
-    int c = SNPRINTF(NULL, 1000, NULL);
+    int c = SNPRINTF(nullptr, 1000, nullptr);
     REQUIRE(c == 0);
 }
 
@@ -17,14 +17,14 @@ TEST_CASE("test_null_buffer", "[stdio]")
 TEST_CASE("test_null_format", "[stdio]")
 {
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), NULL);
+    int c = SNPRINTF(buf, sizeof(buf), nullptr);
     REQUIRE(c == 0);
 }
 
 // SNPRINTF returns zero when the size is zero
 TEST_CASE("test_zero_length", "[stdio]")
 {
-    int c = SNPRINTF(NULL, 0, NULL);
+    int c = SNPRINTF(nullptr, 0, nullptr);
     REQUIRE(c == 0);
 }
 
@@ -111,12 +111,12 @@ TEST_CASE("test_string_arg_0", "[stdio]")
 }
 
 // SNPRINTF can format string arguments
-// If the string is NULL then we format as "NULL".
+// If the string is nullptr then we format as "nullptr".
 TEST_CASE("test_string_arg_1", "[stdio]")
 {
     static const char expected[] = "test (null)";
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "test %s", NULL);
+    int c = SNPRINTF(buf, sizeof(buf), "test %s", nullptr);
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen(expected));
 
@@ -124,7 +124,7 @@ TEST_CASE("test_string_arg_1", "[stdio]")
     char libcbuf[32];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat"
-    int d = snprintf(libcbuf, sizeof(libcbuf), "test %s", NULL);
+    int d = snprintf(libcbuf, sizeof(libcbuf), "test %s", nullptr);
     #pragma GCC diagnostic pop
     REQUIRE(std::string(buf) == libcbuf);
     REQUIRE(c == d);
@@ -136,7 +136,7 @@ TEST_CASE("test_string_arg_2", "[stdio]")
 {
     static const char expected[] = "test";
     char buf[5];
-    int c = SNPRINTF(buf, sizeof(buf), "test %s", NULL);
+    int c = SNPRINTF(buf, sizeof(buf), "test %s", nullptr);
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen("test (null)"));
 
@@ -144,7 +144,7 @@ TEST_CASE("test_string_arg_2", "[stdio]")
     char libcbuf[5];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat"
-    int d = snprintf(libcbuf, sizeof(libcbuf), "test %s", NULL);
+    int d = snprintf(libcbuf, sizeof(libcbuf), "test %s", nullptr);
     #pragma GCC diagnostic pop
     REQUIRE(c == d);
     REQUIRE(std::string(buf) == libcbuf);

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_GET_EBP_H
+#define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_GET_EBP_H
 
 #include <stdint.h>
 
@@ -11,3 +12,5 @@ uintptr_t* get_ebp(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_GET_EBP_H

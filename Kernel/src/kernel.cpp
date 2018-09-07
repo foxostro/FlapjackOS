@@ -32,14 +32,14 @@
 // We pass the terminal around globally becuase it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
 // around literally everywhere.
-text_terminal *g_terminal = NULL;
+TextTerminal *g_terminal = nullptr;
 
-static gdt_entry_t s_gdt[6];
-static tss_struct_t s_tss;
-static idt_entry_t s_idt[IDT_MAX];
-static ps2_keyboard_device *s_keyboard;
-static pit_timer_device *s_timer;
-static kernel_memory_allocators *s_allocators;
+static GDTEntry s_gdt[6];
+static TaskStateSegment s_tss;
+static IDTEntry s_idt[IDT_MAX];
+static PS2KeyboardDevice *s_keyboard;
+static PITTimerDevice *s_timer;
+static KernelMemoryAllocators *s_allocators;
 
 // Called when a page fault occurs.
 static void page_fault_handler(unsigned error_code);
@@ -180,11 +180,11 @@ void interrupt_dispatch(unsigned interrupt_number,
 // this after initializing interrupts and after initializing the console.
 static void call_global_constructors()
 {
-    extern char start_ctors[];
-    extern char end_ctors[];
+    extern char g_start_ctors[];
+    extern char g_end_ctors[];
 
-    for (char *ctor = start_ctors;
-         ctor < end_ctors;
+    for (char *ctor = g_start_ctors;
+         ctor < g_end_ctors;
          ctor += sizeof(void *)) {
 
         // Read the address from the table, interpret as a function pointer,
@@ -262,26 +262,26 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // Initialize the VGA text console output driver.
     // The driver lives in the kernel stack since we haven't initialized the
     // kernel heap yet.
-    vga_text_display_device vga;
+    VGATextDisplayDevice vga;
     vga.clear();
 
     // Initialize the text terminal, built on top of the VGA text display, and
     // make it available to other sub-systems which rely on it globally.
-    text_terminal term(vga);
+    TextTerminal term(vga);
     g_terminal = &term;
     
     // The kernel memory allocators must be initialized after the text terminal
     // (because they print to the screen) and before anything tries to use new
     // or malloc().
-    s_allocators = kernel_memory_allocators::create(mb_info, term);
+    s_allocators = KernelMemoryAllocators::create(mb_info, term);
 
     // Initialize the PS/2 keyboard driver.
-    s_keyboard = new ps2_keyboard_device();
+    s_keyboard = new PS2KeyboardDevice();
 
     // Configure the PIT timer chip so that it fires an interrupt every 10ms.
-    s_timer = new pit_timer_device(pit_timer_device::TIMER_RATE_10ms,
-                                   pit_timer_device::TIMER_LEAP_INTERVAL_10ms,
-                                   pit_timer_device::TIMER_LEAP_TICKS_10ms);
+    s_timer = new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
+                                 PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
+                                 PITTimerDevice::TIMER_LEAP_TICKS_10ms);
 
     // After this point, interrupts will start firing.
     enable_interrupts();
@@ -290,7 +290,7 @@ void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
     // (This operating system doesn't do much yet.)
     {
         term.puts("Entering console loop:\n");
-        line_editor ed(term, *s_keyboard);
+        LineEditor ed(term, *s_keyboard);
         while (true) {
             auto user_input = ed.getline();
             term.puts("Got: ");

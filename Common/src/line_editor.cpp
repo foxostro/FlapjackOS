@@ -6,30 +6,29 @@
 #include <cassert>
 #include <cctype>
 
-line_editor::~line_editor() = default;
+LineEditor::~LineEditor() = default;
 
-line_editor::line_editor(text_terminal &t,
-                         keyboard_device &keyboard)
- : term(t),
-   kb(keyboard)
+LineEditor::LineEditor(TextTerminal &t, KeyboardDevice &keyboard)
+ : terminal_(t),
+   keyboard_(keyboard)
 {
     set_prompt(strlen(">"), ">");
 }
 
 // Prompt for one line of user input on the console.
-line_editor::line_t line_editor::getline()
+LineEditor::Line LineEditor::getline()
 {
     bool have_a_newline = false;
 
-    term.putv(prompt);
-    term.putchar(' ');
+    terminal_.putv(prompt_);
+    terminal_.putchar(' ');
 
-    line_t user_input, stashed_user_input;
-    line_t::size_type linear_cursor = 0;
+    Line user_input, stashed_user_input;
+    Line::size_type linear_cursor = 0;
     int history_cursor = -1;
 
     while (!have_a_newline) {
-        keyboard_event event = kb.get_event();
+        KeyboardEvent event = keyboard_.get_event();
 
         if (event.state != PRESSED) {
             continue;
@@ -45,7 +44,7 @@ line_editor::line_t line_editor::getline()
             case KEYCODE_LEFT_ARROW:
                 if (linear_cursor > 0) {
                     linear_cursor--;
-                    term.move_cursor_left();
+                    terminal_.move_cursor_left();
                 }
                 break;
 
@@ -55,7 +54,7 @@ line_editor::line_t line_editor::getline()
             case KEYCODE_RIGHT_ARROW:
                 if (linear_cursor < user_input.size()) {
                     linear_cursor++;
-                    term.move_cursor_right();
+                    terminal_.move_cursor_right();
                 }
                 break;
 
@@ -64,18 +63,18 @@ line_editor::line_t line_editor::getline()
 
             case KEYCODE_DOWN_ARROW:
                 if (history_cursor != -1) {
-                    term.move_cursor_to_end();
+                    terminal_.move_cursor_to_end();
                     for (int i = 0, n = user_input.size(); i < n; ++i) {
-                        term.putchar('\b');
+                        terminal_.putchar('\b');
                     }
                     history_cursor = MAX(history_cursor-1, -1);
                     if (history_cursor == -1) {
                         user_input = stashed_user_input;
                     } else {
-                        user_input = history[history_cursor];
+                        user_input = history_[history_cursor];
                     }
                     for (int i = 0, n = user_input.size(); i < n; ++i) {
-                        term.putchar(user_input[i]);
+                        terminal_.putchar(user_input[i]);
                     }
                     linear_cursor = user_input.size();
                 }
@@ -85,22 +84,22 @@ line_editor::line_t line_editor::getline()
                 // fall through
 
             case KEYCODE_UP_ARROW:
-                if (history_cursor < history.size()-1) {
-                    term.move_cursor_to_end();
+                if (history_cursor < history_.size()-1) {
+                    terminal_.move_cursor_to_end();
                     for (int i = 0, n = user_input.size(); i < n; ++i) {
-                        term.putchar('\b');
+                        terminal_.putchar('\b');
                     }
                     if (history_cursor == -1) {
                         stashed_user_input = user_input;
                     }
-                    history_cursor = MIN(history_cursor+1, history.size()-1);
+                    history_cursor = MIN(history_cursor+1, history_.size()-1);
                     if (history_cursor == -1) {
                         user_input = stashed_user_input;
                     } else {
-                        user_input = history[history_cursor];
+                        user_input = history_[history_cursor];
                     }
                     for (int i = 0, n = user_input.size(); i < n; ++i) {
-                        term.putchar(user_input[i]);
+                        terminal_.putchar(user_input[i]);
                     }
                     linear_cursor = user_input.size();
                 }
@@ -111,12 +110,12 @@ line_editor::line_t line_editor::getline()
                     case '\b':
                         if (user_input.size() > 0) {
                             user_input.remove(--linear_cursor);
-                            term.putchar('\b');
+                            terminal_.putchar('\b');
                         }
                         break;
 
                     case '\n':
-                        term.putchar('\n');
+                        terminal_.putchar('\n');
                         have_a_newline = true;
                         break;
 
@@ -126,7 +125,7 @@ line_editor::line_t line_editor::getline()
                             user_input.size() < MAXLINE) {
 
                             user_input.insert(linear_cursor++, ch);
-                            term.putchar(ch);
+                            terminal_.putchar(ch);
                         }
                         break;
                 } // switch (ch)
@@ -138,16 +137,16 @@ line_editor::line_t line_editor::getline()
 }
 
 // Change the prompt displayed at the beginning of the line.
-void line_editor::set_prompt(size_t size, const char *str)
+void LineEditor::set_prompt(size_t size, const char *str)
 {
-    prompt.clear();
+    prompt_.clear();
     for (int i = 0, n = MIN(MAXPROMPT, (int)strnlen(str, size)); i < n; ++i) {
-        prompt.push_back(str[i]);
+        prompt_.push_back(str[i]);
     }
 }
 
 // Add a line to the editor history.
-void line_editor::add_history(line_t entry)
+void LineEditor::add_history(Line entry)
 {
-    history.push_front(std::move(entry));
+    history_.push_front(std::move(entry));
 }

@@ -40,7 +40,7 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-const char* ps2_keyboard_device::keycode_name(keycode_t key)
+const char* PS2KeyboardDevice::keycode_name(keycode_t key)
 {
     if (key < KEYCODE_MAX) {
         return g_keycode_names[key];
@@ -49,14 +49,14 @@ const char* ps2_keyboard_device::keycode_name(keycode_t key)
     }
 }
 
-void ps2_keyboard_device::clear_input(void)
+void PS2KeyboardDevice::clear_input(void)
 {
     for (size_t i = 0; i < MAX_SCANCODE_BYTES; ++i) {
         (void)inb(KEYBOARD_DATA_PORT);
     }
 }
 
-bool ps2_keyboard_device::step_state_machine(keyboard_driver_state &state, keyboard_event &output)
+bool PS2KeyboardDevice::step_state_machine(KeyboardDriverState &state, KeyboardEvent &output)
 {
     unsigned scancode = inb(KEYBOARD_DATA_PORT);
 
@@ -92,17 +92,17 @@ bool ps2_keyboard_device::step_state_machine(keyboard_driver_state &state, keybo
     return true;
 }
 
-void ps2_keyboard_device::int_handler()
+void PS2KeyboardDevice::int_handler()
 {
-    keyboard_driver_state state = IDLE;
-    keyboard_event event;
+    KeyboardDriverState state = IDLE;
+    KeyboardEvent event;
 
     for (size_t i = 0; i < MAX_SCANCODE_BYTES && step_state_machine(state, event); ++i);
 
     if (event.key < KEYCODE_MAX) {
-        key_state[event.key] = event.state;
+        key_state_[event.key] = event.state;
 
-        bool shift = (key_state[KEYCODE_LEFT_SHIFT] == PRESSED) || (key_state[KEYCODE_RIGHT_SHIFT] == PRESSED);
+        bool shift = (key_state_[KEYCODE_LEFT_SHIFT] == PRESSED) || (key_state_[KEYCODE_RIGHT_SHIFT] == PRESSED);
         const char* char_tbl = shift ? g_keyboard_keycode_ascii_uppercase : g_keyboard_keycode_ascii_lowercase;
         event.ch = char_tbl[event.key];
 
@@ -112,13 +112,13 @@ void ps2_keyboard_device::int_handler()
         // new thread can execute is through an interrupt which invokes the
         // scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
-        events.push_back(event);
+        events_.push_back(event);
     }
 }
 
-keyboard_event ps2_keyboard_device::get_event()
+KeyboardEvent PS2KeyboardDevice::get_event()
 {
-    keyboard_event event;
+    KeyboardEvent event;
 
     bool have_a_key = false;
 
@@ -129,10 +129,10 @@ keyboard_event ps2_keyboard_device::get_event()
         // an interrupt which invokes the scheduler or something like that.
         // XXX: Need better kernel synchronization primitives.
         disable_interrupts();
-        have_a_key = !events.empty();
+        have_a_key = !events_.empty();
         if (have_a_key) {
-            event = events.front();
-            events.pop_front();
+            event = events_.front();
+            events_.pop_front();
         }
         enable_interrupts();
         hlt();
@@ -141,11 +141,11 @@ keyboard_event ps2_keyboard_device::get_event()
     return event;
 }
 
-ps2_keyboard_device::ps2_keyboard_device()
+PS2KeyboardDevice::PS2KeyboardDevice()
 {
     for (size_t i = 0; i < KEYCODE_MAX; ++i) {
-        key_state[i] = RELEASED;
+        key_state_[i] = RELEASED;
     }
 }
 
-ps2_keyboard_device::~ps2_keyboard_device() noexcept = default;
+PS2KeyboardDevice::~PS2KeyboardDevice() noexcept = default;

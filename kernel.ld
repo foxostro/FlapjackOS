@@ -7,7 +7,7 @@ SECTIONS
 {
 	. = KERNEL_VIRTUAL_START_ADDR + ONE_MEGABYTE;
 
-	PROVIDE (kernel_image_begin = .);
+	PROVIDE (g_kernel_image_begin = .);
 
 	/* Multi-boot header comes first, followed by the text section. */
 	.text ALIGN(4K) : AT(ADDR(.text)-KERNEL_VIRTUAL_START_ADDR)
@@ -18,17 +18,17 @@ SECTIONS
 
 	.rodata ALIGN(4K) : AT(ADDR(.rodata)-KERNEL_VIRTUAL_START_ADDR)
 	{
-		start_ctors = .;
+		g_start_ctors = .;
 		*(SORT(.ctors*))  /* Note the "SORT" */
-		end_ctors = .;
+		g_end_ctors = .;
 
-		start_dtors = .;
+		g_start_dtors = .;
 		*(SORT(.dtors*))
-		end_dtors = .;
+		g_end_dtors = .;
 
 		*(.rodata)
 
-		kernel_rodata_end = .;
+		g_kernel_rodata_end = .;
 	}
 
 	.data ALIGN(4K) : AT(ADDR(.data)-KERNEL_VIRTUAL_START_ADDR)
@@ -42,5 +42,5 @@ SECTIONS
 		*(.bss)
 	}
 
-	PROVIDE (kernel_image_end = .);
+	PROVIDE (g_kernel_image_end = .);
 }

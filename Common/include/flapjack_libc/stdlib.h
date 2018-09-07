@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDLIB_H
+#define FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDLIB_H
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -27,3 +28,5 @@ void FREE(void *ptr);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDLIB_H

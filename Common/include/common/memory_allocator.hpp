@@ -1,11 +1,12 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_MEMORY_ALLOCATOR_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_MEMORY_ALLOCATOR_HPP
 
 #include <cstddef>
 
 // Abstract interface for a generic memory allocator.
-class memory_allocator {
+class MemoryAllocator {
 public:
-    virtual ~memory_allocator() = default;
+    virtual ~MemoryAllocator() = default;
 
     // Allocates a block of memory of the given size from the malloc zone.
     // May return NULL if the request cannot be satisfied.
@@ -25,9 +26,11 @@ public:
     // 
     // If size is zero and ptr is not NULL, a new minimum-sized object is
     // allocated and the original object is freed.
-    virtual void* realloc(void *ptr, size_t new_size) = 0;
+    virtual void* realloc(void* ptr, size_t new_size) = 0;
 
     // Deallocates a memory allocation pointed to be ptr. If ptr is NULL then
     // no operation is performed.
     virtual void free(void *ptr) = 0;
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_MEMORY_ALLOCATOR_HPP

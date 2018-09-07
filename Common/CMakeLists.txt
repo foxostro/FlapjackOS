@@ -13,19 +13,22 @@ set(SOURCE_FILES
     "include/flapjack_libc/stdio.h" "src/stdio.cpp"
     "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
 
-    "include/common/line_editor.hpp" "src/line_editor.cpp"
-    "include/common/text_line.hpp" "src/text_line.cpp"
-    "include/common/text_terminal.hpp" "src/text_terminal.cpp"
-    "include/common/linked_list.hpp"
-    "include/common/ring_buffer.hpp"
-    "include/common/vector.hpp"
-    "include/common/text_display_device.hpp"
-    "include/common/interrupt_handler.hpp"
     "include/common/keyboard_device.hpp"
     "include/common/global_allocator.hpp"
     "include/common/memory_allocator.hpp"
-    "include/common/minmax.hpp"
+    "include/common/interrupt_handler.hpp"
+    "include/common/terminal_metrics.hpp"
+    "include/common/text_display_device.hpp"
+    
+    "include/common/vector.hpp"
+    "include/common/linked_list.hpp"
+    "include/common/ring_buffer.hpp"
     "include/common/vec2.hpp"
+    "include/common/minmax.hpp"
+
+    "include/common/line_editor.hpp" "src/line_editor.cpp"
+    "include/common/text_line.hpp" "src/text_line.cpp"
+    "include/common/text_terminal.hpp" "src/text_terminal.cpp"
     "include/common/bit_array.hpp" "src/bit_array.cpp"
     )
 
@@ -46,16 +49,16 @@ else(CMAKE_CROSSCOMPILING)
     add_executable(CommonTest
                    "test/dummy_text_display_device.hpp"
                    "test/dummy_keyboard_device.hpp"
-                   "test/test_line_editor.cpp"
+                   "test/test_bit_array.cpp"
+                   "test/test_linked_list.cpp"
+                   "test/test_string.cpp"
+                   "test/test_main.cpp"
                    "test/test_text_terminal.cpp"
                    "test/test_text_line.cpp"
                    "test/test_vector.cpp"
+                   "test/test_line_editor.cpp"
                    "test/test_ring_buffer.cpp"
-                   "test/test_linked_list.cpp"
-                   "test/test_string.cpp"
                    "test/test_stdio.cpp"
-                   "test/test_bit_array.cpp"
-                   "test/test_main.cpp"
                    )
 
     target_link_libraries(CommonTest

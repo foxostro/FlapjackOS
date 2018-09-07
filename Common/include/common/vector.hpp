@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_VECTOR_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_VECTOR_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -9,73 +10,73 @@
 #include <new> // for placement-new
 
 template<typename T>
-class vector {
+class Vector {
 public:
     using value_type = T;
     using size_type = int;
     using internal_type = typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type;
 
-    ~vector()
+    ~Vector()
     {
-        if (_data) {
-            delete[] _data;
+        if (data_) {
+            delete[] data_;
         }
     }
 
     // Default constructor. Initializes an empty vector.
-    vector()
-     : _data(nullptr), _count(0), _capacity(0)
+    Vector()
+     : data_(nullptr), count_(0), capacity_(0)
     {}
 
     // Allocates memory for a vector of the specified size.
-    vector(size_type size)
-     : _data(new internal_type[size]), _count(size), _capacity(size)
+    Vector(size_type size)
+     : data_(new internal_type[size]), count_(size), capacity_(size)
     {
-        for (size_type i = 0; i < _count; ++i) {
+        for (size_type i = 0; i < count_; ++i) {
             new (data() + i) value_type();
         }
     }
 
     // Copies the provided items into the vector.
-    vector(size_type size, const value_type *src)
-     : _data(nullptr), _count(size), _capacity(size)
+    Vector(size_type size, const value_type *src)
+     : data_(nullptr), count_(size), capacity_(size)
     {
-        _data = new internal_type[_capacity];
-        for (size_type i = 0; i < _count; ++i) {
-            (value_type &)(_data[i]) = src[i];
+        data_ = new internal_type[capacity_];
+        for (size_type i = 0; i < count_; ++i) {
+            (value_type &)(data_[i]) = src[i];
         }
     }
 
     // Copy constructor.
-    vector(const vector &other)
-     : vector(other._count, other.data())
+    Vector(const Vector &other)
+     : Vector(other.count_, other.data())
     {}
 
     // Move constructor.
-    vector(vector &&other)
-     : _data(other._data),
-       _count(other._count),
-       _capacity(other._capacity)
+    Vector(Vector &&other)
+     : data_(other.data_),
+       count_(other.count_),
+       capacity_(other.capacity_)
     {
-        other._data = nullptr;
-        other._count = 0;
-        other._capacity = 0;
+        other.data_ = nullptr;
+        other.count_ = 0;
+        other.capacity_ = 0;
     }
 
     // Copy-assignment operator.
-    vector& operator=(const vector &other)
+    Vector& operator=(const Vector &other)
     {
         if (this != &other) {
-            if (_data) {
-                delete[] _data;
+            if (data_) {
+                delete[] data_;
             }
 
-            _count = other._count;
-            _capacity = _count;
-            _data = new internal_type[_capacity];
+            count_ = other.count_;
+            capacity_ = count_;
+            data_ = new internal_type[capacity_];
 
-            for (size_type i = 0; i < _count; ++i) {
-                (value_type &)(_data[i]) = (value_type &)(other._data[i]);
+            for (size_type i = 0; i < count_; ++i) {
+                (value_type &)(data_[i]) = (value_type &)(other.data_[i]);
             }
         }
 
@@ -83,27 +84,27 @@ public:
     }
 
     // Move-assignment operator.
-    vector& operator=(vector &&other)
+    Vector& operator=(Vector &&other)
     {
         if (this != &other) {
-            if (_data) {
-                delete[] _data;
+            if (data_) {
+                delete[] data_;
             }
 
-            _data = other._data;
-            _count = other._count;
-            _capacity = other._capacity;
+            data_ = other.data_;
+            count_ = other.count_;
+            capacity_ = other.capacity_;
 
-            other._data = nullptr;
-            other._count = 0;
-            other._capacity = 0;
+            other.data_ = nullptr;
+            other.count_ = 0;
+            other.capacity_ = 0;
         }
 
         return *this;
     }
 
     // Equality operator.
-    bool operator==(const vector &other) const
+    bool operator==(const Vector &other) const
     {
         if (this == &other) {
             return true;
@@ -123,7 +124,7 @@ public:
     }
 
     // Not-equality operator.
-    bool operator!=(const vector &other) const
+    bool operator!=(const Vector &other) const
     {
         return !(*this == other);
     }
@@ -132,38 +133,38 @@ public:
     // The vector gaurantees that all elements are contiguous in memory.
     const value_type* data() const
     {
-        return (value_type *)_data;
+        return (value_type *)data_;
     }
 
     // Returns the address of the first element in memory.
     // The vector gaurantees that all elements are contiguous in memory.
     value_type* data()
     {
-        return (value_type *)_data;
+        return (value_type *)data_;
     }
 
     // Returns the number of items in the collection.
     size_type size() const
     {
-        return _count;
+        return count_;
     }
 
     // Returns true if the collection is empty.
     bool empty() const
     {
-        return _count == 0;
+        return count_ == 0;
     }
 
     // Returns the number of elements for which space is currently allocated.
     size_type capacity() const
     {
-        return _capacity;
+        return capacity_;
     }
 
     // Gets the index'th element of the collection.
     value_type& at(size_type i)
     {
-        assert(i >= 0 && i < _count);
+        assert(i >= 0 && i < count_);
         return data()[i];
     }
 
@@ -176,7 +177,7 @@ public:
     // Gets the index'th element of the collection.
     value_type at(size_type i) const
     {
-        assert(i >= 0 && i < _count);
+        assert(i >= 0 && i < count_);
         return data()[i];
     }
 
@@ -192,25 +193,25 @@ public:
     {
         assert(new_capacity >= 0);
 
-        if(new_capacity > _capacity) {
+        if(new_capacity > capacity_) {
             internal_type *new_data = new internal_type[new_capacity];
 
-            for (size_type i = 0; i < _count; ++i) {
+            for (size_type i = 0; i < count_; ++i) {
                 new ((value_type *)new_data + i) value_type(std::move(data()[i]));
             }
 
-            if (_data) {
-                delete[] _data;
+            if (data_) {
+                delete[] data_;
             }
-            _data = new_data;
-            _capacity = new_capacity;
+            data_ = new_data;
+            capacity_ = new_capacity;
         }
     }
 
     // Inserts an item at the end of the collection.
     void push_back(value_type value)
     {
-        insert(_count, value);
+        insert(count_, value);
     }
 
     // Inserts an item at the beginning of the collection.
@@ -224,18 +225,18 @@ public:
     // All existing items are moved toward the back to make room.
     void insert(size_type index, value_type value)
     {
-        assert(index >= 0 && index <= _count);
+        assert(index >= 0 && index <= count_);
 
         increase_capacity_for_insertion();
 
-        for (size_type i = _count; i > index; --i) {
+        for (size_type i = count_; i > index; --i) {
             value_type &prev = data()[i-1];
             new (data() + i) value_type(std::move(prev));
             prev.~value_type();
         }
 
         new (data() + index) value_type(value);
-        _count++;
+        count_++;
     }
 
     // Removes the index'th element of the collection.
@@ -243,11 +244,11 @@ public:
     // TODO: Change return value to "void" to avoid copying the old value.
     value_type remove(size_type index)
     {
-        assert(index >= 0 && index < _count);
+        assert(index >= 0 && index < count_);
 
         value_type old_value = data()[index];
 
-        for (size_type i = index; i < _count-1; ++i) {
+        for (size_type i = index; i < count_-1; ++i) {
             value_type &curr = data()[i];
             curr.~value_type();
 
@@ -255,7 +256,7 @@ public:
             new (data() + i) value_type(std::move(next));
         }
 
-        _count--;
+        count_--;
 
         return old_value;
     }
@@ -279,15 +280,17 @@ public:
 private:
     static constexpr unsigned GROWTH_FACTOR = 2;
 
-    internal_type *_data;
-    size_type _count, _capacity;
+    internal_type *data_;
+    size_type count_, capacity_;
 
     void increase_capacity_for_insertion()
     {
-        if (_capacity == 0) {
+        if (capacity_ == 0) {
             reserve(1);
-        } else if (_count == _capacity) {
-            reserve(_count * GROWTH_FACTOR);
+        } else if (count_ == capacity_) {
+            reserve(count_ * GROWTH_FACTOR);
         }
     }
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_VECTOR_HPP

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_INOUT_H
+#define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_INOUT_H
 
 #include <stdint.h>
 
@@ -27,3 +28,5 @@ void outd(uint16_t port, uint32_t val);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_INOUT_H

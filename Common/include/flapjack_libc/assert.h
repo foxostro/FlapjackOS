@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_ASSERT_H
+#define FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_ASSERT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,3 +29,5 @@ __attribute__((noreturn)) void panic(const char *fmt, ...);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_ASSERT_H

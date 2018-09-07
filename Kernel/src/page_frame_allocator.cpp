@@ -2,40 +2,40 @@
 #include "logical_addressing.hpp"
 #include "panic.h"
 
-page_frame_allocator::page_frame_allocator(size_t number_of_page_frames, size_t length)
- : count(0),
-   bitmap(number_of_page_frames, length - sizeof(page_frame_allocator))
+PageFrameAllocator::PageFrameAllocator(size_t number_of_page_frames, size_t length)
+ : count_(0),
+   bitmap_(number_of_page_frames, length - sizeof(PageFrameAllocator))
 {}
 
-bool page_frame_allocator::allocate(uintptr_t page_frame)
+bool PageFrameAllocator::allocate(uintptr_t page_frame)
 {
     size_t bit_index = page_frame / PAGE_SIZE;
-    if (bitmap.test(bit_index)) {
+    if (bitmap_.test(bit_index)) {
         return false; // already allocated
     } else {
-        assert(count>0);
-        count--;
-        bitmap.set(bit_index);
+        assert(count_>0);
+        count_--;
+        bitmap_.set(bit_index);
         return true;
     }
 }
 
-void page_frame_allocator::deallocate(uintptr_t page_frame)
+void PageFrameAllocator::deallocate(uintptr_t page_frame)
 {
     size_t bit_index = page_frame / PAGE_SIZE;
-    if (bitmap.test(bit_index)) {
-        count++;
-        bitmap.clear(bit_index);
+    if (bitmap_.test(bit_index)) {
+        count_++;
+        bitmap_.clear(bit_index);
     }
 }
 
-bool page_frame_allocator::is_free(uintptr_t page_frame)
+bool PageFrameAllocator::is_free(uintptr_t page_frame)
 {
     size_t bit_index = page_frame / PAGE_SIZE;
-    return !bitmap.test(bit_index);
+    return !bitmap_.test(bit_index);
 }
 
-size_t page_frame_allocator::get_number_of_free_page_frames() const
+size_t PageFrameAllocator::get_number_of_free_page_frames() const
 {
-    return count;
+    return count_;
 }

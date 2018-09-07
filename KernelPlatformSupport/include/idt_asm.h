@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_IDT_ASM_H
+#define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_IDT_ASM_H
 
 #include <stdint.h>
 
@@ -47,16 +48,16 @@ typedef struct idt_entry {
     uint8_t dpl:2;       // priviledge level for the gate
     uint8_t p:1;         // present bit, set to zero for unused interrupts
     uint16_t offset_2;   // offset bits 16..31
-} idt_entry_t;
+} IDTEntry;
 
 #ifdef __cplusplus
-static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
+static_assert(8 == sizeof(IDTEntry), "each IDT entry is eight bytes");
 #else
-_Static_assert(8 == sizeof(idt_entry_t), "each IDT entry is eight bytes");
+_Static_assert(8 == sizeof(IDTEntry), "each IDT entry is eight bytes");
 #endif
 
 // Returns a pointer to the beginning of the installed IDT.
-idt_entry_t* idt_base(void);
+IDTEntry* idt_base(void);
 
 // Loads a new IDT.
 void lidt(void *idt, unsigned limit);
@@ -64,3 +65,5 @@ void lidt(void *idt, unsigned limit);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_IDT_ASM_H

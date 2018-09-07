@@ -3,10 +3,10 @@
 #include <common/text_terminal.hpp>
 #include "dummy_text_display_device.hpp"
 
-TEST_CASE("text_terminal::puts", "[text_terminal]")
+TEST_CASE("TextTerminal::puts", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts(
         // Simple string
@@ -56,10 +56,10 @@ TEST_CASE("text_terminal::puts", "[text_terminal]")
     }
 }
 
-TEST_CASE("logical lines are limited", "[text_terminal]")
+TEST_CASE("logical lines are limited", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     // When we put more logical lines than can fit on the display, the top line
     // should be discarded to make room.
@@ -128,10 +128,10 @@ TEST_CASE("logical lines are limited", "[text_terminal]")
     REQUIRE(dummy_display.get_line(24) == "i=25                                                                            ");
 }
 
-TEST_CASE("scrolling when logical lines overflow physical lines", "[text_terminal]")
+TEST_CASE("scrolling when logical lines overflow physical lines", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts(
         "i=0\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n"
@@ -203,10 +203,10 @@ TEST_CASE("scrolling when logical lines overflow physical lines", "[text_termina
     REQUIRE(dummy_display.get_cursor_position().y == CONSOLE_HEIGHT-1);
 }
 
-TEST_CASE("putchar backspace", "[text_terminal]")
+TEST_CASE("putchar backspace", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaba");
 
@@ -233,10 +233,10 @@ TEST_CASE("putchar backspace", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
 
-TEST_CASE("backspace over a tab character", "[text_terminal]")
+TEST_CASE("backspace over a tab character", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts("a\tb");
 
@@ -252,10 +252,10 @@ TEST_CASE("backspace over a tab character", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
 
-TEST_CASE("move cursor left", "[text_terminal]")
+TEST_CASE("move cursor left", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts("b");
     term.move_cursor_left();
@@ -266,10 +266,10 @@ TEST_CASE("move cursor left", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
 
-TEST_CASE("move cursor left and right", "[text_terminal]")
+TEST_CASE("move cursor left and right", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts("b");
     term.move_cursor_left();
@@ -282,10 +282,10 @@ TEST_CASE("move cursor left and right", "[text_terminal]")
     REQUIRE(dummy_display.get_cursor_position().y == 0);
 }
 
-TEST_CASE("edit the middle of a line", "[text_terminal]")
+TEST_CASE("edit the middle of a line", "[TextTerminal]")
 {
-    dummy_text_display_device dummy_display;
-    text_terminal term(dummy_display);
+    DummyTextDisplayDevice dummy_display;
+    TextTerminal term(dummy_display);
 
     term.puts("hal");
     REQUIRE(dummy_display.get_line( 0) == "hal                                                                             ");

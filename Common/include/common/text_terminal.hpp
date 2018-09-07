@@ -1,32 +1,32 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP
 
+#include <common/text_display_device.hpp>
 #include <common/ring_buffer.hpp>
 #include <common/text_line.hpp>
 #include <common/vec2.hpp>
 
-class text_display_device;
-
 // A text terminal displays lines of text on a text console display.
-class text_terminal {
+class TextTerminal {
     // Displays monospace text on the screen.
-    text_display_device &_display;
+    TextDisplayDevice &display_;
 
     // Logical lines of text in the terminal. Each of these may span one or more
     // physical lines on the display if they're too long to fit.
-    ring_buffer<text_line, CONSOLE_HEIGHT> _logical_lines;
+    RingBuffer<TextLine, CONSOLE_HEIGHT> logical_lines_;
 
     // The logical position of the cursor. This is the logical line on which
     // the cursor resides and the logical column within that line. This can be
     // mapped to a physical cursor position through the convert() method.
-    point2_t _logical_cursor;
+    Point2 logical_cursor_;
 
-    void _putchar(char ch);
+    void putchar_internal(char ch);
 
 public:
-    ~text_terminal();
+    ~TextTerminal();
 
     // Constructor.
-    text_terminal(text_display_device &display);
+    TextTerminal(TextDisplayDevice &display);
 
     // Draws the terminal on the display.
     void draw();
@@ -50,7 +50,7 @@ public:
     void putv(const T &buf)
     {
         for (typename T::size_type i = 0, n = buf.size(); i < n; ++i) {
-            _putchar(buf[i]);
+            putchar_internal(buf[i]);
         }
         draw();
     }
@@ -60,9 +60,9 @@ public:
 
     // Returns the logical lines in the text terminal. Each of these may span
     // one or more physical lines on the display if they're too long to fit.
-    const ring_buffer<text_line, CONSOLE_HEIGHT>& get_logical_lines() const
+    const RingBuffer<TextLine, CONSOLE_HEIGHT>& get_logical_lines() const
     {
-        return _logical_lines;
+        return logical_lines_;
     }
 
     // Moves the cursor to the left.
@@ -76,3 +76,5 @@ public:
     // Moves the cursor all the way to the end of the line.
     void move_cursor_to_end();
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP

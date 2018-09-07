@@ -21,7 +21,7 @@ TEST_CASE("test_trap_gate", "[idt]")
     unsigned DPL = 0;
     unsigned offset = 0xdeadbeef;
 
-    idt_entry_t entry_expected;
+    IDTEntry entry_expected;
     memset(&entry_expected, 0, sizeof(entry_expected));
 
     // Construct the IDT entry according to the Intel documentation for a
@@ -33,7 +33,7 @@ TEST_CASE("test_trap_gate", "[idt]")
     entry_words[2] = TRAP_GATE_WORD_1 | DPL_FIELD(DPL);
     entry_words[3] = DWORD_UPPER_WORD(offset);
 
-    idt_entry_t entry;
+    IDTEntry entry;
     idt_build_entry(&entry, offset, TRAP_GATE, DPL);
 
     REQUIRE(!memcmp(&entry, &entry_expected, sizeof(entry_expected)));

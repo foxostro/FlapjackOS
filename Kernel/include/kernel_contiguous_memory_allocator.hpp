@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_KERNEL_CONTIGUOUS_MEMORY_ALLOCATOR_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_CONTIGUOUS_MEMORY_ALLOCATOR_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -10,15 +11,15 @@
 // Allocates memory in the kernel heap.
 // The kernel heap region follows the end of the kernel image. Virtual addresses
 // in this region are physically-contiguous kernel logical addresses.
-class kernel_heap_allocator : public memory_allocator {
+class KernelContiguousMemoryAllocator : public MemoryAllocator {
 public:
     // The kernel heap region follows the end of the kernel image.
     // The bootstrap assembly procedure will have ensured that we have enough
     // physical memory mapped into the address space to setup the page frame
     // allocator and any additional page tables we might need to map the rest of
     // physical memory into the kernel memory region.
-    kernel_heap_allocator(kernel_break_allocator &break_allocator,
-                          page_frame_allocator &page_frames);
+    KernelContiguousMemoryAllocator(KernelBreakAllocator &break_allocator,
+                        PageFrameAllocator &page_frames);
 
     // Allocates `size' bytes of memory, or returns NULL on failure.
     // The allocation may fail if it is not possible to allocate corresponding
@@ -29,8 +30,8 @@ public:
     void free(void *ptr) override;
 
 private:
-    kernel_break_allocator &break_allocator;
-    page_frame_allocator &page_frames;
+    KernelBreakAllocator &break_allocator_;
+    PageFrameAllocator &page_frames_;
 
     // Returns true if we can secure page frames for an allocation.
     // For each unmapped page in the kernel heap which would be needed for an
@@ -63,3 +64,5 @@ private:
     // MMU.
     void map_kernel_heap_page(uintptr_t page);
 };
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_CONTIGUOUS_MEMORY_ALLOCATOR_HPP

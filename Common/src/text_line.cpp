@@ -5,7 +5,7 @@
 #include <cassert>
 #include <cctype>
 
-int text_line::step_for_char(int tab_width, int col, char ch)
+int TextLine::step_for_char(int tab_width, int col, char ch)
 {
     int delta;
     if (ch == '\t') {
@@ -18,53 +18,53 @@ int text_line::step_for_char(int tab_width, int col, char ch)
     return delta;
 }
 
-text_line::~text_line() = default;
+TextLine::~TextLine() = default;
 
-text_line::text_line(text_display_device &display)
- : _display(&display),
-   _cached_display_size{0, 0},
+TextLine::TextLine(TextDisplayDevice &display)
+ : display_(&display),
+   cached_display_size_{0, 0},
    dirty(true)
 {}
 
-text_line::text_line(const text_line &line)
- : _display(line._display),
-   _data(line._data),
-   _cached_display_size(line._cached_display_size),
+TextLine::TextLine(const TextLine &line)
+ : display_(line.display_),
+   data_(line.data_),
+   cached_display_size_(line.cached_display_size_),
    dirty(true)
 {}
 
-text_line::text_line(text_line &&line)
- : _display(line._display),
-   _data(std::move(line._data)),
-   _cached_display_size(line._cached_display_size),
+TextLine::TextLine(TextLine &&line)
+ : display_(line.display_),
+   data_(std::move(line.data_)),
+   cached_display_size_(line.cached_display_size_),
    dirty(true)
 {}
 
-text_line& text_line::operator=(const text_line &other)
+TextLine& TextLine::operator=(const TextLine &other)
 {
     if (this != &other) {
-        _display = other._display;
-        _data = other._data;
-        _cached_display_size = other._cached_display_size;
+        display_ = other.display_;
+        data_ = other.data_;
+        cached_display_size_ = other.cached_display_size_;
         dirty = other.dirty;
     }
 
     return *this;
 }
 
-text_line& text_line::operator=(text_line &&other)
+TextLine& TextLine::operator=(TextLine &&other)
 {
     if (this != &other) {
-        _display = other._display;
-        _data = std::move(other._data);
-        _cached_display_size = other._cached_display_size;
+        display_ = other.display_;
+        data_ = std::move(other.data_);
+        cached_display_size_ = other.cached_display_size_;
         dirty = other.dirty;
     }
 
     return *this;
 }
 
-int text_line::draw(int row)
+int TextLine::draw(int row)
 {
     dirty = false;
 
@@ -72,13 +72,13 @@ int text_line::draw(int row)
     const int tab_width = get_display().get_tab_width();
     const int max_columns = get_display().dimensions().width;
 
-    for (int i = 0; i < _data.size(); ++i) {
-        char ch = _data[i];
+    for (int i = 0; i < data_.size(); ++i) {
+        char ch = data_[i];
         int step = step_for_char(tab_width, col, ch);
-        vgachar_t vgachar = get_display().make_char((ch=='\t') ? ' ' : ch);
+        VGAChar vgachar = get_display().make_char((ch=='\t') ? ' ' : ch);
 
         for (int j = col; j < MIN(col+step, max_columns); ++j) {
-            get_display().draw_char(point2_t{j, row}, vgachar);
+            get_display().draw_char(Point2{j, row}, vgachar);
         }
 
         col += step;
@@ -90,20 +90,20 @@ int text_line::draw(int row)
 
     const auto space = get_display().make_char(' ');
     for (; col < max_columns; ++col) {
-        get_display().draw_char(point2_t{col, row}, space);
+        get_display().draw_char(Point2{col, row}, space);
     }
 
     return row + 1;
 }
 
-size2_t text_line::measure() const
+Size2 TextLine::measure() const
 {
     int col = 0, max_col = 0, row = 0;
     const int tab_width = get_display().get_tab_width();
     const int max_columns = get_display().dimensions().width;
 
-    for (int i = 0; i < _data.size(); ++i) {
-        const char ch = _data[i];
+    for (int i = 0; i < data_.size(); ++i) {
+        const char ch = data_[i];
         col += step_for_char(tab_width, col, ch);
         max_col = MAX(max_col, MIN(col, max_columns));
         if (col >= max_columns) {
@@ -112,17 +112,17 @@ size2_t text_line::measure() const
         }
     }
 
-    return size2_t{max_col, row + 1};
+    return Size2{max_col, row + 1};
 }
 
-point2_t text_line::convert(int logi_col) const
+Point2 TextLine::convert(int logi_col) const
 {
     int col = 0, row = 0;
     const int tab_width = get_display().get_tab_width();
     const int max_columns = get_display().dimensions().width;
 
-    for (int i = 0; i < _data.size(); ++i) {
-        char ch = _data[i];
+    for (int i = 0; i < data_.size(); ++i) {
+        char ch = data_[i];
         int step = step_for_char(tab_width, col, ch);
 
         if (i == logi_col) {
@@ -137,63 +137,63 @@ point2_t text_line::convert(int logi_col) const
     }
 
 done:
-    return point2_t{col, row};
+    return Point2{col, row};
 }
 
-vector<char> text_line::str() const
+Vector<char> TextLine::str() const
 {
-    vector<char> chars;
-    for (int i = 0; i < _data.size(); ++i) {
-        chars.push_back(_data[i]);
+    Vector<char> chars;
+    for (int i = 0; i < data_.size(); ++i) {
+        chars.push_back(data_[i]);
     }
     chars.push_back(0);
     return chars;
 }
 
-bool text_line::push_back(char ch)
+bool TextLine::push_back(char ch)
 {
     assert(ch != '\n');
     assert(ch != '\b');
-    bool r = _data.push_back(ch);
+    bool r = data_.push_back(ch);
     dirty = true;
-    _cached_display_size = measure();
+    cached_display_size_ = measure();
     return r;
 }
 
-void text_line::pop_back()
+void TextLine::pop_back()
 {
-    if (!_data.empty()) {
-        _data.pop_back();
+    if (!data_.empty()) {
+        data_.pop_back();
         dirty = true;
-        _cached_display_size = measure();
+        cached_display_size_ = measure();
     }
 }
 
-bool text_line::insert(size_type index, char ch)
+bool TextLine::insert(size_type index, char ch)
 {
     assert(ch != '\n');
     assert(ch != '\b');
-    bool r = _data.insert(index, ch);
+    bool r = data_.insert(index, ch);
     dirty = true;
-    _cached_display_size = measure();
+    cached_display_size_ = measure();
     return r;
 }
 
-void text_line::remove(size_type index)
+void TextLine::remove(size_type index)
 {
-    if (!_data.empty()) {
-        _data.remove(index);
+    if (!data_.empty()) {
+        data_.remove(index);
         dirty = true;
-        _cached_display_size = measure();
+        cached_display_size_ = measure();
     }
 }
 
-text_line::size_type text_line::size() const
+TextLine::size_type TextLine::size() const
 {
-    return _data.size();
+    return data_.size();
 }
 
-size2_t text_line::get_cached_display_size() const
+Size2 TextLine::get_cached_display_size() const
 {
-    return _cached_display_size;
+    return cached_display_size_;
 }

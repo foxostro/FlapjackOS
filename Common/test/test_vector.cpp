@@ -4,7 +4,7 @@
 
 TEST_CASE("Initialize empty vector", "[Vector]")
 {
-    vector<int> v;
+    Vector<int> v;
     REQUIRE(v.size() == 0);
     REQUIRE(v.capacity() == 0);
     REQUIRE(v.empty());
@@ -12,7 +12,7 @@ TEST_CASE("Initialize empty vector", "[Vector]")
 
 TEST_CASE("Initialize vector with default-constructed elements", "[Vector]")
 {
-    vector<int> v(100);
+    Vector<int> v(100);
     REQUIRE(v.size() == 100);
     REQUIRE(v.capacity() >= 100);
     REQUIRE(!v.empty());
@@ -22,7 +22,7 @@ TEST_CASE("Initialize vector with array", "[Vector]")
 {
     static const int arr[3] = {0, 1, 2};
 
-    vector<int> v(3, arr);
+    Vector<int> v(3, arr);
     REQUIRE(v.size() == 3);
     REQUIRE(v.at(0) == arr[0]);
     REQUIRE(v.at(1) == arr[1]);
@@ -31,12 +31,12 @@ TEST_CASE("Initialize vector with array", "[Vector]")
 
 TEST_CASE("Copy constructor", "[Vector]")
 {
-    vector<int> a;
+    Vector<int> a;
     a.push_back(0);
     a.push_back(1);
     a.push_back(2);
 
-    vector<int> b(a);
+    Vector<int> b(a);
     REQUIRE(a.at(0) == b.at(0));
     REQUIRE(a.at(1) == b.at(1));
     REQUIRE(a.at(2) == b.at(2));
@@ -45,12 +45,12 @@ TEST_CASE("Copy constructor", "[Vector]")
 
 TEST_CASE("Copy-assignment operator", "[Vector]")
 {
-    vector<int> a;
+    Vector<int> a;
     a.push_back(0);
     a.push_back(1);
     a.push_back(2);
 
-    vector<int> b(a);
+    Vector<int> b(a);
     b.push_back(5);
     b.push_back(6);
     b.push_back(7);
@@ -64,14 +64,14 @@ TEST_CASE("Copy-assignment operator", "[Vector]")
 
 TEST_CASE("Move constructor", "[Vector]")
 {
-    vector<char> a;
+    Vector<char> a;
     a.push_back('a');
     a.push_back('b');
     a.push_back('c');
 
     const char *ptr = a.data();
 
-    vector<char> b(std::move(a));
+    Vector<char> b(std::move(a));
     REQUIRE('a' == b.at(0));
     REQUIRE('b' == b.at(1));
     REQUIRE('c' == b.at(2));
@@ -85,14 +85,14 @@ TEST_CASE("Move constructor", "[Vector]")
 
 TEST_CASE("Move-assignment operator", "[Vector]")
 {
-    vector<char> a;
+    Vector<char> a;
     a.push_back('a');
     a.push_back('b');
     a.push_back('c');
 
     const char *ptr = a.data();
 
-    vector<char> b;
+    Vector<char> b;
     b.push_back('x');
 
     b = std::move(a);
@@ -110,17 +110,17 @@ TEST_CASE("Move-assignment operator", "[Vector]")
 
 TEST_CASE("Equality operators", "[Vector]")
 {
-    vector<char> a;
+    Vector<char> a;
     a.push_back('a');
     a.push_back('b');
     a.push_back('c');
 
-    vector<char> b;
+    Vector<char> b;
     b.push_back('a');
     b.push_back('b');
     b.push_back('c');
 
-    vector<char> c;
+    Vector<char> c;
     c.push_back('w');
     c.push_back('x');
     c.push_back('y');
@@ -136,7 +136,7 @@ TEST_CASE("Append to end of vector", "[Vector]")
 {
     constexpr int N = 10;
 
-    vector<int> v;
+    Vector<int> v;
 
     for (int i = 0; i < N; ++i) {
         REQUIRE(v.size() == i);
@@ -153,7 +153,7 @@ TEST_CASE("Append to front of vector", "[Vector]")
 {
     constexpr int N = 10;
     
-    vector<int> v;
+    Vector<int> v;
 
     for (int i = 0; i < N; ++i) {
         REQUIRE(v.size() == i);
@@ -170,7 +170,7 @@ TEST_CASE("Reserve memory to avoid allocations", "[Vector]")
 {
     constexpr int N = 10;
     
-    vector<int> v;
+    Vector<int> v;
 
     v.reserve(N);
     int *ptr = v.data();
@@ -186,7 +186,7 @@ TEST_CASE("Reserve memory to avoid allocations", "[Vector]")
 
 TEST_CASE("Remove elements from the front of the vector", "[Vector]")
 {
-    vector<int> v;
+    Vector<int> v;
 
     v.push_back(0);
     v.push_back(1);
@@ -200,7 +200,7 @@ TEST_CASE("Remove elements from the front of the vector", "[Vector]")
 
 TEST_CASE("Remove elements from the back of the vector", "[Vector]")
 {
-    vector<int> v;
+    Vector<int> v;
 
     v.push_back(0);
     v.push_back(1);
@@ -214,7 +214,7 @@ TEST_CASE("Remove elements from the back of the vector", "[Vector]")
 
 TEST_CASE("Remove elements from the middle of the vector", "[Vector]")
 {
-    vector<int> v;
+    Vector<int> v;
 
     v.push_back(0);
     v.push_back(1);

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_FACTORY_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_FACTORY_HPP
 
 #include <multiboot.h>
 #include <logical_addressing.hpp>
@@ -8,40 +9,42 @@
 #include <common/text_terminal.hpp>
 
 // Creates the singleton page frame allocator.
-class page_frame_allocator_factory {
+class PageFrameAllocatorFactory {
 public:
-	page_frame_allocator_factory(multiboot_info_t *mb_info,
-                                 kernel_break_allocator &break_allocator,
-                                 text_terminal &terminal);
+    PageFrameAllocatorFactory(multiboot_info_t *mb_info,
+                              KernelBreakAllocator &break_allocator,
+                              TextTerminal &terminal);
 
-    page_frame_allocator* create();
+    PageFrameAllocator* create();
 
     template<typename Function>
-	void enumerate_page_frames(Function &&fn)
-	{
-	    if (!(mb_info_->flags & MULTIBOOT_MEMORY_INFO)) {
-	        panic("The bootloader did not provide memory information.");
-	    }
+    void enumerate_page_frames(Function &&fn)
+    {
+        if (!(mb_info_->flags & MULTIBOOT_MEMORY_INFO)) {
+            panic("The bootloader did not provide memory information.");
+        }
 
-	    multiboot_memory_map_t *entry = (multiboot_memory_map_t *)convert_physical_to_logical_address(mb_info_->mmap_addr);
-	    multiboot_memory_map_t *limit = entry + mb_info_->mmap_length;
+        multiboot_memory_map_t *entry = (multiboot_memory_map_t *)convert_physical_to_logical_address(mb_info_->mmap_addr);
+        multiboot_memory_map_t *limit = entry + mb_info_->mmap_length;
 
-	    while (entry < limit && entry->size>0) {
-	        if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
-	            uintptr_t page_frame = entry->base_addr_low;
-	            for (size_t length = entry->length_low; length>0; length-=PAGE_SIZE, page_frame+=PAGE_SIZE) {
-	                fn(page_frame);
-	            }
-	        }
+        while (entry < limit && entry->size>0) {
+            if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                uintptr_t page_frame = entry->base_addr_low;
+                for (size_t length = entry->length_low; length>0; length-=PAGE_SIZE, page_frame+=PAGE_SIZE) {
+                    fn(page_frame);
+                }
+            }
 
-	        entry = (multiboot_memory_map_t*)((uintptr_t)entry + entry->size + sizeof(entry->size));
-	    }
-	}
+            entry = (multiboot_memory_map_t*)((uintptr_t)entry + entry->size + sizeof(entry->size));
+        }
+    }
 
 private:
-	multiboot_info_t *mb_info_;
-	kernel_break_allocator &break_allocator_;
-	text_terminal &terminal_;
+    multiboot_info_t *mb_info_;
+    KernelBreakAllocator &break_allocator_;
+    TextTerminal &terminal_;
 
-	size_t count_page_frames();
+    size_t count_page_frames();
 };
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_FACTORY_HPP

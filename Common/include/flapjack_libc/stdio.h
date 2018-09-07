@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDIO_H
+#define FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDIO_H
 
 #ifdef __cplusplus
 #include <cstdarg>
@@ -48,3 +49,5 @@ size_t SNPRINTF(char *str,
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDIO_H

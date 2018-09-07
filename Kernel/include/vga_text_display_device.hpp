@@ -1,31 +1,35 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_VGA_TEXT_DISPLAY_DEVICE_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_VGA_TEXT_DISPLAY_DEVICE_HPP
 
 #include <common/text_display_device.hpp>
 
 // VGA text display output driver.
-class vga_text_display_device : public text_display_device {
-    point2_t cursor_pos;
-    size_t curr_fg, curr_bg;
+class VGATextDisplayDevice : public TextDisplayDevice {
+public:
+	// Constructor.
+    VGATextDisplayDevice();
 
-    inline vgachar_t space_character() const
+    void clear() override;
+    void draw_char(Point2 pos, VGAChar ch) override;
+    VGAChar get_char(Point2 pos) const override;
+    VGAChar make_char(char ch) const override;
+    void set_cursor_position(Point2 pos) override;
+    Point2 get_cursor_position() const override;
+    size_t get_tab_width() const override;
+    Size2 dimensions() const override;
+
+private:
+    Point2 cursor_pos_;
+    size_t current_foreground_color_, current_background_color_;
+    
+    inline VGAChar space_character() const
     {
         return make_char(' ');
     }
-
+    
     void newline();
     void tab();
     void backspace();
-
-public:
-	// Constructor.
-    vga_text_display_device();
-
-    void clear() override;
-    void draw_char(point2_t pos, vgachar_t ch) override;
-    vgachar_t get_char(point2_t pos) const override;
-    vgachar_t make_char(char ch) const override;
-    void set_cursor_position(point2_t pos) override;
-    point2_t get_cursor_position() const override;
-    size_t get_tab_width() const override;
-    size2_t dimensions() const override;
 };
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_VGA_TEXT_DISPLAY_DEVICE_HPP

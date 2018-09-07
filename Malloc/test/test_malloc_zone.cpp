@@ -19,9 +19,9 @@ TEST_CASE("test_init", "[Malloc]")
     size_t size = sizeof(s_buffer) - 3;
 
     memset(buffer, 0, size);
-    malloc_zone *zone = malloc_zone::create((uintptr_t)buffer, size);
+    MallocZone *zone = MallocZone::create((uintptr_t)buffer, size);
 
-    REQUIRE(zone != NULL);
+    REQUIRE(zone != nullptr);
 
     // alignment
     REQUIRE((uintptr_t)s_buffer % 4 == 0);
@@ -29,9 +29,9 @@ TEST_CASE("test_init", "[Malloc]")
     REQUIRE((uintptr_t)zone % 4 == 0); // four byte alignment
 
     // zone initially contains one large empty block
-    REQUIRE(zone->head() != NULL);
-    REQUIRE(zone->head()->prev == NULL);
-    REQUIRE(zone->head()->next == NULL);
+    REQUIRE(zone->head() != nullptr);
+    REQUIRE(zone->head()->prev == nullptr);
+    REQUIRE(zone->head()->next == nullptr);
     REQUIRE(zone->head()->size < size);
     REQUIRE(!zone->head()->inuse);
 }
@@ -41,18 +41,18 @@ TEST_CASE("test_init", "[Malloc]")
 TEST_CASE("test_malloc_really_big", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *allocation = zone->malloc(SIZE_MAX);
-    REQUIRE(allocation == NULL);
+    REQUIRE(allocation == nullptr);
 }
 
 // Starting with an empty zone, we should be able to satisfy a small request.
 TEST_CASE("test_malloc_one_small_request", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *allocation = zone->malloc(64);
-    REQUIRE(allocation != NULL);
+    REQUIRE(allocation != nullptr);
     REQUIRE((uintptr_t)allocation % 4 == 0);
 }
 
@@ -61,9 +61,9 @@ TEST_CASE("test_malloc_one_small_request", "[Malloc]")
 TEST_CASE("test_malloc_one_smallest_request", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *allocation = zone->malloc(SMALL);
-    REQUIRE(allocation != NULL);
+    REQUIRE(allocation != nullptr);
     REQUIRE((uintptr_t)allocation % 4 == 0);
 }
 
@@ -72,9 +72,9 @@ TEST_CASE("test_malloc_one_smallest_request", "[Malloc]")
 TEST_CASE("test_malloc_whole_thing", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *allocation = zone->malloc(zone->head()->size);
-    REQUIRE(allocation != NULL);
+    REQUIRE(allocation != nullptr);
     REQUIRE((uintptr_t)allocation % 4 == 0);
 }
 
@@ -82,10 +82,10 @@ TEST_CASE("test_malloc_whole_thing", "[Malloc]")
 TEST_CASE("test_malloc_several_small", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     size_t size = SMALL, i = 0;
-    size_t ex = (sizeof(s_buffer) - sizeof(malloc_zone)) / (sizeof(malloc_block) + size);
+    size_t ex = (sizeof(s_buffer) - sizeof(MallocZone)) / (sizeof(MallocBlock) + size);
 
     while (true) {
         void *allocation = zone->malloc(size);
@@ -103,25 +103,25 @@ TEST_CASE("test_malloc_several_small", "[Malloc]")
 TEST_CASE("test_malloc_one_free_one", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *alloc = zone->malloc(zone->head()->size);
-    REQUIRE(alloc != NULL);
-    REQUIRE(zone->malloc(zone->head()->size) == NULL);
+    REQUIRE(alloc != nullptr);
+    REQUIRE(zone->malloc(zone->head()->size) == nullptr);
     zone->free(alloc);
     alloc = zone->malloc(zone->head()->size);
-    REQUIRE(alloc != NULL);
+    REQUIRE(alloc != nullptr);
 }
 
 // Freeing allocations should release memory to the zone for future allocations.
 TEST_CASE("test_malloc_several_free_one", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *allocation = zone->malloc(SMALL);
     while (zone->malloc(SMALL));
     zone->free(allocation);
     allocation = zone->malloc(SMALL);
-    REQUIRE(allocation != NULL);
+    REQUIRE(allocation != nullptr);
 }
 
 // Free blocks should coalesce to avoid fragmentation.
@@ -131,7 +131,7 @@ TEST_CASE("test_malloc_several_free_one", "[Malloc]")
 TEST_CASE("test_coalesce_0", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(SMALL);
     REQUIRE(a);
@@ -139,7 +139,7 @@ TEST_CASE("test_coalesce_0", "[Malloc]")
     void *b = zone->malloc(SMALL);
     REQUIRE(b);
 
-    void *c = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - 2*(SMALL+sizeof(malloc_block)) - sizeof(malloc_block));
+    void *c = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - 2*(SMALL+sizeof(MallocBlock)) - sizeof(MallocBlock));
     REQUIRE(c);
 
     void *d = zone->malloc(SMALL*2);
@@ -160,7 +160,7 @@ TEST_CASE("test_coalesce_0", "[Malloc]")
 TEST_CASE("test_coalesce_1", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(SMALL);
     REQUIRE(a);
@@ -168,7 +168,7 @@ TEST_CASE("test_coalesce_1", "[Malloc]")
     void *b = zone->malloc(SMALL);
     REQUIRE(b);
 
-    void *c = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - 2*(SMALL+sizeof(malloc_block)) - sizeof(malloc_block));
+    void *c = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - 2*(SMALL+sizeof(MallocBlock)) - sizeof(MallocBlock));
     REQUIRE(c);
 
     void *d = zone->malloc(SMALL*2);
@@ -189,7 +189,7 @@ TEST_CASE("test_coalesce_1", "[Malloc]")
 TEST_CASE("test_coalesce_2", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(SMALL);
     REQUIRE(a);
@@ -197,17 +197,17 @@ TEST_CASE("test_coalesce_2", "[Malloc]")
     void *b = zone->malloc(SMALL);
     REQUIRE(b);
 
-    void *c = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - 2*(SMALL+sizeof(malloc_block)) - sizeof(malloc_block));
+    void *c = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - 2*(SMALL+sizeof(MallocBlock)) - sizeof(MallocBlock));
     REQUIRE(c);
 
-    void *d = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - sizeof(malloc_block));
+    void *d = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - sizeof(MallocBlock));
     REQUIRE(!d); // expected to fail
 
     zone->free(c);
     zone->free(a);
     zone->free(b); // preceding and following both merged here
 
-    void *e = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - sizeof(malloc_block));
+    void *e = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - sizeof(MallocBlock));
     REQUIRE(e); // should succeed now
     REQUIRE(a == e); // using the same block as `a'
 }
@@ -217,17 +217,17 @@ TEST_CASE("test_coalesce_2", "[Malloc]")
 TEST_CASE("test_realloc_extend_0", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(1);
     REQUIRE(a);
-    REQUIRE(zone->head()->next != NULL);
+    REQUIRE(zone->head()->next != nullptr);
 
-    malloc_block *block1 = zone->head();
-    malloc_block *block2 = zone->head()->next;
+    MallocBlock *block1 = zone->head();
+    MallocBlock *block2 = zone->head()->next;
 
     size_t size1 = block1->size;
-    size_t size2 = block2->size;
+    size_t Size2_ = block2->size;
 
     void *b = zone->realloc(a, 2);
     REQUIRE(b);
@@ -236,7 +236,7 @@ TEST_CASE("test_realloc_extend_0", "[Malloc]")
     REQUIRE(zone->head() == block1);
     REQUIRE(zone->head()->next == block2);
     REQUIRE(block1->size == size1);
-    REQUIRE(block2->size == size2);
+    REQUIRE(block2->size == Size2_);
 }
 
 // If realloc cannot extend the current allocation into the following block
@@ -245,24 +245,24 @@ TEST_CASE("test_realloc_extend_0", "[Malloc]")
 TEST_CASE("test_realloc_extend_1", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(0);
     REQUIRE(a);
-    REQUIRE(zone->head()->next != NULL);
+    REQUIRE(zone->head()->next != nullptr);
 
     void *b = zone->realloc(a, SMALL);
     REQUIRE(b);
     REQUIRE(a == b);
 
-    malloc_block *block1 = zone->head();
+    MallocBlock *block1 = zone->head();
     REQUIRE(block1);
 
-    malloc_block *block2 = zone->head()->next;
+    MallocBlock *block2 = zone->head()->next;
     REQUIRE(block2);
 
     REQUIRE(block1->size >= SMALL);
-    REQUIRE(block2->size >= sizeof(s_buffer) - sizeof(malloc_zone) - 2*sizeof(malloc_block) - SMALL);
+    REQUIRE(block2->size >= sizeof(s_buffer) - sizeof(MallocZone) - 2*sizeof(MallocBlock) - SMALL);
 }
 
 // Realloc tries to extend an allocation in place. If it cannot then it
@@ -270,7 +270,7 @@ TEST_CASE("test_realloc_extend_1", "[Malloc]")
 TEST_CASE("test_realloc_relocate_0", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(SMALL);
     REQUIRE(a);
@@ -283,7 +283,7 @@ TEST_CASE("test_realloc_relocate_0", "[Malloc]")
     REQUIRE(a != c);
 
     size_t count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         ++count;
     }
     REQUIRE(count == 4);
@@ -292,7 +292,7 @@ TEST_CASE("test_realloc_relocate_0", "[Malloc]")
         SMALL,
         SMALL,
         2*SMALL,
-        sizeof(s_buffer) - sizeof(malloc_zone) - 4*SMALL - 4*sizeof(malloc_block)
+        sizeof(s_buffer) - sizeof(MallocZone) - 4*SMALL - 4*sizeof(MallocBlock)
     };
     size_t expected_inuse[] = {
         false,
@@ -301,7 +301,7 @@ TEST_CASE("test_realloc_relocate_0", "[Malloc]")
         false
     };
     count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         REQUIRE(block->size == expected_size[count]);
         REQUIRE(block->inuse == expected_inuse[count]);
         ++count;
@@ -314,7 +314,7 @@ TEST_CASE("test_realloc_relocate_0", "[Malloc]")
 TEST_CASE("test_realloc_relocate_1", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(SMALL);
     REQUIRE(a);
@@ -322,14 +322,14 @@ TEST_CASE("test_realloc_relocate_1", "[Malloc]")
     void *b = zone->malloc(SMALL);
     REQUIRE(b);
 
-    void *c = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - 2*(SMALL+sizeof(malloc_block)) - sizeof(malloc_block));
+    void *c = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - 2*(SMALL+sizeof(MallocBlock)) - sizeof(MallocBlock));
     REQUIRE(c);
 
     void *d = zone->realloc(a, 2*SMALL);
     REQUIRE(!d);
 
     size_t count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         ++count;
     }
     REQUIRE(count == 3);
@@ -337,7 +337,7 @@ TEST_CASE("test_realloc_relocate_1", "[Malloc]")
     size_t expected_size[] = {
         SMALL,
         SMALL,
-        sizeof(s_buffer) - sizeof(malloc_zone) - 2*(SMALL+sizeof(malloc_block)) - sizeof(malloc_block)
+        sizeof(s_buffer) - sizeof(MallocZone) - 2*(SMALL+sizeof(MallocBlock)) - sizeof(MallocBlock)
     };
     size_t expected_inuse[] = {
         true,
@@ -345,7 +345,7 @@ TEST_CASE("test_realloc_relocate_1", "[Malloc]")
         true
     };
     count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         REQUIRE(block->size == expected_size[count]);
         REQUIRE(block->inuse == expected_inuse[count]);
         ++count;
@@ -361,7 +361,7 @@ TEST_CASE("test_realloc_relocate_1", "[Malloc]")
 TEST_CASE("test_realloc_relocate_2", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
     void *a = zone->malloc(SMALL);
     REQUIRE(a);
@@ -369,7 +369,7 @@ TEST_CASE("test_realloc_relocate_2", "[Malloc]")
     void *b = zone->malloc(SMALL);
     REQUIRE(b);
 
-    void *c = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - 2*(SMALL+sizeof(malloc_block)) - sizeof(malloc_block));
+    void *c = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - 2*(SMALL+sizeof(MallocBlock)) - sizeof(MallocBlock));
     REQUIRE(c);
 
     zone->free(a);
@@ -393,21 +393,21 @@ TEST_CASE("test_realloc_relocate_2", "[Malloc]")
 #endif
 
     size_t count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         ++count;
     }
     REQUIRE(count == 2);
 
     size_t expected_size[] = {
-        2*SMALL + sizeof(malloc_block),
-        sizeof(s_buffer) - sizeof(malloc_zone) - 3*sizeof(malloc_block) - 2*SMALL
+        2*SMALL + sizeof(MallocBlock),
+        sizeof(s_buffer) - sizeof(MallocZone) - 3*sizeof(MallocBlock) - 2*SMALL
     };
     size_t expected_inuse[] = {
         true,
         true,
     };
     count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         REQUIRE(block->size == expected_size[count]);
         REQUIRE(block->inuse == expected_inuse[count]);
         ++count;
@@ -423,9 +423,9 @@ TEST_CASE("test_realloc_relocate_2", "[Malloc]")
 TEST_CASE("test_realloc_shrink", "[Malloc]")
 {
     memset(s_buffer, 0, sizeof(s_buffer));
-    malloc_zone *zone = malloc_zone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
 
-    void *a = zone->malloc(sizeof(s_buffer) - sizeof(malloc_zone) - sizeof(malloc_block));
+    void *a = zone->malloc(sizeof(s_buffer) - sizeof(MallocZone) - sizeof(MallocBlock));
     REQUIRE(a);
 
     void *d = zone->realloc(a, SMALL);
@@ -433,21 +433,21 @@ TEST_CASE("test_realloc_shrink", "[Malloc]")
     REQUIRE(a == d);
 
     size_t count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         ++count;
     }
     REQUIRE(count == 2);
 
     size_t expected_size[] = {
         SMALL,
-        sizeof(s_buffer) - sizeof(malloc_zone) - 2*sizeof(malloc_block) - SMALL
+        sizeof(s_buffer) - sizeof(MallocZone) - 2*sizeof(MallocBlock) - SMALL
     };
     size_t expected_inuse[] = {
         true,
         false,
     };
     count = 0;
-    for (malloc_block *block = zone->head(); block; block = block->next) {
+    for (MallocBlock *block = zone->head(); block; block = block->next) {
         REQUIRE(block->size == expected_size[count]);
         REQUIRE(block->inuse == expected_inuse[count]);
         ++count;

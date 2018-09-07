@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_KERNEL_PAGE_DIRECTORY_POPULATE_OPERATION_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_PAGE_DIRECTORY_POPULATE_OPERATION_HPP
 
 #include <mmu.hpp>
 #include <kernel_break_allocator.hpp>
@@ -7,14 +8,16 @@
 // These page tables are allocated from the kernel bootstrap heap once at boot
 // time. These tables are updatd as memory is allocated for the kernel.
 // Kernel virtual memory mappings are shared by all tasks.
-class kernel_page_directory_populate_operation {
+class KernelPageDirectoryPopulateOperation {
 public:
-    kernel_page_directory_populate_operation(kernel_break_allocator &break_allocator);
+    KernelPageDirectoryPopulateOperation(KernelBreakAllocator &break_allocator);
 
     void populate_kernel_page_directory();
 
 private:
-    kernel_break_allocator &break_allocator;
+    KernelBreakAllocator &break_allocator_;
 
-    page_table* allocate_kernel_page_tables();
+    PageTable* allocate_kernel_page_tables();
 };
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_PAGE_DIRECTORY_POPULATE_OPERATION_HPP

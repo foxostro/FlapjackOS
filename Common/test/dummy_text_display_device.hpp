@@ -1,13 +1,14 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_TEST_DUMMY_TEXT_DISPLAY_DEVICE_HPP
+#define FLAPJACKOS_COMMON_TEST_DUMMY_TEXT_DISPLAY_DEVICE_HPP
 
 #include <common/text_display_device.hpp>
 
-class dummy_text_display_device : public text_display_device {
-    vgachar_t _buffer[CONSOLE_WIDTH*CONSOLE_HEIGHT];
-    point2_t _cursor;
+class DummyTextDisplayDevice : public TextDisplayDevice {
+    VGAChar _buffer[CONSOLE_WIDTH*CONSOLE_HEIGHT];
+    Point2 _cursor;
 
 public:
-    dummy_text_display_device()
+    DummyTextDisplayDevice()
     {
         clear();
     }
@@ -17,7 +18,7 @@ public:
         memset(_buffer, 0, sizeof(_buffer));
     }
 
-    void draw_char(point2_t pos, vgachar_t ch) override
+    void draw_char(Point2 pos, VGAChar ch) override
     {
         if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH) {
             size_t i = pos.x + CONSOLE_WIDTH * pos.y;
@@ -26,16 +27,16 @@ public:
         }
     }
 
-    vgachar_t get_char(point2_t pos) const override
+    VGAChar get_char(Point2 pos) const override
     {
         size_t i = pos.x + CONSOLE_WIDTH * pos.y;
         assert(i < CONSOLE_WIDTH * CONSOLE_HEIGHT);
         return _buffer[i];
     }
 
-    vgachar_t make_char(char ch) const override
+    VGAChar make_char(char ch) const override
     {
-        vgachar_t r;
+        VGAChar r;
         r.blink = 0;
         r.fg = WHITE;
         r.bg = BLACK;
@@ -43,12 +44,12 @@ public:
         return r;
     }
 
-    void set_cursor_position(point2_t pos) override
+    void set_cursor_position(Point2 pos) override
     {
         _cursor = pos;
     }
 
-    point2_t get_cursor_position() const override
+    Point2 get_cursor_position() const override
     {
         return _cursor;
     }
@@ -58,7 +59,7 @@ public:
         return TAB_WIDTH;
     }
 
-    size2_t dimensions() const override
+    Size2 dimensions() const override
     {
         return {CONSOLE_WIDTH, CONSOLE_HEIGHT};
     }
@@ -67,10 +68,12 @@ public:
     {
         assert(row < CONSOLE_HEIGHT);
         std::string str;
-        point2_t pos{0, (int)row};
+        Point2 pos{0, (int)row};
         for (pos.x = 0; pos.x < CONSOLE_WIDTH; ++pos.x) {
             str += get_char(pos).ch;
         }
         return str;
     }
 };
+
+#endif // FLAPJACKOS_COMMON_TEST_DUMMY_TEXT_DISPLAY_DEVICE_HPP

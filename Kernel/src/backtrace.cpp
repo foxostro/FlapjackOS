@@ -1,10 +1,10 @@
-#include <common/text_terminal.hpp>
+#include <backtrace.hpp>
 #include <get_ebp.h>
 
 // Maximum number of stack frames in a backtrace.
 constexpr size_t MAXFRAMES = 16;
 
-void backtrace(text_terminal &term)
+void backtrace(TextTerminal &term)
 {
     size_t frame;
     uintptr_t * ebp;

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_TSS_H
+#define FLAPJACKOS_KERNEL_INCLUDE_TSS_H
 
 typedef struct {
     unsigned short   link;
@@ -54,4 +55,6 @@ typedef struct {
 
     unsigned short   trap;
     unsigned short   iomap;
-} tss_struct_t;
+} TaskStateSegment;
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_TSS_H

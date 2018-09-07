@@ -1,29 +1,32 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_TEST_DUMMY_KEYBOARD_DEVICE_HPP
+#define FLAPJACKOS_COMMON_TEST_DUMMY_KEYBOARD_DEVICE_HPP
 
 #include <common/keyboard_device.hpp>
 #include <vector>
 
-class dummy_keyboard_device : public keyboard_device {
-    std::vector<keyboard_event> _events;
+class DummyKeyboardDevice : public KeyboardDevice {
+    std::vector<KeyboardEvent> _events;
 
 public:
-    virtual ~dummy_keyboard_device() noexcept = default;
+    virtual ~DummyKeyboardDevice() noexcept = default;
 
     const char* keycode_name(keycode_t) override
     {
         return "Unknown Key Code";
     }
 
-    keyboard_event get_event() override
+    KeyboardEvent get_event() override
     {
         assert(!_events.empty());
-        keyboard_event ev = _events.front();
+        KeyboardEvent ev = _events.front();
         _events.erase(_events.begin());
         return ev;
     }
 
-    void set_events(std::vector<keyboard_event> &&events)
+    void set_events(std::vector<KeyboardEvent> &&events)
     {
         _events = std::move(events);
     }
 };
+
+#endif // FLAPJACKOS_COMMON_TEST_DUMMY_KEYBOARD_DEVICE_HPP

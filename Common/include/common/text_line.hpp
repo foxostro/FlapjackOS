@@ -1,49 +1,49 @@
-#pragma once
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_LINE_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_LINE_HPP
 
+#include <common/text_display_device.hpp>
 #include <common/ring_buffer.hpp>
 #include <common/vector.hpp>
 #include <common/terminal_metrics.hpp>
 #include <common/vec2.hpp>
 
-class text_display_device;
-
 // A logical line of text in the terminal. This is a sequence of characters.
 // In the terminal, these are separated by line breaks. Though, each logical
 // line may flow across several physical display lines if they're long enough.
-class text_line {
+class TextLine {
     // The logical line is bound to a physical display.
-    text_display_device *_display;
+    TextDisplayDevice *display_;
 
     // The characters in the logical line. This is limited to MAXLINE chars.
-    ring_buffer<char, MAXLINE> _data;
+    RingBuffer<char, MAXLINE> data_;
 
     // When we change the contents of the text line, we measure the number of
     // physical lines and rows needed to display the logical line.
-    size2_t _cached_display_size;
+    Size2 cached_display_size_;
 
 public:
-    using size_type = ring_buffer<char, MAXLINE>::size_type;
+    using size_type = RingBuffer<char, MAXLINE>::size_type;
 
     // The number of columns this character will take up.
     static int step_for_char(int tab_width, int col, char ch);
 
     // Destructor.
-    ~text_line();
+    ~TextLine();
 
     // Constructor.
-    text_line(text_display_device &display);
+    TextLine(TextDisplayDevice &display);
 
     // Copy constructor.
-    text_line(const text_line &line);
+    TextLine(const TextLine &line);
 
     // Move constructor.
-    text_line(text_line &&line);
+    TextLine(TextLine &&line);
 
     // Copy-assignment operator.
-    text_line& operator=(const text_line &other);
+    TextLine& operator=(const TextLine &other);
 
     // Move-assignment operator.
-    text_line& operator=(text_line &&other);
+    TextLine& operator=(TextLine &&other);
 
     // Draws the text line at the specified line of the display.
     // Returns the display line where the next logical line should be placed.
@@ -51,16 +51,16 @@ public:
 
     // Count the number of columns and rows on the display needed to draw the
     // text line.
-    size2_t measure() const;
+    Size2 measure() const;
 
     // Convert the specified logical position to a physical position, relative
     // to this row. We do not specify the logical row, because we're always
     // referring to this row.
-    point2_t convert(int logi_col) const;
+    Point2 convert(int logi_col) const;
 
     // Gets the characters in the text line.
     // The string is nul-terminated.
-    vector<char> str() const;
+    Vector<char> str() const;
 
     // Inserts a character at the end of the line.
     // If the character won't fit on the line then the line remains unmodified
@@ -91,17 +91,19 @@ public:
 
     // When we change the contents of the text line, we measure the number of
     // physical lines and rows needed to display the logical line.
-    size2_t get_cached_display_size() const;
+    Size2 get_cached_display_size() const;
 
-    text_display_device& get_display()
+    TextDisplayDevice& get_display()
     {
-        assert(_display);
-        return *_display;
+        assert(display_);
+        return *display_;
     }
 
-    const text_display_device& get_display() const
+    const TextDisplayDevice& get_display() const
     {
-        assert(_display);
-        return *_display;
+        assert(display_);
+        return *display_;
     }
 };
+
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_LINE_HPP

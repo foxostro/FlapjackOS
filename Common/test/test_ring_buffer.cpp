@@ -6,10 +6,10 @@
 
 #define VERBOSE 0
 
-TEST_CASE("Initialize an empty buffer", "[ring_buffer]")
+TEST_CASE("Initialize an empty buffer", "[RingBuffer]")
 {
     constexpr size_t N = 10;
-    ring_buffer<int, N> buffer;
+    RingBuffer<int, N> buffer;
     REQUIRE(buffer.size() == 0);
     REQUIRE(buffer.empty());
     REQUIRE(buffer.capacity() == N);
@@ -68,10 +68,10 @@ template<typename T>
 static void print_buffer(const char *, const T &) {}
 #endif
 
-TEST_CASE("Push back, pop front", "[ring_buffer]")
+TEST_CASE("Push back, pop front", "[RingBuffer]")
 {
     {
-        ring_buffer<whatever, 3> buffer;
+        RingBuffer<whatever, 3> buffer;
 
         REQUIRE(buffer.push_back(0));
         print_buffer("buffer.push_back(0)", buffer);
@@ -118,9 +118,9 @@ TEST_CASE("Push back, pop front", "[ring_buffer]")
     REQUIRE((count_ctor + count_ctor_move + count_ctor_copy) == count_dtor);
 }
 
-TEST_CASE("Push front, pop back", "[ring_buffer]")
+TEST_CASE("Push front, pop back", "[RingBuffer]")
 {
-    ring_buffer<whatever, 3> buffer;
+    RingBuffer<whatever, 3> buffer;
 
     REQUIRE(buffer.push_front(0));
     print_buffer("buffer.push_front(0)", buffer);
@@ -163,9 +163,9 @@ TEST_CASE("Push front, pop back", "[ring_buffer]")
     REQUIRE(buffer.size() == 0);
 }
 
-TEST_CASE("repeated", "[ring_buffer]")
+TEST_CASE("repeated", "[RingBuffer]")
 {
-    ring_buffer<whatever, 10> buffer;
+    RingBuffer<whatever, 10> buffer;
 
     // Push front, pop back
     for (int i = 0; i < 2; ++i) {
@@ -220,9 +220,9 @@ TEST_CASE("repeated", "[ring_buffer]")
     }
 }
 
-TEST_CASE("insert", "[ring_buffer]")
+TEST_CASE("insert", "[RingBuffer]")
 {
-    ring_buffer<whatever, 3> buffer;
+    RingBuffer<whatever, 3> buffer;
 
     REQUIRE(buffer.insert(0, whatever(0)) == true);
     REQUIRE(buffer.size() == 1);
@@ -243,9 +243,9 @@ TEST_CASE("insert", "[ring_buffer]")
     REQUIRE(buffer.insert(0, whatever(3)) == false);
 }
 
-TEST_CASE("remove", "[ring_buffer]")
+TEST_CASE("remove", "[RingBuffer]")
 {
-    ring_buffer<whatever, 3> buffer;
+    RingBuffer<whatever, 3> buffer;
 
     buffer.push_back(0);
     buffer.push_back(1);

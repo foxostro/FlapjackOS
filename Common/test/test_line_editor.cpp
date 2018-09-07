@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 
-using line_t = line_editor::line_t;
+using line_t = LineEditor::Line;
 
 static line_t build_line(const std::string &str)
 {
@@ -27,30 +27,30 @@ static std::string to_string(const line_t &line)
     return result;
 }
 
-TEST_CASE("line_editor basic input", "[line_editor]")
+TEST_CASE("LineEditor basic input", "[LineEditor]")
 {
     line_t expected = build_line("hello");
 
-    dummy_text_display_device display;
-    dummy_keyboard_device keyboard;
-    text_terminal term(display);
+    DummyTextDisplayDevice display;
+    DummyKeyboardDevice keyboard;
+    TextTerminal term(display);
 
-    keyboard.set_events(std::vector<keyboard_event>{
-        keyboard_event(KEYCODE_H, PRESSED, 'h'),
-        keyboard_event(KEYCODE_H, RELEASED, 'h'),
-        keyboard_event(KEYCODE_E, PRESSED, 'e'),
-        keyboard_event(KEYCODE_E, RELEASED, 'e'),
-        keyboard_event(KEYCODE_L, PRESSED, 'l'),
-        keyboard_event(KEYCODE_L, RELEASED, 'l'),
-        keyboard_event(KEYCODE_L, PRESSED, 'l'),
-        keyboard_event(KEYCODE_L, RELEASED, 'l'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n')
+    keyboard.set_events(std::vector<KeyboardEvent>{
+        KeyboardEvent(KEYCODE_H, PRESSED, 'h'),
+        KeyboardEvent(KEYCODE_H, RELEASED, 'h'),
+        KeyboardEvent(KEYCODE_E, PRESSED, 'e'),
+        KeyboardEvent(KEYCODE_E, RELEASED, 'e'),
+        KeyboardEvent(KEYCODE_L, PRESSED, 'l'),
+        KeyboardEvent(KEYCODE_L, RELEASED, 'l'),
+        KeyboardEvent(KEYCODE_L, PRESSED, 'l'),
+        KeyboardEvent(KEYCODE_L, RELEASED, 'l'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n')
     });
 
-    line_editor ed(term, keyboard);
+    LineEditor ed(term, keyboard);
 
     line_t line = ed.getline();
 
@@ -58,88 +58,88 @@ TEST_CASE("line_editor basic input", "[line_editor]")
     REQUIRE(display.get_line( 0) == "> hello                                                                         ");
 }
 
-TEST_CASE("line_editor backspace at the end", "[line_editor]")
+TEST_CASE("LineEditor backspace at the end", "[LineEditor]")
 {
-    dummy_text_display_device display;
-    dummy_keyboard_device keyboard;
-    text_terminal term(display);
+    DummyTextDisplayDevice display;
+    DummyKeyboardDevice keyboard;
+    TextTerminal term(display);
 
-    keyboard.set_events(std::vector<keyboard_event>{
-        keyboard_event(KEYCODE_H, PRESSED, 'h'),
-        keyboard_event(KEYCODE_H, RELEASED, 'h'),
-        keyboard_event(KEYCODE_E, PRESSED, 'e'),
-        keyboard_event(KEYCODE_E, RELEASED, 'e'),
-        keyboard_event(KEYCODE_L, PRESSED, 'l'),
-        keyboard_event(KEYCODE_L, RELEASED, 'l'),
-        keyboard_event(KEYCODE_L, PRESSED, 'l'),
-        keyboard_event(KEYCODE_L, RELEASED, 'l'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
+    keyboard.set_events(std::vector<KeyboardEvent>{
+        KeyboardEvent(KEYCODE_H, PRESSED, 'h'),
+        KeyboardEvent(KEYCODE_H, RELEASED, 'h'),
+        KeyboardEvent(KEYCODE_E, PRESSED, 'e'),
+        KeyboardEvent(KEYCODE_E, RELEASED, 'e'),
+        KeyboardEvent(KEYCODE_L, PRESSED, 'l'),
+        KeyboardEvent(KEYCODE_L, RELEASED, 'l'),
+        KeyboardEvent(KEYCODE_L, PRESSED, 'l'),
+        KeyboardEvent(KEYCODE_L, RELEASED, 'l'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
 
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'), // o
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'), // l
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'), // l
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'), // e
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'), // h
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'), // does nothing in the editor
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'), // o
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'), // l
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'), // l
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'), // e
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'), // h
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'), // does nothing in the editor
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
 
-        keyboard_event(KEYCODE_O, PRESSED, 'f'),
-        keyboard_event(KEYCODE_O, RELEASED, 'f'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'f'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'f'),
 
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n')
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n')
     });
 
-    line_editor ed(term, keyboard);
+    LineEditor ed(term, keyboard);
 
     line_t line = ed.getline();
 
     REQUIRE(display.get_line( 0) == "> f                                                                             ");
 }
 
-TEST_CASE("line_editor left and right arrows", "[line_editor]")
+TEST_CASE("LineEditor left and right arrows", "[LineEditor]")
 {
     line_t expected = build_line("hello");
 
-    dummy_text_display_device display;
-    dummy_keyboard_device keyboard;
-    text_terminal term(display);
+    DummyTextDisplayDevice display;
+    DummyKeyboardDevice keyboard;
+    TextTerminal term(display);
 
-    keyboard.set_events(std::vector<keyboard_event>{
-        keyboard_event(KEYCODE_H, PRESSED, 'h'),
-        keyboard_event(KEYCODE_H, RELEASED, 'h'),
-        keyboard_event(KEYCODE_A, PRESSED, 'a'),
-        keyboard_event(KEYCODE_A, RELEASED, 'a'),
-        keyboard_event(KEYCODE_L, PRESSED, 'l'),
-        keyboard_event(KEYCODE_L, RELEASED, 'l'),
+    keyboard.set_events(std::vector<KeyboardEvent>{
+        KeyboardEvent(KEYCODE_H, PRESSED, 'h'),
+        KeyboardEvent(KEYCODE_H, RELEASED, 'h'),
+        KeyboardEvent(KEYCODE_A, PRESSED, 'a'),
+        KeyboardEvent(KEYCODE_A, RELEASED, 'a'),
+        KeyboardEvent(KEYCODE_L, PRESSED, 'l'),
+        KeyboardEvent(KEYCODE_L, RELEASED, 'l'),
 
-        keyboard_event(KEYCODE_LEFT_ARROW, PRESSED, 0),
-        keyboard_event(KEYCODE_LEFT_ARROW, RELEASED, 0),
+        KeyboardEvent(KEYCODE_LEFT_ARROW, PRESSED, 0),
+        KeyboardEvent(KEYCODE_LEFT_ARROW, RELEASED, 0),
 
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_E, PRESSED, 'e'),
-        keyboard_event(KEYCODE_E, RELEASED, 'e'),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_E, PRESSED, 'e'),
+        KeyboardEvent(KEYCODE_E, RELEASED, 'e'),
 
-        keyboard_event(KEYCODE_RIGHT_ARROW, PRESSED, 0),
-        keyboard_event(KEYCODE_RIGHT_ARROW, RELEASED, 0),
+        KeyboardEvent(KEYCODE_RIGHT_ARROW, PRESSED, 0),
+        KeyboardEvent(KEYCODE_RIGHT_ARROW, RELEASED, 0),
 
-        keyboard_event(KEYCODE_L, PRESSED, 'l'),
-        keyboard_event(KEYCODE_L, RELEASED, 'l'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
+        KeyboardEvent(KEYCODE_L, PRESSED, 'l'),
+        KeyboardEvent(KEYCODE_L, RELEASED, 'l'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
 
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n')
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n')
     });
 
-    line_editor ed(term, keyboard);
+    LineEditor ed(term, keyboard);
 
     line_t line = ed.getline();
 
@@ -147,54 +147,54 @@ TEST_CASE("line_editor left and right arrows", "[line_editor]")
     REQUIRE(display.get_line( 0) == "> hello                                                                         ");
 }
 
-TEST_CASE("line_editor history navigation", "[line_editor]")
+TEST_CASE("LineEditor history navigation", "[LineEditor]")
 {
-    dummy_text_display_device display;
-    dummy_keyboard_device keyboard;
-    text_terminal term(display);
+    DummyTextDisplayDevice display;
+    DummyKeyboardDevice keyboard;
+    TextTerminal term(display);
 
-    keyboard.set_events(std::vector<keyboard_event>{
-        keyboard_event(KEYCODE_F, PRESSED, 'f'),
-        keyboard_event(KEYCODE_F, RELEASED, 'f'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n'),
-        keyboard_event(KEYCODE_B, PRESSED, 'b'),
-        keyboard_event(KEYCODE_B, RELEASED, 'b'),
-        keyboard_event(KEYCODE_A, PRESSED, 'a'),
-        keyboard_event(KEYCODE_A, RELEASED, 'a'),
-        keyboard_event(KEYCODE_R, PRESSED, 'r'),
-        keyboard_event(KEYCODE_R, RELEASED, 'r'),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n'),
-        keyboard_event(KEYCODE_B, PRESSED, 'b'),
-        keyboard_event(KEYCODE_B, RELEASED, 'b'),
-        keyboard_event(KEYCODE_A, PRESSED, 'a'),
-        keyboard_event(KEYCODE_A, RELEASED, 'a'),
-        keyboard_event(KEYCODE_Z, PRESSED, 'z'),
-        keyboard_event(KEYCODE_Z, RELEASED, 'z'),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n'),
-        keyboard_event(KEYCODE_A, PRESSED, 'a'),
-        keyboard_event(KEYCODE_A, RELEASED, 'a'),
-        keyboard_event(KEYCODE_S, PRESSED, 's'),
-        keyboard_event(KEYCODE_S, RELEASED, 's'),
-        keyboard_event(KEYCODE_D, PRESSED, 'd'),
-        keyboard_event(KEYCODE_D, RELEASED, 'd'),
-        keyboard_event(KEYCODE_F, PRESSED, 'f'),
-        keyboard_event(KEYCODE_F, RELEASED, 'f'),
-        keyboard_event(KEYCODE_UP_ARROW, PRESSED, 0),
-        keyboard_event(KEYCODE_UP_ARROW, RELEASED, 0),
-        keyboard_event(KEYCODE_UP_ARROW, PRESSED, 0),
-        keyboard_event(KEYCODE_UP_ARROW, RELEASED, 0),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n')
+    keyboard.set_events(std::vector<KeyboardEvent>{
+        KeyboardEvent(KEYCODE_F, PRESSED, 'f'),
+        KeyboardEvent(KEYCODE_F, RELEASED, 'f'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n'),
+        KeyboardEvent(KEYCODE_B, PRESSED, 'b'),
+        KeyboardEvent(KEYCODE_B, RELEASED, 'b'),
+        KeyboardEvent(KEYCODE_A, PRESSED, 'a'),
+        KeyboardEvent(KEYCODE_A, RELEASED, 'a'),
+        KeyboardEvent(KEYCODE_R, PRESSED, 'r'),
+        KeyboardEvent(KEYCODE_R, RELEASED, 'r'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n'),
+        KeyboardEvent(KEYCODE_B, PRESSED, 'b'),
+        KeyboardEvent(KEYCODE_B, RELEASED, 'b'),
+        KeyboardEvent(KEYCODE_A, PRESSED, 'a'),
+        KeyboardEvent(KEYCODE_A, RELEASED, 'a'),
+        KeyboardEvent(KEYCODE_Z, PRESSED, 'z'),
+        KeyboardEvent(KEYCODE_Z, RELEASED, 'z'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n'),
+        KeyboardEvent(KEYCODE_A, PRESSED, 'a'),
+        KeyboardEvent(KEYCODE_A, RELEASED, 'a'),
+        KeyboardEvent(KEYCODE_S, PRESSED, 's'),
+        KeyboardEvent(KEYCODE_S, RELEASED, 's'),
+        KeyboardEvent(KEYCODE_D, PRESSED, 'd'),
+        KeyboardEvent(KEYCODE_D, RELEASED, 'd'),
+        KeyboardEvent(KEYCODE_F, PRESSED, 'f'),
+        KeyboardEvent(KEYCODE_F, RELEASED, 'f'),
+        KeyboardEvent(KEYCODE_UP_ARROW, PRESSED, 0),
+        KeyboardEvent(KEYCODE_UP_ARROW, RELEASED, 0),
+        KeyboardEvent(KEYCODE_UP_ARROW, PRESSED, 0),
+        KeyboardEvent(KEYCODE_UP_ARROW, RELEASED, 0),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n')
     });
 
-    line_editor ed(term, keyboard);
+    LineEditor ed(term, keyboard);
 
     line_t line;
 
@@ -214,30 +214,30 @@ TEST_CASE("line_editor history navigation", "[line_editor]")
     REQUIRE(to_string(line) == "bar");
 }
 
-TEST_CASE("backspace after history recall", "[line_editor]")
+TEST_CASE("backspace after history recall", "[LineEditor]")
 {
-    dummy_text_display_device display;
-    dummy_keyboard_device keyboard;
-    text_terminal term(display);
+    DummyTextDisplayDevice display;
+    DummyKeyboardDevice keyboard;
+    TextTerminal term(display);
 
-    keyboard.set_events(std::vector<keyboard_event>{
-        keyboard_event(KEYCODE_F, PRESSED, 'f'),
-        keyboard_event(KEYCODE_F, RELEASED, 'f'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
-        keyboard_event(KEYCODE_O, PRESSED, 'o'),
-        keyboard_event(KEYCODE_O, RELEASED, 'o'),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n'),
-        keyboard_event(KEYCODE_UP_ARROW, PRESSED, 0),
-        keyboard_event(KEYCODE_UP_ARROW, RELEASED, 0),
-        keyboard_event(KEYCODE_BACKSPACE, PRESSED, '\b'),
-        keyboard_event(KEYCODE_BACKSPACE, RELEASED, '\b'),
-        keyboard_event(KEYCODE_ENTER, PRESSED, '\n'),
-        keyboard_event(KEYCODE_ENTER, RELEASED, '\n')
+    keyboard.set_events(std::vector<KeyboardEvent>{
+        KeyboardEvent(KEYCODE_F, PRESSED, 'f'),
+        KeyboardEvent(KEYCODE_F, RELEASED, 'f'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
+        KeyboardEvent(KEYCODE_O, PRESSED, 'o'),
+        KeyboardEvent(KEYCODE_O, RELEASED, 'o'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n'),
+        KeyboardEvent(KEYCODE_UP_ARROW, PRESSED, 0),
+        KeyboardEvent(KEYCODE_UP_ARROW, RELEASED, 0),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n')
     });
 
-    line_editor ed(term, keyboard);
+    LineEditor ed(term, keyboard);
 
     line_t line;
 

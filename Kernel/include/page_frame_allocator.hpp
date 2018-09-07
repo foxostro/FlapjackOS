@@ -1,14 +1,15 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP
 
 #include <common/bit_array.hpp>
 
 // Allocates physical page frames for use in the kernel.
-class page_frame_allocator {
+class PageFrameAllocator {
 public:
     // Constructor.
-    // Use placement-new to allocate the page_frame_allocator in a suitably-
+    // Use placement-new to allocate the PageFrameAllocator in a suitably-
     // sized block of memory for the number of page frames in the system.
-    page_frame_allocator(size_t number_of_page_frames, size_t length);
+    PageFrameAllocator(size_t number_of_page_frames, size_t length);
 
     // Allocates a specific page frame.
     // Returns true if the allocation was successful, false otherwise.
@@ -27,10 +28,12 @@ public:
     // Mark all page frames as being used.
     void mark_all_as_used()
     {
-        bitmap.set_all();
+        bitmap_.set_all();
     }
 
 private:
-    size_t count;
-    bit_array bitmap; // must be last
+    size_t count_;
+    BitArray bitmap_; // must be last
 };
+
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP

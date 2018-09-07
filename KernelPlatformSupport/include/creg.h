@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_CREG_H
+#define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_CREG_H
 
 #include <stdint.h>
 
@@ -12,3 +13,5 @@ uintptr_t get_cr3(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_CREG_H
