@@ -7,9 +7,12 @@
 class PageFrameAllocator {
 public:
     // Constructor.
-    // Use placement-new to allocate the PageFrameAllocator in a suitably-
-    // sized block of memory for the number of page frames in the system.
-    PageFrameAllocator(size_t number_of_page_frames, size_t length);
+    // The bitmap is stored in the provided buffer, but the PageFrameAllocator
+    // does not gain ownership of this memory and is not responsible for freeing
+    // it later.
+    PageFrameAllocator(size_t number_of_page_frames,
+                       size_t length,
+                       char* storage);
 
     // Allocates a specific page frame.
     // Returns true if the allocation was successful, false otherwise.

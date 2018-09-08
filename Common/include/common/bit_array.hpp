@@ -17,24 +17,15 @@ public:
 
     static size_t calc_number_of_storage_bytes(size_t number_of_bits)
     {
-        return sizeof(BitArray) + (number_of_bits + BitArray::NUMBER_OF_WORD_BITS - 1) / BitArray::NUMBER_OF_WORD_BITS * sizeof(BitArray::Word);
+        return (number_of_bits + NUMBER_OF_WORD_BITS - 1) / NUMBER_OF_WORD_BITS * sizeof(Word);
     }
 
-    static BitArray* create(size_t number_of_bits)
-    {
-        size_t size = calc_number_of_storage_bytes(number_of_bits);
-        char* buffer = new char[size];
-        if (buffer) {
-            BitArray *result = new (buffer) BitArray(number_of_bits, size);
-            return result;
-        } else {
-            return nullptr;
-        }
-    }
-
-    BitArray(size_t number_of_bits, size_t length)
+    // The BitArray does not gain ownership of the buffer and is not responsible
+    // for freeing the memory associated with it.
+    BitArray(size_t number_of_bits, size_t length, char* storage)
      : number_of_bits_(number_of_bits),
-       length_(length)
+       length_(length),
+       storage_(storage)
     {
         clear_all();
     }
@@ -109,7 +100,7 @@ public:
 
 private:
     size_t number_of_bits_, length_;
-    char storage_[];
+    char* storage_;
 
     size_t get_mask(size_t bit_index)
     {

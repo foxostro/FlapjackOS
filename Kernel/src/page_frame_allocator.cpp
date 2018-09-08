@@ -2,9 +2,13 @@
 #include "logical_addressing.hpp"
 #include "panic.h"
 
-PageFrameAllocator::PageFrameAllocator(size_t number_of_page_frames, size_t length)
+PageFrameAllocator::PageFrameAllocator(size_t number_of_page_frames,
+                                       size_t length,
+                                       char* storage)
  : count_(0),
-   bitmap_(number_of_page_frames, length - sizeof(PageFrameAllocator))
+   bitmap_(number_of_page_frames,
+           length,
+           storage)
 {}
 
 bool PageFrameAllocator::allocate(uintptr_t page_frame)
