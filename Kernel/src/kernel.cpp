@@ -11,16 +11,21 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 
-// We pass the terminal around globally becuase it severely clutters the
+
+// We pass the terminal around globally because it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
 // around literally everywhere.
 TextTerminal *g_terminal = nullptr;
 
+// Some things need direct access to the kernel object to manipulate the system.
+// There is only one kernel. So, it's exposed as a global.
 Kernel g_kernel;
 
 
 void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
 {
+    are_interrupts_ready_ = false;
+
     initialize_tss_and_gdt(istack);
     call_global_constructors();
     vga_.clear();
@@ -28,6 +33,8 @@ void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
     g_terminal = &terminal_;
     allocators_ = KernelMemoryAllocators::create(mb_info, terminal_);
     initialize_interrupts_and_device_drivers();
+
+    are_interrupts_ready_ = true;
     enable_interrupts();
 }
 
@@ -108,6 +115,20 @@ void Kernel::initialize_interrupts_and_device_drivers()
     interrupt_dispatcher_.set_handler(IDT_AC,    new PanicInterruptHandler("Alignment Check", /* error_code_present = */ false));
     interrupt_dispatcher_.set_handler(IDT_MC,    new PanicInterruptHandler("Machine Check", /* error_code_present = */ false));
     interrupt_dispatcher_.set_handler(IDT_XF,    new PanicInterruptHandler("SSE Floating Point Exception", /* error_code_present = */ false));
+}
+
+void Kernel::disable_interrupts()
+{
+    if (are_interrupts_ready_) {
+        ::disable_interrupts();
+    }
+}
+
+void Kernel::enable_interrupts()
+{
+    if (are_interrupts_ready_) {
+        ::enable_interrupts();
+    }
 }
 
 // This is marked with "C" linkage because we call it from the assembly code

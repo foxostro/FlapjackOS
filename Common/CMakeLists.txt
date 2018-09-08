@@ -30,10 +30,21 @@ set(SOURCE_FILES
     "include/common/text_line.hpp" "src/text_line.cpp"
     "include/common/text_terminal.hpp" "src/text_terminal.cpp"
     "include/common/bit_array.hpp" "src/bit_array.cpp"
+    "include/common/spin_lock.hpp" "include/common/spin_lock.h" "src/spin_lock.c"
+    "include/common/atomic_counter.hpp"
+    "include/common/shared_pointer.hpp"
+    "include/common/cmpxchg.h"
     )
 
 if(CMAKE_CROSSCOMPILING)
-list(APPEND SOURCE_FILES "src/c_plus_plus_support.cpp")
+list(APPEND SOURCE_FILES
+     "src/c_plus_plus_support.cpp"
+     "src/i386/cmpxchg.S"
+     )
+else(CMAKE_CROSSCOMPILING)
+list(APPEND SOURCE_FILES
+     "src/x86_64/cmpxchg64.c"
+     )
 endif(CMAKE_CROSSCOMPILING)
 
 include_directories("include")
@@ -59,6 +70,7 @@ else(CMAKE_CROSSCOMPILING)
                    "test/test_line_editor.cpp"
                    "test/test_ring_buffer.cpp"
                    "test/test_stdio.cpp"
+                   "test/test_shared_pointer.cpp"
                    )
 
     target_link_libraries(CommonTest

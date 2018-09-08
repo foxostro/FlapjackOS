@@ -5,16 +5,22 @@
 #include <cstring>
 #include <cassert>
 
-InterruptDispatcher::InterruptDispatcher()
-{
-    memset(handlers_, 0, sizeof(handlers_));
-}
+InterruptDispatcher::InterruptDispatcher() = default;
 
-void InterruptDispatcher::set_handler(unsigned interrupt_number,
-                                      InterruptHandler* handler)
+void InterruptDispatcher::set_handler(unsigned interrupt_number, const Handler& handler)
 {
     assert(interrupt_number < IDT_MAX);
+    lock_.lock();
     handlers_[interrupt_number] = handler;
+    lock_.unlock();
+}
+
+auto InterruptDispatcher::get_handler(unsigned interrupt_number) -> Handler
+{
+    lock_.lock();
+    Handler handler = handlers_[interrupt_number];
+    lock_.unlock();
+    return handler;
 }
 
 void InterruptDispatcher::dispatch(unsigned interrupt_number, const Params& params) noexcept
@@ -22,7 +28,7 @@ void InterruptDispatcher::dispatch(unsigned interrupt_number, const Params& para
     assert(interrupt_number < IDT_MAX);
     bool spurious = pic_clear(interrupt_number);
     if (!spurious) {
-        InterruptHandler* handler = handlers_[interrupt_number];
+        auto handler = get_handler(interrupt_number);
         if (handler) {
             handler->int_handler(params);
         }

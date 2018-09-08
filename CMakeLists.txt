@@ -22,7 +22,7 @@ endfunction(GenerateSourceFromTemplate)
 # Let's stick strictly to the C11 standard.
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_EXTENSIONS ON)
 
 # Let's stick strictly to the C++11 standard.
 # Why this instead of C++17? Well, my cross-compiler doesn't support it, and I

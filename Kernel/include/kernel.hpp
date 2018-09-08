@@ -34,6 +34,16 @@ public:
         interrupt_dispatcher_.dispatch(interrupt_number, params);
     }
 
+    // Disables interrupts.
+    // If interrupts have not been configured and intially enabled then this
+    // does nothing.
+    void disable_interrupts();
+
+    // Enables interrupts.
+    // If interrupts have not been configured and intially enabled then this
+    // does nothing.
+    void enable_interrupts();
+
 private:
     GDTEntry gdt_[6];
     TaskStateSegment tss_;
@@ -43,6 +53,7 @@ private:
     InterruptDispatcher interrupt_dispatcher_;
     VGATextDisplayDevice vga_;
     TextTerminal terminal_;
+    bool are_interrupts_ready_;
 
     // Setup a Task State Segment and Global Descriptor Table for the kernel.
     // The kernel uses one TSS between all tasks and performs software task
@@ -65,5 +76,7 @@ private:
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
 };
+
+extern Kernel g_kernel;
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
