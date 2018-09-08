@@ -8,25 +8,12 @@
 
 // A text terminal displays lines of text on a text console display.
 class TextTerminal {
-    // Displays monospace text on the screen.
-    TextDisplayDevice &display_;
-
-    // Logical lines of text in the terminal. Each of these may span one or more
-    // physical lines on the display if they're too long to fit.
-    RingBuffer<TextLine, CONSOLE_HEIGHT> logical_lines_;
-
-    // The logical position of the cursor. This is the logical line on which
-    // the cursor resides and the logical column within that line. This can be
-    // mapped to a physical cursor position through the convert() method.
-    Point2 logical_cursor_;
-
-    void putchar_internal(char ch);
-
 public:
     ~TextTerminal();
 
-    // Constructor.
-    TextTerminal(TextDisplayDevice &display);
+    // Two-phase initialization.
+    TextTerminal();
+    void init(TextDisplayDevice *display);
 
     // Draws the terminal on the display.
     void draw();
@@ -75,6 +62,21 @@ public:
 
     // Moves the cursor all the way to the end of the line.
     void move_cursor_to_end();
+
+private:
+    // Displays monospace text on the screen.
+    TextDisplayDevice *display_;
+
+    // Logical lines of text in the terminal. Each of these may span one or more
+    // physical lines on the display if they're too long to fit.
+    RingBuffer<TextLine, CONSOLE_HEIGHT> logical_lines_;
+
+    // The logical position of the cursor. This is the logical line on which
+    // the cursor resides and the logical column within that line. This can be
+    // mapped to a physical cursor position through the convert() method.
+    Point2 logical_cursor_;
+
+    void putchar_internal(char ch);
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP

@@ -33,7 +33,7 @@ TEST_CASE("LineEditor basic input", "[LineEditor]")
 
     DummyTextDisplayDevice display;
     DummyKeyboardDevice keyboard;
-    TextTerminal term(display);
+    TextTerminal term; term.init(&display);
 
     keyboard.set_events(std::vector<KeyboardEvent>{
         KeyboardEvent(KEYCODE_H, PRESSED, 'h'),
@@ -62,7 +62,7 @@ TEST_CASE("LineEditor backspace at the end", "[LineEditor]")
 {
     DummyTextDisplayDevice display;
     DummyKeyboardDevice keyboard;
-    TextTerminal term(display);
+    TextTerminal term; term.init(&display);
 
     keyboard.set_events(std::vector<KeyboardEvent>{
         KeyboardEvent(KEYCODE_H, PRESSED, 'h'),
@@ -109,7 +109,7 @@ TEST_CASE("LineEditor left and right arrows", "[LineEditor]")
 
     DummyTextDisplayDevice display;
     DummyKeyboardDevice keyboard;
-    TextTerminal term(display);
+    TextTerminal term; term.init(&display);
 
     keyboard.set_events(std::vector<KeyboardEvent>{
         KeyboardEvent(KEYCODE_H, PRESSED, 'h'),
@@ -151,7 +151,7 @@ TEST_CASE("LineEditor history navigation", "[LineEditor]")
 {
     DummyTextDisplayDevice display;
     DummyKeyboardDevice keyboard;
-    TextTerminal term(display);
+    TextTerminal term; term.init(&display);
 
     keyboard.set_events(std::vector<KeyboardEvent>{
         KeyboardEvent(KEYCODE_F, PRESSED, 'f'),
@@ -218,7 +218,7 @@ TEST_CASE("backspace after history recall", "[LineEditor]")
 {
     DummyTextDisplayDevice display;
     DummyKeyboardDevice keyboard;
-    TextTerminal term(display);
+    TextTerminal term; term.init(&display);
 
     keyboard.set_events(std::vector<KeyboardEvent>{
         KeyboardEvent(KEYCODE_F, PRESSED, 'f'),

@@ -24,7 +24,7 @@ public:
                    int leap_ticks);
 
     // Timer interrupt handler. To be called when the timer interrupt fires.
-    void int_handler() override;
+    void int_handler(const ParameterPackage& params) override;
 
     unsigned ticks() override;
     unsigned seconds() override;

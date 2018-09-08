@@ -13,9 +13,9 @@ public:
     // Keyboard interrupt handler.
     // Implements the lower half of PS/2 keyboard driver. To be called when the
     // keyboard interrupt fires.
-    void int_handler() override;
+    void int_handler(const ParameterPackage& params) override;
 
-    const char* keycode_name(keycode_t key) override;
+    const char* keycode_name(Keycode key) override;
     KeyboardEvent get_event() override;
     
 private:
@@ -24,7 +24,7 @@ private:
         PROCESSING_ESCAPE_CODE
     };
     
-    keycode_key_state key_state_[KEYCODE_MAX];
+    KeycodeKeyState key_state_[KEYCODE_MAX];
     RingBuffer<KeyboardEvent, 32> events_;
     
     void clear_input();

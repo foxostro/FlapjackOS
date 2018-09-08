@@ -10,7 +10,7 @@ class DummyKeyboardDevice : public KeyboardDevice {
 public:
     virtual ~DummyKeyboardDevice() noexcept = default;
 
-    const char* keycode_name(keycode_t) override
+    const char* keycode_name(Keycode) override
     {
         return "Unknown Key Code";
     }

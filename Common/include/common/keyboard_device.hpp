@@ -132,18 +132,18 @@ enum {
     KEYCODE_MAX
 };
 
-using keycode_t = unsigned;
+using Keycode = unsigned;
 
-enum keycode_key_state {
+enum KeycodeKeyState {
     PRESSED, RELEASED
 };
 
 struct KeyboardEvent {
     // Identifies which button on the keyboard corresponds to this event.
-    keycode_t key;
+    Keycode key;
 
     // The new state of the key with this event, e.g., PRESSED or RELEASED.
-    keycode_key_state state;
+    KeycodeKeyState state;
 
     // The ASCII character associated with the key press, or zero if none.
     char ch;
@@ -156,7 +156,7 @@ struct KeyboardEvent {
     {}
 
     // Constructor.
-    KeyboardEvent(keycode_t k, keycode_key_state s, char c)
+    KeyboardEvent(Keycode k, KeycodeKeyState s, char c)
      : key(k),
        state(s),
        ch(c)
@@ -168,7 +168,7 @@ public:
     virtual ~KeyboardDevice() noexcept = default;
 
     // Returns the name of the given key code.
-    virtual const char* keycode_name(keycode_t key) = 0;
+    virtual const char* keycode_name(Keycode key) = 0;
 
     // Gets the next key event.
     // Blocks on the next key event and returns it in the specified event structure.

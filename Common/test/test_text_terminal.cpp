@@ -6,7 +6,7 @@
 TEST_CASE("TextTerminal::puts", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts(
         // Simple string
@@ -59,7 +59,7 @@ TEST_CASE("TextTerminal::puts", "[TextTerminal]")
 TEST_CASE("logical lines are limited", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     // When we put more logical lines than can fit on the display, the top line
     // should be discarded to make room.
@@ -131,7 +131,7 @@ TEST_CASE("logical lines are limited", "[TextTerminal]")
 TEST_CASE("scrolling when logical lines overflow physical lines", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts(
         "i=0\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n"
@@ -206,7 +206,7 @@ TEST_CASE("scrolling when logical lines overflow physical lines", "[TextTerminal
 TEST_CASE("putchar backspace", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaba");
 
@@ -236,7 +236,7 @@ TEST_CASE("putchar backspace", "[TextTerminal]")
 TEST_CASE("backspace over a tab character", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts("a\tb");
 
@@ -255,7 +255,7 @@ TEST_CASE("backspace over a tab character", "[TextTerminal]")
 TEST_CASE("move cursor left", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts("b");
     term.move_cursor_left();
@@ -269,7 +269,7 @@ TEST_CASE("move cursor left", "[TextTerminal]")
 TEST_CASE("move cursor left and right", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts("b");
     term.move_cursor_left();
@@ -285,7 +285,7 @@ TEST_CASE("move cursor left and right", "[TextTerminal]")
 TEST_CASE("edit the middle of a line", "[TextTerminal]")
 {
     DummyTextDisplayDevice dummy_display;
-    TextTerminal term(dummy_display);
+    TextTerminal term; term.init(&dummy_display);
 
     term.puts("hal");
     REQUIRE(dummy_display.get_line( 0) == "hal                                                                             ");

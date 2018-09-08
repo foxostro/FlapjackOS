@@ -35,7 +35,7 @@ LineEditor::Line LineEditor::getline()
         }
 
         char ch = event.ch;
-        keycode_t key = event.key;
+        Keycode key = event.key;
 
         switch (key) {
             case KEYCODE_NUMPAD_4:

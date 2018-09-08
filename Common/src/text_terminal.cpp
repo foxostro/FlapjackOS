@@ -8,10 +8,17 @@
 
 TextTerminal::~TextTerminal() = default;
 
-TextTerminal::TextTerminal(TextDisplayDevice &disp)
- : display_(disp),
+TextTerminal::TextTerminal()
+ : display_(nullptr),
    logical_cursor_{0, 0}
 {}
+
+void TextTerminal::init(TextDisplayDevice *display)
+{
+    assert(display);
+    display_ = display;
+    logical_cursor_ = {0, 0};
+}
 
 void TextTerminal::draw()
 {
@@ -46,17 +53,17 @@ void TextTerminal::draw()
     }
 
     // Clear the remainder of the display.
-    auto space = display_.make_char(' ');
+    auto space = display_->make_char(' ');
     for (; row < CONSOLE_HEIGHT; ++row) {
         for (int col = 0; col < CONSOLE_WIDTH; ++col) {
-            display_.draw_char(Point2{col, row}, space);
+            display_->draw_char(Point2{col, row}, space);
         }
     }
 
     // Set the hardware cursor position using physical display coords.
     Point2 phys_cursor = logical_lines_[logical_cursor_.y].convert(logical_cursor_.x);
     phys_cursor.y += cursor_offset;
-    display_.set_cursor_position(phys_cursor);
+    display_->set_cursor_position(phys_cursor);
 }
 
 void TextTerminal::putchar_internal(char ch)
@@ -65,14 +72,14 @@ void TextTerminal::putchar_internal(char ch)
     bool subsequent_are_dirty_too = false;
 
     if (logical_lines_.empty()) {
-        TextLine line(display_);
+        TextLine line(*display_);
         logical_lines_.push_back(line);
         logical_cursor_.y = 0;
         logical_cursor_.x = 0;
     }
 
     if (ch == '\n') {
-        TextLine line(display_);
+        TextLine line(*display_);
 
         if (logical_lines_.full()) {
             logical_lines_.pop_front();

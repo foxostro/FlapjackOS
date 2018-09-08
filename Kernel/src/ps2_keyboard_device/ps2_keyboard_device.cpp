@@ -40,7 +40,7 @@ static const char g_keyboard_keycode_ascii_uppercase[KEYCODE_MAX] = {
 #include "keyboard_keycode_ascii_uppercase.inc"
 };
 
-const char* PS2KeyboardDevice::keycode_name(keycode_t key)
+const char* PS2KeyboardDevice::keycode_name(Keycode key)
 {
     if (key < KEYCODE_MAX) {
         return g_keycode_names[key];
@@ -72,12 +72,12 @@ bool PS2KeyboardDevice::step_state_machine(KeyboardDriverState &state, KeyboardE
         escape ? g_scancodes_break_escape : g_scancodes_break
     };
 
-    const keycode_key_state states[] = { PRESSED, RELEASED };
+    const KeycodeKeyState states[] = { PRESSED, RELEASED };
 
     for(size_t i = 0, n = sizeof(scancode_sets) / sizeof(*scancode_sets); i < n; ++i) {
         const uint8_t *scancodes = scancode_sets[i];
 
-        for (keycode_t key = 0; key < KEYCODE_MAX; ++key) {
+        for (Keycode key = 0; key < KEYCODE_MAX; ++key) {
             if (scancode == scancodes[key]) {
                 output.key = key;
                 output.state = states[i];
@@ -92,7 +92,7 @@ bool PS2KeyboardDevice::step_state_machine(KeyboardDriverState &state, KeyboardE
     return true;
 }
 
-void PS2KeyboardDevice::int_handler()
+void PS2KeyboardDevice::int_handler(const ParameterPackage&)
 {
     KeyboardDriverState state = IDLE;
     KeyboardEvent event;

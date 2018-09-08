@@ -1,184 +1,66 @@
-#include <common/line_editor.hpp>
-#include <common/text_terminal.hpp>
+#include <kernel.hpp>
 
 #include <seg.h>
-#include <gdt.h>
-#include <idt.h>
-#include <tss.h>
 #include <ltr.h>
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
-#include <inout.h>
-#include <halt.h>
-#include <panic.h>
-#include <backtrace.hpp>
-#include <multiboot.h>
-#include <creg.h>
-#include <kernel_image_info.hpp>
-#include <logical_addressing.hpp>
-#include <kernel_memory_allocators.hpp>
+#include <panic_interrupt_handler.hpp>
+#include <page_fault_interrupt_handler.hpp>
 
-#include <vga_text_display_device.hpp>
-#include <pit_timer_device.hpp>
-#include <ps2_keyboard_device.hpp>
-
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
+#include <common/line_editor.hpp>
+#include <common/text_terminal.hpp>
 
 // We pass the terminal around globally becuase it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
 // around literally everywhere.
 TextTerminal *g_terminal = nullptr;
 
-static GDTEntry s_gdt[6];
-static TaskStateSegment s_tss;
-static IDTEntry s_idt[IDT_MAX];
-static PS2KeyboardDevice *s_keyboard;
-static PITTimerDevice *s_timer;
-static KernelMemoryAllocators *s_allocators;
+Kernel g_kernel;
 
-// Called when a page fault occurs.
-static void page_fault_handler(unsigned error_code);
 
-// This is marked with "C" linkage because we call it from the assembly code
-// ISR stubs in isr_wrapper_asm.S.
-extern "C"
-void interrupt_dispatch(unsigned interrupt_number,
-                        unsigned edi,
-                        unsigned esi,
-                        unsigned ebp,
-                        unsigned esp,
-                        unsigned ebx,
-                        unsigned edx,
-                        unsigned ecx,
-                        unsigned eax,
-                        unsigned error_code,
-                        unsigned eip)
+void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
 {
-    bool spurious = pic_clear(interrupt_number);
+    initialize_tss_and_gdt(istack);
+    call_global_constructors();
+    vga_.clear();
+    terminal_.init(&vga_);
+    g_terminal = &terminal_;
+    allocators_ = KernelMemoryAllocators::create(mb_info, terminal_);
+    initialize_interrupts_and_device_drivers();
+    enable_interrupts();
+}
 
-    if (spurious) {
-        return;
-    }
-
-    switch (interrupt_number) {
-        case IDT_KEY:
-            s_keyboard->int_handler();
-            break;
-
-        case IDT_TIMER:
-            s_timer->int_handler();
-            break;
-
-        case IDT_DE:
-            panic2("Division Error", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_DB:
-            panic2("Debug Exception", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_NMI:
-            panic2("Non-Maskable Interrupt", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_BP:
-            panic2("Breakpoint", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_OF:
-            panic2("Overflow", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_BR:
-            panic2("BOUND Range exceeded", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_UD:
-            panic2("Undefined Opcode", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_NM:
-            panic2("No Math coprocessor", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_DF:
-            panic2("Double Fault.", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
-            break;
-
-        case IDT_CSO:
-            panic2("Coprocessor Segment Overrun", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_TS:
-            panic2("Invalid Task Segment Selector.", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
-            break;
-
-        case IDT_NP:
-            panic2("Segment Not Present.", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
-            break;
-
-        case IDT_SS:
-            panic2("Stack Segment Fault.", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
-            break;
-
-        case IDT_GP:
-            panic2("General Protection Fault.", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, true, error_code, eip);
-            break;
-
-        case IDT_PF:
-            page_fault_handler(error_code);
-            break;
-
-        case IDT_MF:
-            panic2("X87 Math Fault", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_AC:
-            panic2("Alignment Check", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_MC:
-            panic2("Machine Check", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        case IDT_XF:
-            panic2("SSE Floating Point Exception", 
-                   edi, esi, ebp, esp, ebx, edx, ecx, eax, false, error_code, eip);
-            break;
-
-        default:
-            panic("Unknown interrupt: 0x%x", interrupt_number);
+void Kernel::run()
+{
+    // Read lines of user input forever, but don't do anything with them.
+    // (This operating system doesn't do much yet.)
+    terminal_.puts("Entering console loop:\n");
+    LineEditor ed(terminal_, *keyboard_);
+    while (true) {
+        auto user_input = ed.getline();
+        terminal_.puts("Got: ");
+        terminal_.putv(user_input);
+        terminal_.puts("\n");
+        ed.add_history(std::move(user_input));
     }
 }
 
-// The kernel must call global constructors itself as we have no runtime
-// support beyond what we implement ourselves.
-// We want to call this as early as possible after booting. However, we also
-// want the constructors to be able to at least panic() on error. So, call
-// this after initializing interrupts and after initializing the console.
-static void call_global_constructors()
+void Kernel::initialize_tss_and_gdt(uint32_t istack)
+{
+    memset(&tss_, 0, sizeof(tss_));
+    tss_.ss0 = SEGSEL_KERNEL_DS;
+    tss_.esp0 = istack;
+    tss_.iomap = sizeof(tss_);
+
+    memset(gdt_, 0, sizeof(gdt_));
+    gdt_create_flat_mapping(gdt_, sizeof(gdt_), (uintptr_t)&tss_);
+    lgdt(gdt_, sizeof(gdt_) - 1);
+
+    load_task_register();
+}
+
+void Kernel::call_global_constructors()
 {
     extern char g_start_ctors[];
     extern char g_end_ctors[];
@@ -195,111 +77,66 @@ static void call_global_constructors()
     }
 }
 
-// Returns a string interpretation of a page fault error code.
-static const char* get_page_fault_error_string(unsigned error_code)
+void Kernel::initialize_interrupts_and_device_drivers()
 {
-    switch (error_code)
-    {
-        case 0b000: return "supervisory process tried to read a non-present page entry";
-        case 0b001: return "supervisory process tried to read a page and caused a protection fault";
-        case 0b010: return "supervisory process tried to write to a non-present page entry";
-        case 0b011: return "supervisory process tried to write a page and caused a protection fault";
-        case 0b100: return "user process tried to read a non-present page entry";
-        case 0b101: return "user process tried to read a page and caused a protection fault";
-        case 0b110: return "user process tried to write to a non-present page entry";
-        case 0b111: return "user process tried to write a page and caused a protection fault";
-        default: return "unknown";
-    }
+    keyboard_ = new PS2KeyboardDevice();
+    
+    isr_install(idt_);
+    pic_init();
+
+    // TODO: This will leak handlers.
+    interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_);
+    interrupt_dispatcher_.set_handler(IDT_TIMER, new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
+                                                                    PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
+                                                                    PITTimerDevice::TIMER_LEAP_TICKS_10ms));
+    interrupt_dispatcher_.set_handler(IDT_DE,    new PanicInterruptHandler("Division Error", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_DB,    new PanicInterruptHandler("Debug Exception", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_NMI,   new PanicInterruptHandler("Non-Maskable Interrupt", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_BP,    new PanicInterruptHandler("Breakpoint", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_OF,    new PanicInterruptHandler("Overflow", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_BR,    new PanicInterruptHandler("BOUND Range exceeded", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_UD,    new PanicInterruptHandler("Undefined Opcode", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_NM,    new PanicInterruptHandler("No Math coprocessor", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_DF,    new PanicInterruptHandler("Double Fault.", /* error_code_present = */ true));
+    interrupt_dispatcher_.set_handler(IDT_CSO,   new PanicInterruptHandler("Coprocessor Segment Overrun", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_TS,    new PanicInterruptHandler("Invalid Task Segment Selector.", /* error_code_present = */ true));
+    interrupt_dispatcher_.set_handler(IDT_NP,    new PanicInterruptHandler("Segment Not Present.", /* error_code_present = */ true));
+    interrupt_dispatcher_.set_handler(IDT_SS,    new PanicInterruptHandler("Stack Segment Fault.", /* error_code_present = */ true));
+    interrupt_dispatcher_.set_handler(IDT_GP,    new PanicInterruptHandler("General Protection Fault.", /* error_code_present = */ true));
+    interrupt_dispatcher_.set_handler(IDT_PF,    new PageFaultInterruptHandler());
+    interrupt_dispatcher_.set_handler(IDT_MF,    new PanicInterruptHandler("X87 Math Fault", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_AC,    new PanicInterruptHandler("Alignment Check", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_MC,    new PanicInterruptHandler("Machine Check", /* error_code_present = */ false));
+    interrupt_dispatcher_.set_handler(IDT_XF,    new PanicInterruptHandler("SSE Floating Point Exception", /* error_code_present = */ false));
 }
 
-static __attribute__((noreturn))
-void panic_on_unrecoverable_page_fault(uintptr_t faulting_address,
-                                       unsigned error_code)
+// This is marked with "C" linkage because we call it from the assembly code
+// ISR stubs in isr_wrapper_asm.S.
+extern "C"
+void interrupt_dispatch(unsigned interrupt_number,
+                        unsigned edi,
+                        unsigned esi,
+                        unsigned ebp,
+                        unsigned esp,
+                        unsigned ebx,
+                        unsigned edx,
+                        unsigned ecx,
+                        unsigned eax,
+                        unsigned error_code,
+                        unsigned eip)
 {
-    char message[128]={0};
-    snprintf(message, sizeof(message),
-             "Page Fault.\nfaulting_address: %p\nerror: %s (%u)\n",
-              (void*)faulting_address,
-              get_page_fault_error_string(error_code),
-              error_code);
-    panic(message);
-}
-
-static void page_fault_handler(unsigned error_code)
-{
-    uintptr_t faulting_address = (uintptr_t)get_cr2();
-    panic_on_unrecoverable_page_fault(faulting_address, error_code);
+    const InterruptDispatcher::Params params = {
+        edi, esi, ebp, esp, ebx, edx, ecx, eax, error_code, eip
+    };
+    g_kernel.dispatch_interrupt(interrupt_number, params);
 }
 
 // This is marked with "C" linkage because we call it from assembly in boot.S.
-extern "C"
-__attribute__((noreturn))
+extern "C" __attribute__((noreturn))
 void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
 {
-    // Setup the initial Task State Segment. The kernel uses one TSS between all
-    // tasks and performs software task switching.
-    memset(&s_tss, 0, sizeof(s_tss));
-    s_tss.ss0 = SEGSEL_KERNEL_DS;
-    s_tss.esp0 = istack;
-    s_tss.iomap = sizeof(s_tss);
-
-    // Setup the Global Descriptor Table. The kernel uses a flat memory map.
-    memset(s_gdt, 0, sizeof(s_gdt));
-    gdt_create_flat_mapping(s_gdt, sizeof(s_gdt), (uintptr_t)&s_tss);
-    lgdt(s_gdt, sizeof(s_gdt) - 1);
-    load_task_register();
-
-    call_global_constructors();
-
-    // Setup the Interrupt Descriptor Table. This wires various IRQs up to their
-    // handler functions.
-    isr_install(s_idt);
-
-    // Initialize the PIC chip. It is necessary to remap IRQs before enabling
-    // interrupts.
-    pic_init();
-
-    // Initialize the VGA text console output driver.
-    // The driver lives in the kernel stack since we haven't initialized the
-    // kernel heap yet.
-    VGATextDisplayDevice vga;
-    vga.clear();
-
-    // Initialize the text terminal, built on top of the VGA text display, and
-    // make it available to other sub-systems which rely on it globally.
-    TextTerminal term(vga);
-    g_terminal = &term;
-    
-    // The kernel memory allocators must be initialized after the text terminal
-    // (because they print to the screen) and before anything tries to use new
-    // or malloc().
-    s_allocators = KernelMemoryAllocators::create(mb_info, term);
-
-    // Initialize the PS/2 keyboard driver.
-    s_keyboard = new PS2KeyboardDevice();
-
-    // Configure the PIT timer chip so that it fires an interrupt every 10ms.
-    s_timer = new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
-                                 PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
-                                 PITTimerDevice::TIMER_LEAP_TICKS_10ms);
-
-    // After this point, interrupts will start firing.
-    enable_interrupts();
-
-    // Read lines of user input forever, but don't do anything with them.
-    // (This operating system doesn't do much yet.)
-    {
-        term.puts("Entering console loop:\n");
-        LineEditor ed(term, *s_keyboard);
-        while (true) {
-            auto user_input = ed.getline();
-            term.puts("Got: ");
-            term.putv(user_input);
-            term.puts("\n");
-            ed.add_history(std::move(user_input));
-        }
-    }
-
+    g_kernel.init(mb_info, istack);
+    g_kernel.run();
     panic("We should never reach this point.");
     __builtin_unreachable();
 }

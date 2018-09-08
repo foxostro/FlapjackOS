@@ -20,7 +20,7 @@ set(SOURCE_FILES
     "src/ps2_keyboard_device/keyboard_keycode_ascii_lowercase.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
     "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
-    "src/kernel.cpp"
+    "include/kernel.hpp" "src/kernel.cpp"
     "include/page_size.hpp"
     "include/kernel_image_info.hpp"
     "include/kernel_contiguous_memory_allocator.hpp" "src/kernel_contiguous_memory_allocator.cpp"
@@ -31,6 +31,9 @@ set(SOURCE_FILES
     "include/kernel_page_directory_populate_operation.hpp" "src/kernel_page_directory_populate_operation.cpp"
     "include/cleanup_kernel_memory_map_operation.hpp" "src/cleanup_kernel_memory_map_operation.cpp"
     "include/kernel_memory_allocators.hpp" "src/kernel_memory_allocators.cpp"
+    "include/interrupt_dispatcher.hpp" "src/interrupt_dispatcher.cpp"
+    "include/panic_interrupt_handler.hpp" "src/panic_interrupt_handler.cpp"
+    "include/page_fault_interrupt_handler.hpp" "src/page_fault_interrupt_handler.cpp"
     )
 
 GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/isr_install.c.erb"
