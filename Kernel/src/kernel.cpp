@@ -27,6 +27,8 @@ void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
     are_interrupts_ready_ = false;
 
     initialize_tss_and_gdt(istack);
+    isr_install(idt_);
+    pic_init();
     call_global_constructors();
     vga_.clear();
     terminal_.init(&vga_);
@@ -88,9 +90,6 @@ void Kernel::initialize_interrupts_and_device_drivers()
 {
     keyboard_ = new PS2KeyboardDevice();
     
-    isr_install(idt_);
-    pic_init();
-
     // TODO: This will leak handlers.
     interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_);
     interrupt_dispatcher_.set_handler(IDT_TIMER, new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
