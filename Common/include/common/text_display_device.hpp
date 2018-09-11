@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <common/terminal_metrics.hpp>
 #include <common/vec2.hpp>
 
@@ -25,13 +26,31 @@ enum VGAColor {
     WHITE    = 0xF
 };
 
-struct VGAChar {
-    uint16_t ch:8;
-    uint16_t fg:4;
-    uint16_t bg:3;
-    uint16_t blink:1;
+// A single character in the hardware VGA text buffer.
+class VGAChar {
+public:
+    union {
+        struct {
+            uint16_t ch:8;
+            uint16_t fg:4;
+            uint16_t bg:3;
+            uint16_t blink:1;
+        } attr;
+        uint16_t value_;
+    };
+
+    VGAChar() : value_(0) {}
+
+    explicit VGAChar(uint16_t value)
+    {
+        value_ = value;
+    }
+
+    inline uint16_t get_value() const
+    {
+        return value_;
+    }
 };
-static_assert(sizeof(VGAChar) == 2, "Characters in the VGA text buffer are 2 bytes.");
 
 // A text display device is a physical device which displays a grid of monospace
 // text. An example of a console is a VGA display in text mode.

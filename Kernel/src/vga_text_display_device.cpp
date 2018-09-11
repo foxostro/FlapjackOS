@@ -14,17 +14,17 @@ constexpr unsigned CRTC_CURSOR_LSB_IDX  = 15;
 constexpr unsigned CRTC_CURSOR_MSB_IDX  = 14;
 
 volatile uint16_t *g_vga_text_buffer = (uint16_t *)0xC00B8000;
+static_assert(sizeof(VGAChar) == sizeof(uint16_t));
 
 inline VGAChar vga_text_buffer_get(size_t index)
 {
     uint16_t value = g_vga_text_buffer[index];
-    return *(VGAChar *)&value;
+    return VGAChar(value);
 }
 
 inline void vga_text_buffer_set(VGAChar ch, size_t index)
 {
-    uint16_t value = *(uint16_t *)&ch;
-    g_vga_text_buffer[index] = value;
+    g_vga_text_buffer[index] = ch.get_value();
 }
 
 VGATextDisplayDevice::VGATextDisplayDevice()
@@ -46,7 +46,7 @@ void VGATextDisplayDevice::clear()
 
 void VGATextDisplayDevice::draw_char(Point2 pos, VGAChar ch)
 {
-    if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH && isprint(ch.ch)) {
+    if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH && isprint(ch.attr.ch)) {
         const size_t index = pos.y * CONSOLE_WIDTH + pos.x;
         vga_text_buffer_set(ch, index);
     }
@@ -65,10 +65,10 @@ VGAChar VGATextDisplayDevice::get_char(Point2 pos) const
 VGAChar VGATextDisplayDevice::make_char(char ch) const
 {
     VGAChar r;
-    r.blink = 0;
-    r.fg = current_foreground_color_;
-    r.bg = current_background_color_;
-    r.ch = ch;
+    r.attr.blink = 0;
+    r.attr.fg = current_foreground_color_;
+    r.attr.bg = current_background_color_;
+    r.attr.ch = ch;
     return r;
 }
 

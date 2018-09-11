@@ -37,10 +37,10 @@ public:
     VGAChar make_char(char ch) const override
     {
         VGAChar r;
-        r.blink = 0;
-        r.fg = WHITE;
-        r.bg = BLACK;
-        r.ch = ch;
+        r.attr.blink = 0;
+        r.attr.fg = WHITE;
+        r.attr.bg = BLACK;
+        r.attr.ch = ch;
         return r;
     }
 
@@ -70,7 +70,7 @@ public:
         std::string str;
         Point2 pos{0, (int)row};
         for (pos.x = 0; pos.x < CONSOLE_WIDTH; ++pos.x) {
-            str += get_char(pos).ch;
+            str += get_char(pos).attr.ch;
         }
         return str;
     }
