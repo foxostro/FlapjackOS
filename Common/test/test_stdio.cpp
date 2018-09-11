@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cassert>
+#include <cstring>
 
 // SNPRINTF returns zero when the buffer is null
 TEST_CASE("test_null_buffer", "[stdio]")

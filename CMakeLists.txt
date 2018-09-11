@@ -29,7 +29,7 @@ set(CMAKE_C_EXTENSIONS ON)
 # don't care to spend the time to address that. In any case, we don't have
 # access to the standard library so most of the C++17 features are not useful to
 # us in FlapjackOS.
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -47,8 +47,10 @@ if(CMAKE_CROSSCOMPILING)
     # optimizer silliness which might break the kernel or make debugging things
     # more difficult. In the future, I should enable -O2 and fix anything that
     # breaks.
-    set(CMAKE_C_FLAGS "-nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
-    set(CMAKE_C_LINK_FLAGS "-nostdlib -ffreestanding")
+    set(CMAKE_C_FLAGS "-m32 -nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
+    set(CMAKE_C_LINK_FLAGS "-Xlinker -melf_i386 -nostdlib -ffreestanding")
+
+    SET(CMAKE_ASM_FLAGS "-m32")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-rtti")
     set(CMAKE_CXX_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
@@ -113,11 +115,12 @@ if(CMAKE_CROSSCOMPILING)
     # The linker produces a kernel binary image which is multiboot compliant and
     # can actually be directly booted by Qemu.
     set(KERNEL_BIN "kernel.bin")
-    set(KERNEL_LINK_FLAGS "-m32 -march=i386 -T ${KERNEL_LAYOUT_FILE}")
+    set(KERNEL_LINK_FLAGS "-T ${KERNEL_LAYOUT_FILE}")
     add_executable(${KERNEL_BIN} boot.S)
     set_target_properties(${KERNEL_BIN} PROPERTIES LINK_DEPENDS ${KERNEL_LAYOUT_FILE})
     target_link_libraries(${KERNEL_BIN}
                           ${KERNEL_LIBRARIES}
+                          libgcc.a
                           )
     set_target_properties(
         ${KERNEL_BIN} PROPERTIES

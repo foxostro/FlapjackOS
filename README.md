@@ -12,14 +12,19 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 2. Use MacPorts to install the following packages:
 
    ```bash
-   % sudo port install i386-elf-gcc objconv check
+   % sudo port install objconv check
    ```
 
-   * i386-elf-gcc -- This is the cross-compiler we'll use to build the kernel.
    * objconv -- This tool can convert and manipulate object files in a variety of formats. This is required for the GRUB2 command-line tools.
    * check -- This is a C unit testing framework used by Flapjack OS.
 
-3. Make sure to put the MacPorts cross-compiler and other tools into your $PATH. The cross-compiler in particular will appear there as a suite of tools named i386-elf-*.
+3. Build a cross compiler:
+
+   ```bash
+   % ./scripts/make_toolchain.sh i386-elf
+   ```
+
+   * Make sure to put the cross compiler into your $PATH.
 
 4. Install [xorriso](https://www.gnu.org/software/xorriso)
 
