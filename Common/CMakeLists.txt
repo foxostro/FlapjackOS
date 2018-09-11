@@ -33,17 +33,12 @@ set(SOURCE_FILES
     "include/common/spin_lock.hpp" "include/common/spin_lock.h" "src/spin_lock.c"
     "include/common/atomic_counter.hpp"
     "include/common/shared_pointer.hpp"
-    "include/common/cmpxchg.h"
+    "include/common/cmpxchg.h" "src/cmpxchg.c"
     )
 
 if(CMAKE_CROSSCOMPILING)
 list(APPEND SOURCE_FILES
      "src/c_plus_plus_support.cpp"
-     "src/i386/cmpxchg.S"
-     )
-else(CMAKE_CROSSCOMPILING)
-list(APPEND SOURCE_FILES
-     "src/x86_64/cmpxchg64.c"
      )
 endif(CMAKE_CROSSCOMPILING)
 
