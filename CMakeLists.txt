@@ -33,7 +33,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(COMMON_COMPILER_FLAGS "-O0 -Wall -Wextra -Werror")
+set(COMMON_COMPILER_FLAGS "-O1 -Wall -Wextra -Werror")
 
 # Setup compiler flags before building the subdirectories.
 if(CMAKE_CROSSCOMPILING)
@@ -47,7 +47,7 @@ if(CMAKE_CROSSCOMPILING)
     # optimizer silliness which might break the kernel or make debugging things
     # more difficult. In the future, I should enable -O2 and fix anything that
     # breaks.
-    set(CMAKE_C_FLAGS "-m32 -nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
+    set(CMAKE_C_FLAGS "-fno-stack-protector -m32 -nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
     set(CMAKE_C_LINK_FLAGS "-Xlinker -melf_i386 -nostdlib -ffreestanding")
 
     SET(CMAKE_ASM_FLAGS "-m32")
