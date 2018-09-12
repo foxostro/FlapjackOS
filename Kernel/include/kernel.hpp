@@ -21,7 +21,7 @@ public:
     // The kernel is the thing that invokes constructors for globals! So, we
     // must do two-phase initialization with a nearly empty constructor and then
     // this method, which performs the real initialization work.
-    void init(multiboot_info_t *mb_info, uint32_t istack);
+    void init(multiboot_info_t *mb_info, uintptr_t istack);
 
     // Enter the event loop until the kernel is done. This may never return.
     void run();

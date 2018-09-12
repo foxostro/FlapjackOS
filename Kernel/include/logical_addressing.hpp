@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_LOGICAL_ADDRESSING_HPP
 
 #include "kernel_image_info.hpp"
+#include <cassert>
 
 // Convert the given physical address to a logical address.
 // These addresses are easily converted between physical and virtual as they are

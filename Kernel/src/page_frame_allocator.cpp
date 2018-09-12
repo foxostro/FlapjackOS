@@ -1,4 +1,5 @@
 #include "page_frame_allocator.hpp"
+#include "page_size.hpp"
 #include "logical_addressing.hpp"
 #include "panic.h"
 

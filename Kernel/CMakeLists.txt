@@ -22,7 +22,6 @@ set(SOURCE_FILES
     "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
     "include/kernel.hpp" "src/kernel.cpp"
     "include/page_size.hpp"
-    "include/kernel_image_info.hpp"
     "include/kernel_contiguous_memory_allocator.hpp" "src/kernel_contiguous_memory_allocator.cpp"
     "include/kernel_break_allocator.hpp" "src/kernel_break_allocator.cpp"
     "include/mmu.hpp" "src/mmu.cpp"
@@ -45,6 +44,7 @@ include_directories("include"
                     ${COMMON_INCLUDE_DIRS}
                     ${MALLOC_INCLUDE_DIRS}
                     ${KERNEL_PLATFORM_SUPPORT_INCLUDE_DIRS}
+                    ${BOOT_INCLUDE_DIR}
                     )
 
 link_directories(${COMMON_LIBRARIES_DIR}
@@ -75,3 +75,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     add_test(KernelTest ${CMAKE_CURRENT_BINARY_DIR}/KernelTest)
 
 endif (NOT CMAKE_CROSSCOMPILING)
+
+set(KERNEL_LIBRARIES Kernel PARENT_SCOPE)
+set(KERNEL_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/Kernel" PARENT_SCOPE)
+set(KERNEL_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Kernel/include" PARENT_SCOPE)

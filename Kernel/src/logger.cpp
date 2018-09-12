@@ -21,6 +21,14 @@ void Logger::puts(const char *s)
     while (*s) {
         putchar(*s++);
     }
+    putchar('\n');
+}
+
+void Logger::puts_no_newline(const char *s)
+{
+    while (*s) {
+        putchar(*s++);
+    }
 }
 
 void Logger::log(const char *function, const char *fmt, ...)
@@ -34,5 +42,5 @@ void Logger::log(const char *function, const char *fmt, ...)
     va_end(args);
 
     snprintf(buffer, sizeof(buffer), "%s: %s\n", function, message);
-    puts(buffer);
+    puts_no_newline(buffer);
 }

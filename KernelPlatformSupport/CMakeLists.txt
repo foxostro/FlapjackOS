@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 set(INCLUDE_FILES
     "include/gdt_asm.h"
-    "include/get_ebp.h"
+    "include/get_frame_pointer.h"
     "include/halt.h"
     "include/idt_asm.h"
     "include/inout.h"
@@ -17,21 +17,21 @@ set(INCLUDE_FILES
 # unit tests, we end up replacing most of these functions with stubs.
 if(CMAKE_CROSSCOMPILING)
     set(SOURCE_FILES
-        "src/i386/gdt_asm.S"
-        "src/i386/get_ebp.S"
-        "src/i386/halt.S"
-        "src/i386/idt_asm.S"
-        "src/i386/inout.S"
-        "src/i386/interrupt_asm.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/gdt_asm.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/get_frame_pointer.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/halt.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/idt_asm.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/inout.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/interrupt_asm.S"
         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
-        "src/i386/ltr.S"
-        "src/i386/creg.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/ltr.S"
+        "src/${CMAKE_SYSTEM_PROCESSOR}/creg.S"
         )
-    GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/i386/isr_wrapper_asm.S.erb"
+    GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/${CMAKE_SYSTEM_PROCESSOR}/isr_wrapper_asm.S.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")
 else(CMAKE_CROSSCOMPILING)
     set(SOURCE_FILES
-        "src/host/get_ebp.c"
+        "src/host/get_frame_pointer.c"
         "src/host/gdt.c"
         "src/host/halt.c"
         "src/host/idt.c"
@@ -47,3 +47,7 @@ endif(CMAKE_CROSSCOMPILING)
 include_directories("include")
 
 add_library(KernelPlatformSupport STATIC ${SOURCE_FILES})
+
+set(KERNEL_PLATFORM_SUPPORT_LIBRARIES KernelPlatformSupport PARENT_SCOPE)
+set(KERNEL_PLATFORM_SUPPORT_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/KernelPlatformSupport" PARENT_SCOPE)
+set(KERNEL_PLATFORM_SUPPORT_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/KernelPlatformSupport/include" PARENT_SCOPE)

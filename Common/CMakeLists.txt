@@ -75,3 +75,17 @@ else(CMAKE_CROSSCOMPILING)
     add_test(CommonTest ${CMAKE_CURRENT_BINARY_DIR}/CommonTest)
 
 endif(CMAKE_CROSSCOMPILING)
+
+set(COMMON_LIBRARIES Common PARENT_SCOPE)
+set(COMMON_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/Common" PARENT_SCOPE)
+if(CMAKE_CROSSCOMPILING)
+    # Some of our headers have names that collide with the host libc.
+    # So, we omit those from the header search path unless building for
+    # a cross-compile.
+    set(COMMON_INCLUDE_DIRS
+        "${PROJECT_SOURCE_DIR}/Common/include"
+        "${PROJECT_SOURCE_DIR}/Common/include/flapjack_libc"
+        PARENT_SCOPE)
+else(CMAKE_CROSSCOMPILING)
+    set(COMMON_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Common/include" PARENT_SCOPE)
+endif(CMAKE_CROSSCOMPILING)

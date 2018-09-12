@@ -7,6 +7,7 @@
 #include <page_frame_allocator.hpp>
 #include <kernel_break_allocator.hpp>
 #include <common/text_terminal.hpp>
+#include <page_size.hpp>
 
 // Creates the singleton page frame allocator.
 class PageFrameAllocatorFactory {

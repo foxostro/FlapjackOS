@@ -1,5 +1,7 @@
 #include "kernel_break_allocator.hpp"
 #include "kernel_image_info.hpp"
+#include "page_size.hpp"
+#include <cassert>
 
 void KernelBreakAllocator::reset(void *bootstrap_heap_begin)
 {

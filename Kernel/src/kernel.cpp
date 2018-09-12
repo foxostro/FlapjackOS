@@ -5,6 +5,7 @@
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
+#include <inout.h>
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
 #include <logger.hpp>
@@ -23,7 +24,7 @@ TextTerminal *g_terminal = nullptr;
 Kernel g_kernel;
 
 
-void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
+void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
 
@@ -76,9 +77,6 @@ void Kernel::initialize_tss_and_gdt(uint32_t istack)
 
 void Kernel::call_global_constructors()
 {
-    extern char g_start_ctors[];
-    extern char g_end_ctors[];
-
     for (char *ctor = g_start_ctors;
          ctor < g_end_ctors;
          ctor += sizeof(void *)) {
@@ -160,8 +158,12 @@ void interrupt_dispatch(unsigned interrupt_number,
 
 // This is marked with "C" linkage because we call it from assembly in boot.S.
 extern "C" __attribute__((noreturn))
-void kernel_main(multiboot_info_t *mb_info, uint32_t istack)
+void kernel_main(multiboot_info_t *mb_info, uintptr_t istack)
 {
+#ifdef __x86_64__
+    panic("Hello, World (x86_64)");
+#endif
+
     g_kernel.init(mb_info, istack);
     g_kernel.run();
     panic("We should never reach this point.");

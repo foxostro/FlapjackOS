@@ -1,5 +1,6 @@
 #include <vga_text_display_device.hpp>
 
+#include <kernel_image_info.hpp> // for KERNEL_VIRTUAL_START_ADDR
 #include <inout.h>
 #include <misc.h>
 
@@ -13,7 +14,7 @@ constexpr unsigned CRTC_DATA_REG        = 0x3d5;
 constexpr unsigned CRTC_CURSOR_LSB_IDX  = 15;
 constexpr unsigned CRTC_CURSOR_MSB_IDX  = 14;
 
-volatile uint16_t *g_vga_text_buffer = (uint16_t *)0xC00B8000;
+volatile uint16_t *g_vga_text_buffer = (uint16_t *)(0xB8000 + KERNEL_VIRTUAL_START_ADDR);
 static_assert(sizeof(VGAChar) == sizeof(uint16_t));
 
 inline VGAChar vga_text_buffer_get(size_t index)

@@ -8,6 +8,7 @@ public:
     Logger();
     void putchar(char ch);
     void puts(const char *s);
+    void puts_no_newline(const char *s);
     void log(const char *function, const char *fmt, ...);
 
 private:

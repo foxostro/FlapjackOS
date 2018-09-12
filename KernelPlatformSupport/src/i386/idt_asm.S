@@ -11,12 +11,22 @@ idt_base:
     leave  
     ret
 
+# Loads the IDTR register.
 .global lidt
 lidt:
-    movl 4(%esp), %eax      # Swap the order of the arguments passed in
-    movl 8(%esp), %ecx
+    # Move parameters into registers %eax and %ecx
+    movl 4(%esp), %eax # Four byte base address
+    movl 8(%esp), %ecx # Two byte table limit
+
+    # Build a six byte descriptor on the stack using the parameters, now in the
+    # %eax and %cx registers. The lidt instruction wants the address of a
+    # descriptor with an six byte base and a two byte limit.
     pushl %eax
     pushw %cx
-    lidt (%esp)             # Load the IDTR
-    addl $6, %esp           # and return
+
+    # Load the interrupt descriptor table register (IDTR)
+    lidt (%esp)
+
+    # Clean up the stack and return
+    addl $6, %esp
     ret

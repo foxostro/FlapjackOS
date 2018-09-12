@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-uintptr_t* get_ebp(void);
+uintptr_t* get_frame_pointer(void);
 
 #ifdef __cplusplus
 }
