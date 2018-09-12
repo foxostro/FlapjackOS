@@ -7,7 +7,7 @@ SECTIONS
 {
 	. = KERNEL_VIRTUAL_START_ADDR + ONE_MEGABYTE;
 
-	PROVIDE (g_kernel_image_begin = .);
+	g_kernel_image_begin = .;
 
 	/* Multi-boot header comes first, followed by the text section. */
 	.text ALIGN(4K) : AT(ADDR(.text)-KERNEL_VIRTUAL_START_ADDR)
@@ -42,5 +42,5 @@ SECTIONS
 		*(.bss)
 	}
 
-	PROVIDE (g_kernel_image_end = .);
+	g_kernel_image_end = .;
 }

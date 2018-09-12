@@ -97,13 +97,13 @@ if(CMAKE_CROSSCOMPILING)
     link_directories(${KERNEL_LIBRARIES_DIRS})
 
     # The layout file specifies how the linker puts together the binary image.
-    set(KERNEL_LAYOUT_FILE "${PROJECT_SOURCE_DIR}/kernel.ld")
+    set(KERNEL_LAYOUT_FILE "${PROJECT_SOURCE_DIR}/Head/${CMAKE_SYSTEM_PROCESSOR}/kernel.ld")
 
     # The linker produces a kernel binary image which is multiboot compliant and
     # can actually be directly booted by Qemu.
     set(KERNEL_BIN "kernel.bin")
     set(KERNEL_LINK_FLAGS "-T ${KERNEL_LAYOUT_FILE}")
-    add_executable(${KERNEL_BIN} boot.S)
+    add_executable(${KERNEL_BIN} "${PROJECT_SOURCE_DIR}/Head/${CMAKE_SYSTEM_PROCESSOR}/head.S")
     set_target_properties(${KERNEL_BIN} PROPERTIES LINK_DEPENDS ${KERNEL_LAYOUT_FILE})
     target_link_libraries(${KERNEL_BIN}
                           ${KERNEL_LIBRARIES}
