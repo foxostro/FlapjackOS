@@ -19,16 +19,10 @@ function(GenerateSourceFromTemplate
 
 endfunction(GenerateSourceFromTemplate)
 
-# Let's stick strictly to the C11 standard.
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-# Let's stick strictly to the C++11 standard.
-# Why this instead of C++17? Well, my cross-compiler doesn't support it, and I
-# don't care to spend the time to address that. In any case, we don't have
-# access to the standard library so most of the C++17 features are not useful to
-# us in FlapjackOS.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -42,15 +36,8 @@ if(CMAKE_CROSSCOMPILING)
     # standard library as we cannot use the libc of the host system. Also, the
     # kernel must perform some magic to boot which is never done in userspace
     # programs.
-    #
-    # Finally, note that we choose -O0. We do this so as to avoid any kind of
-    # optimizer silliness which might break the kernel or make debugging things
-    # more difficult. In the future, I should enable -O2 and fix anything that
-    # breaks.
-    set(CMAKE_C_FLAGS "-fno-stack-protector -m32 -nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
-    set(CMAKE_C_LINK_FLAGS "-Xlinker -melf_i386 -nostdlib -ffreestanding")
-
-    SET(CMAKE_ASM_FLAGS "-m32")
+    set(CMAKE_C_FLAGS "-fno-stack-protector -nostdlib -ffreestanding ${COMMON_COMPILER_FLAGS}")
+    set(CMAKE_C_LINK_FLAGS "-nostdlib -ffreestanding")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-rtti")
     set(CMAKE_CXX_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
