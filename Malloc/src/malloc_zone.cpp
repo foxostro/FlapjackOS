@@ -56,7 +56,10 @@ MallocZone* MallocZone::create(uintptr_t start, size_t size)
     assert(start);
     assert(size > sizeof(MallocZone));
 
-    //start += (4 - start % 4); // 4 byte alignment
+    // If the buffer is not 4-byte aligned then make it so.
+    if (start % 4 != 0) {
+        start += (4 - start % 4);
+    }
 
     MallocZone *zone = new ((void *)start) MallocZone;
 
