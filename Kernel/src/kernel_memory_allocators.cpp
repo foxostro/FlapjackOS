@@ -1,4 +1,5 @@
 #include "kernel_memory_allocators.hpp"
+#include <logger.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
 
@@ -27,12 +28,17 @@ KernelMemoryAllocators::KernelMemoryAllocators(multiboot_info_t *mb_info,
 
 void KernelMemoryAllocators::report_installed_memory()
 {
+    TRACE("%u KB low memory, %u MB high memory",
+          mb_info_->mem_lower, mb_info_->mem_upper/1024);
     terminal_.printf("%u KB low memory, %u MB high memory\n",
                      mb_info_->mem_lower, mb_info_->mem_upper/1024);
 }
 
 void KernelMemoryAllocators::report_free_page_frames()
 {
+    TRACE("Number of free page frames is %u (%uMB)",
+          (unsigned)page_frame_allocator_->get_number_of_free_page_frames(),
+          (unsigned)page_frame_allocator_->get_number_of_free_page_frames()*4/1024);
     terminal_.printf("Number of free page frames is %u (%uMB)\n",
                      (unsigned)page_frame_allocator_->get_number_of_free_page_frames(),
                      (unsigned)page_frame_allocator_->get_number_of_free_page_frames()*4/1024);
@@ -75,13 +81,13 @@ void KernelMemoryAllocators::initialize_kernel_malloc()
     constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
     size_t length = EIGHT_MB;
     assert(length > 0);
-    terminal_.printf("Malloc zone size is %u KB.", (unsigned)length/1024);
+    TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
     uintptr_t begin = (uintptr_t)contiguous_memory_allocator_->malloc(length);
 
-    terminal_.puts(" Clearing... ");
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
+    TRACE("Clearing the malloc zone to 0x%x.", MAGIC_NUMBER_UNINITIALIZED_HEAP);
     memset((void*)begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
-    terminal_.puts("Done.\n");
+    TRACE("Finished clearing the malloc zone.");
 
     MemoryAllocator *alloc = MallocZone::create(begin, length);
     set_global_allocator(alloc);

@@ -7,6 +7,7 @@
 #include <pic.h>
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
+#include <logger.hpp>
 
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
@@ -24,6 +25,8 @@ Kernel g_kernel;
 
 void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
 {
+    TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
+
     are_interrupts_ready_ = false;
 
     initialize_tss_and_gdt(istack);
@@ -42,6 +45,8 @@ void Kernel::init(multiboot_info_t *mb_info, uint32_t istack)
 
 void Kernel::run()
 {
+    TRACE("Running...");
+
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     terminal_.puts("Entering console loop:\n");
@@ -88,6 +93,8 @@ void Kernel::call_global_constructors()
 
 void Kernel::initialize_interrupts_and_device_drivers()
 {
+    TRACE("Initializing device drivers.");
+
     keyboard_ = new PS2KeyboardDevice();
     
     // TODO: This will leak handlers.
