@@ -119,6 +119,8 @@ void Kernel::initialize_interrupts_and_device_drivers()
     interrupt_dispatcher_.set_handler(IDT_AC,    new PanicInterruptHandler("Alignment Check", /* error_code_present = */ false));
     interrupt_dispatcher_.set_handler(IDT_MC,    new PanicInterruptHandler("Machine Check", /* error_code_present = */ false));
     interrupt_dispatcher_.set_handler(IDT_XF,    new PanicInterruptHandler("SSE Floating Point Exception", /* error_code_present = */ false));
+
+    interrupt_dispatcher_.set_should_panic_on_null_handler(false);
 }
 
 void Kernel::disable_interrupts()
