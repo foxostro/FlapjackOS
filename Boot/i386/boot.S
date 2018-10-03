@@ -1,6 +1,7 @@
 #include "multiboot_asm.h"
 #include "paging.h"
 #include "creg_bits.h"
+#include "panic_asm.h"
 
 
 DECLARE_MULTIBOOT_HEADER
@@ -12,6 +13,13 @@ DECLARE_MULTIBOOT_HEADER
 _start:
     cli
     cld
+
+    # The kernel must lie entirely within the first 4MB of physical memory.
+    leal g_kernel_physical_end, %ecx
+    cmpl $0x400000, %ecx
+    jle kernel_is_not_too_big
+    PANIC kernel_too_big_string
+kernel_is_not_too_big:
 
     # This will map the entire kernel image as read-write, but we'll fix this up
     # later to mark kernel rodata and text sections read-only.
@@ -83,6 +91,11 @@ hang:
     jmp hang
 
 .size start_in_higher_half, . - start_in_higher_half
+
+
+.section .bootdata
+kernel_too_big_string:
+.asciz "The kernel is too big. Must be 4MB or less."
 
 
 .section .bss

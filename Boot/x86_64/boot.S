@@ -2,6 +2,7 @@
 #include "paging.h"
 #include "creg_bits.h"
 #include "declare_gdt.h"
+#include "panic_asm.h"
 
 
 DECLARE_MULTIBOOT_HEADER
@@ -18,6 +19,13 @@ DECLARE_MULTIBOOT_HEADER
 _start:
     cli
     cld
+
+    # The kernel must lie entirely within the first 4MB of physical memory.
+    leal g_kernel_physical_end, %ecx
+    cmpl $0x400000, %ecx
+    jle kernel_is_not_too_big
+    PANIC kernel_too_big_string
+kernel_is_not_too_big:
 
     SET_PML4_ENTRY GET_PHYSICAL_ADDRESS(pml4), GET_PHYSICAL_ADDRESS(low_pdpt), KERNEL_PHYSICAL_LOAD_ADDR
     SET_PML4_ENTRY GET_PHYSICAL_ADDRESS(pml4), GET_PHYSICAL_ADDRESS(high_pdpt), KERNEL_PHYSICAL_LOAD_ADDR + KERNEL_VIRTUAL_START_ADDR
@@ -100,8 +108,16 @@ hang:
 .section .bootdata
 DECLARE_GDT gdt_table, gdt_table_end, gdt_ptr
 
+kernel_too_big_string:
+.asciz "The kernel is too big. Must be 4MB or less."
+
 
 .section .bss
+
+# In order to remap the kernel into higher memory, we need to reserve space
+# for bootstrap paging structures. We use these to map physical memory into the
+# kernel virtual memory region for the kernel image. The kernel must fit into
+# 3MB of physical memory for this to work.
 DECLARE_PML4 pml4
 DECLARE_PAGE_DIRECTORY_POINTER_TABLE low_pdpt
 DECLARE_PAGE_DIRECTORY_POINTER_TABLE high_pdpt
