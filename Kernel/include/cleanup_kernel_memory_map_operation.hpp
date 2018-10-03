@@ -12,7 +12,8 @@ public:
     void cleanup_kernel_memory_map();
 
 private:
-    void mark_page_readonly(uintptr_t virtual_address);
+	void mark_pages_readonly(uintptr_t begin, uintptr_t end);
+    void mark_page_readonly(uintptr_t page);
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_CLEANUP_KERNEL_MEMORY_MAP_OPERATION_HPP

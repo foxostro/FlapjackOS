@@ -6,8 +6,6 @@
 #include <common/text_terminal.hpp>
 #include <kernel_contiguous_memory_allocator.hpp>
 #include <page_frame_allocator_factory.hpp>
-#include <kernel_page_directory_populate_operation.hpp>
-#include <cleanup_kernel_memory_map_operation.hpp>
 
 // Initializes the kernel's core memory allocators.
 // Instantiated at boot time.

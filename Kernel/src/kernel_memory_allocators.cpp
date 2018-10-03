@@ -2,6 +2,8 @@
 #include <logger.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
+#include <kernel_page_directory_populate_operation.hpp>
+#include <cleanup_kernel_memory_map_operation.hpp>
 
 KernelMemoryAllocators*
 KernelMemoryAllocators::create(multiboot_info_t *mb_info,

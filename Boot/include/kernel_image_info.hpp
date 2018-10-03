@@ -24,8 +24,14 @@ extern "C" char g_boot_end[];
 // The first address of the kernel image in memory.
 extern "C" char g_kernel_image_begin[];
 
+// The beginning of the text section in memory.
+extern "C" char g_kernel_text_begin[];
+
 // The end of the text section in memory.
 extern "C" char g_kernel_text_end[];
+
+// The beginning of the kernel rodata section in memory.
+extern "C" char g_kernel_rodata_begin[];
 
 // The end of the kernel rodata section in memory.
 extern "C" char g_kernel_rodata_end[];

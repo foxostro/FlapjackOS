@@ -22,6 +22,7 @@ SECTIONS
     g_boot_end = .;
 
     . += KERNEL_VIRTUAL_START_ADDR;
+    g_kernel_text_begin = .;
 
     .text : AT(g_boot_end)
     {
@@ -30,6 +31,7 @@ SECTIONS
 
     . = ALIGN(4K);
     g_kernel_text_end = .;
+    g_kernel_rodata_begin = .;
 
     .rodata : AT(ADDR(.rodata) - KERNEL_VIRTUAL_START_ADDR)
     {

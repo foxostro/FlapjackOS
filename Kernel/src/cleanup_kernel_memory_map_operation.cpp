@@ -1,14 +1,23 @@
 #include "cleanup_kernel_memory_map_operation.hpp"
 #include "mmu.hpp"
 #include "kernel_image_info.hpp"
+#include <logger.hpp>
 
 CleanupKernelMemoryMapOperation::CleanupKernelMemoryMapOperation() = default;
 
 void CleanupKernelMemoryMapOperation::cleanup_kernel_memory_map()
 {
-    for (uintptr_t page = (uintptr_t)g_kernel_image_begin;
-         page < (uintptr_t)g_kernel_rodata_end;
-         page += PAGE_SIZE) {
+    mark_pages_readonly((uintptr_t)g_kernel_text_begin,
+                        (uintptr_t)g_kernel_text_end);
+
+    mark_pages_readonly((uintptr_t)g_kernel_rodata_begin,
+                        (uintptr_t)g_kernel_rodata_end);
+}
+
+void CleanupKernelMemoryMapOperation::mark_pages_readonly(uintptr_t begin,
+                                                          uintptr_t end)
+{
+    for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
         mark_page_readonly(page);
     }
 }
