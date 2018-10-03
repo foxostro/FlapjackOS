@@ -10,8 +10,8 @@ leal 0xB8000, %edi
 leal \STRING, %esi
 panic_print_loop:
 xor %eax, %eax
-movb (%esi), %ax
-cmpb $0, %ax
+movb (%esi), %al
+cmpb $0, %al
 je panic_halt_loop
 movl %eax, (%edi)
 incl %edi
