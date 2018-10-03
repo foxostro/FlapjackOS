@@ -23,21 +23,17 @@ kernel_is_not_too_big:
 
     # This will map the entire kernel image as read-write, but we'll fix this up
     # later to mark kernel rodata and text sections read-only.
-    FILL_PAGE_TABLE GET_PHYSICAL_ADDRESS(bootstrap_page_table_1), 0x000000
-    FILL_PAGE_TABLE GET_PHYSICAL_ADDRESS(bootstrap_page_table_2), 0x400000
-    FILL_PAGE_TABLE GET_PHYSICAL_ADDRESS(bootstrap_page_table_3), 0x800000
+    FILL_PAGE_TABLE GET_PHYSICAL_ADDRESS(bootstrap_page_table), 0x000000
 
     # Fill out the bootstrap page directory.
     # We use the first page table twice in the page directory in order to effect
     # 1) a direct mapping of the first 4MB of physical memory to the first 4MB
     # of virtual memory as well as 2) a mapping of physical memory to the kernel
     # virtual start address at KERNEL_VIRTUAL_START_ADDR.
-    # It's necessary to map the first table twice to avoid page faulting when we
-    # try to fetch the next instruction before entering the higher half.
-    SET_PAGE_DIRECTORY_ENTRY GET_PHYSICAL_ADDRESS(bootstrap_page_directory), GET_PHYSICAL_ADDRESS(bootstrap_page_table_1), 0x000000
-    SET_PAGE_DIRECTORY_ENTRY GET_PHYSICAL_ADDRESS(bootstrap_page_directory), GET_PHYSICAL_ADDRESS(bootstrap_page_table_1), KERNEL_VIRTUAL_START_ADDR+0x000000
-    SET_PAGE_DIRECTORY_ENTRY GET_PHYSICAL_ADDRESS(bootstrap_page_directory), GET_PHYSICAL_ADDRESS(bootstrap_page_table_2), KERNEL_VIRTUAL_START_ADDR+0x400000
-    SET_PAGE_DIRECTORY_ENTRY GET_PHYSICAL_ADDRESS(bootstrap_page_directory), GET_PHYSICAL_ADDRESS(bootstrap_page_table_3), KERNEL_VIRTUAL_START_ADDR+0x800000
+    # It's necessary to map the table twice to avoid page faulting when we try
+    # to fetch the next instruction before entering the higher half.
+    SET_PAGE_DIRECTORY_ENTRY GET_PHYSICAL_ADDRESS(bootstrap_page_directory), GET_PHYSICAL_ADDRESS(bootstrap_page_table), 0x000000
+    SET_PAGE_DIRECTORY_ENTRY GET_PHYSICAL_ADDRESS(bootstrap_page_directory), GET_PHYSICAL_ADDRESS(bootstrap_page_table), KERNEL_VIRTUAL_START_ADDR+0x000000
 
     # Point CR3 to the bootstrap page directory.
     movl $(GET_PHYSICAL_ADDRESS(bootstrap_page_directory)), %ecx
@@ -102,10 +98,8 @@ kernel_too_big_string:
 DECLARE_KERNEL_STACK
 
 # In order to remap the kernel into higher memory, we need to reserve space
-# for a bootstrap page directory and page tables. We use these to map physical
-# memory into the kernel virtual memory region for the kernel image and for the
-# bootstrap kernel heap.
+# for a bootstrap page directory and page table. We use these to map physical
+# memory into the kernel virtual memory region for the kernel image.
+# The kernel must fit into 4MB of physical memory for this to work.
 DECLARE_PAGE_DIRECTORY bootstrap_page_directory
-DECLARE_PAGE_TABLE bootstrap_page_table_1
-DECLARE_PAGE_TABLE bootstrap_page_table_2
-DECLARE_PAGE_TABLE bootstrap_page_table_3
+DECLARE_PAGE_TABLE bootstrap_page_table

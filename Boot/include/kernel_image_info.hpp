@@ -7,14 +7,6 @@
 #include <cstddef>
 #include <cstdint>
 
-// The bootstrap assembly start code will have configured some number of page
-// tables for us to map the bootstrap heap into virtual memory.
-constexpr size_t NUMBER_OF_BOOTSTRAP_PAGE_TABLES = 3;
-
-// Compute the end of the bootstrap kernel heap. We can't go past this without
-// mapping additional pages.
-constexpr uintptr_t BOOTSTRAP_HEAP_END = KERNEL_VIRTUAL_START_ADDR + 0x400000 * NUMBER_OF_BOOTSTRAP_PAGE_TABLES;
-
 // The first address of the kernel image in physical memory.
 extern "C" char g_kernel_physical_start[];
 

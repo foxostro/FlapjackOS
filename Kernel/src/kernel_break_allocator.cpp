@@ -31,19 +31,7 @@ void KernelBreakAllocator::align_break_on_next_page_boundary()
     kernel_break_ = (void*)round_address_up_to_next_page(kernel_break_);
 }
 
-void* KernelBreakAllocator::get_bootstrap_heap_end()
-{
-    return (void*)BOOTSTRAP_HEAP_END;
-}
-
 void* KernelBreakAllocator::get_kernel_break()
 {
     return kernel_break_;
-}
-
-bool KernelBreakAllocator::is_frame_beyond_bootstrap_heap(uintptr_t page_frame)
-{
-    uintptr_t bootstrap_heap_end = (uintptr_t)get_bootstrap_heap_end();
-    bool result = (page_frame >= (bootstrap_heap_end - KERNEL_VIRTUAL_START_ADDR));
-    return result;
 }

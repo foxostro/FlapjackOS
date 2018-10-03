@@ -46,6 +46,8 @@ private:
     TextTerminal &terminal_;
 
     size_t count_page_frames();
+    PageFrameAllocator* create_page_frame_allocator();
+    void configure_page_frame_allocator(PageFrameAllocator* page_frames);
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_FACTORY_HPP

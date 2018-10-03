@@ -116,8 +116,8 @@ kernel_too_big_string:
 
 # In order to remap the kernel into higher memory, we need to reserve space
 # for bootstrap paging structures. We use these to map physical memory into the
-# kernel virtual memory region for the kernel image. The kernel must fit into
-# 3MB of physical memory for this to work.
+# kernel virtual memory region for the kernel image.
+# The kernel must fit into 4MB of physical memory for this to work.
 DECLARE_PML4 pml4
 DECLARE_PAGE_DIRECTORY_POINTER_TABLE low_pdpt
 DECLARE_PAGE_DIRECTORY_POINTER_TABLE high_pdpt

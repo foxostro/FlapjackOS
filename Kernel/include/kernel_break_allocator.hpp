@@ -18,16 +18,8 @@ public:
     // Move the break pointer forward to the next page boundary.
     void align_break_on_next_page_boundary();
 
-    // Gets the address of the end of the kernel's bootstrap heap.
-    // The bootstrap heap is the region of the kernel heap which was mapped into
-    // virtual memory by the bootstrap assembly start code.
-    void* get_bootstrap_heap_end();
-
     // Gets the current break pointer.
     void* get_kernel_break();
-
-    // Returns true if the page frame is beyond the bootstrap heap.
-    bool is_frame_beyond_bootstrap_heap(uintptr_t page_frame);
 
 private:
     void* kernel_heap_begin_;

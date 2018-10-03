@@ -21,9 +21,14 @@ public:
     void prepare_address_space();
 
 private:
-    KernelBreakAllocator &break_allocator_;
+    KernelBreakAllocator& break_allocator_;
+    PageDirectory& pd_;
 
-    PageTable* allocate_kernel_page_tables();
+    void prepare_page_directory_entry(PageDirectoryEntry& pde);
+    void configure_page_directory_entry(PageDirectoryEntry& pde);
+    void* allocate_page_table_memory();
+    void ensure_page_table_is_mapped(void* page_table_pointer);
+    void set_page_table(PageDirectoryEntry& pde, void *page_table_pointer);
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_ADDRESS_SPACE_BOOTSTRAP_OPERATION_HPP

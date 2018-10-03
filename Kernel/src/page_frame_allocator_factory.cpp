@@ -1,4 +1,6 @@
 #include "page_frame_allocator_factory.hpp"
+#include "logger.hpp"
+#include <new>
 #include <common/minmax.hpp>
 
 PageFrameAllocatorFactory::PageFrameAllocatorFactory(multiboot_info_t *mb_info,
@@ -21,6 +23,13 @@ size_t PageFrameAllocatorFactory::count_page_frames()
 
 PageFrameAllocator* PageFrameAllocatorFactory::create()
 {
+    PageFrameAllocator *page_frames = create_page_frame_allocator();
+    configure_page_frame_allocator(page_frames);
+    return page_frames;
+}
+
+PageFrameAllocator* PageFrameAllocatorFactory::create_page_frame_allocator()
+{
     size_t number_of_page_frames = count_page_frames();
     size_t number_of_storage_bytes = BitArray::calc_number_of_storage_bytes(number_of_page_frames);
     size_t size = sizeof(PageFrameAllocator) + number_of_storage_bytes;
@@ -29,13 +38,21 @@ PageFrameAllocator* PageFrameAllocatorFactory::create()
     void* page_frame_allocator_address = break_allocator_.malloc(size);
     char* storage = (char*)page_frame_allocator_address + sizeof(PageFrameAllocator);
     PageFrameAllocator *page_frames = new (page_frame_allocator_address) PageFrameAllocator(number_of_page_frames, number_of_storage_bytes, storage);
-    
+    return page_frames;
+}
+
+void PageFrameAllocatorFactory::configure_page_frame_allocator(PageFrameAllocator* page_frames)
+{
+    // Enumerate the useable page frames of the system. Those which map to a VMA
+    // beyond the kernel break pointer are available. We assume all other page
+    // frames are in use, e.g., by the kernel image, or for use in paging
+    // structures.
+    uintptr_t break_address = (uintptr_t)break_allocator_.get_kernel_break();
     page_frames->mark_all_as_used();
     enumerate_page_frames([&](uintptr_t page_frame){
-        if (break_allocator_.is_frame_beyond_bootstrap_heap(page_frame)) {
+        uintptr_t corresponding_logical_address = convert_physical_to_logical_address(page_frame);
+        if (corresponding_logical_address >= break_address) {
             page_frames->deallocate(page_frame);
         }
     });
-
-    return page_frames;
 }
