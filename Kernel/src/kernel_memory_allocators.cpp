@@ -2,7 +2,7 @@
 #include <logger.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
-#include <kernel_page_directory_populate_operation.hpp>
+#include <kernel_address_space_bootstrap_operation.hpp>
 #include <cleanup_kernel_memory_map_operation.hpp>
 
 KernelMemoryAllocators*
@@ -67,8 +67,8 @@ void KernelMemoryAllocators::prepare_kernel_memory_map()
     }
 
     {
-        KernelPageDirectoryPopulateOperation operation(kernel_break_allocator_);
-        operation.populate_kernel_page_directory();
+        KernelAddressSpaceBootstrapOperation operation(kernel_break_allocator_);
+        operation.prepare_address_space();
     }
 }
 

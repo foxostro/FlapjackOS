@@ -1,11 +1,11 @@
-#include "kernel_page_directory_populate_operation.hpp"
+#include "kernel_address_space_bootstrap_operation.hpp"
 #include <cstring>
 
-KernelPageDirectoryPopulateOperation::KernelPageDirectoryPopulateOperation(KernelBreakAllocator &break_allocator)
+KernelAddressSpaceBootstrapOperation::KernelAddressSpaceBootstrapOperation(KernelBreakAllocator &break_allocator)
  : break_allocator_(break_allocator)
 {}
 
-void KernelPageDirectoryPopulateOperation::populate_kernel_page_directory()
+void KernelAddressSpaceBootstrapOperation::prepare_address_space()
 {
     PageTable *pt = allocate_kernel_page_tables();
     PageDirectory& pd = get_current_page_directory();
@@ -20,7 +20,7 @@ void KernelPageDirectoryPopulateOperation::populate_kernel_page_directory()
     }
 }
 
-PageTable* KernelPageDirectoryPopulateOperation::allocate_kernel_page_tables()
+PageTable* KernelAddressSpaceBootstrapOperation::allocate_kernel_page_tables()
 {
     size_t number_of_page_tables = PageDirectory::NUMBER_OF_PAGE_DIRECTORY_ENTRIES - NUMBER_OF_BOOTSTRAP_PAGE_TABLES;
     size_t page_table_allocation_size = sizeof(PageTable) * number_of_page_tables;
