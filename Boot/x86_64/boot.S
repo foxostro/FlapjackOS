@@ -4,6 +4,8 @@
 #include "declare_gdt.h"
 #include "panic_asm.h"
 
+#define SEGSEL_KERNEL_DS (0x18)
+
 
 DECLARE_MULTIBOOT_HEADER
 
@@ -74,7 +76,7 @@ kernel_is_not_too_big:
 .type _start64, @function
 _start64:
     # Setup segment selectors
-    movw $0, %ax
+    movw $SEGSEL_KERNEL_DS, %ax
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %fs
