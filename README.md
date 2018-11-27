@@ -73,7 +73,7 @@ To run the unit tests, run the test script, or cd to the build_host directory an
    ```bash
    % svn co http://svn.code.sf.net/p/bochs/code/tags/REL_2_6_8_FINAL/bochs boch
    % cd bochs
-   % ./configure --enable-smp --enable-cpu-level=6 --enable-all-optimizations --enable-x86-64 --enable-pci --enable-vmx --enable-debugger --enable-disasm --enable-debugger-gui --enable-logging --enable-fpu --enable-3dnow --enable-sb16=dummy --enable-cdrom --enable-x86-debugger --enable-iodebug --disable-plugins --disable-docbook --with-term --with-sdl2
+   % CXX=/usr/bin/clang++ CC=/usr/bin/clang ./configure --enable-smp --enable-cpu-level=6 --enable-all-optimizations --enable-x86-64 --enable-pci --enable-vmx --enable-debugger --enable-disasm --enable-debugger-gui --enable-logging --enable-fpu --enable-3dnow --enable-sb16=dummy --enable-cdrom --enable-x86-debugger --enable-iodebug --disable-plugins --disable-docbook --with-term --with-sdl2
    % make
    % sudo make install
    ```
@@ -85,6 +85,10 @@ To run the unit tests, run the test script, or cd to the build_host directory an
    ```bash
    % ./scripts/run.sh
    ```
+
+Notes:
+* Bochs 2.6.9 does not build with Clang.
+* Bochs 2.6.8 and 2.6.9 do not build with GCC8.
 
 ### Running on Qemu
 
