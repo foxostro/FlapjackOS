@@ -7,11 +7,11 @@
 
 // Allocates physical page frames for use in the kernel.
 template<size_t NUMBER_OF_PAGE_FRAMES>
-class PageFrameAllocatorType {
+class PageFrameAllocator_ {
 public:
     // Initially, all page frames are marked as "in-use".
     // Page frames must be specifically deallocated before use.
-    PageFrameAllocatorType() : count_(0)
+    PageFrameAllocator_() : count_(0)
     {
         mark_all_as_used();
     }
@@ -74,6 +74,7 @@ private:
     BitArray<NUMBER_OF_PAGE_FRAMES> bitmap_;
 };
 
-using PageFrameAllocator = PageFrameAllocatorType<(1024*1024*1024)/PAGE_SIZE>;
+// The page frame allocator can manage 1GB of memory. No more.
+using PageFrameAllocator = PageFrameAllocator_<(1024*1024*1024)/PAGE_SIZE>;
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP

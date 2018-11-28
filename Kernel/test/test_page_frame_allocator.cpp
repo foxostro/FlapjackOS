@@ -2,7 +2,7 @@
 #include "page_frame_allocator.hpp"
 
 constexpr size_t CAPACITY = 10;
-using TestingAllocator = PageFrameAllocatorType<CAPACITY>;
+using TestingAllocator = PageFrameAllocator_<CAPACITY>;
 
 TEST_CASE("test_page_frame_allocator_default_ctor", "[page_frame_allocator]")
 {
