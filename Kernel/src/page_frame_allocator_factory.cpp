@@ -34,7 +34,7 @@ PageFrameAllocator* PageFrameAllocatorFactory::create_page_frame_allocator()
     terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
                      (unsigned)size, (unsigned)size/1024);
     void* page_frame_allocator_address = break_allocator_.malloc(size);
-    PageFrameAllocator *page_frames = new (page_frame_allocator_address) PageFrameAllocator(0, 0, nullptr);
+    PageFrameAllocator *page_frames = new (page_frame_allocator_address) PageFrameAllocator;
     return page_frames;
 }
 

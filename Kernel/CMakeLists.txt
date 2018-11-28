@@ -25,7 +25,7 @@ set(SOURCE_FILES
     "include/kernel_contiguous_memory_allocator.hpp" "src/kernel_contiguous_memory_allocator.cpp"
     "include/kernel_break_allocator.hpp" "src/kernel_break_allocator.cpp"
     "include/mmu.hpp" "src/mmu.cpp"
-    "include/page_frame_allocator.hpp" "src/page_frame_allocator.cpp"
+    "include/page_frame_allocator.hpp"
     "include/page_frame_allocator_factory.hpp" "src/page_frame_allocator_factory.cpp"
     "include/kernel_address_space_bootstrap_operation.hpp" "src/kernel_address_space_bootstrap_operation.cpp"
     "include/cleanup_kernel_memory_map_operation.hpp" "src/cleanup_kernel_memory_map_operation.cpp"
