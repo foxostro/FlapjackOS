@@ -4,6 +4,93 @@
 #include <malloc/malloc_zone.hpp>
 #include <kernel_address_space_bootstrap_operation.hpp>
 #include <cleanup_kernel_memory_map_operation.hpp>
+#include <page_frame_allocator_configuration_operation.hpp>
+
+
+
+// Parses the mulitboot memory map and enumerates the available page frames.
+class MemoryMapPageFrameEnumerator {
+public:
+    MemoryMapPageFrameEnumerator(multiboot_info_t *mb_info)
+     : mb_info_(mb_info),
+       entry_(nullptr),
+       limit_(nullptr),
+       curr_page_frame_(0),
+       remaining_length_of_entry_(0)
+    {
+        assert(mb_info_);
+
+        if (!(mb_info_->flags & MULTIBOOT_MEMORY_INFO)) {
+            panic("The bootloader did not provide memory information.");
+        }
+
+        entry_ = (multiboot_memory_map_t *)convert_physical_to_logical_address(mb_info_->mmap_addr);
+        limit_ = entry_ + mb_info_->mmap_length;
+
+        assert(entry_->size > 0);
+        assert(entry_->type == MULTIBOOT_MEMORY_AVAILABLE);
+
+        remaining_length_of_entry_ = entry_->length_low;
+        curr_page_frame_ = entry_->base_addr_low;
+    }
+
+    MemoryMapPageFrameEnumerator(const MemoryMapPageFrameEnumerator &enumerator) = default;
+
+    bool has_next() const
+    {
+        if (remaining_length_of_entry_ > 0) {
+            return true;
+        } else {
+            return nullptr != get_next_valid_entry(entry_);            
+        }
+    }
+
+    uintptr_t get_next()
+    {
+        assert(has_next());
+
+        if (remaining_length_of_entry_ == 0) {
+            scan_to_next_valid_entry();
+        }
+
+        uintptr_t result = curr_page_frame_;
+
+        remaining_length_of_entry_ -= PAGE_SIZE;
+        curr_page_frame_ += PAGE_SIZE;
+
+        return result;
+    }
+
+private:
+    multiboot_info_t *mb_info_;
+    multiboot_memory_map_t *entry_;
+    multiboot_memory_map_t *limit_;
+    uintptr_t curr_page_frame_;
+    size_t remaining_length_of_entry_;
+
+    void scan_to_next_valid_entry()
+    {
+        TRACE("scanning to next valid entry...");
+        entry_ = get_next_valid_entry(entry_);
+        assert(entry_ != nullptr);
+        remaining_length_of_entry_ = entry_->length_low;
+        curr_page_frame_ = entry_->base_addr_low;
+        TRACE("found entry with size of %u", (unsigned)remaining_length_of_entry_);
+    }
+
+    multiboot_memory_map_t* get_next_valid_entry(multiboot_memory_map_t *entry) const
+    {
+        while (entry < limit_ && entry->size > 0) {
+            entry = (multiboot_memory_map_t*)((uintptr_t)entry + entry->size + sizeof(entry->size));
+            if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                return entry;
+            }
+        }
+        return nullptr;
+    }
+};
+
+
 
 KernelMemoryAllocators*
 KernelMemoryAllocators::create(multiboot_info_t *mb_info,
@@ -39,11 +126,11 @@ void KernelMemoryAllocators::report_installed_memory()
 void KernelMemoryAllocators::report_free_page_frames()
 {
     TRACE("Number of free page frames is %u (%uMB)",
-          (unsigned)page_frame_allocator_->get_number_of_free_page_frames(),
-          (unsigned)page_frame_allocator_->get_number_of_free_page_frames()*4/1024);
+          (unsigned)page_frame_allocator_.get_number_of_free_page_frames(),
+          (unsigned)page_frame_allocator_.get_number_of_free_page_frames()*4/1024);
     terminal_.printf("Number of free page frames is %u (%uMB)\n",
-                     (unsigned)page_frame_allocator_->get_number_of_free_page_frames(),
-                     (unsigned)page_frame_allocator_->get_number_of_free_page_frames()*4/1024);
+                     (unsigned)page_frame_allocator_.get_number_of_free_page_frames(),
+                     (unsigned)page_frame_allocator_.get_number_of_free_page_frames()*4/1024);
 }
 
 void KernelMemoryAllocators::initialize_kernel_break_allocator()
@@ -53,10 +140,15 @@ void KernelMemoryAllocators::initialize_kernel_break_allocator()
 
 void KernelMemoryAllocators::initialize_page_frame_allocator()
 {
-    PageFrameAllocatorFactory factory(mb_info_,
-                                      kernel_break_allocator_,
-                                      terminal_);
-    page_frame_allocator_ = factory.create();
+    terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
+                     (unsigned)sizeof(PageFrameAllocator),
+                     (unsigned)sizeof(PageFrameAllocator)/1024);
+
+    uintptr_t break_address = (uintptr_t)kernel_break_allocator_.get_kernel_break();
+    using Op = PageFrameAllocatorConfigurationOperation<MemoryMapPageFrameEnumerator>;
+    Op operation(break_address,
+                 MemoryMapPageFrameEnumerator(mb_info_));
+    operation.configure(page_frame_allocator_);
 }
 
 void KernelMemoryAllocators::prepare_kernel_memory_map()
@@ -75,7 +167,7 @@ void KernelMemoryAllocators::prepare_kernel_memory_map()
 void KernelMemoryAllocators::initialize_contiguous_memory_allocator()
 {
     void *memory = kernel_break_allocator_.malloc(sizeof(KernelContiguousMemoryAllocator));
-    contiguous_memory_allocator_ = new (memory) KernelContiguousMemoryAllocator(kernel_break_allocator_, *page_frame_allocator_);
+    contiguous_memory_allocator_ = new (memory) KernelContiguousMemoryAllocator(kernel_break_allocator_, page_frame_allocator_);
 }
 
 void KernelMemoryAllocators::initialize_kernel_malloc()
