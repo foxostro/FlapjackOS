@@ -30,14 +30,11 @@ PageFrameAllocator* PageFrameAllocatorFactory::create()
 
 PageFrameAllocator* PageFrameAllocatorFactory::create_page_frame_allocator()
 {
-    size_t number_of_page_frames = count_page_frames();
-    size_t number_of_storage_bytes = BitArray::calc_number_of_storage_bytes(number_of_page_frames);
-    size_t size = sizeof(PageFrameAllocator) + number_of_storage_bytes;
+    size_t size = sizeof(PageFrameAllocator);
     terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
                      (unsigned)size, (unsigned)size/1024);
     void* page_frame_allocator_address = break_allocator_.malloc(size);
-    char* storage = (char*)page_frame_allocator_address + sizeof(PageFrameAllocator);
-    PageFrameAllocator *page_frames = new (page_frame_allocator_address) PageFrameAllocator(number_of_page_frames, number_of_storage_bytes, storage);
+    PageFrameAllocator *page_frames = new (page_frame_allocator_address) PageFrameAllocator(0, 0, nullptr);
     return page_frames;
 }
 

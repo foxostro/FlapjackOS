@@ -7,37 +7,27 @@
 #include <climits> // for CHAR_BIT
 
 // A compact array of bits.
-// Either use the factory method to create this object, or else use
-// placement-new to construct this in a suitable buffer.
+// `CAPACITY' is the number of bits in the array.
+template<size_t CAPACITY>
 class BitArray {
 public:
     using Word = unsigned;
     static constexpr size_t NUMBER_OF_WORD_BITS = sizeof(Word) * 8;
     static constexpr int NOT_FOUND = -1;
 
-    static size_t calc_number_of_storage_bytes(size_t number_of_bits)
-    {
-        return (number_of_bits + NUMBER_OF_WORD_BITS - 1) / NUMBER_OF_WORD_BITS * sizeof(Word);
-    }
-
-    // The BitArray does not gain ownership of the buffer and is not responsible
-    // for freeing the memory associated with it.
-    BitArray(size_t number_of_bits, size_t length, char* storage)
-     : number_of_bits_(number_of_bits),
-       length_(length),
-       storage_(storage)
+    BitArray()
     {
         clear_all();
     }
 
     void clear_all()
     {
-        memset(storage_, 0x00, length_);
+        memset(storage_, 0x00, sizeof(storage_));
     }
 
     void set_all()
     {
-        memset(storage_, 0xFF, length_);
+        memset(storage_, 0xFF, sizeof(storage_));
     }
 
     void set(size_t bit_index)
@@ -57,7 +47,7 @@ public:
 
     size_t get_number_of_bits()
     {
-        return number_of_bits_;
+        return CAPACITY;
     }
 
     void set_region(size_t bit_index_begin, size_t length)
@@ -94,23 +84,29 @@ public:
             return slow_scan_backward(begin, desired_value);
         }
 #else
-        return slow_scan_backward(number_of_bits_-1, desired_value);
+        return slow_scan_backward(CAPACITY-1, desired_value);
 #endif        
     }
 
 private:
-    size_t number_of_bits_, length_;
-    char* storage_;
+    static constexpr size_t calc_number_of_storage_bytes(size_t number_of_bits)
+    {
+        return (number_of_bits + NUMBER_OF_WORD_BITS - 1) / NUMBER_OF_WORD_BITS * sizeof(Word);
+    }
+
+    static_assert(CAPACITY > 0, "CAPACITY must be greater than zero.");
+
+    uint8_t storage_[calc_number_of_storage_bytes(CAPACITY)];
 
     size_t get_mask(size_t bit_index)
     {
         return 1 << (bit_index % CHAR_BIT);
     }
 
-    char& get_byte(size_t bit_index)
+    uint8_t& get_byte(size_t bit_index)
     {
-        assert(bit_index < number_of_bits_);
-        assert((bit_index / CHAR_BIT) < length_);
+        assert(bit_index < CAPACITY);
+        assert((bit_index / CHAR_BIT) < sizeof(storage_));
         return storage_[bit_index / CHAR_BIT];
     }
 
@@ -121,7 +117,7 @@ private:
 
     size_t get_number_of_words()
     {
-        return number_of_bits_ / NUMBER_OF_WORD_BITS;
+        return CAPACITY / NUMBER_OF_WORD_BITS;
     }
 
     int scan_forwards_to_find_bit_index_of_matching_word(bool desired_value)
@@ -136,7 +132,7 @@ private:
 
     int slow_scan_forward(size_t begin, bool desired_value)
     {
-        for (size_t i = begin; i < number_of_bits_; ++i) {
+        for (size_t i = begin; i < CAPACITY; ++i) {
             if (test(i) == desired_value) {
                 return i;
             }

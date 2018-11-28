@@ -36,7 +36,8 @@ public:
 
 private:
     size_t count_;
-    BitArray bitmap_; // must be last
+    static constexpr size_t NUMBER_OF_PAGE_FRAMES = (1024*1024*1024)/(4*1024);
+    BitArray<NUMBER_OF_PAGE_FRAMES> bitmap_; // must be last
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP
