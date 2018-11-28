@@ -9,7 +9,12 @@
 template<size_t NUMBER_OF_PAGE_FRAMES>
 class PageFrameAllocatorType {
 public:
-    PageFrameAllocatorType() : count_(0) {}
+    // Initially, all page frames are marked as "in-use".
+    // Page frames must be specifically deallocated before use.
+    PageFrameAllocatorType() : count_(0)
+    {
+        mark_all_as_used();
+    }
 
     // Allocates a specific page frame.
     // Returns true if the allocation was successful, false otherwise.

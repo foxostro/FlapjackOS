@@ -65,6 +65,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     add_executable(KernelTest
                    "test/test_gdt.cpp"
                    "test/test_idt.cpp"
+                   "test/test_page_frame_allocator.cpp"
                    "test/test_main.cpp"
                    )
 
