@@ -3,6 +3,8 @@
 #include <new>
 #include <common/minmax.hpp>
 
+PageFrameAllocatorFactory::PageFrameAllocatorStorage PageFrameAllocatorFactory::page_frame_allocator_storage_;
+
 PageFrameAllocatorFactory::PageFrameAllocatorFactory(multiboot_info_t *mb_info,
                                                      KernelBreakAllocator &break_allocator,
                                                      TextTerminal &terminal)
@@ -23,6 +25,9 @@ size_t PageFrameAllocatorFactory::count_page_frames()
 
 PageFrameAllocator* PageFrameAllocatorFactory::create()
 {
+    terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
+                     (unsigned)sizeof(PageFrameAllocator),
+                     (unsigned)sizeof(PageFrameAllocator)/1024);
     PageFrameAllocator *page_frames = create_page_frame_allocator();
     configure_page_frame_allocator(page_frames);
     return page_frames;
@@ -30,12 +35,7 @@ PageFrameAllocator* PageFrameAllocatorFactory::create()
 
 PageFrameAllocator* PageFrameAllocatorFactory::create_page_frame_allocator()
 {
-    size_t size = sizeof(PageFrameAllocator);
-    terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
-                     (unsigned)size, (unsigned)size/1024);
-    void* page_frame_allocator_address = break_allocator_.malloc(size);
-    PageFrameAllocator *page_frames = new (page_frame_allocator_address) PageFrameAllocator;
-    return page_frames;
+    return new (&page_frame_allocator_storage_) PageFrameAllocator;
 }
 
 void PageFrameAllocatorFactory::configure_page_frame_allocator(PageFrameAllocator* page_frames)

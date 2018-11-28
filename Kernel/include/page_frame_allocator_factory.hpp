@@ -8,6 +8,7 @@
 #include <kernel_break_allocator.hpp>
 #include <common/text_terminal.hpp>
 #include <page_size.hpp>
+#include <type_traits> // for std::aligned_storage
 
 // Creates the singleton page frame allocator.
 class PageFrameAllocatorFactory {
@@ -41,6 +42,9 @@ public:
     }
 
 private:
+    using PageFrameAllocatorStorage = typename std::aligned_storage<sizeof(PageFrameAllocator), alignof(PageFrameAllocator)>::type;
+    static PageFrameAllocatorStorage page_frame_allocator_storage_;
+
     multiboot_info_t *mb_info_;
     KernelBreakAllocator &break_allocator_;
     TextTerminal &terminal_;
