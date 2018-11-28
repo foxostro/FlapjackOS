@@ -5,6 +5,8 @@
 #include <panic.h>
 
 // Parses the mulitboot memory map and enumerates the available page frames.
+// This class cannot be unit tested because the unit test runner cannot ensure
+// the multiboot data structures are loaded at the expected memory addresses.
 class MultibootMemoryMapPageFrameEnumerator {
 public:
     MultibootMemoryMapPageFrameEnumerator(multiboot_info_t *mb_info)
