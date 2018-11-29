@@ -20,7 +20,6 @@ KernelMemoryAllocators::KernelMemoryAllocators(multiboot_info_t *mb_info,
    terminal_(terminal)
 {
     report_installed_memory();
-    initialize_kernel_break_allocator();
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
     report_free_page_frames();
@@ -44,11 +43,6 @@ void KernelMemoryAllocators::report_free_page_frames()
                      (unsigned)page_frame_allocator_.get_number_of_free_page_frames()*4/1024);
 }
 
-void KernelMemoryAllocators::initialize_kernel_break_allocator()
-{
-    kernel_break_allocator_.reset((void*)g_kernel_image_end);
-}
-
 void KernelMemoryAllocators::initialize_page_frame_allocator()
 {
     terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
@@ -56,18 +50,16 @@ void KernelMemoryAllocators::initialize_page_frame_allocator()
                      (unsigned)sizeof(PageFrameAllocator)/1024);
 
     using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator>;
-    Op operation((uintptr_t)kernel_break_allocator_.get_kernel_break(),
+    Op operation((uintptr_t)g_kernel_image_end,
                  MultibootMemoryMapPageFrameEnumerator(mb_info_));
     operation.configure(page_frame_allocator_);
 }
 
 void KernelMemoryAllocators::initialize_kernel_malloc()
 {
-    constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
-    size_t length = EIGHT_MB;
-    assert(length > 0);
+    size_t length = sizeof(heap_storage_);
+    uintptr_t begin = (uintptr_t)&heap_storage_;
     TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
-    uintptr_t begin = (uintptr_t)kernel_break_allocator_.malloc(length);
 
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
     TRACE("Clearing the malloc zone to 0x%x.", MAGIC_NUMBER_UNINITIALIZED_HEAP);

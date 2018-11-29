@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <multiboot.h>
 #include <common/text_terminal.hpp>
-#include <kernel_break_allocator.hpp>
 #include <page_frame_allocator.hpp>
 
 // Initializes the kernel's core memory allocators.
@@ -23,15 +22,17 @@ public:
 private:
     multiboot_info_t *mb_info_;
     TextTerminal &terminal_;
-    KernelBreakAllocator kernel_break_allocator_;
     PageFrameAllocator page_frame_allocator_;
+
+    static constexpr size_t HEAP_SIZE = 4096;
+    using HeapStorage = typename std::aligned_storage<HEAP_SIZE, alignof(int)>::type;
+    HeapStorage heap_storage_;
 
     KernelMemoryAllocators(multiboot_info_t *mb_info,
                            TextTerminal &terminal);
 
     void report_installed_memory();
     void report_free_page_frames();
-    void initialize_kernel_break_allocator();
     void initialize_page_frame_allocator();
     void initialize_kernel_malloc();
 };

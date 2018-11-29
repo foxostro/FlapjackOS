@@ -2,7 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_ADDRESS_SPACE_BOOTSTRAP_OPERATION_HPP
 
 #include <mmu.hpp>
-#include <kernel_break_allocator.hpp>
+#include <type_traits> // for std::aligned_storage
 
 // Operation to populate the MMU paging structures for kernel logical memory.
 //
