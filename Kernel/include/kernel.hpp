@@ -8,11 +8,14 @@
 #include <ps2_keyboard_device.hpp>
 #include <pit_timer_device.hpp>
 #include <vga_text_display_device.hpp>
-#include <kernel_memory_allocators.hpp>
+#include <page_frame_allocator.hpp>
 #include <interrupt_dispatcher.hpp>
 #include <mmu.hpp>
 
+#include <common/text_terminal.hpp>
+
 #include <cstdint>
+#include <type_traits> // for std::aligned_storage
 
 // The kernel is the heart of the operating system.
 // It manages access to memory and resources on the system.
@@ -52,11 +55,16 @@ private:
     TaskStateSegment tss_;
     IDTEntry idt_[IDT_MAX];
     PS2KeyboardDevice* keyboard_;
-    KernelMemoryAllocators* allocators_;
     InterruptDispatcher interrupt_dispatcher_;
     VGATextDisplayDevice vga_;
     TextTerminal terminal_;
+    multiboot_info_t *mb_info_;
+    PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
+
+    static constexpr size_t HEAP_SIZE = 4096;
+    using HeapStorage = typename std::aligned_storage<HEAP_SIZE, alignof(int)>::type;
+    HeapStorage heap_storage_;
 
     // Setup a Task State Segment and Global Descriptor Table for the kernel.
     // The kernel uses one TSS between all tasks and performs software task
@@ -85,6 +93,18 @@ private:
     // The virtual memory map established by the bootstrap code is not
     // sufficient for the kernel's general needs. Fix up permissions, &c.
     void cleanup_kernel_memory_map();
+
+    // Report to the console the amount of installed system memory.
+    void report_installed_memory();
+
+    // Report to the console the number of free page frames.
+    void report_free_page_frames();
+
+    // Initialize the page frame allocator according to the multiboot mmap.
+    void initialize_page_frame_allocator();
+
+    // Initialize the kernel malloc zone allocator.
+    void initialize_kernel_malloc();
 
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();

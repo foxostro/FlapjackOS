@@ -11,7 +11,12 @@
 #include <logger.hpp>
 #include <kernel_address_space_bootstrap_operation.hpp>
 #include <cleanup_kernel_memory_map_operation.hpp>
+#include <page_frame_allocator_configuration_operation.hpp>
+#include <multiboot_memory_map_page_frame_enumerator.hpp>
 
+#include <malloc/malloc_zone.hpp>
+
+#include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 
@@ -33,6 +38,7 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
 
+    mb_info_ = mb_info;
     are_interrupts_ready_ = false;
 
     initialize_tss_and_gdt(istack);
@@ -42,7 +48,10 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     setup_terminal();
     populate_page_directory();
     cleanup_kernel_memory_map();
-    allocators_ = KernelMemoryAllocators::create(mb_info, terminal_);
+    report_installed_memory();
+    initialize_page_frame_allocator();
+    initialize_kernel_malloc();
+    report_free_page_frames();
     initialize_interrupts_and_device_drivers();
 
     are_interrupts_ready_ = true;
@@ -112,6 +121,51 @@ void Kernel::cleanup_kernel_memory_map()
 {
     CleanupKernelMemoryMapOperation operation;
     operation.cleanup_kernel_memory_map();
+}
+
+void Kernel::report_installed_memory()
+{
+    TRACE("%u KB low memory, %u MB high memory",
+          mb_info_->mem_lower, mb_info_->mem_upper/1024);
+    terminal_.printf("%u KB low memory, %u MB high memory\n",
+                     mb_info_->mem_lower, mb_info_->mem_upper/1024);
+}
+
+void Kernel::report_free_page_frames()
+{
+    TRACE("Number of free page frames is %u (%uMB)",
+          (unsigned)page_frame_allocator_.get_number_of_free_page_frames(),
+          (unsigned)page_frame_allocator_.get_number_of_free_page_frames()*4/1024);
+    terminal_.printf("Number of free page frames is %u (%uMB)\n",
+                     (unsigned)page_frame_allocator_.get_number_of_free_page_frames(),
+                     (unsigned)page_frame_allocator_.get_number_of_free_page_frames()*4/1024);
+}
+
+void Kernel::initialize_page_frame_allocator()
+{
+    terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
+                     (unsigned)sizeof(PageFrameAllocator),
+                     (unsigned)sizeof(PageFrameAllocator)/1024);
+
+    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator>;
+    Op operation((uintptr_t)g_kernel_image_end,
+                 MultibootMemoryMapPageFrameEnumerator(mb_info_));
+    operation.configure(page_frame_allocator_);
+}
+
+void Kernel::initialize_kernel_malloc()
+{
+    size_t length = sizeof(heap_storage_);
+    uintptr_t begin = (uintptr_t)&heap_storage_;
+    TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
+
+    constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
+    TRACE("Clearing the malloc zone to 0x%x.", MAGIC_NUMBER_UNINITIALIZED_HEAP);
+    memset((void*)begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
+    TRACE("Finished clearing the malloc zone.");
+
+    MemoryAllocator *alloc = MallocZone::create(begin, length);
+    set_global_allocator(alloc);
 }
 
 void Kernel::initialize_interrupts_and_device_drivers()

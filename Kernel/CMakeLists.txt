@@ -28,7 +28,6 @@ set(SOURCE_FILES
     "include/kernel_address_space_bootstrap_operation.hpp" "src/kernel_address_space_bootstrap_operation.cpp"
     "include/cleanup_kernel_memory_map_operation.hpp" "src/cleanup_kernel_memory_map_operation.cpp"
     "include/multiboot_memory_map_page_frame_enumerator.hpp"
-    "include/kernel_memory_allocators.hpp" "src/kernel_memory_allocators.cpp"
     "include/interrupt_dispatcher.hpp" "src/interrupt_dispatcher.cpp"
     "include/interrupt_lock.hpp" "src/interrupt_lock.cpp"
     "include/panic_interrupt_handler.hpp" "src/panic_interrupt_handler.cpp"
