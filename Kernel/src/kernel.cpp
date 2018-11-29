@@ -9,6 +9,7 @@
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
 #include <logger.hpp>
+#include <cleanup_kernel_memory_map_operation.hpp>
 
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
@@ -37,6 +38,7 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     vga_.clear();
     terminal_.init(&vga_);
     g_terminal = &terminal_;
+    cleanup_kernel_memory_map();
     allocators_ = KernelMemoryAllocators::create(mb_info, terminal_);
     initialize_interrupts_and_device_drivers();
 
@@ -87,6 +89,12 @@ void Kernel::call_global_constructors()
         void (*ctor_function_pointer)() = (void (*)())(value);
         ctor_function_pointer();
     }
+}
+
+void Kernel::cleanup_kernel_memory_map()
+{
+    CleanupKernelMemoryMapOperation operation;
+    operation.cleanup_kernel_memory_map();
 }
 
 void Kernel::initialize_interrupts_and_device_drivers()

@@ -73,6 +73,10 @@ private:
     // boot process.
     void call_global_constructors();
 
+    // The virtual memory map established by the bootstrap code is not
+    // sufficient for the kernel's general needs. Fix up permissions, &c.
+    void cleanup_kernel_memory_map();
+
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
 };

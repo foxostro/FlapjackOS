@@ -3,7 +3,6 @@
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
 #include <kernel_address_space_bootstrap_operation.hpp>
-#include <cleanup_kernel_memory_map_operation.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 
@@ -67,15 +66,8 @@ void KernelMemoryAllocators::initialize_page_frame_allocator()
 
 void KernelMemoryAllocators::prepare_kernel_memory_map()
 {
-    {
-        CleanupKernelMemoryMapOperation operation;
-        operation.cleanup_kernel_memory_map();
-    }
-
-    {
-        KernelAddressSpaceBootstrapOperation operation(kernel_break_allocator_);
-        operation.prepare_address_space();
-    }
+    KernelAddressSpaceBootstrapOperation operation(kernel_break_allocator_);
+    operation.prepare_address_space();
 }
 
 void KernelMemoryAllocators::initialize_contiguous_memory_allocator()
