@@ -10,6 +10,7 @@
 #include <vga_text_display_device.hpp>
 #include <kernel_memory_allocators.hpp>
 #include <interrupt_dispatcher.hpp>
+#include <mmu.hpp>
 
 #include <cstdint>
 
@@ -45,6 +46,8 @@ public:
     void enable_interrupts();
 
 private:
+    static constexpr size_t NUMBER_OF_PAGE_TABLES = KERNEL_MEMORY_REGION_SIZE / PAGE_SIZE / PageTable::NUMBER_OF_PAGE_TABLE_ENTRIES;
+    PageTable page_tables_[NUMBER_OF_PAGE_TABLES];
     GDTEntry gdt_[6];
     TaskStateSegment tss_;
     IDTEntry idt_[IDT_MAX];
@@ -72,6 +75,12 @@ private:
     // This is basic house keeping which must be performed very early in the
     // boot process.
     void call_global_constructors();
+
+    // Setup the VGA console and terminal.
+    void setup_terminal();
+
+    // Populate the page directory with page tables.
+    void populate_page_directory();
 
     // The virtual memory map established by the bootstrap code is not
     // sufficient for the kernel's general needs. Fix up permissions, &c.

@@ -16,19 +16,17 @@
 // the bootstrap code. So, there's a whole dance to bootstrap the address space.
 class KernelAddressSpaceBootstrapOperation {
 public:
-    KernelAddressSpaceBootstrapOperation(KernelBreakAllocator &break_allocator);
+    KernelAddressSpaceBootstrapOperation(size_t count, PageTable* empty_page_tables);
 
     void prepare_address_space();
 
 private:
-    KernelBreakAllocator& break_allocator_;
     PageDirectory& pd_;
+    size_t count_;
+    PageTable* next_page_table_;
 
     void prepare_page_directory_entry(PageDirectoryEntry& pde);
-    void configure_page_directory_entry(PageDirectoryEntry& pde);
-    void* allocate_page_table_memory();
-    void ensure_page_table_is_mapped(void* page_table_pointer);
-    void set_page_table(PageDirectoryEntry& pde, void *page_table_pointer);
+    PageTable* get_next_page_table();
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_ADDRESS_SPACE_BOOTSTRAP_OPERATION_HPP

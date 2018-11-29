@@ -2,7 +2,6 @@
 #include <logger.hpp>
 #include <common/global_allocator.hpp>
 #include <malloc/malloc_zone.hpp>
-#include <kernel_address_space_bootstrap_operation.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 
@@ -22,7 +21,6 @@ KernelMemoryAllocators::KernelMemoryAllocators(multiboot_info_t *mb_info,
 {
     report_installed_memory();
     initialize_kernel_break_allocator();
-    prepare_kernel_memory_map();
     initialize_page_frame_allocator();
     initialize_contiguous_memory_allocator();
     initialize_kernel_malloc();
@@ -62,12 +60,6 @@ void KernelMemoryAllocators::initialize_page_frame_allocator()
     Op operation((uintptr_t)kernel_break_allocator_.get_kernel_break(),
                  MultibootMemoryMapPageFrameEnumerator(mb_info_));
     operation.configure(page_frame_allocator_);
-}
-
-void KernelMemoryAllocators::prepare_kernel_memory_map()
-{
-    KernelAddressSpaceBootstrapOperation operation(kernel_break_allocator_);
-    operation.prepare_address_space();
 }
 
 void KernelMemoryAllocators::initialize_contiguous_memory_allocator()

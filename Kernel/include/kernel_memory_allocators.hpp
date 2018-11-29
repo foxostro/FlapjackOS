@@ -44,7 +44,6 @@ private:
     void report_free_page_frames();
     void initialize_kernel_break_allocator();
     void initialize_page_frame_allocator();
-    void prepare_kernel_memory_map();
     void initialize_contiguous_memory_allocator();
     void initialize_kernel_malloc();
 };

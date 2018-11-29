@@ -4,6 +4,7 @@
 #include <common/bit_array.hpp>
 #include "page_size.hpp"
 #include "panic.h"
+#include "logical_addressing.hpp" // for KERNEL_MEMORY_REGION_SIZE
 
 // Allocates physical page frames for use in the kernel.
 template<size_t NUMBER_OF_PAGE_FRAMES>
@@ -75,6 +76,6 @@ private:
 };
 
 // The page frame allocator can manage 1GB of memory. No more.
-using PageFrameAllocator = PageFrameAllocator_<(1024*1024*1024)/PAGE_SIZE>;
+using PageFrameAllocator = PageFrameAllocator_<KERNEL_MEMORY_REGION_SIZE/PAGE_SIZE>;
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP

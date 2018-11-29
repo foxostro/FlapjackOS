@@ -9,6 +9,7 @@
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
 #include <logger.hpp>
+#include <kernel_address_space_bootstrap_operation.hpp>
 #include <cleanup_kernel_memory_map_operation.hpp>
 
 #include <common/line_editor.hpp>
@@ -25,6 +26,9 @@ TextTerminal *g_terminal = nullptr;
 Kernel g_kernel;
 
 
+constexpr size_t Kernel::NUMBER_OF_PAGE_TABLES;
+
+
 void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
@@ -35,9 +39,8 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     isr_install(idt_);
     pic_init();
     call_global_constructors();
-    vga_.clear();
-    terminal_.init(&vga_);
-    g_terminal = &terminal_;
+    setup_terminal();
+    populate_page_directory();
     cleanup_kernel_memory_map();
     allocators_ = KernelMemoryAllocators::create(mb_info, terminal_);
     initialize_interrupts_and_device_drivers();
@@ -89,6 +92,20 @@ void Kernel::call_global_constructors()
         void (*ctor_function_pointer)() = (void (*)())(value);
         ctor_function_pointer();
     }
+}
+
+void Kernel::setup_terminal()
+{
+    vga_.clear();
+    terminal_.init(&vga_);
+    g_terminal = &terminal_;
+}
+
+void Kernel::populate_page_directory()
+{
+    memset(page_tables_, 0, sizeof(page_tables_));
+    KernelAddressSpaceBootstrapOperation operation(NUMBER_OF_PAGE_TABLES, page_tables_);
+    operation.prepare_address_space();
 }
 
 void Kernel::cleanup_kernel_memory_map()
