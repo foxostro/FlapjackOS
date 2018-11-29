@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <multiboot.h>
 #include <common/text_terminal.hpp>
-#include <kernel_contiguous_memory_allocator.hpp>
+#include <kernel_break_allocator.hpp>
 #include <page_frame_allocator.hpp>
 
 // Initializes the kernel's core memory allocators.
@@ -15,16 +15,6 @@ public:
     static KernelMemoryAllocators* create(multiboot_info_t *mb_info,
                                           TextTerminal &terminal);
 
-    KernelBreakAllocator& get_kernel_break_allocator()
-    {
-        return kernel_break_allocator_;
-    }
-
-    KernelContiguousMemoryAllocator& get_kernel_heap_allocator()
-    {
-        return *contiguous_memory_allocator_;
-    }
-
     PageFrameAllocator& get_page_frame_allocator()
     {
         return page_frame_allocator_;
@@ -34,7 +24,6 @@ private:
     multiboot_info_t *mb_info_;
     TextTerminal &terminal_;
     KernelBreakAllocator kernel_break_allocator_;
-    KernelContiguousMemoryAllocator *contiguous_memory_allocator_;
     PageFrameAllocator page_frame_allocator_;
 
     KernelMemoryAllocators(multiboot_info_t *mb_info,
@@ -44,7 +33,6 @@ private:
     void report_free_page_frames();
     void initialize_kernel_break_allocator();
     void initialize_page_frame_allocator();
-    void initialize_contiguous_memory_allocator();
     void initialize_kernel_malloc();
 };
 

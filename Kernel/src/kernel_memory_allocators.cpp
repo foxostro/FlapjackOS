@@ -22,7 +22,6 @@ KernelMemoryAllocators::KernelMemoryAllocators(multiboot_info_t *mb_info,
     report_installed_memory();
     initialize_kernel_break_allocator();
     initialize_page_frame_allocator();
-    initialize_contiguous_memory_allocator();
     initialize_kernel_malloc();
     report_free_page_frames();
 }
@@ -62,19 +61,13 @@ void KernelMemoryAllocators::initialize_page_frame_allocator()
     operation.configure(page_frame_allocator_);
 }
 
-void KernelMemoryAllocators::initialize_contiguous_memory_allocator()
-{
-    void *memory = kernel_break_allocator_.malloc(sizeof(KernelContiguousMemoryAllocator));
-    contiguous_memory_allocator_ = new (memory) KernelContiguousMemoryAllocator(kernel_break_allocator_, page_frame_allocator_);
-}
-
 void KernelMemoryAllocators::initialize_kernel_malloc()
 {
     constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
     size_t length = EIGHT_MB;
     assert(length > 0);
     TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
-    uintptr_t begin = (uintptr_t)contiguous_memory_allocator_->malloc(length);
+    uintptr_t begin = (uintptr_t)kernel_break_allocator_.malloc(length);
 
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
     TRACE("Clearing the malloc zone to 0x%x.", MAGIC_NUMBER_UNINITIALIZED_HEAP);

@@ -22,7 +22,6 @@ set(SOURCE_FILES
     "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
     "include/kernel.hpp" "src/kernel.cpp"
     "include/page_size.hpp"
-    "include/kernel_contiguous_memory_allocator.hpp" "src/kernel_contiguous_memory_allocator.cpp"
     "include/kernel_break_allocator.hpp" "src/kernel_break_allocator.cpp"
     "include/mmu.hpp" "src/mmu.cpp"
     "include/page_frame_allocator.hpp"
