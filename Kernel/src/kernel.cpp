@@ -155,16 +155,19 @@ void Kernel::initialize_page_frame_allocator()
 
 void Kernel::initialize_kernel_malloc()
 {
-    size_t length = sizeof(heap_storage_);
-    uintptr_t begin = (uintptr_t)&heap_storage_;
+    constexpr size_t EIGHT_MB = 8 * 1024 * 1024;
+    size_t length = EIGHT_MB;
     TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
+
+    uintptr_t begin_physical_addr = page_frame_allocator_.allocate_span(length);
+    void* begin = (void*)convert_physical_to_logical_address(begin_physical_addr);
 
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
     TRACE("Clearing the malloc zone to 0x%x.", MAGIC_NUMBER_UNINITIALIZED_HEAP);
-    memset((void*)begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
+    memset(begin, MAGIC_NUMBER_UNINITIALIZED_HEAP, length);
     TRACE("Finished clearing the malloc zone.");
 
-    MemoryAllocator *alloc = MallocZone::create(begin, length);
+    MemoryAllocator *alloc = MallocZone::create((uintptr_t)begin, length);
     set_global_allocator(alloc);
 }
 

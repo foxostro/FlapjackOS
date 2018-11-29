@@ -15,7 +15,6 @@
 #include <common/text_terminal.hpp>
 
 #include <cstdint>
-#include <type_traits> // for std::aligned_storage
 
 // The kernel is the heart of the operating system.
 // It manages access to memory and resources on the system.
@@ -61,10 +60,6 @@ private:
     multiboot_info_t *mb_info_;
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
-
-    static constexpr size_t HEAP_SIZE = 4096;
-    using HeapStorage = typename std::aligned_storage<HEAP_SIZE, alignof(int)>::type;
-    HeapStorage heap_storage_;
 
     // Setup a Task State Segment and Global Descriptor Table for the kernel.
     // The kernel uses one TSS between all tasks and performs software task

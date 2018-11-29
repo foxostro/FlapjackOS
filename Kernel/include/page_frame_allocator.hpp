@@ -17,6 +17,49 @@ public:
         mark_all_as_used();
     }
 
+    // Allocate a contiguous span of page frames with a size (in bytes) of at
+    // least the specified length.
+    // Returns the physical address of the first page frame on success.
+    // Returns zero if the allocation fails.
+    // This method will refuse to allocate page frame zero.
+    uintptr_t allocate_span(size_t length)
+    {
+        for (uintptr_t page_frame = PAGE_SIZE;
+             page_frame < PAGE_SIZE*NUMBER_OF_PAGE_FRAMES;
+             page_frame += PAGE_SIZE) {
+
+            if (is_span_free(page_frame, length)) {
+                uintptr_t result = page_frame;
+                for (; length >= PAGE_SIZE; length -= PAGE_SIZE) {
+                    allocate(page_frame);
+                    page_frame += PAGE_SIZE;
+                }
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    bool is_span_free(uintptr_t begin_page_frame, size_t length)
+    {
+        assert_is_page_aligned(begin_page_frame);
+
+        if (length == 0) {
+            return is_free(begin_page_frame);
+        }
+
+        for (uintptr_t page_frame = begin_page_frame,
+                       limit = begin_page_frame + length;
+             page_frame < limit;
+             page_frame += PAGE_SIZE) {
+            if (!is_free(page_frame)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // Allocates a specific page frame.
     // Returns true if the allocation was successful, false otherwise.
     bool allocate(uintptr_t page_frame)
@@ -44,10 +87,15 @@ public:
     }
 
     // Returns true if the specified page frame is free.
+    // Also returns false if the specified page frame is out of bounds.
     bool is_free(uintptr_t page_frame)
     {
         size_t bit_index = page_frame / PAGE_SIZE;
-        return !bitmap_.test(bit_index);
+        if (bit_index < get_capacity()) {
+            return !bitmap_.test(bit_index);
+        } else {
+            return false;
+        }
     }
 
     // Return the number of free page frames remaining.
