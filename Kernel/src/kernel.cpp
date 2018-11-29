@@ -41,10 +41,10 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     mb_info_ = mb_info;
     are_interrupts_ready_ = false;
 
+    call_global_constructors(); // NOTE: Kernel::Kernel() is invoked here!
     initialize_tss_and_gdt(istack);
     isr_install(idt_);
     pic_init();
-    call_global_constructors();
     setup_terminal();
     populate_page_directory();
     cleanup_kernel_memory_map();
