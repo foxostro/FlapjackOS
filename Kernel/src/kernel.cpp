@@ -1,6 +1,5 @@
 #include <kernel.hpp>
 
-#include <ps2_keyboard_device.hpp>
 #include <pit_timer_device.hpp>
 #include <inout.h>
 #include <panic_interrupt_handler.hpp>
@@ -8,6 +7,8 @@
 #include <logger.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
+
+#include <drivers/pc/ps2_keyboard_device.hpp>
 
 #include <malloc/malloc_zone.hpp>
 

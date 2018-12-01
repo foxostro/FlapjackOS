@@ -5,15 +5,7 @@ set(SOURCE_FILES
     "include/panic.h" "src/panic.cpp"
     "include/timer_device.hpp"
     "include/pit_timer_device.hpp" "src/pit_timer_device.cpp"
-    "include/ps2_keyboard_device.hpp" "src/ps2_keyboard_device/ps2_keyboard_device.cpp"
     "include/vga_text_display_device.hpp" "src/vga_text_display_device.cpp"
-    "src/ps2_keyboard_device/keyboard_scancodes_make_escaped.inc"
-    "src/ps2_keyboard_device/keyboard_scancodes_break.inc"
-    "src/ps2_keyboard_device/keyboard_keycode_ascii_uppercase.inc"
-    "src/ps2_keyboard_device/keyboard_keycode_names.inc"
-    "src/ps2_keyboard_device/keyboard_keycode_ascii_lowercase.inc"
-    "src/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
-    "src/ps2_keyboard_device/keyboard_scancodes_make.inc"
     "include/kernel.hpp" "src/kernel.cpp"
     "include/page_frame_allocator.hpp"
     "include/page_frame_allocator_configuration_operation.hpp"
@@ -30,11 +22,13 @@ include_directories("include"
                     ${MALLOC_INCLUDE_DIRS}
                     ${KERNEL_PLATFORM_SUPPORT_INCLUDE_DIRS}
                     ${BOOT_INCLUDE_DIR}
+                    ${DRIVERS_INCLUDE_DIR}
                     )
 
 link_directories(${COMMON_LIBRARIES_DIR}
                  ${MALLOC_LIBRARIES_DIRS}
                  ${KERNEL_PLATFORM_SUPPORT_LIBRARIES_DIR}
+                 ${DRIVERS_LIBRARIES_DIR}
                  )
 
 add_library(Kernel STATIC ${SOURCE_FILES})
@@ -43,6 +37,7 @@ target_link_libraries(Kernel
                       ${COMMON_LIBRARIES}
                       ${MALLOC_LIBRARIES}
                       ${KERNEL_PLATFORM_SUPPORT_LIBRARIES}
+                      ${DRIVERS_LIBRARIES}
                       )
 
 if (NOT CMAKE_CROSSCOMPILING)

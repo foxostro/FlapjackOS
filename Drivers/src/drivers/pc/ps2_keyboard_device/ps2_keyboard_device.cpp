@@ -1,4 +1,4 @@
-#include <ps2_keyboard_device.hpp>
+#include <drivers/pc/ps2_keyboard_device.hpp>
 #include <cstdlib>
 #include <climits>
 #include <cstring>

@@ -45,6 +45,7 @@ list(APPEND SOURCE_FILES
      "include/creg.h"
      "include/page_size.hpp"
      "include/logical_addressing.hpp"
+     
      "include/platform/i386/idt.h" "src/platform/i386/idt.c"
      "include/platform/i386/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/i386_isr_install.c"
      "include/platform/i386/protection_flags.hpp"
@@ -59,6 +60,7 @@ list(APPEND SOURCE_FILES
      "include/platform/i386/gdt.h" "src/platform/i386/gdt.c"
      "include/platform/i386/tss.h"
      "include/platform/i386/hardware_interrupt_controller.hpp" "src/platform/i386/hardware_interrupt_controller.cpp"
+     
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )
 
