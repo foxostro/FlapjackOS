@@ -1,6 +1,6 @@
 #include <interrupt_dispatcher.hpp>
 #include <panic.h>
-#include <pic.h>
+#include <platform/pc/pic.h> // TODO: This class needs to be more platform-agnostic.
 #include <interrupt_asm.h>
 #include <cstring>
 #include <cassert>

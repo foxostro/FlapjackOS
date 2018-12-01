@@ -1,8 +1,5 @@
 #include <kernel.hpp>
 
-#include <interrupt_asm.h>
-#include <isr_install.h>
-#include <pic.h>
 #include <inout.h>
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
@@ -37,8 +34,7 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     are_interrupts_ready_ = false;
 
     hardware_task_configuration_.init(istack);
-    isr_install(idt_);
-    pic_init();
+    hardware_interrupt_controller_.init();
     setup_terminal();
     prepare_kernel_address_space();
     report_installed_memory();
@@ -197,14 +193,14 @@ void Kernel::initialize_interrupts_and_device_drivers()
 void Kernel::disable_interrupts()
 {
     if (are_interrupts_ready_) {
-        ::disable_interrupts();
+        hardware_interrupt_controller_.disable_interrupts();
     }
 }
 
 void Kernel::enable_interrupts()
 {
     if (are_interrupts_ready_) {
-        ::enable_interrupts();
+        hardware_interrupt_controller_.enable_interrupts();
     }
 }
 

@@ -2,7 +2,6 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
 
 #include <multiboot.h>
-#include <idt.h>
 #include <ps2_keyboard_device.hpp>
 #include <pit_timer_device.hpp>
 #include <vga_text_display_device.hpp>
@@ -48,10 +47,11 @@ public:
 
 private:
     using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
+    using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
 
     HardwareTaskConfiguration hardware_task_configuration_;
-    IDTEntry idt_[IDT_MAX];
+    HardwareInterruptController hardware_interrupt_controller_;
     PS2KeyboardDevice* keyboard_;
     InterruptDispatcher interrupt_dispatcher_;
     VGATextDisplayDevice vga_;

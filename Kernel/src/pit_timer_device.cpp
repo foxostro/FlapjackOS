@@ -1,6 +1,6 @@
 #include <pit_timer_device.hpp>
 
-#include <pic.h>
+#include <platform/pc/pic.h> // TODO: This class should probably be moved to the "pc" platform directory.
 #include <inout.h>
 #include <common/misc.h>
 

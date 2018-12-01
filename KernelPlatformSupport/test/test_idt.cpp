@@ -1,11 +1,12 @@
 #include "catch.hpp"
 
-#include <cstdio>
-#include <cstddef>
+#include <platform/i386/idt.h>
 
 #include <seg.h>
-#include <idt.h>
 #include <common/misc.h>
+
+#include <cstdio>
+#include <cstddef>
 
 // Useful for installing Trap Gates
 #define DPL_FIELD(DPL)    (unsigned)( ((DPL) & 0x03) << 13 )

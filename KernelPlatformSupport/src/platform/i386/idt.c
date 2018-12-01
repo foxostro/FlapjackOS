@@ -1,4 +1,4 @@
-#include <idt.h>
+#include <platform/i386/idt.h>
 #include <seg.h>
 #include <common/misc.h>
 

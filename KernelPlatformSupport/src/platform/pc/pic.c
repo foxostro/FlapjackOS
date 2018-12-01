@@ -1,5 +1,5 @@
 // See <http://wiki.osdev.org/PIC> for information about the PIC.
-#include <pic.h>
+#include <platform/pc/pic.h>
 #include <inout.h>
 
 #define PIC1           0x20 // IO base address for master PIC.
