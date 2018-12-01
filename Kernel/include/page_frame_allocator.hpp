@@ -2,9 +2,9 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_HPP
 
 #include <common/bit_array.hpp>
+#include <logical_addressing.hpp> // for KERNEL_MEMORY_REGION_SIZE
 #include "page_size.hpp"
 #include "panic.h"
-#include "logical_addressing.hpp" // for KERNEL_MEMORY_REGION_SIZE
 
 // Allocates physical page frames for use in the kernel.
 template<size_t NUMBER_OF_PAGE_FRAMES>

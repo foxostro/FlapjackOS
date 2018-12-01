@@ -9,8 +9,6 @@
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
 #include <logger.hpp>
-#include <kernel_address_space_bootstrap_operation.hpp>
-#include <cleanup_kernel_memory_map_operation.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 
@@ -31,9 +29,6 @@ TextTerminal *g_terminal = nullptr;
 Kernel g_kernel;
 
 
-constexpr size_t Kernel::NUMBER_OF_PAGE_TABLES;
-
-
 void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
@@ -46,8 +41,7 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     isr_install(idt_);
     pic_init();
     setup_terminal();
-    populate_page_directory();
-    cleanup_kernel_memory_map();
+    prepare_kernel_address_space();
     report_installed_memory();
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
@@ -110,17 +104,27 @@ void Kernel::setup_terminal()
     g_terminal = &terminal_;
 }
 
-void Kernel::populate_page_directory()
+void Kernel::prepare_kernel_address_space()
 {
-    memset(page_tables_, 0, sizeof(page_tables_));
-    KernelAddressSpaceBootstrapOperation operation(NUMBER_OF_PAGE_TABLES, page_tables_);
-    operation.prepare_address_space();
-}
+    address_space_bootstrapper_.prepare_address_space();
 
-void Kernel::cleanup_kernel_memory_map()
-{
-    CleanupKernelMemoryMapOperation operation;
-    operation.cleanup_kernel_memory_map();
+    auto& phys_map = address_space_bootstrapper_.get_physical_memory_map();
+
+    // Ensure the address space is mapped.
+    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
+    for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
+         length > 0; length -= PAGE_SIZE) {
+        phys_map.map_page(convert_logical_to_physical_address(linear_address),
+                          linear_address,
+                          phys_map.WRITABLE);
+        linear_address += PAGE_SIZE;
+    }
+
+    // Setup correct permissions for the .text and .rodata sections.
+    phys_map.set_readonly((uintptr_t)g_kernel_text_begin,
+                          (uintptr_t)g_kernel_text_end);
+    phys_map.set_readonly((uintptr_t)g_kernel_rodata_begin,
+                          (uintptr_t)g_kernel_rodata_end);
 }
 
 void Kernel::report_installed_memory()

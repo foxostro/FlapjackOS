@@ -71,8 +71,8 @@ include_directories("3rdParty")
 
 add_subdirectory("Common")
 add_subdirectory("Malloc")
-add_subdirectory("KernelPlatformSupport")
 add_subdirectory("Boot")
+add_subdirectory("KernelPlatformSupport")
 add_subdirectory("Kernel")
 
 

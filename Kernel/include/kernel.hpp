@@ -10,7 +10,8 @@
 #include <vga_text_display_device.hpp>
 #include <page_frame_allocator.hpp>
 #include <interrupt_dispatcher.hpp>
-#include <mmu.hpp>
+
+#include <platform/kernel_policy.hpp>
 
 #include <common/text_terminal.hpp>
 
@@ -48,8 +49,8 @@ public:
     void enable_interrupts();
 
 private:
-    static constexpr size_t NUMBER_OF_PAGE_TABLES = KERNEL_MEMORY_REGION_SIZE / PAGE_SIZE / PageTable::NUMBER_OF_PAGE_TABLE_ENTRIES;
-    PageTable page_tables_[NUMBER_OF_PAGE_TABLES];
+    using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
+
     GDTEntry gdt_[6];
     TaskStateSegment tss_;
     IDTEntry idt_[IDT_MAX];
@@ -58,6 +59,7 @@ private:
     VGATextDisplayDevice vga_;
     TextTerminal terminal_;
     multiboot_info_t *mb_info_;
+    KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
 
@@ -82,12 +84,11 @@ private:
     // Setup the VGA console and terminal.
     void setup_terminal();
 
-    // Populate the page directory with page tables.
-    void populate_page_directory();
-
-    // The virtual memory map established by the bootstrap code is not
-    // sufficient for the kernel's general needs. Fix up permissions, &c.
-    void cleanup_kernel_memory_map();
+    // The virtual memory map established by the bootstrap code is only
+    // sufficient for getting the Kernel to start running. We need to
+    // map the rest of the kernel virtual memory region, fix up access
+    // flags for the kernel image, and so on.
+    void prepare_kernel_address_space();
 
     // Report to the console the amount of installed system memory.
     void report_installed_memory();
