@@ -2,7 +2,6 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
 
 #include <multiboot.h>
-#include <pit_timer_device.hpp>
 #include <vga_text_display_device.hpp>
 #include <page_frame_allocator.hpp>
 #include <interrupt_dispatcher.hpp>

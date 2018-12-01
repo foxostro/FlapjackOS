@@ -1,6 +1,7 @@
 #include <kernel.hpp>
 
 #include <ps2_keyboard_device.hpp>
+#include <pit_timer_device.hpp>
 #include <inout.h>
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
