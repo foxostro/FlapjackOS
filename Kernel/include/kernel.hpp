@@ -2,7 +2,6 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
 
 #include <multiboot.h>
-#include <ps2_keyboard_device.hpp>
 #include <pit_timer_device.hpp>
 #include <vga_text_display_device.hpp>
 #include <page_frame_allocator.hpp>
@@ -10,6 +9,7 @@
 
 #include <platform/kernel_policy.hpp>
 
+#include <common/keyboard_device.hpp>
 #include <common/text_terminal.hpp>
 
 #include <cstdint>
@@ -58,7 +58,7 @@ public:
 private:
     HardwareTaskConfiguration hardware_task_configuration_;
     HardwareInterruptController hardware_interrupt_controller_;
-    PS2KeyboardDevice* keyboard_;
+    KeyboardDevice* keyboard_;
     InterruptDispatcher interrupt_dispatcher_;
     VGATextDisplayDevice vga_;
     TextTerminal terminal_;

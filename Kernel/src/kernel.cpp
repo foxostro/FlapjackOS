@@ -1,5 +1,6 @@
 #include <kernel.hpp>
 
+#include <ps2_keyboard_device.hpp>
 #include <inout.h>
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
@@ -160,10 +161,11 @@ void Kernel::initialize_interrupts_and_device_drivers()
 {
     TRACE("Initializing device drivers.");
 
-    keyboard_ = new PS2KeyboardDevice();
+    PS2KeyboardDevice *keyboard_driver = new PS2KeyboardDevice();
+    keyboard_ = keyboard_driver;
     
     // TODO: This will leak handlers.
-    interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_);
+    interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_driver);
     interrupt_dispatcher_.set_handler(IDT_TIMER, new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
                                                                     PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
                                                                     PITTimerDevice::TIMER_LEAP_TICKS_10ms));
