@@ -1,6 +1,6 @@
 #include <idt.h>
 #include <seg.h>
-#include <misc.h>
+#include <common/misc.h>
 
 #include <stddef.h>
 

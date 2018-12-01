@@ -1,7 +1,5 @@
 #include <kernel.hpp>
 
-#include <seg.h>
-#include <ltr.h>
 #include <interrupt_asm.h>
 #include <isr_install.h>
 #include <pic.h>
@@ -33,11 +31,12 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
 
+    call_global_constructors(); // NOTE: Kernel::Kernel() is invoked here!
+
     mb_info_ = mb_info;
     are_interrupts_ready_ = false;
 
-    call_global_constructors(); // NOTE: Kernel::Kernel() is invoked here!
-    initialize_tss_and_gdt(istack);
+    hardware_task_configuration_.init(istack);
     isr_install(idt_);
     pic_init();
     setup_terminal();
@@ -67,20 +66,6 @@ void Kernel::run()
         terminal_.puts("\n");
         ed.add_history(std::move(user_input));
     }
-}
-
-void Kernel::initialize_tss_and_gdt(uint32_t istack)
-{
-    memset(&tss_, 0, sizeof(tss_));
-    tss_.ss0 = SEGSEL_KERNEL_DS;
-    tss_.esp0 = istack;
-    tss_.iomap = sizeof(tss_);
-
-    memset(gdt_, 0, sizeof(gdt_));
-    gdt_create_flat_mapping(gdt_, sizeof(gdt_), (uintptr_t)&tss_);
-    lgdt(gdt_, sizeof(gdt_) - 1);
-
-    load_task_register();
 }
 
 void Kernel::call_global_constructors()

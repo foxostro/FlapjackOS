@@ -1,4 +1,4 @@
-#include <gdt.h>
+#include <platform/i386/gdt.h>
 #include <seg.h>
 
 void gdt_create_entry(GDTEntry *entry, uint32_t base, uint32_t limit,

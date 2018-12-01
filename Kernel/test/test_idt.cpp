@@ -5,7 +5,7 @@
 
 #include <seg.h>
 #include <idt.h>
-#include <misc.h>
+#include <common/misc.h>
 
 // Useful for installing Trap Gates
 #define DPL_FIELD(DPL)    (unsigned)( ((DPL) & 0x03) << 13 )

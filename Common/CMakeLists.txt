@@ -20,6 +20,7 @@ set(SOURCE_FILES
     "include/common/terminal_metrics.hpp"
     "include/common/text_display_device.hpp"
     
+    "include/common/misc.h"
     "include/common/vector.hpp"
     "include/common/linked_list.hpp"
     "include/common/ring_buffer.hpp"

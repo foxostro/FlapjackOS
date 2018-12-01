@@ -2,7 +2,7 @@
 
 #include <kernel_image_info.hpp> // for KERNEL_VIRTUAL_START_ADDR
 #include <inout.h>
-#include <misc.h>
+#include <common/misc.h>
 
 #include <cstdint>
 #include <cstddef>

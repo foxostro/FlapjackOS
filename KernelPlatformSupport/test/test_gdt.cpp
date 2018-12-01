@@ -5,8 +5,8 @@
 #include <cstring>
 
 #include <seg.h>
-#include <gdt.h>
-#include <misc.h>
+#include <platform/i386/gdt.h>
+#include <common/misc.h>
 
 #define VERBOSE 0
 

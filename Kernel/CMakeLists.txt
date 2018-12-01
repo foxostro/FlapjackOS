@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
 set(SOURCE_FILES
-    "include/misc.h"
-    "include/tss.h"
     "include/idt.h" "src/idt.c"
-    "include/gdt.h" "src/gdt.c"
     "include/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/isr_install.c"
     "include/backtrace.hpp" "src/backtrace.cpp"
     "include/panic.h" "src/panic.cpp"
@@ -57,7 +54,6 @@ target_link_libraries(Kernel
 if (NOT CMAKE_CROSSCOMPILING)
 
     add_executable(KernelTest
-                   "test/test_gdt.cpp"
                    "test/test_idt.cpp"
                    "test/test_page_frame_allocator.cpp"
                    "test/test_page_frame_allocator_configuration_operation.cpp"

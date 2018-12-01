@@ -2,9 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
 
 #include <multiboot.h>
-#include <gdt.h>
 #include <idt.h>
-#include <tss.h>
 #include <ps2_keyboard_device.hpp>
 #include <pit_timer_device.hpp>
 #include <vga_text_display_device.hpp>
@@ -49,10 +47,10 @@ public:
     void enable_interrupts();
 
 private:
+    using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
 
-    GDTEntry gdt_[6];
-    TaskStateSegment tss_;
+    HardwareTaskConfiguration hardware_task_configuration_;
     IDTEntry idt_[IDT_MAX];
     PS2KeyboardDevice* keyboard_;
     InterruptDispatcher interrupt_dispatcher_;
@@ -62,14 +60,6 @@ private:
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
-
-    // Setup a Task State Segment and Global Descriptor Table for the kernel.
-    // The kernel uses one TSS between all tasks and performs software task
-    // switching. Also, the kernel uses a flat memory map.
-    //
-    // This is basic house keeping which must be performed very early in the
-    // boot process.
-    void initialize_tss_and_gdt(uint32_t istack);
 
     // The kernel must call global constructors itself as we have no runtime
     // support beyond what we implement ourselves.

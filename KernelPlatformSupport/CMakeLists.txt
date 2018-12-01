@@ -53,6 +53,9 @@ list(APPEND SOURCE_FILES
      "include/platform/i386/physical_memory_map.hpp" "src/platform/i386/physical_memory_map.cpp"
      "include/platform/i386/mmu.hpp" "src/platform/i386/mmu.cpp"
      "include/platform/i386/kernel_address_space_bootstrapper.hpp" "src/platform/i386/kernel_address_space_bootstrapper.cpp"
+     "include/platform/i386/hardware_task_configuration.hpp" "src/platform/i386/hardware_task_configuration.cpp"
+     "include/platform/i386/gdt.h" "src/platform/i386/gdt.c"
+     "include/platform/i386/tss.h"
      )
 
 include_directories("include"
@@ -68,6 +71,21 @@ add_library(KernelPlatformSupport STATIC ${SOURCE_FILES})
 target_link_libraries(KernelPlatformSupport
                       ${COMMON_LIBRARIES}
                       )
+
+if (NOT CMAKE_CROSSCOMPILING)
+
+    add_executable(KernelPlatformSupportTest
+                   "test/test_gdt.cpp"
+                   "test/test_main.cpp"
+                   )
+
+    target_link_libraries(KernelPlatformSupportTest
+                          KernelPlatformSupport
+                          )
+
+    add_test(KernelPlatformSupportTest ${CMAKE_CURRENT_BINARY_DIR}/KernelPlatformSupportTest)
+
+endif (NOT CMAKE_CROSSCOMPILING)
 
 set(KERNEL_PLATFORM_SUPPORT_LIBRARIES KernelPlatformSupport PARENT_SCOPE)
 set(KERNEL_PLATFORM_SUPPORT_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/KernelPlatformSupport" PARENT_SCOPE)
