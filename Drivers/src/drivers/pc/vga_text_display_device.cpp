@@ -1,4 +1,4 @@
-#include <vga_text_display_device.hpp>
+#include <drivers/pc/vga_text_display_device.hpp>
 
 #include <kernel_image_info.hpp> // for KERNEL_VIRTUAL_START_ADDR
 #include <inout.h>

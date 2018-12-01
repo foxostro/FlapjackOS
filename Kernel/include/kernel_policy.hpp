@@ -8,7 +8,7 @@
 #include <platform/i386/hardware_interrupt_controller.hpp>
 #include <platform/i386/kernel_address_space_bootstrapper.hpp>
 #include <platform/i386/physical_memory_map.hpp>
-#include <vga_text_display_device.hpp>
+#include <drivers/pc/vga_text_display_device.hpp>
 
 struct KernelPolicy {
 	using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;

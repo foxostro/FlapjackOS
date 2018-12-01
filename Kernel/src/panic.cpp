@@ -1,7 +1,7 @@
 #include <panic.h> // The panic API uses C linkage.
 
 #include <common/text_terminal.hpp>
-#include <vga_text_display_device.hpp>
+#include <drivers/pc/vga_text_display_device.hpp> // TODO: How can I make panic more platform-agnostic?
 #include <logger.hpp>
 #include <inout.h>
 #include <halt.h>

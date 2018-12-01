@@ -9,10 +9,13 @@ set(SOURCE_FILES
      "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_ascii_lowercase.inc"
      "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
      "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make.inc"
+
+     "include/drivers/pc/vga_text_display_device.hpp" "src/drivers/pc/vga_text_display_device.cpp"
      )
 
 include_directories("include"
                     ${COMMON_INCLUDE_DIRS}
+                    ${BOOT_INCLUDE_DIR}
                     ${KERNEL_PLATFORM_SUPPORT_INCLUDE_DIRS}
                     )
 
