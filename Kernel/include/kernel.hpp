@@ -2,11 +2,9 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
 
 #include <multiboot.h>
-#include <vga_text_display_device.hpp>
 #include <page_frame_allocator.hpp>
 #include <interrupt_dispatcher.hpp>
-
-#include <platform/kernel_policy.hpp>
+#include <kernel_policy.hpp>
 
 #include <common/keyboard_device.hpp>
 #include <common/text_terminal.hpp>
@@ -20,6 +18,7 @@ public:
     using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
     using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
+    using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
     // Boot the kernel and device drivers.
     // The kernel is the thing that invokes constructors for globals! So, we
@@ -59,7 +58,7 @@ private:
     HardwareInterruptController hardware_interrupt_controller_;
     KeyboardDevice* keyboard_;
     InterruptDispatcher interrupt_dispatcher_;
-    VGATextDisplayDevice vga_;
+    TextDisplayDevice display_;
     TextTerminal terminal_;
     multiboot_info_t *mb_info_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;

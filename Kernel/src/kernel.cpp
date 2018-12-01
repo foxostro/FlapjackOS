@@ -83,8 +83,8 @@ void Kernel::call_global_constructors()
 
 void Kernel::setup_terminal()
 {
-    vga_.clear();
-    terminal_.init(&vga_);
+    display_.clear();
+    terminal_.init(&display_);
     g_terminal = &terminal_;
 }
 
