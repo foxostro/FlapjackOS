@@ -165,6 +165,7 @@ void Kernel::initialize_interrupts_and_device_drivers()
     PS2KeyboardDevice *keyboard_driver = new PS2KeyboardDevice();
     keyboard_ = keyboard_driver;
     
+    // TODO: These interrupt numbers are platform-specific. I'd like to abstract these for an eventual port to the Raspberry Pi. How can I do that?
     // TODO: This will leak handlers.
     interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_driver);
     interrupt_dispatcher_.set_handler(IDT_TIMER, new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
