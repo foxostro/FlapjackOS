@@ -11,6 +11,8 @@ set(SOURCE_FILES
      "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make.inc"
 
      "include/drivers/pc/vga_text_display_device.hpp" "src/drivers/pc/vga_text_display_device.cpp"
+
+     "include/drivers/pc/pit_timer_device.hpp" "src/drivers/pc/pit_timer_device.cpp"
      )
 
 include_directories("include"

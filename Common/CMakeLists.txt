@@ -13,6 +13,7 @@ set(SOURCE_FILES
     "include/flapjack_libc/stdio.h" "src/stdio.cpp"
     "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
 
+    "include/common/timer_device.hpp"
     "include/common/keyboard_device.hpp"
     "include/common/global_allocator.hpp"
     "include/common/memory_allocator.hpp"

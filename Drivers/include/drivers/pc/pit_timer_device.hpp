@@ -1,7 +1,7 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_PIT_TIMER_DEVICE_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_PIT_TIMER_DEVICE_HPP
 
-#include <timer_device.hpp>
+#include <common/timer_device.hpp>
 #include <common/interrupt_handler.hpp>
 
 class PITTimerDevice : public TimerDevice, public InterruptHandler {

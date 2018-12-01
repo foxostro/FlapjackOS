@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.6)
 set(SOURCE_FILES
     "include/backtrace.hpp" "src/backtrace.cpp"
     "include/panic.h" "src/panic.cpp"
-    "include/timer_device.hpp"
-    "include/pit_timer_device.hpp" "src/pit_timer_device.cpp"
     "include/kernel_policy.hpp" 
     "include/kernel.hpp" "src/kernel.cpp"
     "include/page_frame_allocator.hpp"

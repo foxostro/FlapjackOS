@@ -1,6 +1,5 @@
 #include <kernel.hpp>
 
-#include <pit_timer_device.hpp>
 #include <inout.h>
 #include <panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
@@ -8,6 +7,8 @@
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 
+// TODO: How can Kernel be made more platform-agnostic wrt to device drivers?
+#include <drivers/pc/pit_timer_device.hpp>
 #include <drivers/pc/ps2_keyboard_device.hpp>
 
 #include <malloc/malloc_zone.hpp>
