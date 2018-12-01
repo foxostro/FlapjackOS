@@ -37,6 +37,7 @@ private:
     Handler handlers_[IDT_MAX];
     bool should_panic_on_null_handler_;
 
+    bool clear_hardware_interrupt(unsigned interrupt_number) noexcept;
     void panic_on_null_handler(unsigned interrupt_number) noexcept;
     const char* get_interrupt_name(unsigned interrupt_number) noexcept;
 };

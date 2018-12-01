@@ -11,6 +11,7 @@ public:
     void init();
     void disable_interrupts();
     void enable_interrupts();
+    bool clear(unsigned interrupt_number);
 
 private:
     IDTEntry idt_[IDT_MAX];

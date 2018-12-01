@@ -23,4 +23,9 @@ void HardwareInterruptController::enable_interrupts()
     ::enable_interrupts();
 }
 
+bool HardwareInterruptController::clear(unsigned interrupt_number)
+{
+    return pic_clear(interrupt_number);
+}
+
 } // namespace i386

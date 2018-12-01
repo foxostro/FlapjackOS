@@ -1,7 +1,7 @@
 #include <interrupt_dispatcher.hpp>
 #include <panic.h>
 #include <platform/pc/pic.h> // TODO: This class needs to be more platform-agnostic.
-#include <interrupt_asm.h>
+#include <kernel.hpp>
 #include <cstring>
 #include <cassert>
 
@@ -28,7 +28,7 @@ auto InterruptDispatcher::get_handler(unsigned interrupt_number) -> Handler
 void InterruptDispatcher::dispatch(unsigned interrupt_number, const Params& params) noexcept
 {
     assert(interrupt_number < IDT_MAX);
-    bool spurious = pic_clear(interrupt_number);
+    bool spurious = clear_hardware_interrupt(interrupt_number);
     if (!spurious) {
         auto handler = get_handler(interrupt_number);
         if (handler) {
@@ -37,6 +37,12 @@ void InterruptDispatcher::dispatch(unsigned interrupt_number, const Params& para
             panic_on_null_handler(interrupt_number);
         }
     }
+}
+
+bool InterruptDispatcher::clear_hardware_interrupt(unsigned interrupt_number) noexcept
+{
+    // TODO: This feels messy. If I implement my own std::function then I pass a closure to InterruptDispatcher which makes the call to clear the PIC.
+    return g_kernel.get_hardware_interrupt_controller().clear(interrupt_number);
 }
 
 void InterruptDispatcher::panic_on_null_handler(unsigned interrupt_number) noexcept

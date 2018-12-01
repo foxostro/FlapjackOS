@@ -18,6 +18,10 @@
 // It manages access to memory and resources on the system.
 class Kernel {
 public:
+    using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
+    using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
+    using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
+
     // Boot the kernel and device drivers.
     // The kernel is the thing that invokes constructors for globals! So, we
     // must do two-phase initialization with a nearly empty constructor and then
@@ -45,11 +49,13 @@ public:
     // does nothing.
     void enable_interrupts();
 
-private:
-    using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
-    using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
-    using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
+    // TODO: Is this messy?
+    HardwareInterruptController& get_hardware_interrupt_controller() noexcept
+    {
+        return hardware_interrupt_controller_;
+    }
 
+private:
     HardwareTaskConfiguration hardware_task_configuration_;
     HardwareInterruptController hardware_interrupt_controller_;
     PS2KeyboardDevice* keyboard_;
