@@ -23,7 +23,7 @@ void PageTableEntry::set_flags(unsigned flags)
 void PageTableEntry::set_writable(bool writable)
 {
     if (writable) {
-        pte = pte & PAGING_WRITABLE;
+        pte = pte | PAGING_WRITABLE;
     } else {
         pte = pte & ~PAGING_WRITABLE;
     }
