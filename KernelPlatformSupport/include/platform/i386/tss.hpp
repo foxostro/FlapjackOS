@@ -1,7 +1,10 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_TSS_H
-#define FLAPJACKOS_KERNEL_INCLUDE_TSS_H
+#ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_TSS_HPP
+#define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_TSS_HPP
 
-typedef struct {
+#include <cstring> // for memset()
+
+class TaskStateSegment {
+public:
     unsigned short   link;
     unsigned short   link_h;
 
@@ -55,6 +58,11 @@ typedef struct {
 
     unsigned short   trap;
     unsigned short   iomap;
-} TaskStateSegment;
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_TSS_H
+    void clear()
+    {
+        memset(this, 0, sizeof(*this));
+    }
+};
+
+#endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_TSS_HPP

@@ -9,7 +9,7 @@ HardwareTaskConfiguration::HardwareTaskConfiguration() = default;
 
 void HardwareTaskConfiguration::init(uint32_t istack)
 {
-    memset(&tss_, 0, sizeof(tss_));
+	tss_.clear();
     tss_.ss0 = SEGSEL_KERNEL_DS;
     tss_.esp0 = istack;
     tss_.iomap = sizeof(tss_);

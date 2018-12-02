@@ -2,7 +2,7 @@
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_HARDWARE_TASK_CONFIGURATION_HPP
 
 #include "gdt.hpp"
-#include "tss.h"
+#include "tss.hpp"
 
 #include <cstdint>
 
