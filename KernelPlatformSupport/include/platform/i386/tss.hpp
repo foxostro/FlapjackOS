@@ -1,63 +1,64 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_TSS_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_TSS_HPP
 
+#include <cstdint>
 #include <cstring> // for memset()
 
 class TaskStateSegment {
 public:
-    unsigned short   link;
-    unsigned short   link_h;
-
-    unsigned long    esp0;
-    unsigned short   ss0;
-    unsigned short   ss0_h;
-
-    unsigned long    esp1;
-    unsigned short   ss1;
-    unsigned short   ss1_h;
-
-    unsigned long    esp2;
-    unsigned short   ss2;
-    unsigned short   ss2_h;
-
-    unsigned long    cr3;
-    unsigned long    eip;
-    unsigned long    eflags;
-
-    unsigned long    eax;
-    unsigned long    ecx;
-    unsigned long    edx;
-    unsigned long    ebx;
-
-    unsigned long    esp;
-    unsigned long    ebp;
-
-    unsigned long    esi;
-    unsigned long    edi;
-
-    unsigned short   es;
-    unsigned short   es_h;
-
-    unsigned short   cs;
-    unsigned short   cs_h;
-
-    unsigned short   ss;
-    unsigned short   ss_h;
-
-    unsigned short   ds;
-    unsigned short   ds_h;
-
-    unsigned short   fs;
-    unsigned short   fs_h;
-
-    unsigned short   gs;
-    unsigned short   gs_h;
-
-    unsigned short   ldt;
-    unsigned short   ldt_h;
-
-    unsigned short   trap;
-    unsigned short   iomap;
+    uint16_t link;
+    uint16_t link_h;
+ 
+    uint32_t esp0;
+    uint16_t ss0;
+    uint16_t ss0_h;
+ 
+    uint32_t esp1;
+    uint16_t ss1;
+    uint16_t ss1_h;
+ 
+    uint32_t esp2;
+    uint16_t ss2;
+    uint16_t ss2_h;
+ 
+    uint32_t cr3;
+    uint32_t eip;
+    uint32_t eflags;
+ 
+    uint32_t eax;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t ebx;
+ 
+    uint32_t esp;
+    uint32_t ebp;
+ 
+    uint32_t esi;
+    uint32_t edi;
+ 
+    uint16_t es;
+    uint16_t es_h;
+ 
+    uint16_t cs;
+    uint16_t cs_h;
+ 
+    uint16_t ss;
+    uint16_t ss_h;
+ 
+    uint16_t ds;
+    uint16_t ds_h;
+ 
+    uint16_t fs;
+    uint16_t fs_h;
+ 
+    uint16_t gs;
+    uint16_t gs_h;
+ 
+    uint16_t ldt;
+    uint16_t ldt_h;
+ 
+    uint16_t trap;
+    uint16_t iomap;
 
     void clear()
     {
