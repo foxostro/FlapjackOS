@@ -38,14 +38,21 @@
 // BASE -- The 64-bit base address of the TSS structure.
 // LIMIT -- The size of the TSS structure.
 // AVL -- Available and reserved bits.
-// B -- Busy flag.
 // DPL -- Descriptor privilege level field.
 // G -- Granularity flag.
 // P -- Segment present flag.
 // TYPE -- Type field.
-#define DECLARE_GDT_TSS_ENTRY_LO(BASE, LIMIT, AVL, B, DPL, G, P, TYPE)         \
+#define DECLARE_GDT_TSS_ENTRY_LO(BASE, LIMIT, AVL, DPL, G, P, TYPE)            \
 (                                                                              \
-0                                                                              \
+((((GlobalDescriptorTableEntry)(BASE) >> 24) & 0xFF) << 56) |                  \
+(((GlobalDescriptorTableEntry)(G) & 0x1) << 55) |                              \
+(((GlobalDescriptorTableEntry)(AVL) & 0x1) << 52) |                            \
+((((GlobalDescriptorTableEntry)(LIMIT) >> 16) & 0xF) << 48) |                  \
+(((GlobalDescriptorTableEntry)(P) & 0x1) << 47) |                              \
+(((GlobalDescriptorTableEntry)(DPL) & 0x3) << 45) |                            \
+(((GlobalDescriptorTableEntry)(TYPE) & 0xf) << 40) |                           \
+(((GlobalDescriptorTableEntry)(BASE) & 0xFFF) << 16) |                         \
+((GlobalDescriptorTableEntry)(LIMIT) & 0xFFFF)                                 \
 )
 
 // Declare the upper eight bytes of Global Descriptor Table entry for the TSS.
@@ -54,7 +61,7 @@
 // BASE -- The 64-bit base address of the TSS structure.
 #define DECLARE_GDT_TSS_ENTRY_HI(BASE)                                         \
 (                                                                              \
-0                                                                              \
+(((GlobalDescriptorTableEntry)(BASE) & 0xFFFFFFFF) >> 32)                      \
 )
 
 namespace x86_64 {
@@ -63,7 +70,7 @@ constexpr unsigned GDT_D_BIT = 0;
 constexpr unsigned GDT_L_BIT = 1;
 
 // Type field values are described in the Intel manual vol. 3a, section 3.5.4.1.
-//constexpr unsigned GDT_TYPE_DATA_READ_ONLY                        = 0b0000;
+constexpr unsigned GDT_TYPE_DATA_READ_ONLY                          = 0b0000;
 //constexpr unsigned GDT_TYPE_DATA_READ_ONLY_ACCESSED               = 0b0001;
 constexpr unsigned GDT_TYPE_DATA_READ_WRITE                         = 0b0010;
 //constexpr unsigned GDT_TYPE_DATA_READ_WRITE_ACCESSED              = 0b0011;
@@ -82,23 +89,22 @@ constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ                       = 0b1010;
 
 constexpr size_t GlobalDescriptorTable::COUNT;
 
-void GlobalDescriptorTable::init(TaskStateSegment *)
+void GlobalDescriptorTable::init(TaskStateSegment *tss)
 {
     memset(entries_, 0, sizeof(entries_));
 
     entries_[SEGSEL_KERNEL_TSS_IDX_LO] = DECLARE_GDT_TSS_ENTRY_LO(
-        /*BASE*/ = (uintptr_t)tss,
-        /*LIMIT*/ = sizeof(TaskStateSegment),
-        /*AVL*/ = 0,
-        /*B*/ = 0,
-        /*DPL*/ = 0,
-        /*G*/ = 1,
-        /*P*/ = 1,
-        /*TYPE*/ = GDT_TYPE_DATA_READ_ONLY
+        /*BASE=*/(uintptr_t)tss,
+        /*LIMIT=*/sizeof(TaskStateSegment),
+        /*AVL=*/0,
+        /*DPL=*/0,
+        /*G=*/1,
+        /*P=*/1,
+        /*TYPE=*/GDT_TYPE_DATA_READ_ONLY
     );
 
     entries_[SEGSEL_KERNEL_TSS_IDX_HI] = DECLARE_GDT_TSS_ENTRY_HI(
-        /*BASE*/ = (uintptr_t)tss
+        /*BASE=*/(uintptr_t)tss
     );
 
     entries_[SEGSEL_KERNEL_CS_IDX] = DECLARE_GDT_ENTRY(
