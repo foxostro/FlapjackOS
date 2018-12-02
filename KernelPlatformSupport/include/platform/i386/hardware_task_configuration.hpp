@@ -1,7 +1,7 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_HARDWARE_TASK_CONFIGURATION_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_HARDWARE_TASK_CONFIGURATION_HPP
 
-#include "gdt.h"
+#include "gdt.hpp"
 #include "tss.h"
 
 #include <cstdint>
@@ -21,7 +21,7 @@ public:
     void init(uint32_t istack);
 
 private:
-    GDTEntry gdt_[6];
+    GlobalDescriptorTable gdt_;
     TaskStateSegment tss_;
 };
 

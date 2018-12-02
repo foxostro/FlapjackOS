@@ -1,7 +1,7 @@
 #include <platform/i386/hardware_task_configuration.hpp>
-#include <seg.h>
-#include <ltr.h>
+#include <seg.h> // for SEGSEL_KERNEL_DS
 #include <cstring> // for memset()
+#include <ltr.h>
 
 namespace i386 {
 
@@ -14,9 +14,8 @@ void HardwareTaskConfiguration::init(uint32_t istack)
     tss_.esp0 = istack;
     tss_.iomap = sizeof(tss_);
 
-    memset(gdt_, 0, sizeof(gdt_));
-    gdt_create_flat_mapping(gdt_, sizeof(gdt_), (uintptr_t)&tss_);
-    lgdt(gdt_, sizeof(gdt_) - 1);
+    gdt_.establish_flat_mapping((uintptr_t)&tss_);
+    gdt_.load();
 
     load_task_register();
 }
