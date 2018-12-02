@@ -32,6 +32,31 @@
 ((GlobalDescriptorTableEntry)(LIMIT) & 0xFFFF)                                 \
 )
 
+// Declare the lower eight bytes of Global Descriptor Table entry for the TSS.
+// Parameters for this macro are named so as to match the Intel documentation
+// in vol. 3a, section 7.2.3. Refer to the documentation for more details.
+// BASE -- The 64-bit base address of the TSS structure.
+// LIMIT -- The size of the TSS structure.
+// AVL -- Available and reserved bits.
+// B -- Busy flag.
+// DPL -- Descriptor privilege level field.
+// G -- Granularity flag.
+// P -- Segment present flag.
+// TYPE -- Type field.
+#define DECLARE_GDT_TSS_ENTRY_LO(BASE, LIMIT, AVL, B, DPL, G, P, TYPE)         \
+(                                                                              \
+0                                                                              \
+)
+
+// Declare the upper eight bytes of Global Descriptor Table entry for the TSS.
+// Parameters for this macro are named so as to match the Intel documentation
+// in vol. 3a, section 7.2.3. Refer to the documentation for more details.
+// BASE -- The 64-bit base address of the TSS structure.
+#define DECLARE_GDT_TSS_ENTRY_HI(BASE)                                         \
+(                                                                              \
+0                                                                              \
+)
+
 namespace x86_64 {
 
 constexpr unsigned GDT_D_BIT = 0;
@@ -55,13 +80,26 @@ constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ                       = 0b1010;
 //constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ_CONFORMING          = 0b1110;
 //constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ_CONFORMING_ACCESSED = 0b1111;
 
-constexpr size_t GlobalDescriptorTable::NUMBER_OF_ENTRIES;
+constexpr size_t GlobalDescriptorTable::COUNT;
 
 void GlobalDescriptorTable::init(TaskStateSegment *)
 {
     memset(entries_, 0, sizeof(entries_));
 
-    entries_[SEGSEL_KERNEL_TSS_IDX] = 0; // TODO: Must specify the TSS here.
+    entries_[SEGSEL_KERNEL_TSS_IDX_LO] = DECLARE_GDT_TSS_ENTRY_LO(
+        /*BASE*/ = (uintptr_t)tss,
+        /*LIMIT*/ = sizeof(TaskStateSegment),
+        /*AVL*/ = 0,
+        /*B*/ = 0,
+        /*DPL*/ = 0,
+        /*G*/ = 1,
+        /*P*/ = 1,
+        /*TYPE*/ = GDT_TYPE_DATA_READ_ONLY
+    );
+
+    entries_[SEGSEL_KERNEL_TSS_IDX_HI] = DECLARE_GDT_TSS_ENTRY_HI(
+        /*BASE*/ = (uintptr_t)tss
+    );
 
     entries_[SEGSEL_KERNEL_CS_IDX] = DECLARE_GDT_ENTRY(
         /*BASE=*/0x00000000,

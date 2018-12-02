@@ -40,27 +40,27 @@ void GlobalDescriptorTable::establish_flat_mapping(uintptr_t tss)
     memset(&entries[0], 0, sizeof(entries));
 
     entries[0].init(0x00000000, // base
-                     0x00000000, // limit
-                     false,      // gr
-                     false,      // sz
-                     false,      // pr
-                     0,          // privl
-                     false,      // ex
-                     false,      // dc
-                     false,      // rw
-                     false);     // ac
+                    0x00000000, // limit
+                    false,      // gr
+                    false,      // sz
+                    false,      // pr
+                    0,          // privl
+                    false,      // ex
+                    false,      // dc
+                    false,      // rw
+                    false);     // ac
 
-    entries[SEGSEL_KERNEL_TSS_IDX].init((uint32_t)tss,// base
-                                        0x67,         // limit
-                                        false,        // gr
-                                        false,        // sz
-                                        true,         // pr
-                                        0,            // privl
-                                        true,         // ex
-                                        false,        // dc
-                                        false,        // rw
-                                        true);        // ac
-    entries[SEGSEL_KERNEL_TSS_IDX].access = 0x89;
+    entries[SEGSEL_KERNEL_TSS_IDX_LO].init((uint32_t)tss,// base
+                                           0x67,         // limit
+                                           false,        // gr
+                                           false,        // sz
+                                           true,         // pr
+                                           0,            // privl
+                                           true,         // ex
+                                           false,        // dc
+                                           false,        // rw
+                                           true);        // ac
+    entries[SEGSEL_KERNEL_TSS_IDX_LO].access = 0x89;
 
     entries[SEGSEL_KERNEL_CS_IDX].init(0x00000000, // base
                                        0x000fffff, // limit

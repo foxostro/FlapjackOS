@@ -42,8 +42,6 @@
 
 .set GDT_ENTRY_SIZE, 8
 
-.set KERNEL_GDT_ENTRY, 2
-
 #ifdef __x86_64__
 #define GDT_D_BIT 0
 #define GDT_L_BIT 1
@@ -75,27 +73,11 @@
 .align GDT_TABLE_ALIGNMENT
 \GDT_TABLE_NAME:
 // The first entry is zero.
-.8byte DECLARE_GDT_ENTRY(/*BASE=*/0x00000000,
-                         /*LIMIT=*/0x00000,
-                         /*G=*/0,
-                         /*DB=*/0,
-                         /*L=*/0,
-                         /*AVL=*/0,
-                         /*P=*/0,
-                         /*DPL=*/0,
-                         /*S=*/0,
-                         /*TYPE=*/0)
-// SEGSEL_KERNEL_TSS_IDX. We'll need to specify the TSS later.
-.8byte DECLARE_GDT_ENTRY(/*BASE=*/0x00000000,
-                         /*LIMIT=*/0x00000,
-                         /*G=*/0,
-                         /*DB=*/0,
-                         /*L=*/0,
-                         /*AVL=*/0,
-                         /*P=*/0,
-                         /*DPL=*/0,
-                         /*S=*/0,
-                         /*TYPE=*/0)
+.8byte 0
+// SEGSEL_KERNEL_TSS_IDX_LO. We'll need to specify the TSS later.
+.8byte 0
+// SEGSEL_KERNEL_TSS_IDX_HI. We'll need to specify the TSS later.
+.8byte 0
 // SEGSEL_KERNEL_CS_IDX
 .8byte DECLARE_GDT_ENTRY(/*BASE=*/0x00000000,
                          /*LIMIT=*/0xFFFFF,

@@ -27,11 +27,12 @@ public:
               bool rw,
               bool ac);
 };
-static_assert(8 == sizeof(GlobalDescriptorTableEntry), "each GDT entry must be eight bytes");
+static_assert(8 == sizeof(GlobalDescriptorTableEntry),
+              "The Intel docs specify that each entry in the GDT is 8 bytes.");
 
 class GlobalDescriptorTable {
 public:
-    GlobalDescriptorTableEntry entries[6];
+    GlobalDescriptorTableEntry entries[7];
 
     void establish_flat_mapping(uintptr_t tss);
 

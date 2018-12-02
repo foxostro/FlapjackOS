@@ -4,7 +4,10 @@
 #include "declare_gdt.h"
 #include "panic_asm.h"
 
-#define SEGSEL_KERNEL_DS (0x18)
+# This should match seg.h
+# TODO: Should seg.h be moved to libBoot?
+#define SEGSEL_KERNEL_CS (0x18)
+#define SEGSEL_KERNEL_DS (0x20)
 
 
 DECLARE_MULTIBOOT_HEADER
@@ -64,7 +67,7 @@ kernel_is_not_too_big:
     lgdt gdt_ptr
 
     # Long jump into 64-bit code and never look back.
-    ljmp $(KERNEL_GDT_ENTRY * GDT_ENTRY_SIZE), $_start64
+    ljmp $SEGSEL_KERNEL_CS, $_start64
 
 .size _start, . - _start
 

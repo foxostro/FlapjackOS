@@ -8,9 +8,8 @@
 namespace x86_64 {
 
 using GlobalDescriptorTableEntry = unsigned long long;
-constexpr size_t GDT_ENTRY_SIZE = 8;
-static_assert(GDT_ENTRY_SIZE == sizeof(GlobalDescriptorTableEntry),
-	          "The Intel docs specify that each entry in the GDT is 8 bytes.");
+static_assert(8 == sizeof(GlobalDescriptorTableEntry),
+              "The Intel docs specify that each entry in the GDT is 8 bytes.");
 
 // Intel manual volume 3a, section 3.5.1, specifies that a GDT should be aligned 
 // on an eight byte boundary.
@@ -22,8 +21,8 @@ public:
     void load();
 
 private:
-	static constexpr size_t NUMBER_OF_ENTRIES = 6;
-    alignas(GDT_TABLE_ALIGNMENT) GlobalDescriptorTableEntry entries_[NUMBER_OF_ENTRIES];
+    static constexpr size_t COUNT = 7;
+    alignas(GDT_TABLE_ALIGNMENT) GlobalDescriptorTableEntry entries_[COUNT];
 };
 
 } // namespace x86_64

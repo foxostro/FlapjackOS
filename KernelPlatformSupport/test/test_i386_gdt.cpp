@@ -91,13 +91,15 @@ TEST_CASE("test_gdt_layout_2", "[gdt]")
         0x00000000,
         0x09300067, // 1
         0x00008910,
-        0x0000ffff, // 2
-        0x00cf9b00,
+        0x00000000, // 2
+        0x00000000,
         0x0000ffff, // 3
-        0x00cf9300,
+        0x00cf9b00,
         0x0000ffff, // 4
-        0x00cffb00,
+        0x00cf9300,
         0x0000ffff, // 5
+        0x00cffb00,
+        0x0000ffff, // 6
         0x00cff200,
     };
     i386::GlobalDescriptorTable gdt;
