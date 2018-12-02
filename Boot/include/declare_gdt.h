@@ -85,7 +85,7 @@
                          /*DPL=*/0,
                          /*S=*/0,
                          /*TYPE=*/0)
-// SEGSEL_KERNEL_TSS_IDX. I don't think I need a TSS in 64-bit mode?
+// SEGSEL_KERNEL_TSS_IDX. We'll need to specify the TSS later.
 .8byte DECLARE_GDT_ENTRY(/*BASE=*/0x00000000,
                          /*LIMIT=*/0x00000,
                          /*G=*/0,
