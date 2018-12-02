@@ -26,6 +26,11 @@ void PageDirectoryEntry::set_flags(unsigned flags)
     pde = (uint32_t)get_page_table_physical_address() | (flags & PDE_FLAGS_MASK);
 }
 
+bool PageDirectoryEntry::has_page_table() const
+{
+	return get_page_table_physical_address() != 0;
+}
+
 bool PageDirectoryEntry::is_present() const
 {
     return (pde & PAGING_PRESENT) == PAGING_PRESENT;

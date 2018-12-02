@@ -22,6 +22,7 @@ const PageDirectoryEntry& PageDirectory::get_pde(uintptr_t virtual_address) cons
 PageTableEntry& PageDirectory::get_pte(uintptr_t virtual_address)
 {
     PageDirectoryEntry& pde = entries[index_for_virtual_address(virtual_address)];
+    assert(pde.has_page_table());
     PageTable& pt = pde.get_page_table();
     size_t page_table_index = pt.index_for_virtual_address(virtual_address);
     PageTableEntry& pte = pt.entries[page_table_index];
@@ -61,8 +62,6 @@ void PageDirectory::map_page(uintptr_t physical_address,
     PageTableEntry &pte = get_pte(virtual_address);
     pte.set_page_frame(physical_address);
     pte.set_flags(flags | PAGING_PRESENT);
-
-    invlpg((void*)virtual_address);
 }
 
 } // namespace i386

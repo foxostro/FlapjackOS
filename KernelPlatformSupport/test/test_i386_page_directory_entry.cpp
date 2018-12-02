@@ -19,24 +19,29 @@ TEST_CASE("test_i386_page_directory_entry_is_not_present", "[i386]")
 
 TEST_CASE("test_i386_page_directory_entry_set_page_table", "[i386]")
 {
-    const void* const fake_page_table_address = (void *)0xFFFFFFFF80000000;
+    const uint32_t fake_page_table_address = 0x80000000;
+    i386::PageTable* const fake_page_table = (i386::PageTable*)((uintptr_t)fake_page_table_address);
+
     i386::PageDirectoryEntry entry;
     entry.pde = 0;
-    entry.set_page_table((i386::PageTable*)fake_page_table_address);
+    entry.set_page_table(fake_page_table);
+
     i386::PageTable& page_table = entry.get_page_table();
-    REQUIRE((void*)&page_table == fake_page_table_address);
+    REQUIRE(&page_table == fake_page_table);
 }
 
 TEST_CASE("test_i386_page_directory_entry_set_flags", "[i386]")
 {
-    const void* const fake_page_table_address = (void *)0xFFFFFFFF80000000;
+    const uint32_t fake_page_table_address = 0x80000000;
+    i386::PageTable* const fake_page_table = (i386::PageTable*)((uintptr_t)fake_page_table_address);
+
     i386::PageDirectoryEntry entry;
     entry.pde = 0;
-    entry.set_page_table((i386::PageTable*)fake_page_table_address);
+    entry.set_page_table(fake_page_table);
     entry.set_flags(i386::PAGING_PRESENT);
 
     i386::PageTable& page_table = entry.get_page_table();
-    REQUIRE((void*)&page_table == fake_page_table_address);
+    REQUIRE(&page_table == fake_page_table);
 
     REQUIRE(entry.is_present() == true);
 }

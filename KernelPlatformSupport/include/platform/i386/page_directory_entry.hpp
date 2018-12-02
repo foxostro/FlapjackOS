@@ -29,6 +29,9 @@ struct PageDirectoryEntry {
     // Returns true if the PRESENT bit is set.
     bool is_present() const;
 
+    // Returns true if the PDE has a page table with a non-zero address.
+    bool has_page_table() const;
+
     // Return a reference to the page table associated with this PDE.
     // This method assumes the page table has a kernel logical address.
     PageTable& get_page_table();
