@@ -93,6 +93,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                    "test/test_i386_page_table_entry.cpp"
                    "test/test_i386_page_directory.cpp"
                    "test/test_i386_page_table.cpp"
+                   "test/test_x86_64_tss.cpp"
                    "test/test_main.cpp"
                    )
 

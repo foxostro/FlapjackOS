@@ -10,7 +10,7 @@ namespace x86_64 {
 // volume 3a, section 7.7.
 class TaskStateSegment {
 public:
-    uint16_t reserved0;
+    uint32_t reserved0;
     uint64_t rsp0;
     uint64_t rsp1;
     uint64_t rsp2;
@@ -30,10 +30,7 @@ public:
     {
         memset(this, 0, sizeof(*this));
     }
-};
-static_assert(104 == sizeof(TaskStateSegment),
-              "The Intel documentation specifies the 64-bit TSS must have a "
-              "size of 104 bytes. See volume 3a, section 7.7, fior details.");
+} __attribute__((packed));
 
 } // namespace x86_64
 
