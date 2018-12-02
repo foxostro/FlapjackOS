@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <cstring> // for memset()
 
+namespace i386 {
+
+// TaskStateSegment must match the layout specified in the Intel Manual,
+// Vol. 3a, section 7.2.1.
 class TaskStateSegment {
 public:
     uint16_t link;
@@ -65,5 +69,7 @@ public:
         memset(this, 0, sizeof(*this));
     }
 };
+
+} // namespace i386
 
 #endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_TSS_HPP
