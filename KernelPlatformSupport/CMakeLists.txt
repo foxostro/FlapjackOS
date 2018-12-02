@@ -60,6 +60,9 @@ list(APPEND SOURCE_FILES
      "include/platform/i386/gdt.hpp" "src/platform/i386/gdt.cpp"
      "include/platform/i386/tss.hpp"
      "include/platform/i386/hardware_interrupt_controller.hpp" "src/platform/i386/hardware_interrupt_controller.cpp"
+
+     "include/platform/x86_64/tss.hpp"
+     "include/platform/x86_64/hardware_task_configuration.hpp" "src/platform/x86_64/hardware_task_configuration.cpp"
      
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )
