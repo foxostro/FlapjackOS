@@ -1,6 +1,5 @@
 #include <platform/i386/hardware_task_configuration.hpp>
 #include <seg.h> // for SEGSEL_KERNEL_DS
-#include <cstring> // for memset()
 #include <ltr.h>
 
 namespace i386 {

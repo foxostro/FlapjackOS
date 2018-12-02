@@ -1,6 +1,4 @@
 #include <platform/x86_64/hardware_task_configuration.hpp>
-#include <seg.h> // for SEGSEL_KERNEL_DS
-#include <cstring> // for memset()
 #include <ltr.h>
 
 namespace x86_64 {
