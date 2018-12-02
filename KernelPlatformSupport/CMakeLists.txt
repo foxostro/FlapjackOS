@@ -88,7 +88,7 @@ if (NOT CMAKE_CROSSCOMPILING)
 
     add_executable(KernelPlatformSupportTest
                    "test/test_idt.cpp"
-                   "test/test_gdt.cpp"
+                   "test/test_i386_gdt.cpp"
                    "test/test_i386_page_directory_entry.cpp"
                    "test/test_i386_page_table_entry.cpp"
                    "test/test_i386_page_directory.cpp"
