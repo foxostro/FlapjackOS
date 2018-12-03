@@ -61,7 +61,7 @@
 // BASE -- The 64-bit base address of the TSS structure.
 #define DECLARE_GDT_TSS_ENTRY_HI(BASE)                                         \
 (                                                                              \
-(((GlobalDescriptorTableEntry)(BASE) & 0xFFFFFFFF) >> 32)                      \
+(((GlobalDescriptorTableEntry)(BASE) >> 32) & 0xFFFFFFFF)                      \
 )
 
 namespace x86_64 {
