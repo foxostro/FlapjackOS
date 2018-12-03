@@ -26,6 +26,9 @@ public:
     // this method, which performs the real initialization work.
     void init(multiboot_info_t *mb_info, uintptr_t istack);
 
+    // Returns the name of the platform we were built for, e.g., "x86_64".
+    const char* get_platform() const;
+
     // Enter the event loop until the kernel is done. This may never return.
     void run();
 
@@ -77,6 +80,9 @@ private:
 
     // Setup the VGA console and terminal.
     void setup_terminal();
+
+    // Print a welcome message to the terminal.
+    void print_welcome_message();
 
     // The virtual memory map established by the bootstrap code is only
     // sufficient for getting the Kernel to start running. We need to

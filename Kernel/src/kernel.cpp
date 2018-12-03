@@ -30,6 +30,7 @@ Kernel g_kernel;
 
 void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
+    TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
 
     call_global_constructors(); // NOTE: Kernel::Kernel() is invoked here!
@@ -40,6 +41,7 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
     hardware_task_configuration_.init(istack);
     hardware_interrupt_controller_.init();
     setup_terminal();
+    print_welcome_message();
     prepare_kernel_address_space();
     report_installed_memory();
     initialize_page_frame_allocator();
@@ -49,6 +51,22 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 
     are_interrupts_ready_ = true;
     enable_interrupts();
+}
+
+const char* Kernel::get_platform() const
+{
+    static const char platform[] = 
+#if defined(__x86_64__)
+    "x86_64"
+#elif defined(__i386__)
+    "i386"
+#elif defined(__arm__)
+    "ARM"
+#else
+    "unknown"
+#endif
+    ;
+    return platform;
 }
 
 void Kernel::run()
@@ -87,6 +105,11 @@ void Kernel::setup_terminal()
     display_.clear();
     terminal_.init(&display_);
     g_terminal = &terminal_;
+}
+
+void Kernel::print_welcome_message()
+{
+    terminal_.printf("Flapjack OS (%s)\n", get_platform());
 }
 
 void Kernel::prepare_kernel_address_space()
