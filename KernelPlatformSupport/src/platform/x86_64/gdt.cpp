@@ -87,6 +87,10 @@ constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ                       = 0b1010;
 //constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ_CONFORMING          = 0b1110;
 //constexpr unsigned GDT_TYPE_CODE_EXECUTE_READ_CONFORMING_ACCESSED = 0b1111;
 
+// The "type" value for a TSS descriptor is specified in the Intel manual
+// volume 3a, section 3.5, table 3-2.
+constexpr unsigned GDT_TYPE_TSS_DESCRIPTOR = 0b1001;
+
 constexpr size_t GlobalDescriptorTable::COUNT;
 
 void GlobalDescriptorTable::init(TaskStateSegment *tss)
@@ -102,7 +106,7 @@ void GlobalDescriptorTable::init(TaskStateSegment *tss)
         /*DPL=*/0,
         /*G=*/0,
         /*P=*/1,
-        /*TYPE=*/GDT_TYPE_DATA_READ_ONLY
+        /*TYPE=*/GDT_TYPE_TSS_DESCRIPTOR
     );
 
     entries_[SEGSEL_KERNEL_TSS_IDX_HI] = DECLARE_GDT_TSS_ENTRY_HI(
