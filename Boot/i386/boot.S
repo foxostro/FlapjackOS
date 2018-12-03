@@ -15,6 +15,9 @@ _start:
     cld
 
     # The kernel must lie entirely within the first 4MB of physical memory.
+    # This is because a single page table can only map 4MB of memory, and the
+    # procedure below only maps a single page table.
+    # (The limit is 2MB for x86_64.)
     leal g_kernel_physical_end, %ecx
     cmpl $0x400000, %ecx
     jle kernel_is_not_too_big

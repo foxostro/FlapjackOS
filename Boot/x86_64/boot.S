@@ -25,9 +25,12 @@ _start:
     cli
     cld
 
-    # The kernel must lie entirely within the first 4MB of physical memory.
+    # The kernel must lie entirely within the first 2MB of physical memory.
+    # This is because a single page table can only map 2MB of memory, and the
+    # procedure below only maps a single page table.
+    # (The limit is 4MB for i386.)
     leal g_kernel_physical_end, %ecx
-    cmpl $0x400000, %ecx
+    cmpl $0x200000, %ecx
     jle kernel_is_not_too_big
     PANIC kernel_too_big_string
 kernel_is_not_too_big:
@@ -114,7 +117,7 @@ hang:
 DECLARE_GDT gdt_table, gdt_table_end, gdt_ptr
 
 kernel_too_big_string:
-.asciz "The kernel is too big. Must be 4MB or less."
+.asciz "The kernel is too big. Must be 2MB or less."
 
 
 .section .bss
