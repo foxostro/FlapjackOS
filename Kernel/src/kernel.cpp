@@ -258,10 +258,6 @@ void interrupt_dispatch(unsigned interrupt_number,
 extern "C" __attribute__((noreturn))
 void kernel_main(multiboot_info_t *mb_info, uintptr_t istack)
 {
-#ifdef __x86_64__
-    panic("Hello, World (x86_64)");
-#endif
-
     g_kernel.init(mb_info, istack);
     g_kernel.run();
     panic("We should never reach this point.");
