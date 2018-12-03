@@ -4,8 +4,8 @@
 #include <kernel_image_info.hpp>
 #include <cassert>
 
-// The kernel memory region is fixed at 1GB.
-constexpr size_t KERNEL_MEMORY_REGION_SIZE = 1024*1024*1024;
+// The kernel memory region is fixed at 32MB.
+constexpr size_t KERNEL_MEMORY_REGION_SIZE = 32*1024*1024;
 
 // Convert the given physical address to a logical address.
 // These addresses are easily converted between physical and virtual as they are
