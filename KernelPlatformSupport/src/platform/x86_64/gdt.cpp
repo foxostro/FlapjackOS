@@ -93,12 +93,14 @@ void GlobalDescriptorTable::init(TaskStateSegment *tss)
 {
     memset(entries_, 0, sizeof(entries_));
 
+    static_assert(sizeof(TaskStateSegment)-1 == 0x67, "");
+
     entries_[SEGSEL_KERNEL_TSS_IDX_LO] = DECLARE_GDT_TSS_ENTRY_LO(
         /*BASE=*/(uintptr_t)tss,
-        /*LIMIT=*/sizeof(TaskStateSegment),
+        /*LIMIT=*/sizeof(TaskStateSegment)-1,
         /*AVL=*/0,
         /*DPL=*/0,
-        /*G=*/1,
+        /*G=*/0,
         /*P=*/1,
         /*TYPE=*/GDT_TYPE_DATA_READ_ONLY
     );
