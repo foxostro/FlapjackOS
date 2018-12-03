@@ -78,6 +78,9 @@ private:
     // boot process.
     void call_global_constructors();
 
+    // Invoke the ctor at the specified address.
+    void invoke_ctor(uintptr_t ctor_addr);
+
     // Setup the VGA console and terminal.
     void setup_terminal();
 

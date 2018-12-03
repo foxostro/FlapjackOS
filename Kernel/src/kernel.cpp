@@ -88,16 +88,19 @@ void Kernel::run()
 
 void Kernel::call_global_constructors()
 {
-    for (char *ctor = g_start_ctors;
-         ctor < g_end_ctors;
-         ctor += sizeof(void *)) {
-
-        // Read the address from the table, interpret as a function pointer,
-        // and then execute the ctor.
-        void *value = *((void **)ctor);
-        void (*ctor_function_pointer)() = (void (*)())(value);
-        ctor_function_pointer();
+    for (uintptr_t *ctors_addr = (uintptr_t *)g_start_ctors,
+                   *ctors_limit = (uintptr_t *)g_end_ctors;
+         ctors_addr < ctors_limit;
+         ++ctors_addr) {
+        invoke_ctor(*ctors_addr);
     }
+}
+
+void Kernel::invoke_ctor(uintptr_t ctor_addr)
+{
+    using Function = void (*)();
+    Function fn = (Function)ctor_addr;
+    fn();
 }
 
 void Kernel::setup_terminal()
