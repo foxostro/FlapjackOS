@@ -1,40 +1,37 @@
-#ifndef FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_GENERIC_PAGE_DIRECTORY_ENTRY_HPP
-#define FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_GENERIC_PAGE_DIRECTORY_ENTRY_HPP
+#ifndef FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_PAGE_TABLE_ENTRY_HPP
+#define FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_PAGE_TABLE_ENTRY_HPP
 
 #include <cstdint>
 
 namespace x86_64 {
 
-// Generic entry in a paging table under x86_64.
+// Page table entry under x86_64.
 //
-// According to the Intel manual, volume 3a, section 4.5, several of the paging
-// structures have entries that follow an identical format. That format is
-// reproduced here, in this generic structure.
+// According to the Intel manual, volume 3a, section 4.5, table 4-19, the
+// memory layout of a page table entry is as follows:
 //
-// This is suitable for use in a Page Map Level Four, a Page Directory Pointer
-// Table, and a Page Directory structure. This is never acceptable for use in a
-// Page Table. Documented layout in memory is as follows:
-//
-// ---------------------------------------------------------------------------------
-// | 63 | 62:52 | 51:M | (M-1):12  | 11:8 |  7 | 6 | 5 |  4  |  3  |  2  |  1  | 0 |
-// |-------------------------------------------------------------------------------|
-// | XD |     x |    0 | phys addr |    x | PS | x | A | PCD | PWT | U/S | R/W | P |
-// ---------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// | 63 | 62:59 | 58:52 | 51:M | (M-1):12  | 11:9 | 8 |  7  | 6 | 5 |  4  |  3  |  2  |  1  | 0 |
+// |--------------------------------------------------------------------------------------------|
+// | XD |   key |     x |    0 | phys addr |      | G | PAT | D | A | PCD | PWT | U/S | R/W | P |
+// ----------------------------------------------------------------------------------------------
 //
 // Where...
 // x  -- Ignored
 // 0  -- Must be zero
 // XD -- Execute Disable
-// phys addr -- The physical address of the paging structure to which this entry
-//              refers, e.g., a page table.
-// PS -- Page Size, which must be zero else we'd use a different object.
+// key -- 4-bit protection key, but we won't be using these. (see section 4.6.2)
+// phys addr -- The physical address of the 4KB page frame.
+// G -- Global
+// PAT -- Explained in more detail in section 4.9.2.
+// D -- Dirty
 // A -- Accessed
 // PCD -- Page-level Cache Disable
 // PWT -- Page-level Write-Through
 // U/S -- User / Supervisor
 // R/W -- Read-only / Read-Write
 // P -- Present
-class GenericPageDirectoryEntry {
+class PageTableEntry {
 public:
     static constexpr uint64_t PRESENT         = 1 << 0;
     static constexpr uint64_t READWRITE       = 1 << 1;
@@ -42,16 +39,17 @@ public:
     static constexpr uint64_t PWT             = 1 << 3;
     static constexpr uint64_t PCD             = 1 << 4;
     static constexpr uint64_t ACCESSED        = 1 << 5;
+    static constexpr uint64_t DIRTY           = 1 << 6;
+    static constexpr uint64_t PAT             = 1 << 7;
+    static constexpr uint64_t GLOBAL          = 1 << 8;
     static constexpr uint64_t EXECUTE_DISABLE = 1ull << 63;
-    static constexpr uint64_t PAGE_SIZE_SHIFT = 7;
-    static constexpr uint64_t PAGE_SIZE_MASK  = 1 << PAGE_SIZE_SHIFT;
     static constexpr uint64_t ADDRESS_ZERO_MASK = 0b1111111111110000000000000000000000000000000000000000111111111111;
     static constexpr uint64_t ADDRESS_MASK = 0b1111111111111111111111111111111111111111;
     static constexpr uint64_t ADDRESS_SHIFT = 12;
 
     uint64_t data;
 
-    GenericPageDirectoryEntry() = default;
+    PageTableEntry() = default;
 
     bool is_present() const
     {
@@ -137,11 +135,6 @@ public:
         }
     }
 
-    int get_page_size() const
-    {
-        return (data & PAGE_SIZE_MASK) >> PAGE_SIZE_SHIFT;
-    }
-
     bool is_execute_disabled() const
     {
         return !!(data & EXECUTE_DISABLE);
@@ -153,6 +146,48 @@ public:
             data = data | EXECUTE_DISABLE;
         } else {
             data = data & ~EXECUTE_DISABLE;
+        }
+    }
+
+    bool is_dirty() const
+    {
+        return !!(data & DIRTY);
+    }
+
+    void set_dirty(bool dirty)
+    {
+        if (dirty) {
+            data = data | DIRTY;
+        } else {
+            data = data & ~DIRTY;
+        }
+    }
+
+    bool is_pat_bit_set() const
+    {
+        return !!(data & PAT);
+    }
+
+    void set_pat_bit(bool pat)
+    {
+        if (pat) {
+            data = data | PAT;
+        } else {
+            data = data & ~PAT;
+        }
+    }
+
+    bool is_global() const
+    {
+        return !!(data & GLOBAL);
+    }
+
+    void set_global(bool global)
+    {
+        if (global) {
+            data = data | GLOBAL;
+        } else {
+            data = data & ~GLOBAL;
         }
     }
 
@@ -171,4 +206,4 @@ public:
 
 } // namespace x86_64
 
-#endif // FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_GENERIC_PAGE_DIRECTORY_ENTRY_HPP
+#endif // FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_PAGE_TABLE_ENTRY_HPP

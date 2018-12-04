@@ -97,6 +97,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                    "test/test_x86_64_gdt.cpp"
                    "test/test_x86_64_tss.cpp"
                    "test/test_x86_64_generic_page_directory_entry.cpp"
+                   "test/test_x86_64_page_table_entry.cpp"
                    "test/test_main.cpp"
                    )
 
