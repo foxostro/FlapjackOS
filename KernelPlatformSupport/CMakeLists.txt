@@ -65,6 +65,17 @@ list(APPEND SOURCE_FILES
      "include/platform/x86_64/tss.hpp"
      "include/platform/x86_64/gdt.hpp" "src/platform/x86_64/gdt.cpp"
 
+     "include/platform/x86_64/physical_memory_map.hpp" "src/platform/x86_64/physical_memory_map.cpp"
+     "include/platform/x86_64/page_directory_pointer_table.hpp"
+     "include/platform/x86_64/page_table_entry.hpp"
+     "include/platform/x86_64/generic_page_directory_entry.hpp"
+     "include/platform/x86_64/page_directory_pointer_table_entry.hpp"
+     "include/platform/x86_64/page_map_level_four.hpp"
+     "include/platform/x86_64/page_directory.hpp"
+     "include/platform/x86_64/page_map_level_four_entry.hpp"
+     "include/platform/x86_64/page_directory_entry.hpp"
+     "include/platform/x86_64/page_table.hpp"
+
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )
 
@@ -98,6 +109,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                    "test/test_x86_64_tss.cpp"
                    "test/test_x86_64_generic_page_directory_entry.cpp"
                    "test/test_x86_64_page_table_entry.cpp"
+                   "test/test_x86_64_physical_memory_map.cpp"
                    "test/test_main.cpp"
                    )
 
