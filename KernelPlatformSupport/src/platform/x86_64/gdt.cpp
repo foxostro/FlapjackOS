@@ -70,7 +70,7 @@ constexpr unsigned GDT_D_BIT = 0;
 constexpr unsigned GDT_L_BIT = 1;
 
 // Type field values are described in the Intel manual vol. 3a, section 3.5.4.1.
-constexpr unsigned GDT_TYPE_DATA_READ_ONLY                          = 0b0000;
+//constexpr unsigned GDT_TYPE_DATA_READ_ONLY                        = 0b0000;
 //constexpr unsigned GDT_TYPE_DATA_READ_ONLY_ACCESSED               = 0b0001;
 constexpr unsigned GDT_TYPE_DATA_READ_WRITE                         = 0b0010;
 //constexpr unsigned GDT_TYPE_DATA_READ_WRITE_ACCESSED              = 0b0011;
