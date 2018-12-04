@@ -45,7 +45,7 @@ list(APPEND SOURCE_FILES
      "include/creg.h"
      "include/page_size.hpp"
      "include/logical_addressing.hpp"
-     
+
      "include/platform/i386/idt.h" "src/platform/i386/idt.c"
      "include/platform/i386/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/i386_isr_install.c"
      "include/platform/i386/protection_flags.hpp"
@@ -96,6 +96,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                    "test/test_i386_page_table.cpp"
                    "test/test_x86_64_gdt.cpp"
                    "test/test_x86_64_tss.cpp"
+                   "test/test_x86_64_generic_page_directory_entry.cpp"
                    "test/test_main.cpp"
                    )
 
