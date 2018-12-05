@@ -1,7 +1,8 @@
 #include <seg.h>
 
-.global lgdt
-lgdt:
+.global i386_lgdt
+i386_lgdt:
+#ifdef __i386__
     # Move parameters into registers %eax and %ecx
     movl 4(%esp), %eax # Four byte base address
     movl 8(%esp), %ecx # Table limit. We only use two bytes of this.
@@ -30,3 +31,10 @@ lgdt_reload:
     # Cleanup the stack and return
     addl $6, %esp
     ret
+#elif __x86_64__
+    ud2
+#elif __arm__
+    udf
+#else
+#error "Unknown arch. Need a stub for i386_lgdt."
+#endif

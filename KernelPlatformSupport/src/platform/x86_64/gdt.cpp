@@ -1,6 +1,6 @@
 #include <platform/x86_64/gdt.hpp>
+#include <platform/x86_64/lgdt.hpp>
 #include <seg.h>
-#include <gdt_asm.h> // for lgdt()
 #include <cstring> // for memset()
 
 // Declare a Global Descriptor Table object.

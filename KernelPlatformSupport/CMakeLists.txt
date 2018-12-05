@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.6)
 # these functions with stubs.
 if(CMAKE_CROSSCOMPILING)
     set(SOURCE_FILES
-        "src/${CMAKE_SYSTEM_PROCESSOR}/gdt_asm.S"
         "src/${CMAKE_SYSTEM_PROCESSOR}/get_frame_pointer.S"
         "src/${CMAKE_SYSTEM_PROCESSOR}/halt.S"
         "src/${CMAKE_SYSTEM_PROCESSOR}/idt_asm.S"
@@ -21,7 +20,6 @@ if(CMAKE_CROSSCOMPILING)
 else(CMAKE_CROSSCOMPILING)
     set(SOURCE_FILES
         "src/host/get_frame_pointer.c"
-        "src/host/gdt.c"
         "src/host/halt.c"
         "src/host/idt.c"
         "src/host/inout.c"
@@ -34,7 +32,6 @@ else(CMAKE_CROSSCOMPILING)
 endif(CMAKE_CROSSCOMPILING)
 
 list(APPEND SOURCE_FILES
-     "include/gdt_asm.h"
      "include/get_frame_pointer.h"
      "include/halt.h"
      "include/idt_asm.h"
@@ -60,11 +57,11 @@ list(APPEND SOURCE_FILES
      "include/platform/i386/gdt.hpp" "src/platform/i386/gdt.cpp"
      "include/platform/i386/tss.hpp"
      "include/platform/i386/hardware_interrupt_controller.hpp" "src/platform/i386/hardware_interrupt_controller.cpp"
+     "include/platform/i386/lgdt.hpp" "src/platform/i386/lgdt.S"
 
      "include/platform/x86_64/hardware_task_configuration.hpp" "src/platform/x86_64/hardware_task_configuration.cpp"
      "include/platform/x86_64/tss.hpp"
      "include/platform/x86_64/gdt.hpp" "src/platform/x86_64/gdt.cpp"
-
      "include/platform/x86_64/physical_memory_map.hpp" "src/platform/x86_64/physical_memory_map.cpp"
      "include/platform/x86_64/page_directory_pointer_table.hpp"
      "include/platform/x86_64/page_table_entry.hpp"
@@ -75,6 +72,7 @@ list(APPEND SOURCE_FILES
      "include/platform/x86_64/page_map_level_four_entry.hpp"
      "include/platform/x86_64/page_directory_entry.hpp"
      "include/platform/x86_64/page_table.hpp"
+     "include/platform/x86_64/lgdt.hpp" "src/platform/x86_64/lgdt.S"
 
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )

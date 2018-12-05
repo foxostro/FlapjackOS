@@ -1,6 +1,6 @@
 #include <platform/i386/gdt.hpp>
+#include <platform/i386/lgdt.hpp>
 #include <seg.h>
-#include <gdt_asm.h> // for lgdt()
 #include <cstring> // for memset()
 
 namespace i386 {
