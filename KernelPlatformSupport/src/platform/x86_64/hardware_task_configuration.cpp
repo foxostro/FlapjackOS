@@ -1,5 +1,5 @@
 #include <platform/x86_64/hardware_task_configuration.hpp>
-#include <ltr.h>
+#include <platform/x86_64/ltr.hpp>
 
 namespace x86_64 {
 
@@ -14,7 +14,7 @@ void HardwareTaskConfiguration::init(uint64_t rsp0)
     gdt_.init(&tss_);
     gdt_.load();
 
-    load_task_register();
+    ltr();
 }
 
 } // namespace x86_64

@@ -1,6 +1,6 @@
 #include <platform/i386/hardware_task_configuration.hpp>
+#include <platform/i386/ltr.hpp>
 #include <seg.h> // for SEGSEL_KERNEL_DS
-#include <ltr.h>
 
 namespace i386 {
 
@@ -16,7 +16,7 @@ void HardwareTaskConfiguration::init(uint32_t istack)
     gdt_.establish_flat_mapping((uintptr_t)&tss_);
     gdt_.load();
 
-    load_task_register();
+    ltr();
 }
 
 } // namespace i386
