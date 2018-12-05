@@ -12,7 +12,6 @@ if(CMAKE_CROSSCOMPILING)
         "src/${CMAKE_SYSTEM_PROCESSOR}/inout.S"
         "src/${CMAKE_SYSTEM_PROCESSOR}/interrupt_asm.S"
         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
-        "src/${CMAKE_SYSTEM_PROCESSOR}/creg.S"
         )
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/${CMAKE_SYSTEM_PROCESSOR}/isr_wrapper_asm.S.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")
@@ -36,7 +35,6 @@ list(APPEND SOURCE_FILES
      "include/inout.h"
      "include/interrupt_asm.h"
      "include/seg.h"
-     "include/creg.h"
      "include/page_size.hpp"
      "include/logical_addressing.hpp"
 
@@ -56,6 +54,7 @@ list(APPEND SOURCE_FILES
      "include/platform/i386/hardware_interrupt_controller.hpp" "src/platform/i386/hardware_interrupt_controller.cpp"
      "include/platform/i386/lgdt.hpp" "src/platform/i386/lgdt.S"
      "include/platform/i386/ltr.hpp" "src/platform/i386/ltr.S"
+     "include/platform/i386/creg.hpp" "src/platform/i386/creg.S"
 
      "include/platform/x86_64/hardware_task_configuration.hpp" "src/platform/x86_64/hardware_task_configuration.cpp"
      "include/platform/x86_64/tss.hpp"
@@ -72,6 +71,7 @@ list(APPEND SOURCE_FILES
      "include/platform/x86_64/page_table.hpp"
      "include/platform/x86_64/lgdt.hpp" "src/platform/x86_64/lgdt.S"
      "include/platform/x86_64/ltr.hpp" "src/platform/x86_64/ltr.S"
+     "include/platform/x86_64/creg.hpp" "src/platform/x86_64/creg.S"
 
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )

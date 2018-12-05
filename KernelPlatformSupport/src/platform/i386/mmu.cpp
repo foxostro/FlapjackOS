@@ -1,6 +1,6 @@
 #include <platform/i386/mmu.hpp>
+#include <platform/i386/creg.hpp>
 #include <logical_addressing.hpp>
-#include "creg.h"
 
 namespace i386 {
 

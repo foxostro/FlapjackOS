@@ -1,6 +1,6 @@
 #include <page_fault_interrupt_handler.hpp>
 #include <logical_addressing.hpp>
-#include <creg.h>
+#include <platform/i386/creg.hpp> // AFOX_TODO: This needs to be platform-agnostic too.
 #include <cstdio>
 
 // Returns a string interpretation of a page fault error code.
@@ -36,6 +36,6 @@ PageFaultInterruptHandler::PageFaultInterruptHandler() = default;
 
 void PageFaultInterruptHandler::int_handler(const ParameterPackage& params)
 {    
-    uintptr_t faulting_address = (uintptr_t)get_cr2();
+    uintptr_t faulting_address = (uintptr_t)i386::get_cr2(); // AFOX_TODO: This needs to be platform-agnostic too.
     panic_on_unrecoverable_page_fault(faulting_address, params.error_code);
 }
