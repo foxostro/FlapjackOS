@@ -18,6 +18,7 @@ public:
     using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
     using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
+    using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
     using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
@@ -67,6 +68,7 @@ private:
     multiboot_info_t *mb_info_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     HardwareMemoryManagementUnit mmu_;
+    PhysicalMemoryMap phys_map_;
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
 

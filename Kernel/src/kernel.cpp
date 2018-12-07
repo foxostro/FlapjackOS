@@ -123,23 +123,21 @@ void Kernel::prepare_kernel_address_space()
 
     TRACE("now manipulating PhysicalMemoryMap...");
 
-    auto& phys_map = address_space_bootstrapper_.get_physical_memory_map();
-
     // Ensure the address space is mapped.
     uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
          length > 0; length -= PAGE_SIZE) {
-        phys_map.map_page(convert_logical_to_physical_address(linear_address),
-                          linear_address,
-                          phys_map.WRITABLE);
+        phys_map_.map_page(convert_logical_to_physical_address(linear_address),
+                           linear_address,
+                           phys_map_.WRITABLE);
         linear_address += PAGE_SIZE;
     }
 
     // Setup correct permissions for the .text and .rodata sections.
-    phys_map.set_readonly((uintptr_t)g_kernel_text_begin,
-                          (uintptr_t)g_kernel_text_end);
-    phys_map.set_readonly((uintptr_t)g_kernel_rodata_begin,
-                          (uintptr_t)g_kernel_rodata_end);
+    phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,
+                           (uintptr_t)g_kernel_text_end);
+    phys_map_.set_readonly((uintptr_t)g_kernel_rodata_begin,
+                           (uintptr_t)g_kernel_rodata_end);
 
     TRACE("end");
 }
