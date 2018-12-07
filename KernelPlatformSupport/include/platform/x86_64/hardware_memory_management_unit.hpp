@@ -12,11 +12,6 @@ public:
     {
         return x86_64::get_cr3();
     }
-
-    void set_cr3(uint64_t cr3)
-    {
-        return x86_64::set_cr3(cr3);
-    }
 };
 
 } // namespace x86_64
