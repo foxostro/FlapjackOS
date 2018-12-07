@@ -7,7 +7,7 @@
 // This is the beginning of a virtual memory region which maps to contiguous,
 // low, physical memory and contains the kernel image.
 // This is also the first kernel logical address.
-#define KERNEL_VIRTUAL_START_ADDR_64BIT 0xFFFFFFFF80000000
+#define KERNEL_VIRTUAL_START_ADDR_64BIT 0xFFFFFFFFC0000000
 #define KERNEL_VIRTUAL_START_ADDR_32BIT 0xC0000000
 #ifdef __c_plus_plus
 #ifdef __x86_64__
