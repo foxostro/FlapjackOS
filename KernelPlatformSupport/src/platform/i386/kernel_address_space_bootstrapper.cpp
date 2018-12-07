@@ -12,8 +12,12 @@ KernelAddressSpaceBootstrapper::KernelAddressSpaceBootstrapper()
    next_page_table_(&page_tables_[0])
 {}
 
-void KernelAddressSpaceBootstrapper::prepare_address_space()
+void KernelAddressSpaceBootstrapper::prepare_address_space(uint64_t cr3)
 {
+    // TODO: Get the current page directory from the cr3 parameter instead
+    // of relying on global state via get_current_page_directory().
+    (void)cr3;
+
     // Populate the page directory with some page tables for the
     // the kernel higher-half.
     memset(page_tables_, 0, sizeof(page_tables_));

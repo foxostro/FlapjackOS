@@ -23,7 +23,13 @@ class KernelAddressSpaceBootstrapper {
 public:
     KernelAddressSpaceBootstrapper();
 
-    void prepare_address_space();
+    template<typename MMU>
+    void prepare_address_space(MMU &mmu)
+    {
+        prepare_address_space(mmu.get_cr3());
+    }
+
+    void prepare_address_space(uint64_t cr3);
 
     inline PhysicalMemoryMap& get_physical_memory_map()
     {
