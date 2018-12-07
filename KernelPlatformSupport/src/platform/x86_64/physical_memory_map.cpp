@@ -16,10 +16,7 @@ inline void invlpg(uintptr_t virtual_address)
 #endif
 }
 
-PhysicalMemoryMap::PhysicalMemoryMap()
-{
-    assert(!"stub");
-}
+PhysicalMemoryMap::PhysicalMemoryMap() = default;
 
 void PhysicalMemoryMap::map_page(uintptr_t,
                                  uintptr_t,
