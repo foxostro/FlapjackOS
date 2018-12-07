@@ -7,9 +7,6 @@
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 
-// TODO: Do not leak platform-specific details like the CR3 register into the Kernel class.
-#include <platform/x86_64/creg.hpp>
-
 // TODO: How can Kernel be made more platform-agnostic wrt to device drivers?
 #include <drivers/pc/pit_timer_device.hpp>
 #include <drivers/pc/ps2_keyboard_device.hpp>
@@ -121,10 +118,8 @@ void Kernel::print_welcome_message()
 void Kernel::prepare_kernel_address_space()
 {
     TRACE("begin");
-
-    // TODO: Introduce a new class HardwareMemoryManagementUnit to abstract away platform-specific details like the CR3 register.
-    address_space_bootstrapper_.set_cr3(x86_64::get_cr3());
-    address_space_bootstrapper_.prepare_address_space();
+    
+    address_space_bootstrapper_.prepare_address_space(mmu_);
 
     TRACE("now manipulating PhysicalMemoryMap...");
 

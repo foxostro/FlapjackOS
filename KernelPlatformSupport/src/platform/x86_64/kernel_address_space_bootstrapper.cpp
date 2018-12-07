@@ -6,13 +6,14 @@ namespace x86_64 {
 
 KernelAddressSpaceBootstrapper::KernelAddressSpaceBootstrapper()
  : count_(NUMBER_OF_PAGE_TABLES),
-   next_page_table_(&page_tables_[0]),
-   cr3_(0)
+   next_page_table_(&page_tables_[0])
 {}
 
-void KernelAddressSpaceBootstrapper::prepare_address_space()
+void KernelAddressSpaceBootstrapper::prepare_address_space(uint64_t cr3)
 {
     constexpr uintptr_t TWO_MEGS = 0x200000;
+
+    _resolver.set_cr3(cr3);
 
     // Populate the page directory with some page tables for the
     // the kernel higher-half.
@@ -29,7 +30,6 @@ void KernelAddressSpaceBootstrapper::prepare_address_space()
 
 PageDirectory& KernelAddressSpaceBootstrapper::get_relevant_page_directory()
 {
-    _resolver.set_cr3(cr3_);
     PageDirectory* pd = _resolver.get_page_directory(KERNEL_VIRTUAL_START_ADDR);
     assert(pd && "expected a page directory for the kernel memory region");
     return *pd;

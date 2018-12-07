@@ -1,7 +1,8 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_KERNEL_ADDRESS_SPACE_BOOTSTRAPPER_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_KERNEL_ADDRESS_SPACE_BOOTSTRAPPER_HPP
 
-#include "physical_memory_map.hpp"
+#include "physical_memory_map.hpp" // TODO: Consider separating these two classes.
+#include "hardware_memory_management_unit.hpp"
 #include "paging_resolver.hpp"
 #include <page_size.hpp> // for PAGE_SIZE
 #include <logical_addressing.hpp> // for KERNEL_MEMORY_REGION_SIZE
@@ -23,7 +24,13 @@ class KernelAddressSpaceBootstrapper {
 public:
     KernelAddressSpaceBootstrapper();
 
-    void prepare_address_space();
+    template<typename MMU>
+    void prepare_address_space(MMU &mmu)
+    {
+        prepare_address_space(mmu.get_cr3());
+    }
+
+    void prepare_address_space(uint64_t cr3);
 
     PhysicalMemoryMap& get_physical_memory_map()
     {
@@ -34,16 +41,6 @@ public:
     {
         return physical_memory_map_;
     }
-
-    uint64_t get_cr3() const
-    {
-        return cr3_;
-    }
-
-    void set_cr3(uint64_t value)
-    {
-        cr3_ = value;
-    }
     
 private:
     static constexpr size_t NUMBER_OF_PAGE_TABLES = KERNEL_MEMORY_REGION_SIZE / PAGE_SIZE / PageTable::COUNT;
@@ -52,7 +49,6 @@ private:
     PageTable* next_page_table_;
     PhysicalMemoryMap physical_memory_map_;
     PagingResolver _resolver;
-    uint64_t cr3_;
 
     PageDirectory& get_relevant_page_directory();
     void prepare_page_directory_entry(PageDirectoryEntry& pde);

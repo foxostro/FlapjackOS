@@ -25,10 +25,10 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
     pdpte.set_address(convert_logical_to_physical_address((uintptr_t)&pd));
 
     x86_64::KernelAddressSpaceBootstrapper bootstrapper;
-    bootstrapper.set_cr3(resolver.get_cr3());
+    uint64_t cr3 = resolver.get_cr3();
 
     // Action
-    bootstrapper.prepare_address_space();
+    bootstrapper.prepare_address_space(cr3);
 
     // Test
     constexpr uintptr_t TWO_MEGS = 0x200000;

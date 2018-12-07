@@ -74,6 +74,7 @@ list(APPEND SOURCE_FILES
      "include/platform/x86_64/creg.hpp" "src/platform/x86_64/creg.S"
      "include/platform/x86_64/kernel_address_space_bootstrapper.hpp" "src/platform/x86_64/kernel_address_space_bootstrapper.cpp"
      "include/platform/x86_64/paging_resolver.hpp"
+     "include/platform/x86_64/hardware_memory_management_unit.hpp"
 
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )

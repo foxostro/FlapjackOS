@@ -18,6 +18,7 @@ public:
     using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
     using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
+    using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
     // Boot the kernel and device drivers.
@@ -65,6 +66,7 @@ private:
     TextTerminal terminal_;
     multiboot_info_t *mb_info_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
+    HardwareMemoryManagementUnit mmu_;
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
 
