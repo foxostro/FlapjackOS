@@ -72,6 +72,8 @@ list(APPEND SOURCE_FILES
      "include/platform/x86_64/lgdt.hpp" "src/platform/x86_64/lgdt.S"
      "include/platform/x86_64/ltr.hpp" "src/platform/x86_64/ltr.S"
      "include/platform/x86_64/creg.hpp" "src/platform/x86_64/creg.S"
+     "include/platform/x86_64/kernel_address_space_bootstrapper.hpp" "src/platform/x86_64/kernel_address_space_bootstrapper.cpp"
+     "include/platform/x86_64/paging_resolver.hpp"
 
      "include/platform/pc/pic.h" "src/platform/pc/pic.c"
      )
@@ -107,6 +109,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                    "test/test_x86_64_generic_page_directory_entry.cpp"
                    "test/test_x86_64_page_table_entry.cpp"
                    "test/test_x86_64_physical_memory_map.cpp"
+                   "test/test_x86_64_kernel_address_space_bootstrapper.cpp"
                    "test/test_main.cpp"
                    )
 
