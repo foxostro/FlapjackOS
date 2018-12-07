@@ -2,8 +2,8 @@
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_CREG_HPP
 
 extern "C" {
-uint64_t x86_46_get_cr2(void);
-uint64_t x86_46_get_cr3(void);
+uint64_t x86_64_get_cr2(void);
+uint64_t x86_64_get_cr2(void);
 } // extern "C"
 
 namespace x86_64 {
@@ -12,7 +12,7 @@ namespace x86_64 {
 #       ifdef TESTING
     	return 0;
 #       else
-        return x86_46_get_cr2();
+        return x86_64_get_cr2();
 #       endif
     }
 
@@ -21,7 +21,7 @@ namespace x86_64 {
 #       ifdef TESTING
     	return 0;
 #       else
-        return x86_46_get_cr3();
+        return x86_64_get_cr2();
 #       endif
     }
 } // namespace x86_64
