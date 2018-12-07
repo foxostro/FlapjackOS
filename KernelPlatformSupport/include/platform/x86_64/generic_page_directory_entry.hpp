@@ -158,14 +158,14 @@ public:
 
     void set_address(uintptr_t address)
     {
-        data = data & ADDRESS_ZERO_MASK;
-        const uint64_t field = (address & ADDRESS_MASK) << ADDRESS_SHIFT;
-        data = data | field;
+        uint64_t masked_address = ((address >> ADDRESS_SHIFT) & ADDRESS_MASK);
+        uint64_t field = masked_address << ADDRESS_SHIFT;
+        data = (data & ADDRESS_ZERO_MASK) | field;
     }
 
     uint64_t get_address() const
     {
-        return (data & ~ADDRESS_ZERO_MASK) >> ADDRESS_SHIFT;
+        return (data & ~ADDRESS_ZERO_MASK);
     }
 };
 

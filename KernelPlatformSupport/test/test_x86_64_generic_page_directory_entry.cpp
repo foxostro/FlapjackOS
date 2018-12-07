@@ -248,9 +248,16 @@ TEST_CASE("test_x86_64_generic_page_directory_entry_set_addr_1", "[x86_64]")
     REQUIRE(entry.data == 0b0000000000001111111111111111111111111111111111111111000000000000);
 }
 
-TEST_CASE("test_x86_64_generic_page_directory_entry_get_address", "[x86_64]")
+TEST_CASE("test_x86_64_generic_page_directory_entry_get_address_0", "[x86_64]")
 {
     x86_64::GenericPageDirectoryEntry entry;
     entry.data = 0b0000000000001111111111111111111111111111111111111111000000000000;
-    REQUIRE(entry.get_address() == 0b1111111111111111111111111111111111111111);
+    REQUIRE(entry.get_address() == 0b1111111111111111111111111111111111111111000000000000);
+}
+
+TEST_CASE("test_x86_64_generic_page_directory_entry_get_address_1", "[x86_64]")
+{
+    x86_64::GenericPageDirectoryEntry entry;
+    entry.data = 0x00007ffeefbea000;
+    REQUIRE(entry.get_address() == 0x00007ffeefbea000);
 }
