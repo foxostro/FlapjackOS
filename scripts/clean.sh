@@ -19,6 +19,7 @@ rm -rf "CMakeCache.txt" \
        "Malloc/CTestTestfile.cmake" \
        "Malloc/FlapjackOS.build/" \
        "Malloc/cmake_install.cmake" \
+       "build/" \
        "build_cross/" \
        "build_host/" \
        "cmake_install.cmake" \

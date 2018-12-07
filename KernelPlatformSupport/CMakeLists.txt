@@ -56,7 +56,7 @@ list(APPEND SOURCE_FILES
      "include/platform/i386/lgdt.hpp" "src/platform/i386/lgdt.S"
      "include/platform/i386/ltr.hpp" "src/platform/i386/ltr.S"
      "include/platform/i386/creg.hpp" "src/platform/i386/creg.S"
-
+     
      "include/platform/x86_64/hardware_task_configuration.hpp" "src/platform/x86_64/hardware_task_configuration.cpp"
      "include/platform/x86_64/tss.hpp"
      "include/platform/x86_64/gdt.hpp" "src/platform/x86_64/gdt.cpp"
@@ -104,7 +104,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                    "test/test_i386_gdt.cpp"
                    "test/test_i386_page_directory_entry.cpp"
                    "test/test_i386_page_table_entry.cpp"
-                   #"test/test_i386_page_directory.cpp" # AFOX_TODO: Need to fix broken test.
+                   "test/test_i386_page_directory.cpp"
                    "test/test_i386_page_table.cpp"
                    "test/test_x86_64_gdt.cpp"
                    "test/test_x86_64_tss.cpp"

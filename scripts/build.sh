@@ -1,23 +1,26 @@
 #!/bin/sh
 set -e
 
-TARGET=$1
-if [ -z "$TARGET" ]; then
-    TARGET=i386-elf
+BUILD_PREFIX="build/"
+X86_64_BUILD_DIR="$BUILD_PREFIX/x86_64"
+I386_BUILD_DIR="$BUILD_PREFIX/i386"
+TEST_BUILD_DIR="$BUILD_PREFIX/test"
+
+if [ ! -d "$X86_64_BUILD_DIR" ]; then
+    cmake -E make_directory "$X86_64_BUILD_DIR"
+    cmake -E chdir "$X86_64_BUILD_DIR" cmake ../.. -DCMAKE_TOOLCHAIN_FILE="x86_64-elf.toolchain.cmake"
 fi
 
-CROSS_BUILD_DIR="build_cross"
-HOST_BUILD_DIR="build_host"
-
-if [ ! -d "$CROSS_BUILD_DIR" ]; then
-    cmake -E make_directory "$CROSS_BUILD_DIR"
-    cmake -E chdir "$CROSS_BUILD_DIR" cmake .. -DCMAKE_TOOLCHAIN_FILE="$TARGET.toolchain.cmake"
+if [ ! -d "$I386_BUILD_DIR" ]; then
+    cmake -E make_directory "$I386_BUILD_DIR"
+    cmake -E chdir "$I386_BUILD_DIR" cmake ../.. -DCMAKE_TOOLCHAIN_FILE="i386-elf.toolchain.cmake"
 fi
 
-if [ ! -d "$HOST_BUILD_DIR" ]; then
-    cmake -E make_directory "$HOST_BUILD_DIR"
-    cmake -E chdir "$HOST_BUILD_DIR" cmake ..
+if [ ! -d "$TEST_BUILD_DIR" ]; then
+    cmake -E make_directory "$TEST_BUILD_DIR"
+    cmake -E chdir "$TEST_BUILD_DIR" cmake ../..
 fi
 
-cmake --build "$CROSS_BUILD_DIR"
-cmake --build "$HOST_BUILD_DIR"
+cmake --build "$X86_64_BUILD_DIR" || echo "ERROR: x86_64 build failed."
+cmake --build "$I386_BUILD_DIR" || echo "ERROR: i386 build failed."
+cmake --build "$TEST_BUILD_DIR" || echo "ERROR: unit test build failed."
