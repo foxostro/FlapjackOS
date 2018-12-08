@@ -29,7 +29,6 @@ TEST_CASE("test_i386_page_directory_is_address_mapped_0", "[i386]")
 
 TEST_CASE("test_i386_page_directory_map_page", "[i386]")
 {
-#ifndef __x86_64__
     i386::PageTable pt;
     memset(pt.entries, 0, sizeof(pt.entries));
 
@@ -40,5 +39,4 @@ TEST_CASE("test_i386_page_directory_map_page", "[i386]")
     pd.map_page(0xC0000000, 0xC0000000, 0);
 
     REQUIRE(pd.is_address_mapped(0xC0000000) == true);
-#endif
 }
