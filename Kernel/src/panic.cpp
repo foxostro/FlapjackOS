@@ -13,6 +13,8 @@
 
 extern TextTerminal *g_terminal; // defined in kernel.cpp
 
+constexpr size_t PANIC_BUFFER_SIZE = 1024;
+
 extern "C"
 __attribute__((noreturn))
 void panic(const char *fmt, ...)
@@ -21,7 +23,7 @@ void panic(const char *fmt, ...)
 
     disable_interrupts();
 
-    char buffer[128];
+    char buffer[PANIC_BUFFER_SIZE];
     va_list args;
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);

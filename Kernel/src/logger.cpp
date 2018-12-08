@@ -5,6 +5,7 @@
 
 Logger g_logger;
 
+constexpr size_t LOGGER_MESSAGE_SIZE = 1024;
 constexpr unsigned Logger::BOCHS_LOGGER_PORT;
 
 Logger::~Logger() = default;
@@ -33,8 +34,8 @@ void Logger::puts_no_newline(const char *s)
 
 void Logger::log(const char *function, const char *fmt, ...)
 {
-    char message[128] = {0};
-    char buffer[256] = {0};
+    char message[LOGGER_MESSAGE_SIZE] = {0};
+    char buffer[LOGGER_MESSAGE_SIZE] = {0};
     va_list args;
 
     va_start(args, fmt);

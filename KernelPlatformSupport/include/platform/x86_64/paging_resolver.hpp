@@ -207,6 +207,10 @@ private:
     uint64_t cr3_;
 };
 
+static_assert(sizeof(uint64_t) == sizeof(uintptr_t),
+              "By it's nature, the x86_64::PagingResolver must be able to map "
+              "between a pointer and a 64-bit unsigned int.");
+
 } // namespace x86_64
 
 #endif // FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_PAGING_RESOLVER_HPP

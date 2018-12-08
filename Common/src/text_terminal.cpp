@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <cctype>
 
+constexpr size_t TERMINAL_BUFFER_SIZE = 1024;
+
 TextTerminal::~TextTerminal() = default;
 
 TextTerminal::TextTerminal()
@@ -149,7 +151,7 @@ void TextTerminal::puts(const char *s)
 
 int TextTerminal::printf(const char *fmt, ...)
 {
-    char buffer[128] = {0};
+    char buffer[TERMINAL_BUFFER_SIZE] = {0};
 
     va_list args;
     va_start(args, fmt);
