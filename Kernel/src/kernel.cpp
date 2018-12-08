@@ -126,10 +126,13 @@ void Kernel::prepare_kernel_address_space()
     // Ensure the address space is mapped.
     uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
-         length > 0; length -= PAGE_SIZE) {
+         length > 0;
+         length -= PAGE_SIZE) {
+
         phys_map_.map_page(convert_logical_to_physical_address(linear_address),
                            linear_address,
                            phys_map_.WRITABLE);
+
         linear_address += PAGE_SIZE;
     }
 

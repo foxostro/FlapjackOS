@@ -5,8 +5,6 @@
 
 namespace i386 {
 
-constexpr size_t KernelAddressSpaceBootstrapper::NUMBER_OF_PAGE_TABLES;
-
 KernelAddressSpaceBootstrapper::KernelAddressSpaceBootstrapper()
  : count_(NUMBER_OF_PAGE_TABLES),
    next_page_table_(&page_tables_[0])
@@ -16,16 +14,24 @@ void KernelAddressSpaceBootstrapper::prepare_address_space(uint64_t cr3)
 {
     // TODO: Get the current page directory from the cr3 parameter instead
     // of relying on global state via get_current_page_directory().
-    (void)cr3;
+    PageDirectory& pd = get_current_page_directory();
+    assert((uintptr_t)convert_physical_to_logical_address(cr3) == (uintptr_t)&pd);
+
+    memset(page_tables_, 0, sizeof(page_tables_));
 
     // Populate the page directory with some page tables for the
     // the kernel higher-half.
-    memset(page_tables_, 0, sizeof(page_tables_));
-    PageDirectory& pd = get_current_page_directory();
-    for (size_t i = pd.index_for_virtual_address(KERNEL_VIRTUAL_START_ADDR);
-        i < PageDirectory::NUMBER_OF_PAGE_DIRECTORY_ENTRIES;
-        ++i) {
-        prepare_page_directory_entry(pd.entries[i]);
+    constexpr uintptr_t TWO_MEGS = 0x200000;
+    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
+    for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
+         length > 0;
+         length -= TWO_MEGS) {
+
+        size_t index = pd.index_for_virtual_address(linear_address);
+        PageDirectoryEntry& pde = pd.entries[index];
+        prepare_page_directory_entry(pde);
+
+        linear_address += TWO_MEGS;
     }
 }
 
