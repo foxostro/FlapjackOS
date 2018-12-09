@@ -1,30 +1,7 @@
 #include "catch.hpp"
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <logical_addressing.hpp> // for convert_logical_to_physical_address()
-
-class MockMemoryManagementUnit
-{
-public:
-    MockMemoryManagementUnit() : cr3_(0) {}
-
-    void set_cr3(uintptr_t value)
-    {
-        cr3_ = value;
-    }
-
-    uintptr_t get_cr3()
-    {
-        return cr3_;
-    }
-
-    void reload()
-    {
-        // nothing to do
-    }
-
-private:
-    uintptr_t cr3_;
-};
+#include "mock_memory_management_unit.hpp"
 
 TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
 {
@@ -57,11 +34,14 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
 
     // Test
     constexpr uintptr_t TWO_MEGS = 0x200000;
-    for (uintptr_t linear_address = KERNEL_VIRTUAL_START_ADDR;
-         linear_address < KERNEL_MEMORY_REGION_SIZE;
-         linear_address += TWO_MEGS) {
+    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
+    for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
+         length > 0;
+         length -= TWO_MEGS) {
 
         x86_64::PageTable* pt = resolver.get_page_table(linear_address);
         REQUIRE(pt != nullptr);
+
+        linear_address += TWO_MEGS;
     }
 }
