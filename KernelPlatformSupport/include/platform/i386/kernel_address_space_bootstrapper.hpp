@@ -25,10 +25,8 @@ public:
     template<typename MMU>
     void prepare_address_space(MMU &mmu)
     {
-        prepare_address_space(mmu.get_cr3());
+        prepare_address_space_internal(mmu.get_cr3());
     }
-
-    void prepare_address_space(uint64_t cr3);
 
 private:
     static constexpr size_t NUMBER_OF_PAGE_TABLES = KERNEL_MEMORY_REGION_SIZE / PAGE_SIZE / PageTable::NUMBER_OF_PAGE_TABLE_ENTRIES;
@@ -36,6 +34,7 @@ private:
     size_t count_;
     PageTable* next_page_table_;
 
+    void prepare_address_space_internal(uint64_t cr3);
     void prepare_page_directory_entry(PageDirectoryEntry& pde);
     PageTable* get_next_page_table();
 };
