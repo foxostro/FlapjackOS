@@ -1,6 +1,7 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PAGE_SIZE_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PAGE_SIZE_HPP
 
+#include <cstdint>
 #include <cstddef>
 #include <cassert>
 
