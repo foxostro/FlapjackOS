@@ -1,7 +1,29 @@
 #include <page_fault_interrupt_handler.hpp>
 #include <logical_addressing.hpp>
-#include <platform/i386/creg.hpp> // AFOX_TODO: This needs to be platform-agnostic too.
 #include <cstdio>
+
+// AFOX_TODO: These platform-specific includes seem like a code smell.
+#ifdef __i386__
+#include <platform/i386/creg.hpp>
+#elif __x86_64__
+#include <platform/x86_64/creg.hpp>
+#endif
+
+static uintptr_t get_faulting_address()
+{
+    // AFOX_TODO: A better abstraction for getting the faulting address would be nice.
+    #ifdef __i386__
+    return i386::get_cr2();
+    #elif __x86_64__
+    return x86_64::get_cr2();
+    #elif __arm__
+    #error "interrupt_dispatch is unimplemented for ARM"
+    return 0;
+    #else
+    #error "interrupt_dispatch is unimplemented for this unknown system"
+    return 0;
+    #endif
+}
 
 // Returns a string interpretation of a page fault error code.
 static const char* get_page_fault_error_string(unsigned error_code)
@@ -35,7 +57,7 @@ void panic_on_unrecoverable_page_fault(uintptr_t faulting_address,
 PageFaultInterruptHandler::PageFaultInterruptHandler() = default;
 
 void PageFaultInterruptHandler::int_handler(const ParameterPackage& params)
-{    
-    uintptr_t faulting_address = (uintptr_t)i386::get_cr2(); // AFOX_TODO: This needs to be platform-agnostic too.
+{
+    uintptr_t faulting_address = get_faulting_address();
     panic_on_unrecoverable_page_fault(faulting_address, params.error_code);
 }
