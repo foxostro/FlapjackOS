@@ -47,6 +47,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/page_map_level_four_entry.hpp"
     "include/platform/x86_64/page_directory_entry.hpp"
     "include/platform/x86_64/page_table.hpp"
+    "include/platform/x86_64/hardware_interrupt_controller.hpp" "src/platform/x86_64/hardware_interrupt_controller.cpp"
     "include/platform/x86_64/lgdt.hpp" "src/platform/x86_64/lgdt.S"
     "include/platform/x86_64/ltr.hpp" "src/platform/x86_64/ltr.S"
     "include/platform/x86_64/creg.hpp" "src/platform/x86_64/creg.S"
