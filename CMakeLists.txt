@@ -12,6 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
+option(BUILD_32_BIT_TESTS "Build 32-bit unit tests" OFF)
+
+
 # Function to generate source code from a template file.
 function(GenerateSourceFromTemplate
          TEMPLATE_FILENAME
@@ -33,12 +36,21 @@ endfunction(GenerateSourceFromTemplate)
 set(COMMON_COMPILER_FLAGS "-Wall -Wextra -Werror")
 if(CMAKE_CROSSCOMPILING)
 
+    set(BUILD_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
+    if (BUILD_ARCH STREQUAL "i386")
+        set(BUILD_ARCH "i386")
+        set(BUILD_ARCH_FLAGS "-m32")
+    elseif (BUILD_ARCH STREQUAL "x86_64")
+        set(BUILD_ARCH "x86_64")
+        set(BUILD_ARCH_FLAGS "-m64")
+    endif ()
+
     # When cross-compiling, we want to build free-standing executables with no
     # standard library as we cannot use the libc of the host system. Also, the
     # kernel must perform some magic to boot which is never done in userspace
     # programs.
     set(COMPILER_FLAGS_C_AND_CXX "-O2 -mno-sse -mno-mmx -fno-stack-protector -nostdlib -ffreestanding")
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    if ("${BUILD_ARCH}" STREQUAL "x86_64")
         string(APPEND COMPILER_FLAGS_C_AND_CXX " -mcmodel=kernel")
     endif()
 
@@ -50,15 +62,29 @@ if(CMAKE_CROSSCOMPILING)
     set(CMAKE_CXX_FLAGS "-fno-exceptions -fno-rtti ${COMPILER_FLAGS_C_AND_CXX} ${COMMON_COMPILER_FLAGS} ${${COMMON_COMPILER_FLAGS}}")
     set(CMAKE_CXX_LINK_FLAGS "${LINKER_FLAGS_C_AND_CXX} ${CMAKE_CXX_LINK_FLAGS}")
 
+    set(CMAKE_ASM_FLAGS "${BUILD_ARCH_FLAGS}")
+
 else(CMAKE_CROSSCOMPILING)
+
+    # We define BUILD_ARCH separately from CMAKE_SYSTEM_PROCESSOR: because we
+    # sometimes want to build an i386 test program to test our i386 code, and
+    # we need to carry that information through to various submodules.
+    if (BUILD_32_BIT_TESTS)
+        set(BUILD_ARCH_FLAGS "-m32")
+        set(BUILD_ARCH "i386")
+    else (BUILD_32_BIT_TESTS)
+        set(BUILD_ARCH_FLAGS "-m64")
+        set(BUILD_ARCH "x86_64")
+    endif (BUILD_32_BIT_TESTS)
 
     # When the target system is the host system, we are building natively.
     # In this case, define a flag to indicate we are doing testing and choose
     # some rather standard compiler flags.
     # Disable optimization so unit tests build faster. (25s versus 55s)
-    set(COMPILER_FLAGS_C_AND_CXX "-O0 -g -DTESTING")
+    set(COMPILER_FLAGS_C_AND_CXX "${BUILD_ARCH_FLAGS} -O0 -g -DTESTING")
     set(CMAKE_C_FLAGS "${COMPILER_FLAGS_C_AND_CXX} ${COMMON_COMPILER_FLAGS} ${CMAKE_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS_C_AND_CXX} ${COMMON_COMPILER_FLAGS} ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_ASM_FLAGS "${BUILD_ARCH_FLAGS}")
 
     # If we're building natively then we want to build tests.
     # Tests are defined in each library.
@@ -97,7 +123,7 @@ if(CMAKE_CROSSCOMPILING)
     include_directories(${KERNEL_INCLUDE_DIRS} ${BOOT_INCLUDE_DIR})
     link_directories(${KERNEL_LIBRARIES_DIRS})
     add_executable(${KERNEL_BIN} "${BOOT_SOURCE_DIR}/boot.S")
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    if (BUILD_ARCH STREQUAL "x86_64")
         set(PREPROCESSOR_ARCHITECTURE "-m64")
     else()
         set(PREPROCESSOR_ARCHITECTURE "-m32")

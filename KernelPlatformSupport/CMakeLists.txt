@@ -10,10 +10,10 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/seg.h"
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
+    "include/platform/i386/idt.h" "src/platform/i386/idt.c"
     )
 
 set(I386_SOURCE_FILES
-    "include/platform/i386/idt.h" "src/platform/i386/idt.c"
     "include/platform/i386/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/i386_isr_install.c"
     "include/platform/i386/protection_flags.hpp"
     "include/platform/i386/page_directory.hpp" "src/platform/i386/page_directory.cpp"
@@ -62,11 +62,11 @@ set(PC_SOURCE_FILES
     
 if(CMAKE_CROSSCOMPILING)
     set(PLATFORM_SPECIFIC_SOURCE_FILES
-        "src/${CMAKE_SYSTEM_PROCESSOR}/get_frame_pointer.S"
-        "src/${CMAKE_SYSTEM_PROCESSOR}/halt.S"
-        "src/${CMAKE_SYSTEM_PROCESSOR}/idt_asm.S"
-        "src/${CMAKE_SYSTEM_PROCESSOR}/inout.S"
-        "src/${CMAKE_SYSTEM_PROCESSOR}/interrupt_asm.S"
+        "src/${BUILD_ARCH}/get_frame_pointer.S"
+        "src/${BUILD_ARCH}/halt.S"
+        "src/${BUILD_ARCH}/idt_asm.S"
+        "src/${BUILD_ARCH}/inout.S"
+        "src/${BUILD_ARCH}/interrupt_asm.S"
         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
         )
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/${CMAKE_SYSTEM_PROCESSOR}/isr_wrapper_asm.S.erb"
@@ -75,17 +75,6 @@ if(CMAKE_CROSSCOMPILING)
     list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
         "${PC_SOURCE_FILES}"
         )
-
-    if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
-        list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
-            "${I386_SOURCE_FILES}"
-            )
-    elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-        list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
-            "${I386_SOURCE_FILES}" # AFOX_TODO: It should eventually not be necessary to include both i386 and x86_64 bits when building the x86_64 kernel.
-            "${X86_64_SOURCE_FILES}"
-            )
-    endif()
 else(CMAKE_CROSSCOMPILING)
     set(PLATFORM_SPECIFIC_SOURCE_FILES
         "src/host/get_frame_pointer.c"
@@ -94,13 +83,21 @@ else(CMAKE_CROSSCOMPILING)
         "src/host/inout.c"
         "src/host/interrupt.c"
         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c"
-        "${I386_SOURCE_FILES}"
-        "${X86_64_SOURCE_FILES}"
         "${PC_SOURCE_FILES}"
         )
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/host/isr_wrapper.c.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c")
 endif(CMAKE_CROSSCOMPILING)
+
+if (${BUILD_ARCH} STREQUAL "i386")
+    list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
+         "${I386_SOURCE_FILES}"
+         )
+elseif (${BUILD_ARCH} STREQUAL "x86_64")
+    list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
+         "${X86_64_SOURCE_FILES}"
+         )
+endif ()
 
 set(SOURCE_FILES
     "${PLATFORM_SPECIFIC_SOURCE_FILES}"
@@ -126,20 +123,32 @@ target_link_libraries(KernelPlatformSupport
 
 if (NOT CMAKE_CROSSCOMPILING)
 
+    set(TEST_SOURCE_FILES
+        "test/test_main.cpp"
+        "test/test_idt.cpp"
+        )
+
+    if (BUILD_32_BIT_TESTS)
+        list(APPEND TEST_SOURCE_FILES
+             "test/test_i386_gdt.cpp"
+             "test/test_i386_page_directory_entry.cpp"
+             "test/test_i386_page_table_entry.cpp"
+             "test/test_i386_page_directory.cpp"
+             "test/test_i386_page_table.cpp"
+             )
+    else (BUILD_32_BIT_TESTS)
+        list(APPEND TEST_SOURCE_FILES
+             "test/test_x86_64_gdt.cpp"
+             "test/test_x86_64_tss.cpp"
+             "test/test_x86_64_generic_page_directory_entry.cpp"
+             "test/test_x86_64_page_table_entry.cpp"
+             "test/test_x86_64_physical_memory_map.cpp"
+             "test/test_x86_64_kernel_address_space_bootstrapper.cpp"
+             )
+    endif (BUILD_32_BIT_TESTS)
+
     add_executable(KernelPlatformSupportTest
-                   "test/test_idt.cpp"
-                   "test/test_i386_gdt.cpp"
-                   "test/test_i386_page_directory_entry.cpp"
-                   "test/test_i386_page_table_entry.cpp"
-                   "test/test_i386_page_directory.cpp"
-                   "test/test_i386_page_table.cpp"
-                   "test/test_x86_64_gdt.cpp"
-                   "test/test_x86_64_tss.cpp"
-                   "test/test_x86_64_generic_page_directory_entry.cpp"
-                   "test/test_x86_64_page_table_entry.cpp"
-                   "test/test_x86_64_physical_memory_map.cpp"
-                   "test/test_x86_64_kernel_address_space_bootstrapper.cpp"
-                   "test/test_main.cpp"
+                   "${TEST_SOURCE_FILES}"
                    )
 
     target_link_libraries(KernelPlatformSupportTest
