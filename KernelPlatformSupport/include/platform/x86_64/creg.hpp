@@ -7,6 +7,7 @@
 extern "C" {
 uint64_t x86_64_get_cr2(void);
 uint64_t x86_64_get_cr3(void);
+void x86_64_set_cr3(uint64_t value);
 } // extern "C"
 
 namespace x86_64 {
@@ -25,6 +26,15 @@ namespace x86_64 {
     	return 0;
 #       else
         return x86_64_get_cr3();
+#       endif
+    }
+
+    inline void set_cr3(uint64_t value)
+    {
+#       ifdef TESTING
+    	(void)value;
+#       else
+        return x86_64_set_cr3(value);
 #       endif
     }
 } // namespace x86_64

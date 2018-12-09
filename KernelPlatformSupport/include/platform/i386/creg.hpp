@@ -4,6 +4,7 @@
 extern "C" {
 uint32_t i386_get_cr2(void);
 uint32_t i386_get_cr3(void);
+void i386_set_cr3(uint32_t value);
 } // extern "C"
 
 namespace i386 {
@@ -22,6 +23,15 @@ namespace i386 {
     	return 0;
 #       else
         return i386_get_cr3();
+#       endif
+    }
+
+    inline void set_cr3(uint32_t value)
+    {
+#       ifdef TESTING
+    	(void)value;
+#       else
+        return i386_set_cr3(value);
 #       endif
     }
 } // namespace i386
