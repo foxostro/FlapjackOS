@@ -14,20 +14,20 @@ KernelAddressSpaceBootstrapper::KernelAddressSpaceBootstrapper()
 
 void KernelAddressSpaceBootstrapper::prepare_address_space_internal()
 {
-    constexpr uintptr_t TWO_MEGS = 0x200000;
+    constexpr uintptr_t FOUR_MEGS = 0x400000;
     memset(page_tables_, 0, sizeof(page_tables_));
     PageDirectory& pd = get_relevant_page_directory();
 
     uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
          length > 0;
-         length -= TWO_MEGS) {
+         length -= FOUR_MEGS) {
 
         PageDirectoryEntry* pde = _resolver.get_page_directory_entry(&pd, linear_address);
         assert(pde);
         prepare_page_directory_entry(*pde);
 
-        linear_address += TWO_MEGS;
+        linear_address += FOUR_MEGS;
     }
 }
 
