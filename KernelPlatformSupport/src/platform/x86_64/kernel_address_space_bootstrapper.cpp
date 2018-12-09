@@ -9,14 +9,9 @@ KernelAddressSpaceBootstrapper::KernelAddressSpaceBootstrapper()
    next_page_table_(&page_tables_[0])
 {}
 
-void KernelAddressSpaceBootstrapper::prepare_address_space(uint64_t cr3)
+void KernelAddressSpaceBootstrapper::prepare_address_space_internal()
 {
     constexpr uintptr_t TWO_MEGS = 0x200000;
-
-    _resolver.set_cr3(cr3);
-
-    // Populate the page directory with some page tables for the
-    // the kernel higher-half.
     memset(page_tables_, 0, sizeof(page_tables_));
     PageDirectory& pd = get_relevant_page_directory();
     for (uintptr_t linear_address = KERNEL_VIRTUAL_START_ADDR;

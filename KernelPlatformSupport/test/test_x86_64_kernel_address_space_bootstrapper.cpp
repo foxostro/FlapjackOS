@@ -2,6 +2,25 @@
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <logical_addressing.hpp> // for convert_logical_to_physical_address()
 
+class MockMemoryManagementUnit
+{
+public:
+    MockMemoryManagementUnit() : cr3_(0) {}
+
+    void set_cr3(uintptr_t value)
+    {
+        cr3_ = value;
+    }
+
+    uintptr_t get_cr3()
+    {
+        return cr3_;
+    }
+
+private:
+    uintptr_t cr3_;
+};
+
 TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
 {
     // Setup
@@ -24,11 +43,12 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
     auto& pdpte = pdpt.entries[pdpte_index];
     pdpte.set_address(convert_logical_to_physical_address((uintptr_t)&pd));
 
+    MockMemoryManagementUnit mmu;
+    mmu.set_cr3(resolver.get_cr3());
     x86_64::KernelAddressSpaceBootstrapper bootstrapper;
-    uint64_t cr3 = resolver.get_cr3();
 
     // Action
-    bootstrapper.prepare_address_space(cr3);
+    bootstrapper.prepare_address_space(mmu);
 
     // Test
     constexpr uintptr_t TWO_MEGS = 0x200000;
