@@ -127,8 +127,6 @@ void Kernel::prepare_kernel_address_space()
 
     // Ensure the address space is mapped.
     uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
-    TRACE("linear_address=%p", linear_address);
-    TRACE("KERNEL_MEMORY_REGION_SIZE=0x%x", KERNEL_MEMORY_REGION_SIZE);
 
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
          length > 0;
