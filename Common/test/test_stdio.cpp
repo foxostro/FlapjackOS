@@ -235,12 +235,19 @@ TEST_CASE("test_ptr_arg", "[stdio]")
     // characters for the address portion of the output.
     // This doesn't match the exact behavior of the libc on my system, but I
     // like it anyway.
-    assert(sizeof(void*) == 8);
+#ifdef __i386__
+    static const char *expected[N] = {
+        "ptr is 0xdeadbeef",
+        "ptr is 0x00010000",
+        "ptr is 0xffffffff"
+    };
+#else
     static const char *expected[N] = {
         "ptr is 0x00000000deadbeef",
         "ptr is 0x0000000000010000",
         "ptr is 0x00000000ffffffff"
     };
+#endif
 
     char buf[128];
 
