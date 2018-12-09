@@ -2,7 +2,7 @@
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_PHYSICAL_MEMORY_MAP_HPP
 
 #include <cstdint>
-#include "page_directory.hpp"
+#include "paging_resolver.hpp"
 
 namespace i386 {
 
@@ -16,10 +16,19 @@ public:
 
     PhysicalMemoryMap();
 
+    // Point the physical memory map at the paging structures active on the MMU.
+    // So, whatever the MMU is using right now is what PhysicalMemoryMap will
+    // now act upon.
+    template<typename MMU>
+    void load(MMU &mmu)
+    {
+        resolver_.set_cr3(mmu.get_cr3());
+    }
+
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.
     void map_page(uintptr_t physical_address,
-                  uintptr_t virtual_address,
+                  uintptr_t linear_address,
                   ProtectionFlags flags);
 
     // Mark the specified range of virtual pages as read-only.
@@ -32,11 +41,7 @@ public:
     void invalidate_page(uintptr_t virtual_address);
 
 private:
-    PageDirectory& get_page_directory();
-
-    // Translate the protection flags to equivalent flags for the underlying
-    // hardware paging objects.
-    unsigned translate_protection_flags(ProtectionFlags flags);
+    PagingResolver resolver_;
 };
 
 } // namespace i386

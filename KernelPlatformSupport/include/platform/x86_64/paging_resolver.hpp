@@ -28,6 +28,16 @@ public:
         cr3_ = value;
     }
 
+    PageTableEntry* get_page_table_entry(uintptr_t linear_address)
+    {
+        PageTable* pt = get_page_table(linear_address);
+        if (!pt) {
+            return nullptr;
+        }
+        PageTableEntry* pte = get_page_table_entry(pt, linear_address);
+        return pte;
+    }
+
     PageTable* get_page_table(uintptr_t linear_address)
     {
         PageMapLevelFour* pml4 = get_page_map_level_four();

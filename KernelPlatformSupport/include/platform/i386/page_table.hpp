@@ -1,24 +1,18 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_PAGE_TABLE_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_PAGE_TABLE_HPP
 
-#include "page_table_entry.hpp"
 #include <page_size.hpp>
-#include <cstdint>
+#include "page_table_entry.hpp"
 
 namespace i386 {
 
-// Represents a "Page Table" on Intel x86 CPUs.
 struct alignas(PAGE_SIZE) PageTable {
-    static constexpr size_t NUMBER_OF_PAGE_TABLE_ENTRIES = 1024;
-
-    PageTableEntry entries[NUMBER_OF_PAGE_TABLE_ENTRIES];
-    
-    // Return the page table entry associated with the specified virtual
-    // address.
-    size_t index_for_virtual_address(uintptr_t virtual_address) const;
+public:
+    static constexpr size_t COUNT = 1024;
+    PageTableEntry entries[COUNT];
 };
-static_assert(sizeof(PageTable) == PAGE_SIZE,
-              "A page table on x86 must be 4096 bytes.");
+static_assert(4096 == sizeof(PageTable),
+              "The hardware Page Table object has a length of 4096 bytes.");
 
 } // namespace i386
 

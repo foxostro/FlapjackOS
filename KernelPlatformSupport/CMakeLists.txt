@@ -15,14 +15,13 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
 
 set(I386_SOURCE_FILES
     "include/platform/i386/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/i386_isr_install.c"
-    "include/platform/i386/protection_flags.hpp"
-    "include/platform/i386/page_directory.hpp" "src/platform/i386/page_directory.cpp"
-    "include/platform/i386/page_directory_entry.hpp" "src/platform/i386/page_directory_entry.cpp"
-    "include/platform/i386/page_table.hpp" "src/platform/i386/page_table.cpp"
-    "include/platform/i386/page_table_entry.hpp" "src/platform/i386/page_table_entry.cpp"
+    "include/platform/i386/page_directory.hpp"
+    "include/platform/i386/page_directory_entry.hpp"
+    "include/platform/i386/page_table.hpp"
+    "include/platform/i386/page_table_entry.hpp"
     "include/platform/i386/physical_memory_map.hpp" "src/platform/i386/physical_memory_map.cpp"
-    "include/platform/i386/mmu.hpp" "src/platform/i386/mmu.cpp"
     "include/platform/i386/kernel_address_space_bootstrapper.hpp" "src/platform/i386/kernel_address_space_bootstrapper.cpp"
+    "include/platform/i386/paging_resolver.hpp"
     "include/platform/i386/hardware_memory_management_unit.hpp"
     "include/platform/i386/hardware_task_configuration.hpp" "src/platform/i386/hardware_task_configuration.cpp"
     "include/platform/i386/gdt.hpp" "src/platform/i386/gdt.cpp"
@@ -133,8 +132,6 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_gdt.cpp"
              "test/test_i386_page_directory_entry.cpp"
              "test/test_i386_page_table_entry.cpp"
-             "test/test_i386_page_directory.cpp"
-             "test/test_i386_page_table.cpp"
              )
     else (BUILD_32_BIT_TESTS)
         list(APPEND TEST_SOURCE_FILES
