@@ -15,6 +15,16 @@ public:
 
     PhysicalMemoryMap();
 
+    // Point the physical memory map at the paging structures active on the MMU.
+    // So, whatever the MMU is using right now is what PhysicalMemoryMap will
+    // now act upon.
+    template<typename MMU>
+    void load(MMU &mmu)
+    {
+        // stub
+        (void)mmu;
+    }
+
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.
     void map_page(uintptr_t physical_address,
