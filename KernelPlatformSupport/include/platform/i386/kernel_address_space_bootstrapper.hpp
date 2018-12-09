@@ -27,6 +27,7 @@ public:
     {
         _resolver.set_cr3(mmu.get_cr3());
         prepare_address_space_internal();
+        mmu.reload();
     }
     
 private:
