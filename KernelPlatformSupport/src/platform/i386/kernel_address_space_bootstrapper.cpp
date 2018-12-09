@@ -38,7 +38,8 @@ void KernelAddressSpaceBootstrapper::prepare_page_directory_entry(PageDirectoryE
     uintptr_t page_table_physical_address = pde.get_address();
     if (page_table_physical_address == 0) {
         PageTable* page_table = get_next_page_table();
-        pde.set_address((uintptr_t)page_table);
+        uintptr_t physical_address = convert_logical_to_physical_address((uintptr_t)page_table);
+        pde.set_address(physical_address);
     }
 }
 
