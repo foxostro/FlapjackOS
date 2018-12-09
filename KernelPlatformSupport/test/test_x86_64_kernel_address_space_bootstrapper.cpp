@@ -17,6 +17,11 @@ public:
         return cr3_;
     }
 
+    void reload()
+    {
+        // nothing to do
+    }
+
 private:
     uintptr_t cr3_;
 };

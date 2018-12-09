@@ -12,6 +12,11 @@ public:
     {
         return i386::get_cr3();
     }
+
+    void reload()
+    {
+        i386::set_cr3(i386::get_cr3());
+    }
 };
 
 } // namespace i386
