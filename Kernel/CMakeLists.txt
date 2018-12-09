@@ -12,7 +12,6 @@ set(SOURCE_FILES
     "include/interrupt_lock.hpp" "src/interrupt_lock.cpp"
     "include/panic_interrupt_handler.hpp" "src/panic_interrupt_handler.cpp"
     "include/page_fault_interrupt_handler.hpp" "src/page_fault_interrupt_handler.cpp"
-    "include/logger.hpp" "src/logger.cpp"
     )
 
 include_directories("include"

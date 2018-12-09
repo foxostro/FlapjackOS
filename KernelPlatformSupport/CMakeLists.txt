@@ -11,6 +11,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
     "include/platform/i386/idt.h" "src/platform/i386/idt.c"
+    "include/logger.hpp" "src/logger.cpp"
     )
 
 set(I386_SOURCE_FILES
