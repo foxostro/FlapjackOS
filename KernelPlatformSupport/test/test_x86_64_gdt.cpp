@@ -9,4 +9,5 @@
 TEST_CASE("test_x86_64_gdt_default_ctor", "[x86_64]")
 {
     x86_64::GlobalDescriptorTable table;
+    (void)table;
 }

@@ -8,7 +8,6 @@
 
 #include <malloc/malloc_zone.hpp>
 
-constexpr unsigned VERBOSE = 0;
 constexpr unsigned SMALL = 64;
 
 static uint8_t s_buffer[1024];
