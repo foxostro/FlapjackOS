@@ -1,6 +1,7 @@
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <cassert>
 #include <cstring> // for memset()
+#include <logical_addressing.hpp> // for KERNEL_MEMORY_REGION_SIZE
 
 namespace x86_64 {
 
@@ -11,26 +12,16 @@ KernelAddressSpaceBootstrapper::KernelAddressSpaceBootstrapper()
 
 void KernelAddressSpaceBootstrapper::prepare_address_space_internal()
 {
-    constexpr uintptr_t TWO_MEGS = 0x200000;
     memset(page_tables_, 0, sizeof(page_tables_));
     PageDirectory& pd = get_relevant_page_directory();
-    
-    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
-    for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
-         length > 0;
-         length -= TWO_MEGS) {
-
-        PageDirectoryEntry* pde = _resolver.get_page_directory_entry(&pd, linear_address);
-        assert(pde);
-        prepare_page_directory_entry(*pde);
-
-        linear_address += TWO_MEGS;
-    }
+    resolver_.enumerate_page_directory_entries(pd, (uintptr_t)KERNEL_VIRTUAL_START_ADDR, KERNEL_MEMORY_REGION_SIZE, [&](PageDirectoryEntry& pde){
+        prepare_page_directory_entry(pde);
+    });
 }
 
 PageDirectory& KernelAddressSpaceBootstrapper::get_relevant_page_directory()
 {
-    PageDirectory* pd = _resolver.get_page_directory(KERNEL_VIRTUAL_START_ADDR);
+    PageDirectory* pd = resolver_.get_page_directory(KERNEL_VIRTUAL_START_ADDR);
     assert(pd && "expected a page directory for the kernel memory region");
     return *pd;
 }

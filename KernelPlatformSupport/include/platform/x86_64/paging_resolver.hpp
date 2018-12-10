@@ -28,6 +28,23 @@ public:
         cr3_ = value;
     }
 
+    template<typename Function>
+    void enumerate_page_directory_entries(PageDirectory& pd,
+                                          uintptr_t linear_address,
+                                          size_t length,
+                                          Function&& fn)
+    {
+        constexpr uintptr_t STEP = 0x200000;
+        for (size_t remaining_length = length;
+             remaining_length > 0;
+             remaining_length -= STEP) {
+            PageDirectoryEntry* pde = get_page_directory_entry(&pd, linear_address);
+            assert(pde);
+            fn(*pde);
+            linear_address += STEP;
+        }
+    }
+
     PageTableEntry* get_page_table_entry(uintptr_t linear_address)
     {
         PageTable* pt = get_page_table(linear_address);

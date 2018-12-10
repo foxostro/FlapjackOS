@@ -25,7 +25,7 @@ public:
     template<typename MMU>
     void prepare_address_space(MMU &mmu)
     {
-        _resolver.set_cr3(mmu.get_cr3());
+        resolver_.set_cr3(mmu.get_cr3());
         prepare_address_space_internal();
         mmu.reload();
     }
@@ -35,7 +35,7 @@ private:
     PageTable page_tables_[NUMBER_OF_PAGE_TABLES];
     size_t count_;
     PageTable* next_page_table_;
-    PagingResolver _resolver;
+    PagingResolver resolver_;
 
     void prepare_address_space_internal();
     PageDirectory& get_relevant_page_directory();
