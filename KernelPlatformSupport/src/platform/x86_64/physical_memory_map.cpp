@@ -18,16 +18,27 @@ inline void invlpg(uintptr_t virtual_address)
 
 PhysicalMemoryMap::PhysicalMemoryMap() = default;
 
-void PhysicalMemoryMap::map_page(uintptr_t,
-                                 uintptr_t,
-                                 ProtectionFlags)
+void PhysicalMemoryMap::map_page(uintptr_t physical_address,
+                                 uintptr_t linear_address,
+                                 ProtectionFlags flags)
 {
-    assert(!"stub");
+    PageTableEntry* pte = resolver_.get_page_table_entry(linear_address);
+    assert(pte);
+    pte->set_address(physical_address);
+    pte->set_present(physical_address != 0);
+    pte->set_readwrite((flags & WRITABLE) == WRITABLE);
+    pte->set_global((flags & GLOBAL) == GLOBAL);
+    invalidate_page(linear_address);
 }
 
-void PhysicalMemoryMap::set_readonly(uintptr_t, uintptr_t)
+void PhysicalMemoryMap::set_readonly(uintptr_t begin, uintptr_t end)
 {
-    assert(!"stub");
+    for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
+        PageTableEntry* pte = resolver_.get_page_table_entry(page);
+        assert(pte);
+        pte->set_readwrite(false);
+    }
+    invalidate_pages(begin, end);
 }
 
 void PhysicalMemoryMap::invalidate_pages(uintptr_t begin, uintptr_t end)
