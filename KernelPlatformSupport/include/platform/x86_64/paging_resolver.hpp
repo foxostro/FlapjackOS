@@ -16,6 +16,9 @@ namespace x86_64 {
 // host in order to test the i386 paging structures, or vice-versa.
 class PagingResolver {
 public:
+    using PageDirectory = x86_64::PageDirectory;
+    using PageTable = x86_64::PageTable;
+
     PagingResolver() : cr3_(0) {}
 
     uint64_t get_cr3() const

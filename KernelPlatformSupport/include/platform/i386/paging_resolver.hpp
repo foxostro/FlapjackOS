@@ -14,6 +14,9 @@ namespace i386 {
 // host in order to test the i386 paging structures, or vice-versa.
 class PagingResolver {
 public:
+    using PageDirectory = i386::PageDirectory;
+    using PageTable = i386::PageTable;
+
     PagingResolver() : cr3_(0) {}
 
     uint32_t get_cr3() const

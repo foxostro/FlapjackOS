@@ -1,48 +1,12 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_KERNEL_ADDRESS_SPACE_BOOTSTRAPPER_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_KERNEL_ADDRESS_SPACE_BOOTSTRAPPER_HPP
 
-#include "hardware_memory_management_unit.hpp"
 #include "paging_resolver.hpp"
-#include <page_size.hpp> // for PAGE_SIZE
-#include <logical_addressing.hpp> // for KERNEL_MEMORY_REGION_SIZE
+#include <platform/i386/generic_kernel_address_space_bootstrapper.hpp>
 
 namespace x86_64 {
 
-// Populate the MMU paging structures for kernel logical memory.
-// Also owns the statically allocated storage for those paging structures.
-//
-// This object ensures the MMU paging structures are allocated in mapped memory
-// such that actions to map pages in kernel logical memory do not require
-// additional memory to be allocated.
-//
-// The hardware paging structures used to map kernel logical memory need to be
-// allocated in memory themselves. If allocated in DATA or BSS, those objects
-// will cause the kernel image to become larger than the 2MB limit imposed by
-// the bootstrap code. So, there's a whole dance to bootstrap the address space.
-class KernelAddressSpaceBootstrapper {
-public:
-    KernelAddressSpaceBootstrapper();
-
-    template<typename MMU>
-    void prepare_address_space(MMU &mmu)
-    {
-        resolver_.set_cr3(mmu.get_cr3());
-        prepare_address_space_internal();
-        mmu.reload();
-    }
-    
-private:
-    static constexpr size_t NUMBER_OF_PAGE_TABLES = KERNEL_MEMORY_REGION_SIZE / PAGE_SIZE / PageTable::COUNT;
-    PageTable page_tables_[NUMBER_OF_PAGE_TABLES];
-    size_t count_;
-    PageTable* next_page_table_;
-    PagingResolver resolver_;
-
-    void prepare_address_space_internal();
-    PageDirectory& get_relevant_page_directory();
-    void prepare_page_directory_entry(PageDirectoryEntry& pde);
-    PageTable* get_next_page_table();
-};
+using KernelAddressSpaceBootstrapper = i386::GenericKernelAddressSpaceBootstrapper<x86_64::PagingResolver>;
 
 } // namespace x86_64
 
