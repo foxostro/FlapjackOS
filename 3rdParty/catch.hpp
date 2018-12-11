@@ -4029,7 +4029,7 @@ namespace Catch {
 #include <string>
 
 #ifndef CATCH_CONFIG_CONSOLE_WIDTH
-#define CATCH_CONFIG_CONSOLE_WIDTH 80
+#define CATCH_CONFIG_CONSOLE_WIDTH 512
 #endif
 
 namespace Catch {
