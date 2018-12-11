@@ -11,6 +11,7 @@ class PhysicalMemoryMap {
 public:
     static constexpr unsigned PRESENT = (1 << 0);
     static constexpr unsigned WRITABLE = (1 << 1);
+    static constexpr unsigned GLOBAL = (1 << 2);
     using ProtectionFlags = unsigned;
 
     PhysicalMemoryMap();

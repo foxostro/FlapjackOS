@@ -132,12 +132,12 @@ void Kernel::prepare_kernel_address_space()
          length > 0;
          length -= PAGE_SIZE) {
 
-        TRACE("phys_map_.map_page(%p, %p, WRITABLE)",
+        TRACE("phys_map_.map_page(%p, %p, WRITABLE|GLOBAL)",
               convert_logical_to_physical_address(linear_address),
               linear_address);
         phys_map_.map_page(convert_logical_to_physical_address(linear_address),
                            linear_address,
-                           phys_map_.WRITABLE);
+                           phys_map_.WRITABLE | phys_map_.GLOBAL);
 
         linear_address += PAGE_SIZE;
 

@@ -23,6 +23,7 @@ void PhysicalMemoryMap::map_page(uintptr_t physical_address,
     pte->set_address(physical_address);
     pte->set_present(physical_address != 0);
     pte->set_readwrite((flags & WRITABLE) == WRITABLE);
+    pte->set_global((flags & GLOBAL) == GLOBAL);
     invalidate_page(linear_address);
 }
 
