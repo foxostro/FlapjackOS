@@ -136,6 +136,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_gdt.cpp"
              "test/test_i386_page_directory_entry.cpp"
              "test/test_i386_page_table_entry.cpp"
+             "test/test_i386_physical_memory_map.cpp"
              "test/test_i386_kernel_address_space_bootstrapper.cpp"
              )
     else (BUILD_32_BIT_TESTS)
