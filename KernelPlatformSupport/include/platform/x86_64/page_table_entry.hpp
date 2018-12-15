@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_X86_64_PAGE_TABLE_ENTRY_HPP
 
 #include <cstdint>
+#include "page_size.hpp"
 
 namespace x86_64 {
 
@@ -44,8 +45,8 @@ public:
     static constexpr uint64_t GLOBAL          = 1 << 8;
     static constexpr uint64_t EXECUTE_DISABLE = 1ull << 63;
     static constexpr uint64_t ADDRESS_ZERO_MASK = 0b1111111111110000000000000000000000000000000000000000111111111111;
-    static constexpr uint64_t ADDRESS_MASK = 0b1111111111111111111111111111111111111111;
-    static constexpr uint64_t ADDRESS_SHIFT = 12;
+    static constexpr uint64_t ADDRESS_SIGN_EXT_MASK = 0b1111111111110000000000000000000000000000000000000000000000000000;
+    static constexpr uint64_t ADDRESS_HIGH_BIT = 0x8000000000000;
 
     uint64_t data;
 
@@ -193,14 +194,16 @@ public:
 
     void set_address(uintptr_t address)
     {
+        assert_is_page_aligned(address);
         data = data & ADDRESS_ZERO_MASK;
-        const uint64_t field = (address & ADDRESS_MASK) << ADDRESS_SHIFT;
+        const uint64_t field = (address & ~ADDRESS_ZERO_MASK);
         data = data | field;
     }
 
     uint64_t get_address() const
     {
-        return (data & ~ADDRESS_ZERO_MASK) >> ADDRESS_SHIFT;
+        uint64_t address = (data & ~ADDRESS_ZERO_MASK);
+        return address;
     }
 };
 
