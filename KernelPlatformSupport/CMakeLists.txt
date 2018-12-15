@@ -23,7 +23,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/generic_physical_memory_map.hpp"
     "include/platform/i386/physical_memory_map.hpp"
     "include/platform/i386/generic_kernel_address_space_bootstrapper.hpp"
-    "include/platform/i386/kernel_address_space_bootstrapper.hpp" "src/platform/i386/kernel_address_space_bootstrapper.cpp"
+    "include/platform/i386/kernel_address_space_bootstrapper.hpp"
     "include/platform/i386/paging_resolver.hpp"
     "include/platform/i386/hardware_memory_management_unit.hpp"
     "include/platform/i386/hardware_task_configuration.hpp" "src/platform/i386/hardware_task_configuration.cpp"
@@ -54,7 +54,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/ltr.hpp" "src/platform/x86_64/ltr.S"
     "include/platform/x86_64/creg.hpp" "src/platform/x86_64/creg.S"
     "include/platform/i386/generic_kernel_address_space_bootstrapper.hpp"
-    "include/platform/x86_64/kernel_address_space_bootstrapper.hpp" "src/platform/x86_64/kernel_address_space_bootstrapper.cpp"
+    "include/platform/x86_64/kernel_address_space_bootstrapper.hpp"
     "include/platform/x86_64/paging_resolver.hpp"
     "include/platform/x86_64/hardware_memory_management_unit.hpp"
     )
