@@ -13,11 +13,11 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
     memset(&pdpt, 0, sizeof(pdpt));
     memset(&pd, 0, sizeof(pd));
 
-    MockMemoryManagementUnit mmu;
+    MockMemoryManagementUnit64 mmu;
     uintptr_t cr3 = mmu.convert_logical_to_physical_address((uintptr_t)&pml4);
     mmu.set_cr3(cr3);
 
-    x86_64::PagingResolver<MockMemoryManagementUnit> resolver(mmu);
+    x86_64::PagingResolver<MockMemoryManagementUnit64> resolver(mmu);
     resolver.set_cr3(cr3);
 
     size_t pml4e_index = resolver.get_page_map_level_four_index(mmu.get_kernel_virtual_start_address());
@@ -28,7 +28,7 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
     auto& pdpte = pdpt.entries[pdpte_index];
     pdpte.set_address(mmu.convert_logical_to_physical_address((uintptr_t)&pd));
 
-    x86_64::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit> bootstrapper(mmu);
+    x86_64::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit64> bootstrapper(mmu);
 
     // Action
     bootstrapper.prepare_address_space();

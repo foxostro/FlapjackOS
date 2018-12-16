@@ -8,12 +8,25 @@ TEST_CASE("test_i386_kernel_address_space_bootstrapper", "[i386]")
     i386::PageDirectory pd;
     memset(&pd, 0, sizeof(pd));
     
-    MockMemoryManagementUnit mmu;
+    MockMemoryManagementUnit32 mmu;
+
+    {
+        uint32_t fakePhysicalAddress = 0x100000 + 512*0x1000;
+        mmu.register_address((uintptr_t)&pd, fakePhysicalAddress);
+    }
+
     i386::PagingResolver resolver(mmu);
     uintptr_t cr3 = mmu.convert_logical_to_physical_address((uintptr_t)&pd);
     resolver.set_cr3(cr3);
     mmu.set_cr3(cr3);
-    i386::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit> bootstrapper(mmu);
+    i386::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit32> bootstrapper(mmu);
+
+    for (size_t i = 0; i < bootstrapper.NUMBER_OF_PAGE_TABLES; ++i) {
+        auto& page_table = bootstrapper.page_tables_[i];
+        uintptr_t linearAddress = (uintptr_t)&page_table;
+        uint32_t fakePhysicalAddress = 0x100000 + i*0x1000;
+        mmu.register_address(linearAddress, fakePhysicalAddress);
+    }
 
     // Action
     bootstrapper.prepare_address_space();

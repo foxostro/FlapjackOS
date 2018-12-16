@@ -2,20 +2,23 @@
 #define KERNELPLATFORMSUPPORT_TEST_MOCK_MEMORY_MANAGEMENT_UNIT_HPP
 
 #include <cstdint>
+#include <map>
 
-#ifdef __i386__
-// 32-bit system
-class MockMemoryManagementUnit
+// MMU for a 32-bit address space.
+class MockMemoryManagementUnit32
 {
 public:
-    MockMemoryManagementUnit() : cr3_(0) {}
+    using PhysicalAddress = uint32_t;
+    using LinearAddress = uintptr_t;
 
-    void set_cr3(uint32_t value)
+    MockMemoryManagementUnit32() : cr3_(0) {}
+
+    void set_cr3(PhysicalAddress value)
     {
         cr3_ = value;
     }
 
-    uint32_t get_cr3()
+    PhysicalAddress get_cr3()
     {
         return cr3_;
     }
@@ -25,32 +28,43 @@ public:
         // nothing to do
     }
 
-    uintptr_t convert_physical_to_logical_address(uint32_t physical_address)
+    LinearAddress convert_physical_to_logical_address(PhysicalAddress physical_address)
     {
-	    return physical_address;
+        LinearAddress result = mapPhysicalToLinear_.find(physical_address)->second;
+        return result;
     }
     
-    uint32_t convert_logical_to_physical_address(uintptr_t logical_address)
+    PhysicalAddress convert_logical_to_physical_address(LinearAddress logical_address)
     {
-	    return logical_address;
+        PhysicalAddress result = mapLinearToPhysical_.find(logical_address)->second;
+        return result;
     }
 
     // Gets the address of the start of the kernel virtual memory region.
     // This is the start of the so-called higher-half.
-    constexpr uintptr_t get_kernel_virtual_start_address()
+    constexpr PhysicalAddress get_kernel_virtual_start_address()
     {
         return KERNEL_VIRTUAL_START_ADDR_32BIT;
     }
 
+    void register_address(LinearAddress linear_address,
+                          PhysicalAddress physical_address)
+    {
+        mapLinearToPhysical_[linear_address] = physical_address;
+        mapPhysicalToLinear_[physical_address] = linear_address;
+    }
+
 private:
-    uint32_t cr3_;
+    PhysicalAddress cr3_;
+    std::map<LinearAddress, PhysicalAddress> mapLinearToPhysical_;
+    std::map<PhysicalAddress, LinearAddress> mapPhysicalToLinear_;
 };
-#else
-// 64-bit system
-class MockMemoryManagementUnit
+
+// MMU for a 64-bit address space.
+class MockMemoryManagementUnit64
 {
 public:
-    MockMemoryManagementUnit() : cr3_(0) {}
+    MockMemoryManagementUnit64() : cr3_(0) {}
 
     void set_cr3(uint64_t value)
     {
@@ -69,17 +83,17 @@ public:
 
     uintptr_t convert_physical_to_logical_address(uint64_t physical_address)
     {
-	    return physical_address;
+        return physical_address;
     }
     
     uint64_t convert_logical_to_physical_address(uintptr_t logical_address)
     {
-	    return logical_address;
+        return logical_address;
     }
 
     // Gets the address of the start of the kernel virtual memory region.
     // This is the start of the so-called higher-half.
-    constexpr uintptr_t get_kernel_virtual_start_address()
+    constexpr uint64_t get_kernel_virtual_start_address()
     {
         return KERNEL_VIRTUAL_START_ADDR_64BIT;
     }
@@ -87,8 +101,5 @@ public:
 private:
     uint64_t cr3_;
 };
-static_assert(sizeof(uint64_t) >= sizeof(uintptr_t),
-              "Make sure we can store a pointer in a uint64_t.");
-#endif
 
 #endif // KERNELPLATFORMSUPPORT_TEST_MOCK_MEMORY_MANAGEMENT_UNIT_HPP

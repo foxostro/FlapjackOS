@@ -39,9 +39,15 @@ public:
         mmu_.reload();
     }
     
+#ifdef TESTING
+public:
+#else
 private:
+#endif
     static constexpr size_t NUMBER_OF_PAGE_TABLES = KERNEL_MEMORY_REGION_SIZE / PAGE_SIZE / PageTable::COUNT;
     PageTable page_tables_[NUMBER_OF_PAGE_TABLES];
+
+private:
     size_t count_;
     PageTable* next_page_table_;
     PagingResolver resolver_;
