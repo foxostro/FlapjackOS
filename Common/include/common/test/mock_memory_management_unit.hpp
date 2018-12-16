@@ -4,7 +4,10 @@
 #include <cstdint>
 #include <map>
 
-// MMU for a 32-bit address space.
+// Mock MMU object.
+// The mock address space is 32-bit and the host address space may be different
+// than that, i.e., 64-bit. Though, this requires method calls to associate
+// addresses in the two spaces ahead of time.
 class MockMemoryManagementUnit32
 {
 public:
@@ -60,18 +63,19 @@ private:
     std::map<PhysicalAddress, LinearAddress> mapPhysicalToLinear_;
 };
 
-// MMU for a 64-bit address space.
-class MockMemoryManagementUnit64
+// Mock MMU object.
+// The host system address space is the same size as the mock address space.
+class MockMemoryManagementUnit
 {
 public:
-    MockMemoryManagementUnit64() : cr3_(0) {}
+    MockMemoryManagementUnit() : cr3_(0) {}
 
-    void set_cr3(uint64_t value)
+    void set_cr3(uintptr_t value)
     {
         cr3_ = value;
     }
 
-    uint64_t get_cr3()
+    uintptr_t get_cr3()
     {
         return cr3_;
     }
@@ -81,25 +85,25 @@ public:
         // nothing to do
     }
 
-    uintptr_t convert_physical_to_logical_address(uint64_t physical_address)
+    uintptr_t convert_physical_to_logical_address(uintptr_t physical_address)
     {
         return physical_address;
     }
     
-    uint64_t convert_logical_to_physical_address(uintptr_t logical_address)
+    uintptr_t convert_logical_to_physical_address(uintptr_t logical_address)
     {
         return logical_address;
     }
 
     // Gets the address of the start of the kernel virtual memory region.
     // This is the start of the so-called higher-half.
-    constexpr uint64_t get_kernel_virtual_start_address()
+    constexpr uintptr_t get_kernel_virtual_start_address()
     {
         return KERNEL_VIRTUAL_START_ADDR_64BIT;
     }
 
 private:
-    uint64_t cr3_;
+    uintptr_t cr3_;
 };
 
 #endif // COMMON_INCLUDE_COMMON_TEST_MOCK_MEMORY_MANAGEMENT_UNIT_HPP
