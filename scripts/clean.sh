@@ -12,10 +12,6 @@ rm -rf "CMakeCache.txt" \
        "Kernel/CTestTestfile.cmake" \
        "Kernel/FlapjackOS.build/" \
        "Kernel/cmake_install.cmake" \
-       "KernelPlatformSupport/CMakeScripts/" \
-       "KernelPlatformSupport/CTestTestfile.cmake" \
-       "KernelPlatformSupport/FlapjackOS.build/" \
-       "KernelPlatformSupport/cmake_install.cmake" \
        "Malloc/CTestTestfile.cmake" \
        "Malloc/FlapjackOS.build/" \
        "Malloc/cmake_install.cmake" \

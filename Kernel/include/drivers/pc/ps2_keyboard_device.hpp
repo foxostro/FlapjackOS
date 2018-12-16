@@ -1,5 +1,5 @@
-#ifndef FLAPJACKOS_DRIVERS_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
-#define FLAPJACKOS_DRIVERS_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
 
 #include <common/keyboard_device.hpp>
 #include <common/interrupt_handler.hpp>
@@ -31,4 +31,4 @@ private:
     bool step_state_machine(KeyboardDriverState &state, KeyboardEvent &output); // TODO: Extract this state machine to its own class.
 };
 
-#endif // FLAPJACKOS_DRIVERS_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
