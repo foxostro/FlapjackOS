@@ -20,11 +20,11 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
     x86_64::PagingResolver<MockMemoryManagementUnit> resolver(mmu);
     resolver.set_cr3(cr3);
 
-    size_t pml4e_index = resolver.get_page_map_level_four_index(KERNEL_VIRTUAL_START_ADDR);
+    size_t pml4e_index = resolver.get_page_map_level_four_index(mmu.get_kernel_virtual_start_address());
     auto& pml4e = pml4.entries[pml4e_index];
     pml4e.set_address(mmu.convert_logical_to_physical_address((uintptr_t)&pdpt));
 
-    size_t pdpte_index = resolver.get_page_directory_pointer_table_index(KERNEL_VIRTUAL_START_ADDR);
+    size_t pdpte_index = resolver.get_page_directory_pointer_table_index(mmu.get_kernel_virtual_start_address());
     auto& pdpte = pdpt.entries[pdpte_index];
     pdpte.set_address(mmu.convert_logical_to_physical_address((uintptr_t)&pd));
 
@@ -35,7 +35,7 @@ TEST_CASE("test_x86_64_kernel_address_space_bootstrapper", "[x86_64]")
 
     // Test
     constexpr uintptr_t TWO_MEGS = 0x200000;
-    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
+    uintptr_t linear_address = mmu.get_kernel_virtual_start_address();
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
          length > 0;
          length -= TWO_MEGS) {

@@ -110,7 +110,7 @@ void Kernel::prepare_kernel_address_space()
     phys_map_.reload();
 
     // Ensure the address space is mapped.
-    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
+    uintptr_t linear_address = mmu_.get_kernel_virtual_start_address();
 
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
          length > 0;

@@ -35,6 +35,13 @@ public:
         assert(logical_address >= KERNEL_VIRTUAL_START_ADDR);
         return logical_address - KERNEL_VIRTUAL_START_ADDR;
     }
+
+    // Gets the address of the start of the kernel virtual memory region.
+    // This is the start of the so-called higher-half.
+    constexpr uintptr_t get_kernel_virtual_start_address()
+    {
+        return KERNEL_VIRTUAL_START_ADDR;
+    }
 };
 
 } // namespace i386

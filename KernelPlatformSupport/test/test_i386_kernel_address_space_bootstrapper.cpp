@@ -20,7 +20,7 @@ TEST_CASE("test_i386_kernel_address_space_bootstrapper", "[i386]")
 
     // Test
     constexpr uintptr_t FOUR_MEGS = 0x400000;
-    uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
+    uintptr_t linear_address = mmu.get_kernel_virtual_start_address();
     for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
          length > 0;
          length -= FOUR_MEGS) {

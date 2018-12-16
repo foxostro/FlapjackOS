@@ -35,17 +35,17 @@ TEST_CASE("i386::PhysicalMemoryMap::map_page -- basic example", "[i386]")
     phys_map.reload();
 
     // Action
-    phys_map.map_page(context.mmu_.convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR),
-                      KERNEL_VIRTUAL_START_ADDR,
+    phys_map.map_page(context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()),
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE | phys_map.GLOBAL);
 
     // Test
-    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
     REQUIRE(pte->is_global() == true);
-    REQUIRE(pte->get_address() == context.mmu_.convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR));
+    REQUIRE(pte->get_address() == context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()));
 }
 
 TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- zero size region", "[i386]")
@@ -57,17 +57,18 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- zero size region", "[i386]")
     i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
-                      KERNEL_VIRTUAL_START_ADDR,
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
-                      KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE,
+                      context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
                       phys_map.WRITABLE);
 
     // Action
-    phys_map.set_readonly(KERNEL_VIRTUAL_START_ADDR, KERNEL_VIRTUAL_START_ADDR);
+    phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
+                          context.mmu_.get_kernel_virtual_start_address());
 
     // Test
-    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
@@ -83,22 +84,23 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- one-byte region region", "[i
     i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
-                      KERNEL_VIRTUAL_START_ADDR,
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
-                      KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE,
+                      context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
                       phys_map.WRITABLE);
 
     // Action
-    phys_map.set_readonly(KERNEL_VIRTUAL_START_ADDR, KERNEL_VIRTUAL_START_ADDR+1);
+    phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
+                          1 + context.mmu_.get_kernel_virtual_start_address());
 
     // Test
-    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == false);
 
-    pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE);
+    pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
@@ -115,22 +117,23 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- one-page region region", "[i
     i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
-                      KERNEL_VIRTUAL_START_ADDR,
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
-                      KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE,
+                      context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
                       phys_map.WRITABLE);
 
     // Action
-    phys_map.set_readonly(KERNEL_VIRTUAL_START_ADDR, KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE);
+    phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
+                          context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
 
     // Test
-    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == false);
 
-    pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE);
+    pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);

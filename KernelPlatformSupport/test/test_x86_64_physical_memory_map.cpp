@@ -23,8 +23,8 @@ public:
         uintptr_t cr3 = mmu_.convert_logical_to_physical_address((uintptr_t)&pml4_);
         resolver_.set_cr3(cr3);
         mmu_.set_cr3(cr3);
-        resolver_.get_page_map_level_four_entry(&pml4_, KERNEL_VIRTUAL_START_ADDR)->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&pdpt_));
-        resolver_.get_page_directory_pointer_table_entry(&pdpt_, KERNEL_VIRTUAL_START_ADDR)->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&page_directory_));
+        resolver_.get_page_map_level_four_entry(&pml4_, mmu_.get_kernel_virtual_start_address())->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&pdpt_));
+        resolver_.get_page_directory_pointer_table_entry(&pdpt_, mmu_.get_kernel_virtual_start_address())->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&page_directory_));
         bootstrapper_.prepare_address_space();
     }
 };
@@ -41,17 +41,17 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
     phys_map.reload();
 
     // Action
-    phys_map.map_page(context.mmu_.convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR),
-                      KERNEL_VIRTUAL_START_ADDR,
+    phys_map.map_page(context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()),
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE | phys_map.GLOBAL);
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
     REQUIRE(pte->is_global() == true);
-    REQUIRE(pte->get_address() == context.mmu_.convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR));
+    REQUIRE(pte->get_address() == context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()));
 }
 
 TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_64]")
@@ -63,17 +63,18 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_6
     x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
-                      KERNEL_VIRTUAL_START_ADDR,
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
-                      KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE,
+                      context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
                       phys_map.WRITABLE);
 
     // Action
-    phys_map.set_readonly(KERNEL_VIRTUAL_START_ADDR, KERNEL_VIRTUAL_START_ADDR);
+    phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
+                          context.mmu_.get_kernel_virtual_start_address());
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
@@ -89,22 +90,23 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "
     x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
-                      KERNEL_VIRTUAL_START_ADDR,
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
-                      KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE,
+                      context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
                       phys_map.WRITABLE);
 
     // Action
-    phys_map.set_readonly(KERNEL_VIRTUAL_START_ADDR, KERNEL_VIRTUAL_START_ADDR+1);
+    phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
+                          context.mmu_.get_kernel_virtual_start_address()+1);
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == false);
 
-    pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE);
+    pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
@@ -121,22 +123,23 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "
     x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
-                      KERNEL_VIRTUAL_START_ADDR,
+                      context.mmu_.get_kernel_virtual_start_address(),
                       phys_map.WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
-                      KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE,
+                      context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
                       phys_map.WRITABLE);
 
     // Action
-    phys_map.set_readonly(KERNEL_VIRTUAL_START_ADDR, KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE);
+    phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
+                          context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR);
+    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == false);
 
-    pte = context.resolver_.get_page_table_entry(KERNEL_VIRTUAL_START_ADDR+PAGE_SIZE);
+    pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
