@@ -203,6 +203,14 @@ public:
     uint64_t get_address() const
     {
         uint64_t address = (data & ~ADDRESS_ZERO_MASK);
+
+        // Bits 63-48 are sign extension bits. These bits are copies of bit 47.
+        // The Intel documentation defines such an address to be "canonical".
+        // See also: Intel manual, volume 3a, section 4.1.1.
+        if (address & (1ull<<47)) {
+            address = address | ADDRESS_SIGN_EXT_MASK;
+        }
+        
         return address;
     }
 };

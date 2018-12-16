@@ -320,7 +320,7 @@ TEST_CASE("test_x86_64_page_table_entry_set_addr_1", "[x86_64]")
 {
     x86_64::PageTableEntry entry;
     entry.data = 0;
-    entry.set_address(0x000ffffffffff000);
+    entry.set_address(0xfffffffffffff000);
     REQUIRE(entry.data == 0b0000000000001111111111111111111111111111111111111111000000000000);
 }
 
@@ -328,5 +328,5 @@ TEST_CASE("test_x86_64_page_table_entry_get_address", "[x86_64]")
 {
     x86_64::PageTableEntry entry;
     entry.data = 0b0000000000001111111111111111111111111111111111111111000000000000;
-    REQUIRE(entry.get_address() == 0x000ffffffffff000);
+    REQUIRE(entry.get_address() == 0xfffffffffffff000);
 }
