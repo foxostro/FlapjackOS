@@ -117,11 +117,7 @@ void Kernel::print_welcome_message()
 
 void Kernel::prepare_kernel_address_space()
 {
-    TRACE("begin");
-    
     address_space_bootstrapper_.prepare_address_space(mmu_);
-
-    TRACE("now manipulating PhysicalMemoryMap...");
 
     phys_map_.load(mmu_);
 
@@ -132,27 +128,18 @@ void Kernel::prepare_kernel_address_space()
          length > 0;
          length -= PAGE_SIZE) {
 
-        TRACE("phys_map_.map_page(%p, %p, WRITABLE|GLOBAL)",
-              convert_logical_to_physical_address(linear_address),
-              linear_address);
         phys_map_.map_page(convert_logical_to_physical_address(linear_address),
                            linear_address,
                            phys_map_.WRITABLE | phys_map_.GLOBAL);
 
         linear_address += PAGE_SIZE;
-
-        TRACE("looping. length=0x%x", length);
     }
-
-    TRACE("setting as read-only...");
 
     // Setup correct permissions for the .text and .rodata sections.
     phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,
                            (uintptr_t)g_kernel_text_end);
     phys_map_.set_readonly((uintptr_t)g_kernel_rodata_begin,
                            (uintptr_t)g_kernel_rodata_end);
-
-    TRACE("end");
 }
 
 void Kernel::report_installed_memory()
