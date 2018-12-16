@@ -63,34 +63,31 @@ set(X86_64_SOURCE_FILES
 set(PC_SOURCE_FILES
     "include/platform/pc/pic.h" "src/platform/pc/pic.c"
     )
-    
+
+set(PLATFORM_SPECIFIC_SOURCE_FILES "${PC_SOURCE_FILES}")
+
 if(CMAKE_CROSSCOMPILING)
-    set(PLATFORM_SPECIFIC_SOURCE_FILES
-        "src/${BUILD_ARCH}/get_frame_pointer.S"
-        "src/${BUILD_ARCH}/halt.S"
-        "src/${BUILD_ARCH}/idt_asm.S"
-        "src/${BUILD_ARCH}/inout.S"
-        "src/${BUILD_ARCH}/interrupt_asm.S"
-        "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
-        )
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/${CMAKE_SYSTEM_PROCESSOR}/isr_wrapper_asm.S.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")
-
     list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
-        "${PC_SOURCE_FILES}"
-        )
+         "src/${BUILD_ARCH}/get_frame_pointer.S"
+         "src/${BUILD_ARCH}/halt.S"
+         "src/${BUILD_ARCH}/idt_asm.S"
+         "src/${BUILD_ARCH}/inout.S"
+         "src/${BUILD_ARCH}/interrupt_asm.S"
+         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
+         )
 else(CMAKE_CROSSCOMPILING)
-    set(PLATFORM_SPECIFIC_SOURCE_FILES
-        "src/host/get_frame_pointer.c"
-        "src/host/halt.c"
-        "src/host/idt.c"
-        "src/host/inout.c"
-        "src/host/interrupt.c"
-        "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c"
-        "${PC_SOURCE_FILES}"
-        )
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/KernelPlatformSupport/src/host/isr_wrapper.c.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c")
+    list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
+         "src/host/get_frame_pointer.c"
+         "src/host/halt.c"
+         "src/host/idt.c"
+         "src/host/inout.c"
+         "src/host/interrupt.c"
+         "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c"
+         )
 endif(CMAKE_CROSSCOMPILING)
 
 if (${BUILD_ARCH} STREQUAL "i386")
