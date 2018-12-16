@@ -1,9 +1,7 @@
 #include "catch.hpp"
 #include "page_frame_allocator_configuration_operation.hpp"
 #include "boot.h"
-
-// AFOX_TODO: Need a better way to share test files across libraries.
-#include "../../KernelPlatformSupport/test/mock_memory_management_unit.hpp"
+#include <common/test/mock_memory_management_unit.hpp>
 
 class DummyPageFrameEnumerator {
 public:

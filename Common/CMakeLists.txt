@@ -36,6 +36,8 @@ set(SOURCE_FILES
     "include/common/atomic_counter.hpp"
     "include/common/shared_pointer.hpp"
     "include/common/cmpxchg.h" "src/cmpxchg.c"
+
+    "include/common/test/mock_memory_management_unit.hpp"
     )
 
 if(CMAKE_CROSSCOMPILING)

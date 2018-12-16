@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include <platform/i386/kernel_address_space_bootstrapper.hpp>
-#include "mock_memory_management_unit.hpp"
+#include <common/test/mock_memory_management_unit.hpp>
 
 TEST_CASE("test_i386_kernel_address_space_bootstrapper", "[i386]")
 {
