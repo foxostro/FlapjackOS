@@ -232,22 +232,9 @@ void Kernel::enable_interrupts()
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.
 extern "C"
-void interrupt_dispatch(unsigned interrupt_number,
-                        unsigned edi,
-                        unsigned esi,
-                        unsigned ebp,
-                        unsigned esp,
-                        unsigned ebx,
-                        unsigned edx,
-                        unsigned ecx,
-                        unsigned eax,
-                        unsigned error_code,
-                        unsigned eip)
+void interrupt_dispatch_trampoline(const InterruptDispatcher::Params* params)
 {
-    const InterruptDispatcher::Params params = {
-        edi, esi, ebp, esp, ebx, edx, ecx, eax, error_code, eip
-    };
-    g_kernel.dispatch_interrupt(interrupt_number, params);
+    g_kernel.dispatch_interrupt(*params);
 }
 
 static void call_global_constructors()

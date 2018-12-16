@@ -25,8 +25,10 @@ auto InterruptDispatcher::get_handler(unsigned interrupt_number) -> Handler
     return handler;
 }
 
-void InterruptDispatcher::dispatch(unsigned interrupt_number, const Params& params) noexcept
+void InterruptDispatcher::dispatch(const Params& params) noexcept
 {
+    assert(params.size == sizeof(Params));
+    unsigned interrupt_number = params.interrupt_number;
     assert(interrupt_number < IDT_MAX);
     bool spurious = clear_hardware_interrupt(interrupt_number);
     if (!spurious) {

@@ -24,7 +24,7 @@ public:
     Handler get_handler(unsigned interrupt_number);
 
     // Invoked when an interrupt occurs to redirect to the appropriate handler.
-    void dispatch(unsigned interrupt_number, const Params& params) noexcept;
+    void dispatch(const Params& params) noexcept;
 
     // Indicates that the kernel should panic if the handler is null.
     // This is useful for handling faults early in the boot process, before the

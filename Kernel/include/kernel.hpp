@@ -45,10 +45,9 @@ public:
 
     // Redirect the interrupt to the appropriate handler.
     template<typename Params> inline
-    void dispatch_interrupt(unsigned interrupt_number,
-                            const Params& params) noexcept
+    void dispatch_interrupt(const Params& params) noexcept
     {
-        interrupt_dispatcher_.dispatch(interrupt_number, params);
+        interrupt_dispatcher_.dispatch(params);
     }
 
     // Disables interrupts.

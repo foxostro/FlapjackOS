@@ -11,7 +11,11 @@ isr_wrapper_<%= isr %>:
     cli
     pusha
     pushl $<%= isr %>
-    call interrupt_dispatch
+    pushl $48 # Push the size of the context structure
+    pushl %esp # Push the address of the context structure
+    call interrupt_dispatch_trampoline
+    addl $4, %esp # Clean up the address of the context structure
+    addl $4, %esp # Clean up the size of the context structures
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
@@ -26,7 +30,11 @@ isr_wrapper_<%= isr %>:
     cli
     pusha
     pushl $<%= isr %>
-    call interrupt_dispatch
+    pushl $48 # Push the size of the context structure
+    pushl %esp # Push the address of the context structure
+    call interrupt_dispatch_trampoline
+    addl $4, %esp # Clean up the address of the context structure
+    addl $4, %esp # Clean up the size of the context structures
     addl $4, %esp # Clean up the interrupt number.
     popa
     sti
