@@ -19,11 +19,11 @@ cmake --build "$TEST32_BUILD_DIR"
 cmake --build "$TEST64_BUILD_DIR"
 
 pushd "$TEST32_BUILD_DIR"
-echo "Running 32-bit unit tests."
+echo "Running tests for the i386 kernel."
 ctest --output-on-failure
 popd
 
 pushd "$TEST64_BUILD_DIR"
-echo "Running 64-bit unit tests."
+echo "Running tests for the x86_64 kernel."
 ctest --output-on-failure
 popd
