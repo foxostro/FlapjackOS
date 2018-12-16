@@ -11,10 +11,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
-option(BUILD_32_BIT_TESTS "Build 32-bit unit tests" OFF)
-
-
 # Function to generate source code from a template file.
 function(GenerateSourceFromTemplate
          TEMPLATE_FILENAME
@@ -38,10 +34,8 @@ if(CMAKE_CROSSCOMPILING)
 
     set(BUILD_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
     if (BUILD_ARCH STREQUAL "i386")
-        set(BUILD_ARCH "i386")
         set(BUILD_ARCH_FLAGS "-m32")
     elseif (BUILD_ARCH STREQUAL "x86_64")
-        set(BUILD_ARCH "x86_64")
         set(BUILD_ARCH_FLAGS "-m64")
     endif ()
 
@@ -66,16 +60,17 @@ if(CMAKE_CROSSCOMPILING)
 
 else(CMAKE_CROSSCOMPILING)
 
-    # We define BUILD_ARCH separately from CMAKE_SYSTEM_PROCESSOR: because we
-    # sometimes want to build an i386 test program to test our i386 code, and
-    # we need to carry that information through to various submodules.
-    if (BUILD_32_BIT_TESTS)
+    # We define TEST_BUILD_ARCH separately from CMAKE_SYSTEM_PROCESSOR: because
+    # we sometimes want to build an x86_64 test program to test our i386 code,
+    # and we need to carry that information through to various submodules.
+    SET(TEST_BUILD_ARCH "x86_64" CACHE STRING "The architecture of the system-under-test. Though, all tests are built in the architecture of the host machine.")
+
+    set(BUILD_ARCH "${TEST_BUILD_ARCH}")
+    if (BUILD_ARCH STREQUAL "i386")
         set(BUILD_ARCH_FLAGS "-m32")
-        set(BUILD_ARCH "i386")
-    else (BUILD_32_BIT_TESTS)
+    elseif (BUILD_ARCH STREQUAL "x86_64")
         set(BUILD_ARCH_FLAGS "-m64")
-        set(BUILD_ARCH "x86_64")
-    endif (BUILD_32_BIT_TESTS)
+    endif ()
 
     # When the target system is the host system, we are building natively.
     # In this case, define a flag to indicate we are doing testing and choose

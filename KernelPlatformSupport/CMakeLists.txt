@@ -131,7 +131,7 @@ if (NOT CMAKE_CROSSCOMPILING)
         "test/test_idt.cpp"
         )
 
-    if (BUILD_32_BIT_TESTS)
+    if (${BUILD_ARCH} STREQUAL "i386")
         list(APPEND TEST_SOURCE_FILES
              "test/test_i386_gdt.cpp"
              "test/test_i386_page_directory_entry.cpp"
@@ -139,7 +139,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_physical_memory_map.cpp"
              "test/test_i386_kernel_address_space_bootstrapper.cpp"
              )
-    else (BUILD_32_BIT_TESTS)
+    elseif (${BUILD_ARCH} STREQUAL "x86_64")
         list(APPEND TEST_SOURCE_FILES
              "test/test_x86_64_gdt.cpp"
              "test/test_x86_64_tss.cpp"
@@ -148,7 +148,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_x86_64_physical_memory_map.cpp"
              "test/test_x86_64_kernel_address_space_bootstrapper.cpp"
              )
-    endif (BUILD_32_BIT_TESTS)
+    endif ()
 
     add_executable(KernelPlatformSupportTest
                    "${TEST_SOURCE_FILES}"
