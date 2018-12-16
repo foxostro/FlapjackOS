@@ -3,7 +3,6 @@
 
 #include <multiboot.h>
 #include <page_frame_allocator.hpp>
-#include <interrupt_dispatcher.hpp>
 #include <kernel_policy.hpp>
 
 #include <common/keyboard_device.hpp>
@@ -17,11 +16,11 @@ class Kernel {
 public:
     using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
     using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
+    using InterruptDispatcher = KernelPolicy::InterruptDispatcher;
+    using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
     using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
-    using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
-    using InterruptDispatcher = GenericInterruptDispatcher<KernelPolicy::HardwareInterruptController>;
 
     // Boots the kernel and intializes device drivers.
     //
