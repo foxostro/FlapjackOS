@@ -6,7 +6,8 @@
 
 namespace i386 {
 
-using PhysicalMemoryMap = GenericPhysicalMemoryMap<i386::PagingResolver>;
+template<typename MMU>
+using PhysicalMemoryMap = GenericPhysicalMemoryMap< i386::PagingResolver<MMU> >;
 
 } // namespace i386
 

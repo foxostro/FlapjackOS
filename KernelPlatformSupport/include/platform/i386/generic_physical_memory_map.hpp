@@ -13,21 +13,24 @@ template<typename PagingResolver>
 class GenericPhysicalMemoryMap {
 public:
     using PageTableEntry = typename std::remove_reference<decltype(PagingResolver::PageTable::entries[0])>::type;
+    using MMU = typename PagingResolver::MMU;
     using ProtectionFlags = unsigned;
 
     static constexpr unsigned PRESENT = (1 << 0);
     static constexpr unsigned WRITABLE = (1 << 1);
     static constexpr unsigned GLOBAL = (1 << 2);
 
-    GenericPhysicalMemoryMap() = default;
+    GenericPhysicalMemoryMap(MMU &mmu)
+     : resolver_(mmu),
+       mmu_(mmu)
+    {}
 
     // Point the physical memory map at the paging structures active on the MMU.
     // So, whatever the MMU is using right now is what PhysicalMemoryMap will
     // now act upon.
-    template<typename MMU>
-    void load(MMU &mmu)
+    void reload()
     {
-        resolver_.set_cr3(mmu.get_cr3());
+        resolver_.set_cr3(mmu_.get_cr3());
     }
 
     // Map the specified physical page to the virtual page.
@@ -72,6 +75,7 @@ public:
 
 private:
     PagingResolver resolver_;
+    MMU &mmu_;
 
     inline void invlpg(uintptr_t linear_address)
     {

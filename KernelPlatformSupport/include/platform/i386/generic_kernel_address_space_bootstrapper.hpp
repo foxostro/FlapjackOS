@@ -16,24 +16,27 @@ namespace i386 {
 // allocated in memory themselves. If allocated in DATA or BSS, those objects
 // will cause the kernel image to become larger than the limit imposed by the
 // bootstrap code. So, there's a whole dance to bootstrap the address space.
-template<typename PagingResolver>
+template<typename PAGING_RESOLVER>
 class GenericKernelAddressSpaceBootstrapper {
 public:
-    using PageDirectory = typename PagingResolver::PageDirectory;
-    using PageTable = typename PagingResolver::PageTable;
+    using PageDirectory = typename PAGING_RESOLVER::PageDirectory;
+    using PageTable = typename PAGING_RESOLVER::PageTable;
     using PageDirectoryEntry = decltype(PageDirectory::entries[0]);
+    using MMU = typename PAGING_RESOLVER::MMU;
+    using PagingResolver = PAGING_RESOLVER;
 
-    GenericKernelAddressSpaceBootstrapper()
+    GenericKernelAddressSpaceBootstrapper(MMU &mmu)
      : count_(NUMBER_OF_PAGE_TABLES),
-       next_page_table_(&page_tables_[0])
+       next_page_table_(&page_tables_[0]),
+       resolver_(mmu),
+       mmu_(mmu)
     {}
 
-    template<typename MMU>
-    void prepare_address_space(MMU &mmu)
+    void prepare_address_space()
     {
-        resolver_.set_cr3(mmu.get_cr3());
+        resolver_.set_cr3(mmu_.get_cr3());
         prepare_address_space_internal();
-        mmu.reload();
+        mmu_.reload();
     }
     
 private:
@@ -42,6 +45,7 @@ private:
     size_t count_;
     PageTable* next_page_table_;
     PagingResolver resolver_;
+    MMU &mmu_;
 
     void prepare_address_space_internal()
     {
@@ -61,10 +65,10 @@ private:
 
     void prepare_page_directory_entry(PageDirectoryEntry& pde)
     {
-        uintptr_t page_table_physical_address = pde.get_address();
+        auto page_table_physical_address = pde.get_address();
         if (page_table_physical_address == 0) {
             PageTable* page_table = get_next_page_table();
-            uintptr_t physical_address = convert_logical_to_physical_address((uintptr_t)page_table);
+            auto physical_address = mmu_.convert_logical_to_physical_address((uintptr_t)page_table);
             pde.set_address(physical_address);
             pde.set_readwrite(true);
             pde.set_present(true);

@@ -32,13 +32,19 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 {
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
-
-    call_global_constructors(); // NOTE: Kernel::Kernel() is invoked here!
-
+    
     mb_info_ = mb_info;
-    are_interrupts_ready_ = false;
+    istack_ = istack;
+}
 
-    hardware_task_configuration_.init(istack);
+Kernel::Kernel()
+ : address_space_bootstrapper_(mmu_),
+   phys_map_(mmu_),
+   are_interrupts_ready_(false)
+{
+    // The call to init() occurred BEFORE the ctor is invoked!
+
+    hardware_task_configuration_.init(istack_);
     hardware_interrupt_controller_.init();
     setup_terminal();
     print_welcome_message();
@@ -86,23 +92,6 @@ void Kernel::run()
     }
 }
 
-void Kernel::call_global_constructors()
-{
-    for (uintptr_t *ctors_addr = (uintptr_t *)g_start_ctors,
-                   *ctors_limit = (uintptr_t *)g_end_ctors;
-         ctors_addr < ctors_limit;
-         ++ctors_addr) {
-        invoke_ctor(*ctors_addr);
-    }
-}
-
-void Kernel::invoke_ctor(uintptr_t ctor_addr)
-{
-    using Function = void (*)();
-    Function fn = (Function)ctor_addr;
-    fn();
-}
-
 void Kernel::setup_terminal()
 {
     display_.clear();
@@ -117,9 +106,8 @@ void Kernel::print_welcome_message()
 
 void Kernel::prepare_kernel_address_space()
 {
-    address_space_bootstrapper_.prepare_address_space(mmu_);
-
-    phys_map_.load(mmu_);
+    address_space_bootstrapper_.prepare_address_space();
+    phys_map_.reload();
 
     // Ensure the address space is mapped.
     uintptr_t linear_address = (uintptr_t)KERNEL_VIRTUAL_START_ADDR;
@@ -128,7 +116,7 @@ void Kernel::prepare_kernel_address_space()
          length > 0;
          length -= PAGE_SIZE) {
 
-        phys_map_.map_page(convert_logical_to_physical_address(linear_address),
+        phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
                            linear_address,
                            phys_map_.WRITABLE | phys_map_.GLOBAL);
 
@@ -166,9 +154,10 @@ void Kernel::initialize_page_frame_allocator()
                      (unsigned)sizeof(PageFrameAllocator),
                      (unsigned)sizeof(PageFrameAllocator)/1024);
 
-    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator>;
+    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator, HardwareMemoryManagementUnit>;
     Op operation((uintptr_t)g_kernel_image_end,
-                 MultibootMemoryMapPageFrameEnumerator(mb_info_));
+                 MultibootMemoryMapPageFrameEnumerator(mmu_, mb_info_),
+                 mmu_);
     operation.configure(page_frame_allocator_);
 }
 
@@ -179,7 +168,7 @@ void Kernel::initialize_kernel_malloc()
     TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
 
     uintptr_t begin_physical_addr = page_frame_allocator_.allocate_span(length);
-    void* begin = (void*)convert_physical_to_logical_address(begin_physical_addr);
+    void* begin = (void*)mmu_.convert_physical_to_logical_address(begin_physical_addr);
 
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;
     TRACE("Clearing the malloc zone to 0x%x.", MAGIC_NUMBER_UNINITIALIZED_HEAP);
@@ -261,11 +250,25 @@ void interrupt_dispatch(unsigned interrupt_number,
     g_kernel.dispatch_interrupt(interrupt_number, params);
 }
 
+static void call_global_constructors()
+{
+    for (uintptr_t *ctors_addr = (uintptr_t *)g_start_ctors,
+                   *ctors_limit = (uintptr_t *)g_end_ctors;
+         ctors_addr < ctors_limit;
+         ++ctors_addr) {
+        uintptr_t ctor_addr = *ctors_addr;
+        using Function = void (*)();
+        Function fn = (Function)ctor_addr;
+        fn();
+    }
+}
+
 // This is marked with "C" linkage because we call it from assembly in boot.S.
 extern "C" __attribute__((noreturn))
 void kernel_main(multiboot_info_t *mb_info, uintptr_t istack)
 {
     g_kernel.init(mb_info, istack);
+    call_global_constructors(); // The Kernel ctor is invoked here!
     g_kernel.run();
     panic("We should never reach this point.");
     __builtin_unreachable();

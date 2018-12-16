@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "creg.hpp"
+#include "kernel_image_info.hpp" // for KERNEL_VIRTUAL_START_ADDR
 
 namespace x86_64 {
 
@@ -16,6 +17,23 @@ public:
     void reload()
     {
         x86_64::set_cr3(x86_64::get_cr3());
+    }
+
+    // Convert the given physical address to a logical address.
+    // These addresses are easily converted between physical and virtual as they are
+    // always offset by KERNEL_VIRTUAL_START_ADDR.
+    uintptr_t convert_physical_to_logical_address(uint64_t physical_address)
+    {
+        return physical_address + KERNEL_VIRTUAL_START_ADDR;
+    }
+
+    // Convert the given logical address to a physical address.
+    // These addresses are easily converted between physical and virtual as they are
+    // always offset by KERNEL_VIRTUAL_START_ADDR.
+    uint64_t convert_logical_to_physical_address(uintptr_t logical_address)
+    {
+        assert(logical_address >= KERNEL_VIRTUAL_START_ADDR);
+        return logical_address - KERNEL_VIRTUAL_START_ADDR;
     }
 };
 

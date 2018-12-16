@@ -1,6 +1,8 @@
 #ifndef FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_CREG_HPP
 #define FLAPJACKOS_KERNELPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_CREG_HPP
 
+#include <cstdint> // for uint32_t
+
 extern "C" {
 uint32_t i386_get_cr2(void);
 uint32_t i386_get_cr3(void);

@@ -5,21 +5,20 @@
 #include "page_directory.hpp"
 #include "page_directory_pointer_table.hpp"
 #include "page_map_level_four.hpp"
+#include "hardware_memory_management_unit.hpp"
 #include <cstdint>
-#include <logical_addressing.hpp> // for convert_physical_to_logical_address()
 
 namespace x86_64 {
 
-// Walks the paging structures.
-// The idea is to extract this stuff to make it easy to implement a mock for
-// testing. Imagine implementing a version of this class to run on an x86_64
-// host in order to test the i386 paging structures, or vice-versa.
+// Walks the paging structures and understands the relationships between them.
+template<typename MMU_ = x86_64::HardwareMemoryManagementUnit>
 class PagingResolver {
 public:
     using PageDirectory = x86_64::PageDirectory;
     using PageTable = x86_64::PageTable;
+    using MMU = MMU_;
 
-    PagingResolver() : cr3_(0) {}
+    PagingResolver(MMU &mmu) : cr3_(0), mmu_(mmu) {}
 
     uint64_t get_cr3() const
     {
@@ -98,8 +97,7 @@ public:
 
     PageMapLevelFour* get_page_map_level_four()
     { 
-        uintptr_t address = (uintptr_t)cr3_;
-        PageMapLevelFour* pml4 = (PageMapLevelFour*)convert_physical_to_logical_address(address);
+        PageMapLevelFour* pml4 = (PageMapLevelFour*)mmu_.convert_physical_to_logical_address(cr3_);
         return pml4;
     }
 
@@ -113,7 +111,7 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
-        PageDirectoryPointerTable* pdpt = (PageDirectoryPointerTable*)convert_physical_to_logical_address(address);
+        PageDirectoryPointerTable* pdpt = (PageDirectoryPointerTable*)mmu_.convert_physical_to_logical_address(address);
         return pdpt;
     }
 
@@ -127,7 +125,7 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
-        PageDirectory* pd = (PageDirectory*)convert_physical_to_logical_address(address);
+        PageDirectory* pd = (PageDirectory*)mmu_.convert_physical_to_logical_address(address);
         return pd;
     }
 
@@ -141,7 +139,7 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
-        PageTable* pt = (PageTable*)convert_physical_to_logical_address(address);
+        PageTable* pt = (PageTable*)mmu_.convert_physical_to_logical_address(address);
         return pt;
     }
 
@@ -235,11 +233,8 @@ public:
 
 private:
     uint64_t cr3_;
+    MMU &mmu_;
 };
-
-static_assert(sizeof(uint64_t) == sizeof(uintptr_t),
-              "By it's nature, the x86_64::PagingResolver must be able to map "
-              "between a pointer and a 64-bit unsigned int.");
 
 } // namespace x86_64
 

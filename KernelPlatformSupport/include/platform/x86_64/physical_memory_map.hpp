@@ -6,7 +6,8 @@
 
 namespace x86_64 {
 
-using PhysicalMemoryMap = i386::GenericPhysicalMemoryMap<x86_64::PagingResolver>;
+template<typename MMU>
+using PhysicalMemoryMap = i386::GenericPhysicalMemoryMap< x86_64::PagingResolver<MMU> >;
 
 } // namespace x86_64
 

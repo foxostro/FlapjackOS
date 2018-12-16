@@ -6,7 +6,8 @@
 
 namespace x86_64 {
 
-using KernelAddressSpaceBootstrapper = i386::GenericKernelAddressSpaceBootstrapper<x86_64::PagingResolver>;
+template<typename MMU>
+using KernelAddressSpaceBootstrapper = i386::GenericKernelAddressSpaceBootstrapper< x86_64::PagingResolver<MMU> >;
 
 } // namespace x86_64
 

@@ -22,11 +22,20 @@ public:
     using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
-    // Boot the kernel and device drivers.
-    // The kernel is the thing that invokes constructors for globals! So, we
-    // must do two-phase initialization with a nearly empty constructor and then
-    // this method, which performs the real initialization work.
+    // Boots the kernel and intializes device drivers.
+    //
+    // Be aware: we need to do a two-phase initialization because the ctor for
+    // the global Kernel instance cannot occur until after kernel_main() starts
+    // running. The init() method passes parameters to the Kernel which might
+    // otherwise be passed to a ctor and then Kernel::Kernel() is invoked
+    // through a special procedure which calls all global constructors.
+    //
+    // AFOX_TODO: This problem largely goes away if the global Kernel instance
+    // is placed in an optional and instantiated in kernel_main(). In this case,
+    // the "g_kernel" symbol is replaced with calls to a getter which unboxes
+    // the optional behind the scenes.
     void init(multiboot_info_t *mb_info, uintptr_t istack);
+    Kernel();
 
     // Returns the name of the platform we were built for, e.g., "x86_64".
     const char* get_platform() const;
@@ -59,15 +68,16 @@ public:
     }
 
 private:
+    multiboot_info_t *mb_info_;
+    uintptr_t istack_;
     HardwareTaskConfiguration hardware_task_configuration_;
     HardwareInterruptController hardware_interrupt_controller_;
     KeyboardDevice* keyboard_;
     InterruptDispatcher interrupt_dispatcher_;
     TextDisplayDevice display_;
     TextTerminal terminal_;
-    multiboot_info_t *mb_info_;
-    KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     HardwareMemoryManagementUnit mmu_;
+    KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PhysicalMemoryMap phys_map_;
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;

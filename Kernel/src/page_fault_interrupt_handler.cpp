@@ -1,5 +1,4 @@
 #include <page_fault_interrupt_handler.hpp>
-#include <logical_addressing.hpp>
 #include <cstdio>
 
 // AFOX_TODO: These platform-specific includes seem like a code smell.

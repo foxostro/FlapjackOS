@@ -1,7 +1,6 @@
 #include "catch.hpp"
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <platform/x86_64/physical_memory_map.hpp>
-#include <logical_addressing.hpp> // for convert_logical_to_physical_address()
 #include "mock_memory_management_unit.hpp"
 
 class TestPagingContext
@@ -11,19 +10,22 @@ public:
     x86_64::PageDirectoryPointerTable pdpt_;
     x86_64::PageDirectory page_directory_;
     MockMemoryManagementUnit mmu_;
-    x86_64::PagingResolver resolver_;
-    x86_64::KernelAddressSpaceBootstrapper bootstrapper_;
+    x86_64::PagingResolver<MockMemoryManagementUnit> resolver_;
+    x86_64::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit> bootstrapper_;
 
     TestPagingContext()
+     : resolver_(mmu_),
+       bootstrapper_(mmu_)
     {
         memset(&pml4_, 0, sizeof(pml4_));
         memset(&pdpt_, 0, sizeof(pdpt_));
         memset(&page_directory_, 0, sizeof(page_directory_));
-        resolver_.set_cr3(convert_logical_to_physical_address((uintptr_t)&pml4_));
-        mmu_.set_cr3(resolver_.get_cr3());
-        resolver_.get_page_map_level_four_entry(&pml4_, KERNEL_VIRTUAL_START_ADDR)->set_address(convert_logical_to_physical_address((uintptr_t)&pdpt_));
-        resolver_.get_page_directory_pointer_table_entry(&pdpt_, KERNEL_VIRTUAL_START_ADDR)->set_address(convert_logical_to_physical_address((uintptr_t)&page_directory_));
-        bootstrapper_.prepare_address_space(mmu_);
+        uintptr_t cr3 = mmu_.convert_logical_to_physical_address((uintptr_t)&pml4_);
+        resolver_.set_cr3(cr3);
+        mmu_.set_cr3(cr3);
+        resolver_.get_page_map_level_four_entry(&pml4_, KERNEL_VIRTUAL_START_ADDR)->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&pdpt_));
+        resolver_.get_page_directory_pointer_table_entry(&pdpt_, KERNEL_VIRTUAL_START_ADDR)->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&page_directory_));
+        bootstrapper_.prepare_address_space();
     }
 };
 
@@ -35,11 +37,11 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map;
-    phys_map.load(context.mmu_);
+    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    phys_map.reload();
 
     // Action
-    phys_map.map_page(convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR),
+    phys_map.map_page(context.mmu_.convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR),
                       KERNEL_VIRTUAL_START_ADDR,
                       phys_map.WRITABLE | phys_map.GLOBAL);
 
@@ -49,7 +51,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
     REQUIRE(pte->is_global() == true);
-    REQUIRE(pte->get_address() == convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR));
+    REQUIRE(pte->get_address() == context.mmu_.convert_logical_to_physical_address(KERNEL_VIRTUAL_START_ADDR));
 }
 
 TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_64]")
@@ -58,8 +60,8 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_6
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map;
-    phys_map.load(context.mmu_);
+    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       KERNEL_VIRTUAL_START_ADDR,
                       phys_map.WRITABLE);
@@ -84,8 +86,8 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map;
-    phys_map.load(context.mmu_);
+    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       KERNEL_VIRTUAL_START_ADDR,
                       phys_map.WRITABLE);
@@ -116,8 +118,8 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map;
-    phys_map.load(context.mmu_);
+    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       KERNEL_VIRTUAL_START_ADDR,
                       phys_map.WRITABLE);

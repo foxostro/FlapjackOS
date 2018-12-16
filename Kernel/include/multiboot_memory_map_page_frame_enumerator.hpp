@@ -9,7 +9,8 @@
 // the multiboot data structures are loaded at the expected memory addresses.
 class MultibootMemoryMapPageFrameEnumerator {
 public:
-    MultibootMemoryMapPageFrameEnumerator(multiboot_info_t *mb_info)
+    template<typename MMU>
+    MultibootMemoryMapPageFrameEnumerator(MMU &mmu, multiboot_info_t *mb_info)
      : mb_info_(mb_info)
     {
         assert(mb_info_);
@@ -18,7 +19,7 @@ public:
             panic("The bootloader did not provide memory information.");
         }
 
-        entry_ = (multiboot_memory_map_t *)convert_physical_to_logical_address(mb_info_->mmap_addr);
+        entry_ = (multiboot_memory_map_t *)mmu.convert_physical_to_logical_address(mb_info_->mmap_addr);
         limit_ = entry_ + mb_info_->mmap_length;
 
         assert(entry_->size > 0);

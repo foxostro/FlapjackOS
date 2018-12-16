@@ -2,7 +2,6 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PAGE_FRAME_ALLOCATOR_CONFIGURATION_OPERATION_HPP
 
 #include <multiboot.h>
-#include <logical_addressing.hpp>
 #include <page_frame_allocator.hpp>
 
 // Configures a page frame allocator for use at boot time.
@@ -14,20 +13,22 @@
 // "PageFrameEnumerator" is a Functor which enumerates the page frames in the
 // system. This generally is implemented with logic to walk the multiboot memory
 // map.
-template<typename PageFrameEnumerator>
+template<typename PageFrameEnumerator, typename MMU>
 class PageFrameAllocatorConfigurationOperation {
 public:
     PageFrameAllocatorConfigurationOperation(uintptr_t break_address,
-                                             PageFrameEnumerator enumerator)
+                                             PageFrameEnumerator enumerator,
+                                             MMU &mmu)
      : break_address_(break_address),
-       enumerator_(enumerator)
+       enumerator_(enumerator),
+       mmu_(mmu)
     {}
 
     void configure(PageFrameAllocator &page_frames)
     {
         page_frames.mark_all_as_used();
         enumerate_page_frames([&](uintptr_t page_frame){
-            uintptr_t corresponding_logical_address = convert_physical_to_logical_address(page_frame);
+            uintptr_t corresponding_logical_address = mmu_.convert_physical_to_logical_address(page_frame);
             if (corresponding_logical_address >= break_address_) {
                 page_frames.deallocate(page_frame);
             }
@@ -37,6 +38,7 @@ public:
 private:
     const uintptr_t break_address_;
     PageFrameEnumerator enumerator_;
+    MMU &mmu_;
 
     // Use the provided enumerator to enumerate page frames in the system.
     // For each page frame, invoke the function `fn'.
