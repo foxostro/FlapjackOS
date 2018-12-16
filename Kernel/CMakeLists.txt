@@ -7,7 +7,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/backtrace.hpp" "src/backtrace.cpp"
     "include/panic.h" "src/panic.cpp"
     "include/kernel_policy.hpp" 
-    "include/kernel.hpp" "src/kernel.cpp"
+    "include/kernel.hpp" "src/kernel.cpp" "src/kernel_main.cpp"
     "include/page_frame_allocator.hpp"
     "include/page_frame_allocator_configuration_operation.hpp"
     "include/multiboot_memory_map_page_frame_enumerator.hpp"

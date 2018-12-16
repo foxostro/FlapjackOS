@@ -22,20 +22,10 @@ public:
     using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
+    ~Kernel() = default;
+
     // Boots the kernel and intializes device drivers.
-    //
-    // Be aware: we need to do a two-phase initialization because the ctor for
-    // the global Kernel instance cannot occur until after kernel_main() starts
-    // running. The init() method passes parameters to the Kernel which might
-    // otherwise be passed to a ctor and then Kernel::Kernel() is invoked
-    // through a special procedure which calls all global constructors.
-    //
-    // AFOX_TODO: This problem largely goes away if the global Kernel instance
-    // is placed in an optional and instantiated in kernel_main(). In this case,
-    // the "g_kernel" symbol is replaced with calls to a getter which unboxes
-    // the optional behind the scenes.
-    void init(multiboot_info_t *mb_info, uintptr_t istack);
-    Kernel();
+    Kernel(multiboot_info_t *mb_info, uintptr_t istack);
 
     // Returns the name of the platform we were built for, e.g., "x86_64".
     const char* get_platform() const;
@@ -75,19 +65,6 @@ private:
     PageFrameAllocator page_frame_allocator_;
     bool are_interrupts_ready_;
 
-    // The kernel must call global constructors itself as we have no runtime
-    // support beyond what we implement ourselves.
-    // We want to call this as early as possible after booting. However, we also
-    // want the constructors to be able to at least panic() on error. So, call
-    // this after initializing interrupts and after initializing the console.
-    //
-    // This is basic house keeping which must be performed very early in the
-    // boot process.
-    void call_global_constructors();
-
-    // Invoke the ctor at the specified address.
-    void invoke_ctor(uintptr_t ctor_addr);
-
     // Setup the VGA console and terminal.
     void setup_terminal();
 
@@ -116,6 +93,6 @@ private:
     void initialize_interrupts_and_device_drivers();
 };
 
-extern Kernel g_kernel;
+Kernel& get_global_kernel();
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP

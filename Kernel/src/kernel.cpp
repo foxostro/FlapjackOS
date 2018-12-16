@@ -23,28 +23,18 @@
 // around literally everywhere.
 TextTerminal *g_terminal = nullptr;
 
-// Some things need direct access to the kernel object to manipulate the system.
-// There is only one kernel. So, it's exposed as a global.
-Kernel g_kernel;
 
-
-void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
-{
-    TRACE("Flapjack OS (%s)", get_platform());
-    TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
-    
-    mb_info_ = mb_info;
-    istack_ = istack;
-}
-
-Kernel::Kernel()
- : interrupt_dispatcher_(hardware_interrupt_controller_),
+Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
+ : mb_info_(mb_info),
+   istack_(istack),
+   interrupt_dispatcher_(hardware_interrupt_controller_),
    address_space_bootstrapper_(mmu_),
    phys_map_(mmu_),
    are_interrupts_ready_(false)
 {
-    // The call to init() occurred BEFORE the ctor is invoked!
-
+    TRACE("Flapjack OS (%s)", get_platform());
+    TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
+    
     hardware_task_configuration_.init(istack_);
     hardware_interrupt_controller_.init();
     setup_terminal();
@@ -235,29 +225,5 @@ void Kernel::enable_interrupts()
 extern "C"
 void interrupt_dispatch_trampoline(void* params)
 {
-    g_kernel.dispatch_interrupt(params);
-}
-
-static void call_global_constructors()
-{
-    for (uintptr_t *ctors_addr = (uintptr_t *)g_start_ctors,
-                   *ctors_limit = (uintptr_t *)g_end_ctors;
-         ctors_addr < ctors_limit;
-         ++ctors_addr) {
-        uintptr_t ctor_addr = *ctors_addr;
-        using Function = void (*)();
-        Function fn = (Function)ctor_addr;
-        fn();
-    }
-}
-
-// This is marked with "C" linkage because we call it from assembly in boot.S.
-extern "C" __attribute__((noreturn))
-void kernel_main(multiboot_info_t *mb_info, uintptr_t istack)
-{
-    g_kernel.init(mb_info, istack);
-    call_global_constructors(); // The Kernel ctor is invoked here!
-    g_kernel.run();
-    panic("We should never reach this point.");
-    __builtin_unreachable();
+    get_global_kernel().dispatch_interrupt(params);
 }
