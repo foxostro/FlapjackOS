@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
-# AFOX_TODO: Some of these platform-agnostic source files really are not platform-agnostic at all and assume an Intel CPU. Need to address that somehow.
+# AFOX_TODO: Some of these platform-agnostic source files really are not
+# platform-agnostic and assume an Intel CPU. Need to address that somehow...
 set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/get_frame_pointer.h"
     "include/halt.h"

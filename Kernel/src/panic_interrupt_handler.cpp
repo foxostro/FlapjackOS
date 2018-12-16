@@ -6,7 +6,6 @@
 PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_code_present)
  : error_code_present_(error_code_present)
 {
-    // TODO: implement a strncpy() in the kernel?
     memset(message_, 0, sizeof(message_));
     memcpy(message_, message, MIN(sizeof(message_), strlen(message))-1);
 }

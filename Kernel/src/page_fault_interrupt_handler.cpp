@@ -1,7 +1,11 @@
 #include <page_fault_interrupt_handler.hpp>
 #include <cstdio>
 
-// AFOX_TODO: These platform-specific includes seem like a code smell.
+// AFOX_TODO: These platform-specific includes seem like a code smell. Perhaps
+// the entire page fault interrupt handler should be made to be a
+// platform-specific class. This would collect information such as the faulting
+// address in a platform-specific manner and would then trampoline to a second,
+// platform-agnostic handler.
 #ifdef __i386__
 #include <platform/i386/creg.hpp>
 #elif __x86_64__
@@ -10,7 +14,6 @@
 
 static uintptr_t get_faulting_address()
 {
-    // AFOX_TODO: A better abstraction for getting the faulting address would be nice.
     #ifdef __i386__
     return i386::get_cr2();
     #elif __x86_64__

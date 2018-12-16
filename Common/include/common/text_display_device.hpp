@@ -72,7 +72,6 @@ public:
 
     // Moves the hardware cursor to the specified position.
     // If the cursor is placed outside the visible console then it will be hidden.
-    // TODO: package the position into a Point2 for set_cursor_position()
     virtual void set_cursor_position(Point2 pos) = 0;
 
     // Gets the row and column of the display on which the cursor was placed.

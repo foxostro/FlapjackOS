@@ -1,6 +1,6 @@
 #include <drivers/pc/pit_timer_device.hpp>
 
-#include <platform/pc/pic.h> // TODO: This class should probably be moved to the "pc" platform directory.
+#include <platform/pc/pic.h> // TODO: The PITTimerDevice class should probably be moved to the "pc" platform directory.
 #include <inout.h>
 #include <common/misc.h>
 
