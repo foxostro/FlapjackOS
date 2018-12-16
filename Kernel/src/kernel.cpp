@@ -38,7 +38,8 @@ void Kernel::init(multiboot_info_t *mb_info, uintptr_t istack)
 }
 
 Kernel::Kernel()
- : address_space_bootstrapper_(mmu_),
+ : interrupt_dispatcher_(hardware_interrupt_controller_),
+   address_space_bootstrapper_(mmu_),
    phys_map_(mmu_),
    are_interrupts_ready_(false)
 {
@@ -232,9 +233,9 @@ void Kernel::enable_interrupts()
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.
 extern "C"
-void interrupt_dispatch_trampoline(const InterruptDispatcher::Params* params)
+void interrupt_dispatch_trampoline(void* params)
 {
-    g_kernel.dispatch_interrupt(*params);
+    g_kernel.dispatch_interrupt(params);
 }
 
 static void call_global_constructors()

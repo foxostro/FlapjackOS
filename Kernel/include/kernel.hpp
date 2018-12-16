@@ -21,6 +21,7 @@ public:
     using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
     using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
+    using InterruptDispatcher = GenericInterruptDispatcher<KernelPolicy::HardwareInterruptController>;
 
     // Boots the kernel and intializes device drivers.
     //
@@ -44,10 +45,10 @@ public:
     void run();
 
     // Redirect the interrupt to the appropriate handler.
-    template<typename Params> inline
-    void dispatch_interrupt(const Params& params) noexcept
+    void dispatch_interrupt(void* params_raw) noexcept
     {
-        interrupt_dispatcher_.dispatch(params);
+        InterruptDispatcher::Params* params = (InterruptDispatcher::Params*)params_raw;
+        interrupt_dispatcher_.dispatch(*params);
     }
 
     // Disables interrupts.
@@ -59,12 +60,6 @@ public:
     // If interrupts have not been configured and intially enabled then this
     // does nothing.
     void enable_interrupts();
-
-    // TODO: Is this messy?
-    HardwareInterruptController& get_hardware_interrupt_controller() noexcept
-    {
-        return hardware_interrupt_controller_;
-    }
 
 private:
     multiboot_info_t *mb_info_;
