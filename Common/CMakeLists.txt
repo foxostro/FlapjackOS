@@ -17,7 +17,6 @@ set(SOURCE_FILES
     "include/common/keyboard_device.hpp"
     "include/common/global_allocator.hpp"
     "include/common/memory_allocator.hpp"
-    "include/common/interrupt_handler.hpp"
     "include/common/terminal_metrics.hpp"
     "include/common/text_display_device.hpp"
     

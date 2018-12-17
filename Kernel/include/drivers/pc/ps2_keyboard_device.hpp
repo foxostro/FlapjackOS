@@ -2,8 +2,8 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_DRIVERS_PC_PS2_KEYBOARD_DEVICE_HPP
 
 #include <common/keyboard_device.hpp>
-#include <common/interrupt_handler.hpp>
 #include <common/ring_buffer.hpp>
+#include "interrupt_handler.hpp"
 
 class PS2KeyboardDevice : public KeyboardDevice, public InterruptHandler {
 public:

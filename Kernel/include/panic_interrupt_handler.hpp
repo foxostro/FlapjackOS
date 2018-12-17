@@ -1,9 +1,9 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_PANIC_INTERRUPT_HANDLER_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_PANIC_INTERRUPT_HANDLER_HPP
 
-#include <common/interrupt_handler.hpp>
 #include <panic.h>
 #include <cstring>
+#include "interrupt_handler.hpp"
 
 class PanicInterruptHandler : public InterruptHandler {
 public:

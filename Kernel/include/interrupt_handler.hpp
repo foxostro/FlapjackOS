@@ -1,5 +1,5 @@
-#ifndef FLAPJACKOS_COMMON_INCLUDE_INTERRUPT_HANDLER_HPP
-#define FLAPJACKOS_COMMON_INCLUDE_INTERRUPT_HANDLER_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_HANDLER_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_HANDLER_HPP
 
 #include <cstdint>
 
@@ -7,6 +7,7 @@
 // This can be called by the interrupt dispatcher when the interrupt occurs.
 class InterruptHandler {
 public:
+    // AFOX_TODO: An interrupt handler absolutely needs to be a piece of platform-specific code. Each platform will have its own parameter package type.
     struct ParameterPackage {
         uint32_t size; // The size of the structure.
         uint32_t interrupt_number;
@@ -27,4 +28,4 @@ public:
     virtual void int_handler(const ParameterPackage& params) = 0;
 };
 
-#endif // FLAPJACKOS_COMMON_INCLUDE_INTERRUPT_HANDLER_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_HANDLER_HPP

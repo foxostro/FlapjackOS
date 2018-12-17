@@ -1,10 +1,10 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_GENERIC_INTERRUPT_DISPATCHER_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_GENERIC_INTERRUPT_DISPATCHER_HPP
 
-#include <common/interrupt_handler.hpp>
 #include <common/shared_pointer.hpp>
 #include <idt_asm.h>
 #include <interrupt_lock.hpp>
+#include "interrupt_handler.hpp"
 
 // Invoked when an interrupt occurs to redirect to the appropriate handler.
 template<typename HardwareInterruptController>
