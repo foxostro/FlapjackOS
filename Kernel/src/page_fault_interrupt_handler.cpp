@@ -58,7 +58,7 @@ void panic_on_unrecoverable_page_fault(uintptr_t faulting_address,
 
 PageFaultInterruptHandler::PageFaultInterruptHandler() = default;
 
-void PageFaultInterruptHandler::int_handler(const ParameterPackage& params)
+void PageFaultInterruptHandler::int_handler(const ParameterPackage& params) noexcept
 {
     uintptr_t faulting_address = get_faulting_address();
     panic_on_unrecoverable_page_fault(faulting_address, params.error_code);

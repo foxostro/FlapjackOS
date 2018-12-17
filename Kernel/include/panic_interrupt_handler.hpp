@@ -9,7 +9,7 @@ class PanicInterruptHandler : public InterruptHandler {
 public:
     PanicInterruptHandler(const char *message, bool error_code_present);
 
-    void int_handler(const ParameterPackage& params) override;
+    void int_handler(const ParameterPackage& params) noexcept override;
 
 private:
     char message_[64];

@@ -8,7 +8,7 @@ constexpr unsigned TIMER_PERIOD_IO_PORT = 0x40;
 constexpr unsigned TIMER_MODE_IO_PORT   = 0x43;
 constexpr unsigned TIMER_SQUARE_WAVE    = 0x36;
 
-void PITTimerDevice::int_handler(const ParameterPackage&)
+void PITTimerDevice::int_handler(const ParameterPackage&) noexcept
 {
     if (++leap_counter_ > timer_leap_interval_) {
         leap_counter_ = 0; // reset

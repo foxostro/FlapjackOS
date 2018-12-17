@@ -25,7 +25,7 @@ public:
 
     virtual ~InterruptHandler() noexcept = default;
 
-    virtual void int_handler(const ParameterPackage& params) = 0;
+    virtual void int_handler(const ParameterPackage& params) noexcept = 0;
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_HANDLER_HPP

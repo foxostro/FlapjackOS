@@ -9,7 +9,7 @@ class PageFaultInterruptHandler : public InterruptHandler {
 public:
     PageFaultInterruptHandler();
 
-    void int_handler(const ParameterPackage& params) override;
+    void int_handler(const ParameterPackage& params) noexcept override;
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_PAGE_FAULT_INTERRUPT_HANDLER_HPP

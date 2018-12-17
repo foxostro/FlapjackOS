@@ -10,7 +10,7 @@ PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_cod
     memcpy(message_, message, MIN(sizeof(message_), strlen(message))-1);
 }
 
-void PanicInterruptHandler::int_handler(const ParameterPackage& params)
+void PanicInterruptHandler::int_handler(const ParameterPackage& params) noexcept
 {
     panic2(message_,
            params.edi,
