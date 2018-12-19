@@ -1,8 +1,6 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_PANIC_INTERRUPT_HANDLER_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_PANIC_INTERRUPT_HANDLER_HPP
 
-#include <panic.h>
-#include <cstring>
 #include "generic_interrupt_handler.hpp"
 #include "interrupt_parameters.hpp"
 

@@ -9,6 +9,7 @@ namespace x86_64 {
 struct InterruptParameters {
     uint32_t size; // The size of the structure.
     uint32_t interrupt_number;
+    uint32_t error_code;
     // STUB
 };
 
