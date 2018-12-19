@@ -40,3 +40,11 @@ void kernel_main(multiboot_info_t *mb_info, uintptr_t istack)
     panic("We should never reach this point.");
     __builtin_unreachable();
 }
+
+// This is marked with "C" linkage because we call it from the assembly code
+// ISR stubs in isr_wrapper_asm.S.
+extern "C"
+void interrupt_dispatch_trampoline(void* params)
+{
+    get_global_kernel().dispatch_interrupt(params);
+}

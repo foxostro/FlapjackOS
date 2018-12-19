@@ -15,11 +15,10 @@
 class Kernel {
 public:
     using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
-    using HardwareInterruptController = KernelPolicy::HardwareInterruptController;
-    using InterruptDispatcher = KernelPolicy::InterruptDispatcher;
     using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
     using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
+    using InterruptController = KernelPolicy::InterruptController;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
     ~Kernel() = default;
@@ -34,36 +33,37 @@ public:
     void run();
 
     // Redirect the interrupt to the appropriate handler.
-    void dispatch_interrupt(void* params_raw) noexcept
+    void dispatch_interrupt(void* params)
     {
-        InterruptDispatcher::Params* params = (InterruptDispatcher::Params*)params_raw;
-        interrupt_dispatcher_.dispatch(*params);
+        interrupt_controller_.dispatch(params);
     }
 
     // Disables interrupts.
-    // If interrupts have not been configured and intially enabled then this
-    // does nothing.
-    void disable_interrupts();
+    // If the interrupt controller is not ready then this does nothing.
+    void disable_interrupts()
+    {
+        interrupt_controller_.disable_interrupts();
+    }
 
     // Enables interrupts.
-    // If interrupts have not been configured and intially enabled then this
-    // does nothing.
-    void enable_interrupts();
+    // If the interrupt controller is not ready then this does nothing.
+    void enable_interrupts()
+    {
+        interrupt_controller_.enable_interrupts();
+    }
 
 private:
     multiboot_info_t *mb_info_;
     uintptr_t istack_;
     HardwareTaskConfiguration hardware_task_configuration_;
-    HardwareInterruptController hardware_interrupt_controller_;
+    InterruptController interrupt_controller_;
     KeyboardDevice* keyboard_;
-    InterruptDispatcher interrupt_dispatcher_;
     TextDisplayDevice display_;
     TextTerminal terminal_;
     HardwareMemoryManagementUnit mmu_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PhysicalMemoryMap phys_map_;
     PageFrameAllocator page_frame_allocator_;
-    bool are_interrupts_ready_;
 
     // Setup the VGA console and terminal.
     void setup_terminal();

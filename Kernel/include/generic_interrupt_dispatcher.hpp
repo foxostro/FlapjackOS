@@ -4,6 +4,7 @@
 #include <common/shared_pointer.hpp>
 #include <idt_asm.h>
 #include <interrupt_lock.hpp>
+#include <panic.h>
 #include "interrupt_handler.hpp"
 
 // Invoked when an interrupt occurs to redirect to the appropriate handler.

@@ -1,14 +1,11 @@
 #include <kernel.hpp>
 
 #include <inout.h>
-#include <panic_interrupt_handler.hpp>
-#include <page_fault_interrupt_handler.hpp>
 #include <logger.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 
 // TODO: How can Kernel be made more platform-agnostic wrt to device drivers?
-#include <drivers/pc/pit_timer_device.hpp>
 #include <drivers/pc/ps2_keyboard_device.hpp>
 
 #include <malloc/malloc_zone.hpp>
@@ -27,16 +24,14 @@ TextTerminal *g_terminal = nullptr;
 Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
  : mb_info_(mb_info),
    istack_(istack),
-   interrupt_dispatcher_(hardware_interrupt_controller_),
    address_space_bootstrapper_(mmu_),
-   phys_map_(mmu_),
-   are_interrupts_ready_(false)
+   phys_map_(mmu_)
 {
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
     
     hardware_task_configuration_.init(istack_);
-    hardware_interrupt_controller_.init();
+    interrupt_controller_.init();
     setup_terminal();
     print_welcome_message();
     prepare_kernel_address_space();
@@ -45,9 +40,6 @@ Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
     initialize_kernel_malloc();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
-
-    are_interrupts_ready_ = true;
-    enable_interrupts();
 }
 
 const char* Kernel::get_platform() const
@@ -173,57 +165,9 @@ void Kernel::initialize_kernel_malloc()
 void Kernel::initialize_interrupts_and_device_drivers()
 {
     TRACE("Initializing device drivers.");
-
     PS2KeyboardDevice *keyboard_driver = new PS2KeyboardDevice();
     keyboard_ = keyboard_driver;
-    
-    // TODO: These interrupt numbers are platform-specific. I'd like to abstract these for an eventual port to the Raspberry Pi. How can I do that?
-    // TODO: This will leak handlers.
-    interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_driver);
-    interrupt_dispatcher_.set_handler(IDT_TIMER, new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
-                                                                    PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
-                                                                    PITTimerDevice::TIMER_LEAP_TICKS_10ms));
-    interrupt_dispatcher_.set_handler(IDT_DE,    new PanicInterruptHandler("Division Error", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_DB,    new PanicInterruptHandler("Debug Exception", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_NMI,   new PanicInterruptHandler("Non-Maskable Interrupt", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_BP,    new PanicInterruptHandler("Breakpoint", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_OF,    new PanicInterruptHandler("Overflow", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_BR,    new PanicInterruptHandler("BOUND Range exceeded", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_UD,    new PanicInterruptHandler("Undefined Opcode", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_NM,    new PanicInterruptHandler("No Math coprocessor", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_DF,    new PanicInterruptHandler("Double Fault.", /* error_code_present = */ true));
-    interrupt_dispatcher_.set_handler(IDT_CSO,   new PanicInterruptHandler("Coprocessor Segment Overrun", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_TS,    new PanicInterruptHandler("Invalid Task Segment Selector.", /* error_code_present = */ true));
-    interrupt_dispatcher_.set_handler(IDT_NP,    new PanicInterruptHandler("Segment Not Present.", /* error_code_present = */ true));
-    interrupt_dispatcher_.set_handler(IDT_SS,    new PanicInterruptHandler("Stack Segment Fault.", /* error_code_present = */ true));
-    interrupt_dispatcher_.set_handler(IDT_GP,    new PanicInterruptHandler("General Protection Fault.", /* error_code_present = */ true));
-    interrupt_dispatcher_.set_handler(IDT_PF,    new PageFaultInterruptHandler());
-    interrupt_dispatcher_.set_handler(IDT_MF,    new PanicInterruptHandler("X87 Math Fault", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_AC,    new PanicInterruptHandler("Alignment Check", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_MC,    new PanicInterruptHandler("Machine Check", /* error_code_present = */ false));
-    interrupt_dispatcher_.set_handler(IDT_XF,    new PanicInterruptHandler("SSE Floating Point Exception", /* error_code_present = */ false));
-
-    interrupt_dispatcher_.set_should_panic_on_null_handler(false);
+    interrupt_controller_.install(keyboard_driver);
+    interrupt_controller_.become_ready();
 }
 
-void Kernel::disable_interrupts()
-{
-    if (are_interrupts_ready_) {
-        hardware_interrupt_controller_.disable_interrupts();
-    }
-}
-
-void Kernel::enable_interrupts()
-{
-    if (are_interrupts_ready_) {
-        hardware_interrupt_controller_.enable_interrupts();
-    }
-}
-
-// This is marked with "C" linkage because we call it from the assembly code
-// ISR stubs in isr_wrapper_asm.S.
-extern "C"
-void interrupt_dispatch_trampoline(void* params)
-{
-    get_global_kernel().dispatch_interrupt(params);
-}
