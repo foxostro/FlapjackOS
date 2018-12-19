@@ -1,9 +1,9 @@
 #include <platform/i386/interrupt_controller.hpp>
-#include <logger.hpp>
-#include <panic_interrupt_handler.hpp>
+#include <platform/i386/panic_interrupt_handler.hpp>
 #include <page_fault_interrupt_handler.hpp>
 #include <drivers/pc/pit_timer_device.hpp>
 #include <drivers/pc/ps2_keyboard_device.hpp>
+#include <logger.hpp>
 
 namespace i386 {
 

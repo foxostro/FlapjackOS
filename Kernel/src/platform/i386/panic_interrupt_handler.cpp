@@ -1,7 +1,9 @@
-#include <panic_interrupt_handler.hpp>
+#include <platform/i386/panic_interrupt_handler.hpp>
 #include <panic.h>
 #include <common/minmax.hpp>
 #include <cstring>
+
+namespace i386 {
 
 PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_code_present)
  : error_code_present_(error_code_present)
@@ -10,7 +12,7 @@ PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_cod
     memcpy(message_, message, MIN(sizeof(message_), strlen(message))-1);
 }
 
-void PanicInterruptHandler::int_handler(const ParameterPackage& params) noexcept
+void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexcept
 {
     panic2(message_,
            params.edi,
@@ -25,3 +27,5 @@ void PanicInterruptHandler::int_handler(const ParameterPackage& params) noexcept
            params.error_code,
            params.eip);
 }
+
+} // namespace i386
