@@ -2,13 +2,14 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_INTERRUPT_CONTROLLER_HPP
 
 #include "hardware_interrupt_controller.hpp"
+#include "interrupt_parameters.hpp"
 #include <generic_interrupt_dispatcher.hpp>
 
 namespace i386 {
 
 class InterruptController {
 public:
-    using InterruptDispatcher = GenericInterruptDispatcher<HardwareInterruptController>;
+    using InterruptDispatcher = GenericInterruptDispatcher<HardwareInterruptController, InterruptParameters>;
 
     InterruptController();
 
@@ -18,7 +19,7 @@ public:
     // Installs interrupt handlers for system standard interrupts and traps.
     // InterruptController takes ownership of the handler.
     // AFOX_TODO: I should implement my own equivalent to std::unique_ptr.
-    void install(InterruptHandler *keyboard_handler);
+    void install(InterruptHandler<InterruptParameters> *keyboard_handler);
 
     // Become ready to receive hardware interrupt and then enable them.
     void become_ready();

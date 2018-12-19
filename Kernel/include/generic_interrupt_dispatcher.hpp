@@ -8,12 +8,11 @@
 #include "interrupt_handler.hpp"
 
 // Invoked when an interrupt occurs to redirect to the appropriate handler.
-template<typename HardwareInterruptController>
+template<typename HardwareInterruptController, typename Params>
 class GenericInterruptDispatcher {
 public:
     using LockType = InterruptLock;
-    using Handler = SharedPointer<InterruptHandler, LockType>;
-    using Params = InterruptHandler::ParameterPackage;
+    using Handler = SharedPointer<InterruptHandler<Params>, LockType>;
 
     GenericInterruptDispatcher(HardwareInterruptController& hardware_interrupt_controller)
      : should_panic_on_null_handler_(true),

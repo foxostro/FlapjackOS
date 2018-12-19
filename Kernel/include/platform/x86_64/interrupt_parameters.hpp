@@ -8,6 +8,7 @@ namespace x86_64 {
 // A parameter package constructed by the low-level ISR wrapper.
 struct InterruptParameters {
     uint32_t size; // The size of the structure.
+    uint32_t interrupt_number;
     // STUB
 };
 
