@@ -17,7 +17,7 @@ void InterruptController::init()
     hardware_interrupt_controller_.init();
 }
 
-void InterruptController::install(InterruptHandler<InterruptParameters> *keyboard_handler)
+void InterruptController::install(GenericInterruptHandler<InterruptParameters> *keyboard_handler)
 {
     TRACE("begin");
 

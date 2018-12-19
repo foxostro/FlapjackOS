@@ -19,7 +19,7 @@ public:
     // Installs interrupt handlers for system standard interrupts and traps.
     // InterruptController takes ownership of the handler.
     // AFOX_TODO: I should implement my own equivalent to std::unique_ptr.
-    void install(InterruptHandler<InterruptParameters> *keyboard_handler);
+    void install(GenericInterruptHandler<InterruptParameters> *keyboard_handler);
 
     // Become ready to receive hardware interrupt and then enable them.
     void become_ready();

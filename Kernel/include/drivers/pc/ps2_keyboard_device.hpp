@@ -3,10 +3,10 @@
 
 #include <common/keyboard_device.hpp>
 #include <common/ring_buffer.hpp>
-#include "interrupt_handler.hpp"
+#include "generic_interrupt_handler.hpp"
 #include <platform/i386/interrupt_parameters.hpp> // AFOX_TODO: PS2KeyboardDevice needs to be made general enough to work on i386 and also x86_64.
 
-class PS2KeyboardDevice : public KeyboardDevice, public InterruptHandler<i386::InterruptParameters> {
+class PS2KeyboardDevice : public KeyboardDevice, public GenericInterruptHandler<i386::InterruptParameters> {
 public:
     virtual ~PS2KeyboardDevice() noexcept;
     PS2KeyboardDevice();

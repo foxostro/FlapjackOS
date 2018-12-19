@@ -3,10 +3,10 @@
 
 #include <panic.h>
 #include <cstring>
-#include "interrupt_handler.hpp"
+#include "generic_interrupt_handler.hpp"
 #include <platform/i386/interrupt_parameters.hpp> // AFOX_TODO: PageFaultInterruptHandler needs to be made general enough to work on i386 and also x86_64.
 
-class PageFaultInterruptHandler : public InterruptHandler<i386::InterruptParameters> {
+class PageFaultInterruptHandler : public GenericInterruptHandler<i386::InterruptParameters> {
 public:
     PageFaultInterruptHandler();
 
