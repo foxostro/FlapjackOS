@@ -92,7 +92,7 @@ bool PS2KeyboardDevice::step_state_machine(KeyboardDriverState &state, KeyboardE
     return true;
 }
 
-void PS2KeyboardDevice::int_handler(const ParameterPackage&) noexcept
+void PS2KeyboardDevice::on_interrupt() noexcept
 {
     KeyboardDriverState state = IDLE;
     KeyboardEvent event;

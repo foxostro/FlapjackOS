@@ -3,10 +3,8 @@
 
 #include <common/keyboard_device.hpp>
 #include <common/ring_buffer.hpp>
-#include "generic_interrupt_handler.hpp"
-#include <platform/i386/interrupt_parameters.hpp> // AFOX_TODO: PS2KeyboardDevice needs to be made general enough to work on i386 and also x86_64.
 
-class PS2KeyboardDevice : public KeyboardDevice, public GenericInterruptHandler<i386::InterruptParameters> {
+class PS2KeyboardDevice : public KeyboardDevice {
 public:
     virtual ~PS2KeyboardDevice() noexcept;
     PS2KeyboardDevice();
@@ -14,8 +12,7 @@ public:
     // Keyboard interrupt handler.
     // Implements the lower half of PS/2 keyboard driver. To be called when the
     // keyboard interrupt fires.
-    using ParameterPackage = i386::InterruptParameters;
-    void int_handler(const ParameterPackage& params) noexcept override;
+    void on_interrupt() noexcept;
 
     const char* keycode_name(Keycode key) override;
     KeyboardEvent get_event() override;

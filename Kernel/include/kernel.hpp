@@ -19,6 +19,7 @@ public:
     using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
     using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
     using InterruptController = KernelPolicy::InterruptController;
+    using InterruptParameters = KernelPolicy::InterruptParameters;
     using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
 
     ~Kernel() = default;

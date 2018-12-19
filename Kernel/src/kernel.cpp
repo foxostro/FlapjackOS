@@ -7,6 +7,7 @@
 
 // TODO: How can Kernel be made more platform-agnostic wrt to device drivers?
 #include <drivers/pc/ps2_keyboard_device.hpp>
+#include <simple_device_interrupt_handler.hpp>
 
 #include <malloc/malloc_zone.hpp>
 
@@ -167,10 +168,7 @@ void Kernel::initialize_interrupts_and_device_drivers()
     TRACE("Initializing device drivers.");
     PS2KeyboardDevice *keyboard_driver = new PS2KeyboardDevice();
     keyboard_ = keyboard_driver;
-#ifdef __i386__ // AFOX_TODO: HACK. Just to get the build working for now.
-    interrupt_controller_.install(keyboard_driver);
-#else
-    interrupt_controller_.install(nullptr);
-#endif
+    auto keyboard_handler = new SimpleDeviceInterruptHandler<InterruptParameters, PS2KeyboardDevice>(*keyboard_driver);
+    interrupt_controller_.install(keyboard_handler);
     interrupt_controller_.become_ready();
 }

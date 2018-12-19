@@ -16,6 +16,7 @@ struct KernelPolicy {
 	using KernelAddressSpaceBootstrapper = x86_64::KernelAddressSpaceBootstrapper<x86_64::HardwareMemoryManagementUnit>;
 	using PhysicalMemoryMap = x86_64::PhysicalMemoryMap<x86_64::HardwareMemoryManagementUnit>;
 	using InterruptController = x86_64::InterruptController;
+	using InterruptParameters = x86_64::InterruptParameters;
 	using TextDisplayDevice = VGATextDisplayDevice;
 };
 
@@ -34,6 +35,7 @@ struct KernelPolicy {
 	using KernelAddressSpaceBootstrapper = i386::KernelAddressSpaceBootstrapper<i386::HardwareMemoryManagementUnit>;
 	using PhysicalMemoryMap = i386::PhysicalMemoryMap<i386::HardwareMemoryManagementUnit>;
 	using InterruptController = i386::InterruptController;
+	using InterruptParameters = i386::InterruptParameters;
 	using TextDisplayDevice = VGATextDisplayDevice;
 };
 
