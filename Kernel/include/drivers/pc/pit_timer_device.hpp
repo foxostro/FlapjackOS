@@ -2,10 +2,8 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PIT_TIMER_DEVICE_HPP
 
 #include <common/timer_device.hpp>
-#include "generic_interrupt_handler.hpp"
-#include <platform/i386/interrupt_parameters.hpp> // AFOX_TODO: PITTimerDevice needs to be made general enough to work on i386 and also x86_64.
 
-class PITTimerDevice : public TimerDevice, public GenericInterruptHandler<i386::InterruptParameters> {
+class PITTimerDevice : public TimerDevice {
 public:
     static constexpr unsigned CLOCK_FREQUENCY          = 1193182; // Clock cycles per second.
     static constexpr unsigned TIMER_RATE_10ms          = 11931;
@@ -25,8 +23,7 @@ public:
                    int leap_ticks);
 
     // Timer interrupt handler. To be called when the timer interrupt fires.
-    using ParameterPackage = i386::InterruptParameters;
-    void int_handler(const ParameterPackage& params) noexcept override;
+    void on_interrupt() noexcept;
 
     unsigned ticks() override;
     unsigned seconds() override;

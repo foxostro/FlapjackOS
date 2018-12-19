@@ -14,6 +14,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/generic_interrupt_dispatcher.hpp"
     "include/interrupt_lock.hpp" "src/interrupt_lock.cpp"
     "include/generic_interrupt_handler.hpp"
+    "include/simple_device_interrupt_handler.hpp"
     "include/get_frame_pointer.h"
     "include/halt.h"
     "include/idt_asm.h"

@@ -1,6 +1,5 @@
 #include <drivers/pc/pit_timer_device.hpp>
-
-#include <platform/pc/pic.h> // TODO: The PITTimerDevice class should probably be moved to the "pc" platform directory.
+#include <platform/pc/pic.h>
 #include <inout.h>
 #include <common/misc.h>
 
@@ -8,7 +7,7 @@ constexpr unsigned TIMER_PERIOD_IO_PORT = 0x40;
 constexpr unsigned TIMER_MODE_IO_PORT   = 0x43;
 constexpr unsigned TIMER_SQUARE_WAVE    = 0x36;
 
-void PITTimerDevice::int_handler(const ParameterPackage&) noexcept
+void PITTimerDevice::on_interrupt() noexcept
 {
     if (++leap_counter_ > timer_leap_interval_) {
         leap_counter_ = 0; // reset

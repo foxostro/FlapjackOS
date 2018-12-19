@@ -5,11 +5,15 @@
 #include "interrupt_parameters.hpp"
 #include "interrupt_dispatcher.hpp"
 
+class PITTimerDevice; // AFOX_TODO: Remove me. Separate device drivers and interrupt control.
+
 namespace i386 {
 
 class InterruptController {
 public:
     InterruptController();
+
+    ~InterruptController();
 
     // Initialize the underlying hardware interrupt controller.
     void init();
@@ -36,6 +40,7 @@ public:
 private:
     HardwareInterruptController hardware_interrupt_controller_;
     InterruptDispatcher interrupt_dispatcher_;
+    PITTimerDevice* timer_device_; // AFOX_TODO: Remove me. Separate device drivers and interrupt control.
     bool are_interrupts_ready_;
 };
 

@@ -3,6 +3,7 @@
 #include <platform/i386/page_fault_interrupt_handler.hpp>
 #include <drivers/pc/pit_timer_device.hpp>
 #include <drivers/pc/ps2_keyboard_device.hpp>
+#include <simple_device_interrupt_handler.hpp>
 #include <logger.hpp>
 
 namespace i386 {
@@ -11,6 +12,11 @@ InterruptController::InterruptController()
  : interrupt_dispatcher_(hardware_interrupt_controller_),
    are_interrupts_ready_(false)
  {}
+
+InterruptController::~InterruptController()
+{
+    delete timer_device_;
+}
 
 void InterruptController::init()
 {
@@ -22,12 +28,16 @@ void InterruptController::install(GenericInterruptHandler<InterruptParameters> *
     TRACE("begin");
 
     assert(keyboard_handler);
-    
-    // TODO: This will leak handlers.
+
+    // TODO: Separate device driver initialization from interrupt control.
+    // TODO: If I implement a std::optional equivalent then `timer_device_' does not need to be allocated with new here. Instead, make the optional<Timer> be a class member.
+    timer_device_ = new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
+                                       PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
+                                       PITTimerDevice::TIMER_LEAP_TICKS_10ms);
+    auto timer_handler = new SimpleDeviceInterruptHandler<InterruptParameters, PITTimerDevice>(*timer_device_);
+
     interrupt_dispatcher_.set_handler(IDT_KEY,   keyboard_handler);
-    interrupt_dispatcher_.set_handler(IDT_TIMER, new PITTimerDevice(PITTimerDevice::TIMER_RATE_10ms,
-                                                                    PITTimerDevice::TIMER_LEAP_INTERVAL_10ms,
-                                                                    PITTimerDevice::TIMER_LEAP_TICKS_10ms));
+    interrupt_dispatcher_.set_handler(IDT_TIMER, timer_handler);
     interrupt_dispatcher_.set_handler(IDT_DE,    new PanicInterruptHandler("Division Error", /* error_code_present = */ false));
     interrupt_dispatcher_.set_handler(IDT_DB,    new PanicInterruptHandler("Debug Exception", /* error_code_present = */ false));
     interrupt_dispatcher_.set_handler(IDT_NMI,   new PanicInterruptHandler("Non-Maskable Interrupt", /* error_code_present = */ false));
