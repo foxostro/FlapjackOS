@@ -14,7 +14,7 @@ PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_cod
 
 void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexcept
 {
-    // AFOX_TODO: STUB. Also, panic2() is extremely i386-specific.
+    // AFOX_TODO: STUB.
     (void)params;
     (void)error_code_present_;
     panic(message_);
