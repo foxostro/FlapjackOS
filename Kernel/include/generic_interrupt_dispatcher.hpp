@@ -93,6 +93,7 @@ private:
             interrupt_number);
     }
 
+    // AFOX_TODO: This method is platform-specific and probably doesn't belong on the GenericInterruptDispatcher class. Maybe move to a platform-specific subclass?
     const char* get_interrupt_name(unsigned interrupt_number) noexcept
     {
         switch (interrupt_number) {

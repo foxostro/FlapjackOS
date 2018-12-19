@@ -3,14 +3,12 @@
 
 #include "hardware_interrupt_controller.hpp"
 #include "interrupt_parameters.hpp"
-#include <generic_interrupt_dispatcher.hpp>
+#include "interrupt_dispatcher.hpp"
 
 namespace i386 {
 
 class InterruptController {
 public:
-    using InterruptDispatcher = GenericInterruptDispatcher<HardwareInterruptController, InterruptParameters>;
-
     InterruptController();
 
     // Initialize the underlying hardware interrupt controller.

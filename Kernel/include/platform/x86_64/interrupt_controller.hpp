@@ -3,15 +3,13 @@
 
 #include "hardware_interrupt_controller.hpp"
 #include "interrupt_parameters.hpp"
-#include <generic_interrupt_dispatcher.hpp>
+#include "interrupt_dispatcher.hpp"
 
 namespace x86_64 {
 
 // AFOX_TODO: There's a lot of duplication between this class and the i386 version. Can these two be consolidated, maybe with a common base class?
 class InterruptController {
 public:
-    using InterruptDispatcher = GenericInterruptDispatcher<HardwareInterruptController, InterruptParameters>;
-
     InterruptController();
 
     // Initialize the underlying hardware interrupt controller.
