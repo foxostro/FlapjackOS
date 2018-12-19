@@ -12,16 +12,8 @@
 
 // The kernel is the heart of the operating system.
 // It manages access to memory and resources on the system.
-class Kernel {
+class Kernel : private KernelPolicy {
 public:
-    using HardwareTaskConfiguration = KernelPolicy::HardwareTaskConfiguration;
-    using HardwareMemoryManagementUnit = KernelPolicy::HardwareMemoryManagementUnit;
-    using KernelAddressSpaceBootstrapper = KernelPolicy::KernelAddressSpaceBootstrapper;
-    using PhysicalMemoryMap = KernelPolicy::PhysicalMemoryMap;
-    using InterruptController = KernelPolicy::InterruptController;
-    using InterruptParameters = KernelPolicy::InterruptParameters;
-    using TextDisplayDevice = KernelPolicy::TextDisplayDevice;
-
     ~Kernel() = default;
 
     // Boots the kernel and intializes device drivers.
