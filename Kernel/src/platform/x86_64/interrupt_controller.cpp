@@ -8,14 +8,20 @@ InterruptController::InterruptController()
    are_interrupts_ready_(false)
  {}
 
-void InterruptController::init()
+void InterruptController::initialize_hardware()
 {
     hardware_interrupt_controller_.init();
 }
 
-void InterruptController::install(GenericInterruptHandler<InterruptParameters> *keyboard_handler)
+void InterruptController::setup()
 {
-    (void)keyboard_handler;
+    assert(!"stub");
+}
+
+void InterruptController::install(unsigned irq, InterruptDispatcher::Handler handler)
+{
+    (void)irq;
+    (void)handler;
     assert(!"stub");
 }
 

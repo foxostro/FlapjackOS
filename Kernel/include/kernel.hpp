@@ -4,10 +4,7 @@
 #include <multiboot.h>
 #include <page_frame_allocator.hpp>
 #include <kernel_policy.hpp>
-
-#include <common/keyboard_device.hpp>
 #include <common/text_terminal.hpp>
-
 #include <cstdint>
 
 // The kernel is the heart of the operating system.
@@ -50,7 +47,7 @@ private:
     uintptr_t istack_;
     HardwareTaskConfiguration hardware_task_configuration_;
     InterruptController interrupt_controller_;
-    KeyboardDevice* keyboard_;
+    DeviceDrivers device_drivers_;
     TextDisplayDevice display_;
     TextTerminal terminal_;
     HardwareMemoryManagementUnit mmu_;

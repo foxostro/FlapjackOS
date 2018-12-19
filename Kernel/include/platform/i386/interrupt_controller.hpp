@@ -5,23 +5,20 @@
 #include "interrupt_parameters.hpp"
 #include "interrupt_dispatcher.hpp"
 
-class PITTimerDevice; // AFOX_TODO: Remove me. Separate device drivers and interrupt control.
-
 namespace i386 {
 
 class InterruptController {
 public:
     InterruptController();
 
-    ~InterruptController();
-
     // Initialize the underlying hardware interrupt controller.
-    void init();
+    void initialize_hardware();
 
     // Installs interrupt handlers for system standard interrupts and traps.
-    // InterruptController takes ownership of the handler.
-    // AFOX_TODO: I should implement my own equivalent to std::unique_ptr.
-    void install(GenericInterruptHandler<InterruptParameters> *keyboard_handler);
+    void setup();
+
+    // Installs the specific handler for the given IRQ line.
+    void install(unsigned irq, InterruptDispatcher::Handler handler);
 
     // Become ready to receive hardware interrupt and then enable them.
     void become_ready();
@@ -40,7 +37,6 @@ public:
 private:
     HardwareInterruptController hardware_interrupt_controller_;
     InterruptDispatcher interrupt_dispatcher_;
-    PITTimerDevice* timer_device_; // AFOX_TODO: Remove me. Separate device drivers and interrupt control.
     bool are_interrupts_ready_;
 };
 

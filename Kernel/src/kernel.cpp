@@ -4,13 +4,7 @@
 #include <logger.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
-
-// TODO: How can Kernel be made more platform-agnostic wrt to device drivers?
-#include <drivers/pc/ps2_keyboard_device.hpp>
-#include <simple_device_interrupt_handler.hpp>
-
 #include <malloc/malloc_zone.hpp>
-
 #include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
@@ -25,6 +19,7 @@ TextTerminal *g_terminal = nullptr;
 Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
  : mb_info_(mb_info),
    istack_(istack),
+   device_drivers_(interrupt_controller_),
    address_space_bootstrapper_(mmu_),
    phys_map_(mmu_)
 {
@@ -32,7 +27,7 @@ Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
     
     hardware_task_configuration_.init(istack_);
-    interrupt_controller_.init();
+    interrupt_controller_.initialize_hardware();
     setup_terminal();
     print_welcome_message();
     prepare_kernel_address_space();
@@ -63,10 +58,12 @@ void Kernel::run()
 {
     TRACE("Running...");
 
+    KeyboardDevice& keyboard = device_drivers_.get_keyboard();
+
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     terminal_.puts("Entering console loop:\n");
-    LineEditor ed(terminal_, *keyboard_);
+    LineEditor ed(terminal_, keyboard);
     while (true) {
         auto user_input = ed.getline();
         terminal_.puts("Got: ");
@@ -166,9 +163,7 @@ void Kernel::initialize_kernel_malloc()
 void Kernel::initialize_interrupts_and_device_drivers()
 {
     TRACE("Initializing device drivers.");
-    PS2KeyboardDevice *keyboard_driver = new PS2KeyboardDevice();
-    keyboard_ = keyboard_driver;
-    auto keyboard_handler = new SimpleDeviceInterruptHandler<InterruptParameters, PS2KeyboardDevice>(*keyboard_driver);
-    interrupt_controller_.install(keyboard_handler);
+    interrupt_controller_.setup();
+    device_drivers_.init();
     interrupt_controller_.become_ready();
 }

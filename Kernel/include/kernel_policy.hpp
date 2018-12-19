@@ -8,6 +8,7 @@
 #include <platform/x86_64/hardware_memory_management_unit.hpp>
 #include <platform/x86_64/physical_memory_map.hpp>
 #include <platform/x86_64/interrupt_controller.hpp>
+#include <platform/x86_64/device_drivers.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
 
 struct KernelPolicy {
@@ -17,6 +18,7 @@ struct KernelPolicy {
 	using PhysicalMemoryMap = x86_64::PhysicalMemoryMap<x86_64::HardwareMemoryManagementUnit>;
 	using InterruptController = x86_64::InterruptController;
 	using InterruptParameters = x86_64::InterruptParameters;
+	using DeviceDrivers = x86_64::DeviceDrivers;
 	using TextDisplayDevice = VGATextDisplayDevice;
 };
 
@@ -27,6 +29,7 @@ struct KernelPolicy {
 #include <platform/i386/hardware_memory_management_unit.hpp>
 #include <platform/i386/physical_memory_map.hpp>
 #include <platform/i386/interrupt_controller.hpp>
+#include <platform/i386/device_drivers.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
 
 struct KernelPolicy {
@@ -36,6 +39,7 @@ struct KernelPolicy {
 	using PhysicalMemoryMap = i386::PhysicalMemoryMap<i386::HardwareMemoryManagementUnit>;
 	using InterruptController = i386::InterruptController;
 	using InterruptParameters = i386::InterruptParameters;
+	using DeviceDrivers = i386::DeviceDrivers;
 	using TextDisplayDevice = VGATextDisplayDevice;
 };
 
