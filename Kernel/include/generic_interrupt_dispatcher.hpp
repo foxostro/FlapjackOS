@@ -2,15 +2,17 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_GENERIC_INTERRUPT_DISPATCHER_HPP
 
 #include <common/shared_pointer.hpp>
-#include <idt_asm.h>
 #include <interrupt_lock.hpp>
 #include <panic.h>
+#include <cstddef>
 #include "generic_interrupt_handler.hpp"
 
 // Invoked when an interrupt occurs to redirect to the appropriate handler.
 template<typename HardwareInterruptController, typename Params>
 class GenericInterruptDispatcher {
 public:
+    static constexpr size_t MAX_HANDLERS = 256;
+    
     using LockType = InterruptLock;
     using Handler = SharedPointer<GenericInterruptHandler<Params>, LockType>;
 
@@ -24,7 +26,7 @@ public:
     // The dispatcher does not take ownership of the handler object.
     void set_handler(unsigned interrupt_number, const Handler& handler) noexcept
     {
-        assert(interrupt_number < IDT_MAX);
+        assert(interrupt_number < MAX_HANDLERS);
         lock_.lock();
         handlers_[interrupt_number] = handler;
         lock_.unlock();
@@ -44,7 +46,7 @@ public:
     {
         assert(params.size == sizeof(Params));
         unsigned interrupt_number = params.interrupt_number;
-        assert(interrupt_number < IDT_MAX);
+        assert(interrupt_number < MAX_HANDLERS);
         bool spurious = clear_hardware_interrupt(interrupt_number);
         if (!spurious) {
             auto handler = get_handler(interrupt_number);
@@ -80,7 +82,7 @@ protected:
 
 private:
     LockType lock_;
-    Handler handlers_[IDT_MAX];
+    Handler handlers_[MAX_HANDLERS];
     bool should_panic_on_null_handler_;
     HardwareInterruptController& hardware_interrupt_controller_;
 

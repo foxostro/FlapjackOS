@@ -17,13 +17,11 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/simple_device_interrupt_handler.hpp"
     "include/get_frame_pointer.h"
     "include/halt.h"
-    "include/idt_asm.h"
     "include/inout.h"
     "include/interrupt_asm.h"
     "include/seg.h"
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
-    "include/platform/i386/idt.h" "src/platform/i386/idt.c"
     "include/logger.hpp" "src/logger.cpp"
     "include/drivers/pc/ps2_keyboard_device.hpp" "src/drivers/pc/ps2_keyboard_device/ps2_keyboard_device.cpp"
     "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make_escaped.inc"
@@ -38,7 +36,6 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     )
 
 set(I386_SOURCE_FILES
-    "include/platform/i386/isr_install.h" "${CMAKE_CURRENT_BINARY_DIR}/i386_isr_install.c"
     "include/platform/i386/page_directory.hpp"
     "include/platform/i386/page_directory_entry.hpp"
     "include/platform/i386/page_table.hpp"
@@ -63,8 +60,6 @@ set(I386_SOURCE_FILES
     "include/platform/i386/ltr.hpp" "src/platform/i386/ltr.S"
     "include/platform/i386/creg.hpp" "src/platform/i386/creg.S"
     )
-GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/platform/i386/isr_install.c.erb"
-                           "${CMAKE_CURRENT_BINARY_DIR}/i386_isr_install.c")
 
 set(X86_64_SOURCE_FILES
     "include/platform/x86_64/hardware_task_configuration.hpp" "src/platform/x86_64/hardware_task_configuration.cpp"
@@ -108,7 +103,6 @@ if(CMAKE_CROSSCOMPILING)
     list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
          "src/${BUILD_ARCH}/get_frame_pointer.S"
          "src/${BUILD_ARCH}/halt.S"
-         "src/${BUILD_ARCH}/idt_asm.S"
          "src/${BUILD_ARCH}/inout.S"
          "src/${BUILD_ARCH}/interrupt_asm.S"
          "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S"
@@ -119,7 +113,6 @@ else(CMAKE_CROSSCOMPILING)
     list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
          "src/host/get_frame_pointer.c"
          "src/host/halt.c"
-         "src/host/idt.c"
          "src/host/inout.c"
          "src/host/interrupt.c"
          "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c"
@@ -164,7 +157,6 @@ if (NOT CMAKE_CROSSCOMPILING)
         "test/test_main.cpp"
         "test/test_page_frame_allocator.cpp"
         "test/test_page_frame_allocator_configuration_operation.cpp"
-        "test/test_idt.cpp"
         )
 
     if (${BUILD_ARCH} STREQUAL "i386")
