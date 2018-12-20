@@ -10,16 +10,16 @@ namespace x86_64 {
 // For details, refer to the Intel manual, volume 3a, section 6.14.
 //
 // Interrupt/Trap Gate:
-// -------------------------------------------------------------------------
-// |  127:96  |     95:48      | 47 | 46:45 | 44 |  43:40  | 39:35 | 34:32 |
-// |------------------------------------------------------------------------
-// | reserved |  Offset 63..16 |  P |  DPL  |  0 |  Type   |   0   |  IST  |
-// -------------------------------------------------------------------------
-// -----------------------------------
-// |      31:16       |     15:0     |
-// -----------------------------------
-// | Segment Selector | Offset 15..0 |
-// -----------------------------------
+// ------------------------------------------------------------------------------------------------
+// |      63:48     | 47 | 46:45 | 44 |  43:40  | 39:35 | 34:32 |      31:16       |     15:0     |
+// |----------------------------------------------------------------------------------------------|
+// |  Offset 31..16 |  P |  DPL  |  0 |  Type   |   0   |  IST  | Segment Selector | Offset 15..0 |
+// ------------------------------------------------------------------------------------------------
+// -----------------------------
+// |  63:32   |      31:0      |
+// |----------------------------
+// | reserved |  Offset 63..32 |
+// -----------------------------
 //
 // where...
 // P -- Present
@@ -30,8 +30,19 @@ namespace x86_64 {
 // Segment Selector -- Segment selector for destination code segment
 class InterruptDescriptor {
 public:
-    using uint128 = __uint128_t; // This is a GCC extension, but convenient.
-    uint128 data;
+    uint64_t data;
+    uint64_t data2;
+
+    static constexpr uint64_t SEGMENT_SELECTOR_MASK = 0b0000000000000000000000000000000011111111111111110000000000000000;
+    static constexpr uint64_t SEGMENT_SELECTOR_SHIFT = 16;
+    static constexpr uint64_t DPL_MASK = 0b0000000000000000011000000000000000000000000000000000000000000000;
+    static constexpr uint64_t DPL_SHIFT = 45;
+    static constexpr unsigned PRESENT_BIT = 47;
+    static constexpr uint64_t OFFSET_15_0_MASK = 0b00000000000000001111111111111111;
+    static constexpr uint64_t OFFSET_31_16_MASK = 0b11111111111111110000000000000000;
+    static constexpr uint64_t OFFSET_31_16_SHIFT = 48-16;
+    static constexpr uint64_t OFFSET_63_32_MASK = (1ull<<32)-1;
+    static constexpr uint64_t OFFSET_63_32_SHIFT = 32;
 
     enum GateType {
         InterruptGate,
@@ -43,73 +54,108 @@ public:
     void set_segment_selector(unsigned segment_selector)
     {
         assert(segment_selector < (1<<16));
-        // stub
+        data = data & ~SEGMENT_SELECTOR_MASK;
+        const uint64_t field = (segment_selector << SEGMENT_SELECTOR_SHIFT) & SEGMENT_SELECTOR_MASK;
+        data = data | field;
     }
 
     unsigned get_segment_selector() const
     {
-        return 0; // stub
+        return (data & SEGMENT_SELECTOR_MASK) >> SEGMENT_SELECTOR_SHIFT;
     }
 
-    void set_type([[maybe_unused]] GateType type)
+    void set_type(GateType type)
     {
-        // stub
+        switch (type) {
+        case InterruptGate:
+            set_bit(43);
+            set_bit(42);
+            set_bit(41);
+            clear_bit(40);
+            break;
+
+        case TrapGate:
+            set_bit(43);
+            set_bit(42);
+            set_bit(41);
+            set_bit(40);
+            break;
+        }
     }
 
     GateType get_type() const
     {
-        return InterruptGate; // stub
+        if (get_bit(40) == true) {
+            return TrapGate;
+        } else {
+            return InterruptGate;
+        }
     }
 
     void set_bit(unsigned bit_number)
     {
-        assert(bit_number < 128);
-        uint128 bit = (uint128)1 << bit_number;
+        assert(bit_number < 64);
+        uint64_t bit = 1ull << bit_number;
         data = data | bit;
     }
 
     void clear_bit(unsigned bit_number)
     {
-        assert(bit_number < 128);
-        uint128 bit = (uint128)1 << bit_number;
+        assert(bit_number < 64);
+        uint64_t bit = 1ull << bit_number;
         data = data & ~bit;
     }
 
     bool get_bit(unsigned bit_number) const
     {
-        assert(bit_number < 128);
-        return (data & ((uint128)1 << bit_number)) != 0;
+        assert(bit_number < 64);
+        return (data & (1ull << bit_number)) != 0;
     }
 
     void set_dpl(unsigned dpl)
     {
         assert(dpl <= 3);
-        // stub
+        data = data & ~DPL_MASK;
+        const uint64_t field = ((uint64_t)dpl << DPL_SHIFT) & DPL_MASK;
+        data = data | field;
     }
 
     unsigned get_dpl() const
     {
-        return 0; // stub
+        return (data & DPL_MASK) >> DPL_SHIFT;
     }
 
-    void set_present([[maybe_unused]] bool present)
+    void set_present(bool present)
     {
-        // stub
+        if (present) {
+            set_bit(PRESENT_BIT);
+        } else {
+            clear_bit(PRESENT_BIT);
+        }
     }
 
     bool get_present() const
     {
-        return false; // stub
+        return get_bit(PRESENT_BIT);
     }
 
-    void set_offset([[maybe_unused]] uint32_t offset)
+    void set_offset(uint64_t offset)
     {
-        // stub
+        data = data & ~OFFSET_15_0_MASK;
+        data = data | (offset & OFFSET_15_0_MASK);
+
+        data = data & ~(OFFSET_31_16_MASK << OFFSET_31_16_SHIFT);
+        data = data | ((offset & OFFSET_31_16_MASK) << OFFSET_31_16_SHIFT);
+
+        data2 = data2 & ~OFFSET_63_32_MASK;
+        data2 = data2 | (offset >> OFFSET_63_32_SHIFT);
     }
 
     uint64_t get_offset() const
     {
-        return 0; // stub
+        return ((data2 & OFFSET_63_32_MASK) << OFFSET_63_32_SHIFT)
+             | ((data & (OFFSET_31_16_MASK << OFFSET_31_16_SHIFT)) >> OFFSET_31_16_SHIFT)
+             |  (data & OFFSET_15_0_MASK);
     }
 };
 
