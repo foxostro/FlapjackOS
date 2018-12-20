@@ -30,7 +30,7 @@ void PageFaultInterruptHandler::int_handler(const InterruptParameters& params) n
              "Page Fault.\nfaulting_address: %p\nerror: %s (%u)\n",
               (void*)(uintptr_t)get_cr2(),
               get_page_fault_error_string(params.error_code),
-              params.error_code);
+              (unsigned)params.error_code);
     panic(message);
 }
 
