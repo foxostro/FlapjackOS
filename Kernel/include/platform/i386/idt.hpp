@@ -1,8 +1,10 @@
 #ifndef FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_IDT_HPP
 #define FLAPJACKOS_KERNEPLATFORMSUPPORT_INCLUDE_PLATFORM_I386_IDT_HPP
 
+#include "lidt.hpp"
 #include "interrupt_descriptor.hpp"
 #include <cstddef>
+#include <cstring> // for memset
 
 namespace i386 {
 
@@ -18,7 +20,17 @@ public:
     // gates.
     static constexpr size_t MAX_ENTRIES = 256;
 
-    alignas(IDT_BASE_ALIGNMENT) InterruptDescriptor entries_[MAX_ENTRIES];
+    alignas(IDT_BASE_ALIGNMENT) InterruptDescriptor entries[MAX_ENTRIES];
+
+    void clear()
+    {
+        memset(entries, 0, sizeof(entries));
+    }
+
+    void load()
+    {
+        lidt(entries, sizeof(entries)-1);
+    }
 };
 
 } // namespace i386
