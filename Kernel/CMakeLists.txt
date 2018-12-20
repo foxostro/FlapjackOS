@@ -61,6 +61,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/creg.hpp" "src/platform/i386/creg.S"
     "include/platform/i386/interrupt_numbers.hpp"
     "include/platform/i386/lidt.hpp" "src/platform/i386/lidt.S"
+    "include/platform/i386/idt.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -93,6 +94,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/hardware_memory_management_unit.hpp"
     "include/platform/i386/interrupt_numbers.hpp"
     "include/platform/x86_64/lidt.hpp" "src/platform/x86_64/lidt.S"
+    "include/platform/x86_64/idt.hpp"
     )
 
 set(PC_SOURCE_FILES
@@ -166,6 +168,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     if (${BUILD_ARCH} STREQUAL "i386")
         list(APPEND TEST_SOURCE_FILES
              "test/test_i386_gdt.cpp"
+             "test/test_i386_idt.cpp"
              "test/test_i386_page_directory_entry.cpp"
              "test/test_i386_page_table_entry.cpp"
              "test/test_i386_physical_memory_map.cpp"
@@ -174,6 +177,7 @@ if (NOT CMAKE_CROSSCOMPILING)
     elseif (${BUILD_ARCH} STREQUAL "x86_64")
         list(APPEND TEST_SOURCE_FILES
              "test/test_x86_64_gdt.cpp"
+             "test/test_x86_64_idt.cpp"
              "test/test_x86_64_tss.cpp"
              "test/test_x86_64_generic_page_directory_entry.cpp"
              "test/test_x86_64_page_table_entry.cpp"
