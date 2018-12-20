@@ -4,16 +4,69 @@
 # These are the procedures which are directly referenced by the IDT.
 # Though, all are simply assembly wrappers which call the high-level dispatcher.
 
+.macro ISR_WRAPPER INTERRUPT_NUMBER
+pushq $1312 # Push the size of the parameter package
+pushq \INTERRUPT_NUMBER # Push the interrupt number
+pushq %rax
+pushq %rcx
+pushq %rdx
+pushq %rbx
+pushq %rsp
+pushq %rbp
+pushq %rsi
+pushq %rdi
+pushq %r8
+pushq %r9
+pushq %r10
+pushq %r11
+pushq %r12
+pushq %r13
+pushq %r14
+pushq %r15
+pushw %gs
+pushw %fs
+movq %rsp, %rdi # The first parameter is the address of the parameter package.
+call interrupt_dispatch_trampoline
+popw %fs
+popw %gs
+popq %r15
+popq %r14
+popq %r13
+popq %r12
+popq %r11
+popq %r10
+popq %r9
+popq %r8
+popq %rdi
+popq %rsi
+popq %rbp
+popq %rsp
+popq %rbx
+popq %rdx
+popq %rcx
+popq %rax
+addq $8, %rsp  # Clean up the interrupt number
+addq $8, %rsp  # Clean up the size of the structure
+.endm
+
 # The CPU pushes an error code on the stack for the following ISR wrappers.
 <% [8, 10..14].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    iretq # stub
+    cli
+    ISR_WRAPPER $<%= isr %>
+    sti
+    iretq
 <% end %>
 
 # The CPU does not push an error code for the following ISR wrappers.
 <% [0..7, 9, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    iretq # stub
+    cli
+    pushq $0 # Push a zero for the error code value.
+    ISR_WRAPPER $<%= isr %>
+    addq $8, %rsp  # Clean up the fake error code value.
+    sti
+    iretq
 <% end %>
