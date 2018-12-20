@@ -48,7 +48,6 @@ public:
     static constexpr uint64_t OFFSET_LOWER_MASK = 0b00000000000000001111111111111111;
     static constexpr uint64_t OFFSET_UPPER_MASK = 0b11111111111111110000000000000000;
     static constexpr uint64_t OFFSET_UPPER_SHIFT = 48-16;
-    
 
     enum GateType {
         TaskGate,

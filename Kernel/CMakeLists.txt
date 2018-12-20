@@ -96,6 +96,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/i386/interrupt_numbers.hpp"
     "include/platform/x86_64/lidt.hpp" "src/platform/x86_64/lidt.S"
     "include/platform/x86_64/idt.hpp"
+    "include/platform/x86_64/interrupt_descriptor.hpp"
     )
 
 set(PC_SOURCE_FILES
