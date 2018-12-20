@@ -4,6 +4,7 @@
 #include "hardware_interrupt_controller.hpp"
 #include "interrupt_parameters.hpp"
 #include <generic_interrupt_dispatcher.hpp>
+#include <platform/i386/interrupt_numbers.hpp>
 
 namespace i386 {
 

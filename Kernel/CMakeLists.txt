@@ -59,6 +59,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/lgdt.hpp" "src/platform/i386/lgdt.S"
     "include/platform/i386/ltr.hpp" "src/platform/i386/ltr.S"
     "include/platform/i386/creg.hpp" "src/platform/i386/creg.S"
+    "include/platform/i386/interrupt_numbers.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -89,6 +90,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/kernel_address_space_bootstrapper.hpp"
     "include/platform/x86_64/paging_resolver.hpp"
     "include/platform/x86_64/hardware_memory_management_unit.hpp"
+    "include/platform/i386/interrupt_numbers.hpp"
     )
 
 set(PC_SOURCE_FILES
