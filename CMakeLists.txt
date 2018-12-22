@@ -44,7 +44,9 @@ if(CMAKE_CROSSCOMPILING)
     # kernel must perform some magic to boot which is never done in userspace
     # programs.
     set(COMPILER_FLAGS_C_AND_CXX "-O2 -mno-sse -mno-mmx -fno-stack-protector -nostdlib -ffreestanding")
-    if ("${BUILD_ARCH}" STREQUAL "x86_64")
+    if ("${BUILD_ARCH}" STREQUAL "i386")
+        string(APPEND COMPILER_FLAGS_C_AND_CXX " -march=i486") # necessary for GCC atomic built-ins
+    elseif ("${BUILD_ARCH}" STREQUAL "x86_64")
         string(APPEND COMPILER_FLAGS_C_AND_CXX " -mno-red-zone -mcmodel=kernel")
     endif()
 
