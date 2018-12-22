@@ -7,8 +7,6 @@ namespace x86_64 {
 
 // A parameter package constructed by the low-level ISR wrapper.
 struct InterruptParameters {
-    uint16_t fs;
-    uint16_t gs;
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -30,6 +28,9 @@ struct InterruptParameters {
     uint64_t error_code;
     uint64_t rip;
 };
+
+static_assert(160 == sizeof(InterruptParameters),
+              "The assembly wrappers push 160 bytes.");
 
 } // namespace x86_64
 

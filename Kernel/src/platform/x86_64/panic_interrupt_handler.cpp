@@ -24,8 +24,6 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexc
     if (error_code_present_) {
         snprintf(text, sizeof(text),
                 "Registers:\n"
-                "fs = 0x%x\n"
-                "gs = 0x%x\n"
                 "r15 = %p\n"
                 "r14 = %p\n"
                 "r13 = %p\n"
@@ -45,8 +43,6 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexc
                 "rip = %p\n"
                 "Error Code: 0x%x\n"
                 "%s",
-                params.fs,
-                params.gs,
                 (void*)(uintptr_t)params.r15,
                 (void*)(uintptr_t)params.r14,
                 (void*)(uintptr_t)params.r13,
@@ -69,8 +65,6 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexc
     } else {
         snprintf(text, sizeof(text),
                 "Registers:\n"
-                "fs = 0x%x\n"
-                "gs = 0x%x\n"
                 "r15 = %p\n"
                 "r14 = %p\n"
                 "r13 = %p\n"
@@ -89,8 +83,6 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexc
                 "rax = %p\n"
                 "rip = %p\n"
                 "%s",
-                params.fs,
-                params.gs,
                 (void*)(uintptr_t)params.r15,
                 (void*)(uintptr_t)params.r14,
                 (void*)(uintptr_t)params.r13,

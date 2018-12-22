@@ -5,7 +5,7 @@
 # Though, all are simply assembly wrappers which call the high-level dispatcher.
 
 .macro ISR_WRAPPER INTERRUPT_NUMBER
-pushq $1312 # Push the size of the parameter package
+pushq $160 # Push the size of the parameter package
 pushq \INTERRUPT_NUMBER # Push the interrupt number
 pushq %rax
 pushq %rcx
@@ -23,12 +23,8 @@ pushq %r12
 pushq %r13
 pushq %r14
 pushq %r15
-pushw %gs
-pushw %fs
 movq %rsp, %rdi # The first parameter is the address of the parameter package.
 call interrupt_dispatch_trampoline
-popw %fs
-popw %gs
 popq %r15
 popq %r14
 popq %r13
