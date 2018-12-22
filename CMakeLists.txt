@@ -45,7 +45,7 @@ if(CMAKE_CROSSCOMPILING)
     # programs.
     set(COMPILER_FLAGS_C_AND_CXX "-O2 -mno-sse -mno-mmx -fno-stack-protector -nostdlib -ffreestanding")
     if ("${BUILD_ARCH}" STREQUAL "x86_64")
-        string(APPEND COMPILER_FLAGS_C_AND_CXX " -mcmodel=kernel")
+        string(APPEND COMPILER_FLAGS_C_AND_CXX " -mno-red-zone -mcmodel=kernel")
     endif()
 
     set(LINKER_FLAGS_C_AND_CXX "-nostdlib -ffreestanding")
