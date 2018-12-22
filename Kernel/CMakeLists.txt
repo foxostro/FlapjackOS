@@ -100,7 +100,7 @@ set(X86_64_SOURCE_FILES
     )
 
 set(PC_SOURCE_FILES
-    "include/platform/pc/pic.h" "src/platform/pc/pic.c"
+    "include/platform/pc/pic.hpp" "src/platform/pc/pic.cpp"
     )
 
 set(PLATFORM_SPECIFIC_SOURCE_FILES "${PC_SOURCE_FILES}")

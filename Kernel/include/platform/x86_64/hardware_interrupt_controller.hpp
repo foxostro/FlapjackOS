@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_HARDWARE_INTERRUPT_CONTROLLER_HPP
 
 #include "idt.hpp"
+#include <platform/pc/pic.hpp>
 
 namespace x86_64 {
 
@@ -16,6 +17,7 @@ public:
     bool clear(unsigned interrupt_number);
 
 private:
+    ProgrammableInterruptController pic_;
     InterruptDescriptorTable idt_;
 
     void build_idt();

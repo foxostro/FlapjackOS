@@ -1,5 +1,5 @@
 #include <drivers/pc/pit_timer_device.hpp>
-#include <platform/pc/pic.h>
+#include <platform/pc/pic.hpp>
 #include <inout.h>
 #include <common/misc.h>
 

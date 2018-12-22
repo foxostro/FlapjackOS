@@ -1,5 +1,5 @@
 #include <platform/i386/hardware_interrupt_controller.hpp>
-#include <platform/pc/pic.h>
+#include <platform/pc/pic.hpp>
 #include <interrupt_asm.h>
 #include <seg.h>
 
@@ -255,7 +255,7 @@ HardwareInterruptController::HardwareInterruptController() = default;
 
 void HardwareInterruptController::init()
 {
-    pic_init();
+    pic_.init();
     idt_.clear();
     build_idt();
     idt_.load();
@@ -529,7 +529,7 @@ void HardwareInterruptController::enable_interrupts()
 
 bool HardwareInterruptController::clear(unsigned interrupt_number)
 {
-    return pic_clear(interrupt_number);
+    return pic_.clear(interrupt_number);
 }
 
 } // namespace i386

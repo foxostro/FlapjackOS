@@ -1,5 +1,5 @@
 // See <http://wiki.osdev.org/PIC> for information about the PIC.
-#include <platform/pc/pic.h>
+#include <platform/pc/pic.hpp>
 #include <inout.h>
 
 #define PIC1           0x20 // IO base address for master PIC.
@@ -24,7 +24,7 @@
 #define PIC_READ_ISR    0x0b
 #define PIC_EOI         0x20 // Command code for "end of interrupt"
 
-void pic_remap(unsigned char master_base, unsigned char slave_base)
+void ProgrammableInterruptController::remap(unsigned char master_base, unsigned char slave_base)
 {
     unsigned char a1 = inb(PIC1_DATA);
     unsigned char a2 = inb(PIC2_DATA);
@@ -43,25 +43,25 @@ void pic_remap(unsigned char master_base, unsigned char slave_base)
     outb(PIC2_DATA, a2);
 }
 
-void pic_init(void)
+void ProgrammableInterruptController::init()
 {
     // In protected mode, the IRQs 0 to 7 conflict with the CPU exceptions which
     // are reserved by Intel up until 0x1F. Remap them.
-    pic_remap(0x20, 0x28);
+    remap(0x20, 0x28);
 }
  
-static uint16_t pic_get_isr(void)
+uint16_t ProgrammableInterruptController::get_isr()
 {
     outb(PIC1_COMMAND, PIC_READ_ISR);
     outb(PIC2_COMMAND, PIC_READ_ISR);
     return (inb(PIC2_COMMAND) << 8) | inb(PIC1_COMMAND);
 }
 
-bool pic_clear(unsigned interrupt_number)
+bool ProgrammableInterruptController::clear(unsigned interrupt_number)
 {
     unsigned irq = interrupt_number - 0x20;
 
-    uint16_t isr = pic_get_isr();
+    uint16_t isr = get_isr();
 
     if ((irq == 7) && ((isr & (1 << irq)) == 0)) {
         return true;
