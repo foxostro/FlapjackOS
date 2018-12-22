@@ -28,20 +28,6 @@ public:
         interrupt_controller_.dispatch(params);
     }
 
-    // Disables interrupts.
-    // If the interrupt controller is not ready then this does nothing.
-    void disable_interrupts()
-    {
-        interrupt_controller_.disable_interrupts();
-    }
-
-    // Enables interrupts.
-    // If the interrupt controller is not ready then this does nothing.
-    void enable_interrupts()
-    {
-        interrupt_controller_.enable_interrupts();
-    }
-
 private:
     multiboot_info_t *mb_info_;
     uintptr_t istack_;
@@ -82,7 +68,5 @@ private:
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
 };
-
-Kernel& get_global_kernel();
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP

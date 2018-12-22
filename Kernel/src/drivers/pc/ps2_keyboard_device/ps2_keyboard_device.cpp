@@ -3,8 +3,7 @@
 #include <climits>
 #include <cstring>
 #include <cassert>
-
-#include <interrupt_asm.h>
+#include <interrupt_lock.hpp>
 #include <halt.h>
 #include <inout.h>
 
@@ -111,13 +110,14 @@ void PS2KeyboardDevice::on_interrupt()
         // disabled. As there is only one CPU (in use, at least) the only way a
         // new thread can execute is through an interrupt which invokes the
         // scheduler or something like that.
-        // XXX: Need better kernel synchronization primitives.
+        // AFOX_TODO: Need better kernel synchronization primitives.
         events_.push_back(event);
     }
 }
 
 KeyboardEvent PS2KeyboardDevice::get_event()
 {
+    InterruptLock lock;
     KeyboardEvent event;
 
     bool have_a_key = false;
@@ -127,14 +127,13 @@ KeyboardEvent PS2KeyboardDevice::get_event()
         // interrupts while reading the ring buffer. As there is only one CPU
         // (in use, at least) the only way a new thread can execute is through
         // an interrupt which invokes the scheduler or something like that.
-        // XXX: Need better kernel synchronization primitives.
-        disable_interrupts();
+        lock.lock();
         have_a_key = !events_.empty();
         if (have_a_key) {
             event = events_.front();
             events_.pop_front();
         }
-        enable_interrupts();
+        lock.unlock();
         hlt();
     }
 

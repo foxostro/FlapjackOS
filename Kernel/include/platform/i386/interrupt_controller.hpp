@@ -23,13 +23,13 @@ public:
     using Handler = typename InterruptDispatcher::Handler;
 
     GenericInterruptController()
-     : interrupt_dispatcher_(hardware_interrupt_controller_),
-       are_interrupts_ready_(false)
+     : interrupt_dispatcher_(hardware_interrupt_controller_)
     {}
 
     // Initialize the underlying hardware interrupt controller.
     void initialize_hardware()
     {
+        ready_.lock();
         hardware_interrupt_controller_.init();
     }
 
@@ -71,26 +71,7 @@ public:
     void become_ready()
     {
         interrupt_dispatcher_.set_should_panic_on_null_handler(false);
-        are_interrupts_ready_ = true;
-        enable_interrupts();
-    }
-
-    // Disables interrupts.
-    // If the interrupt controller is not ready then this does nothing.
-    void disable_interrupts()
-    {
-        if (are_interrupts_ready_) {
-            hardware_interrupt_controller_.disable_interrupts();
-        }
-    }
-
-    // Enables interrupts.
-    // If the interrupt controller is not ready then this does nothing.
-    void enable_interrupts()
-    {
-        if (are_interrupts_ready_) {
-            hardware_interrupt_controller_.enable_interrupts();
-        }
+        ready_.unlock();
     }
 
     // Redirect the interrupt to the appropriate handler.
@@ -104,7 +85,7 @@ public:
 private:
     HardwareInterruptController hardware_interrupt_controller_;
     InterruptDispatcher interrupt_dispatcher_;
-    bool are_interrupts_ready_;
+    InterruptLock ready_;
 };
 
 struct InterruptControllerPolicy {

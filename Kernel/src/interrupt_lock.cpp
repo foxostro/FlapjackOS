@@ -1,23 +1,21 @@
 #include <interrupt_lock.hpp>
 #include <interrupt_asm.h>
+#include <logger.hpp>
 
 // The GCC freestanding implementation does not seem to provide support for
-// std::atomic. If it did then the counter below could be replaced with the
-// std::atomic<int>. This change would enable InterruptLock to work correctly
-// when we have preemption working in the kernel.
-// AFOX_TODO: Use an atomic counter so that InterruptLock will work with a preemptive kernel.
+// std::atomic. So, we use the GCC atomic built-ins instead.
 static int g_interrupt_lock_count = 0;
 
 void InterruptLock::lock()
 {
-    if (g_interrupt_lock_count++ == 0) {
+    if (__atomic_fetch_add(&g_interrupt_lock_count, 1, __ATOMIC_SEQ_CST) == 0) {
         ::disable_interrupts();
     }
 }
 
 void InterruptLock::unlock()
 {
-    if (g_interrupt_lock_count-- == 0) {
+    if (__atomic_fetch_sub(&g_interrupt_lock_count, 1, __ATOMIC_SEQ_CST) == 1) {
         ::enable_interrupts();
     }
 }
