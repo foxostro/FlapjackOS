@@ -2,7 +2,7 @@
 #define FLAPJACKOS_COMMON_INCLUDE_SHARED_POINTER_HPP
 
 #include <common/spin_lock.hpp>
-#include <common/atomic_counter.hpp>
+#include <atomic>
 #include <cassert>
 
 // Shared Pointer class implemented with a spin lock.
@@ -18,7 +18,7 @@ public:
 
     SharedPointer(Type* data)
      : data_(data),
-       count_(data ? new AtomicCounter<int>(1) : nullptr)
+       count_(data ? new std::atomic<int>(1) : nullptr)
     {}
 
     SharedPointer(const SharedPointer& other)
@@ -136,26 +136,26 @@ public:
     {
         int count;
         perform_with_lock(lock_, [&]{
-            count = (count_ ? count_->get_value() : 0);
+            count = (count_ ? count_->load() : 0);
         });
         return count;
     }
     
 private:
     Type* data_;
-    mutable AtomicCounter<int>* count_;
+    mutable std::atomic<int>* count_;
     mutable LockType lock_;
 
     void acquire_unlocked()
     {
         if (count_) {
-            count_->increment();
+            count_->fetch_add(1);
         }
     }
 
     void release_unlocked()
     {
-        if (count_ && count_->decrement() == 0) {
+        if (count_ && count_->fetch_sub(1) == 1) {
             delete data_;
             delete count_;
         }
