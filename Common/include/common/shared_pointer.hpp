@@ -18,7 +18,7 @@ public:
 
     SharedPointer(Type* data)
      : data_(data),
-       count_(data ? new AtomicCounter<int, LockType>(1) : nullptr)
+       count_(data ? new AtomicCounter<int>(1) : nullptr)
     {}
 
     SharedPointer(const SharedPointer& other)
@@ -143,7 +143,7 @@ public:
     
 private:
     Type* data_;
-    mutable AtomicCounter<int, LockType>* count_;
+    mutable AtomicCounter<int>* count_;
     mutable LockType lock_;
 
     void acquire_unlocked()
