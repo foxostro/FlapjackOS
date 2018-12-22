@@ -8,15 +8,9 @@
 
 namespace i386 {
 
-class InterruptDispatcher : public GenericInterruptDispatcher<HardwareInterruptController, InterruptParameters>
-{
-public:
-    InterruptDispatcher(HardwareInterruptController& hardware_interrupt_controller)
-     : GenericInterruptDispatcher(hardware_interrupt_controller)
-    {}
-
-protected:
-    const char* get_interrupt_name(unsigned interrupt_number) override
+// Function object. Gets the string name of a given interrupt.
+struct InterruptNamer {
+    static const char* get_interrupt_name(unsigned interrupt_number)
     {
         switch (interrupt_number) {
             case IDT_KEY:   return "Keyboard";
@@ -44,6 +38,10 @@ protected:
         };
     }
 };
+
+using InterruptDispatcher = GenericInterruptDispatcher<HardwareInterruptController,
+                                                       InterruptParameters,
+                                                       InterruptNamer>;
 
 } // namespace i386
 

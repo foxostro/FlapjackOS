@@ -8,7 +8,9 @@
 #include "generic_interrupt_handler.hpp"
 
 // Invoked when an interrupt occurs to redirect to the appropriate handler.
-template<typename HardwareInterruptController, typename Params>
+template<typename HardwareInterruptController,
+         typename Params,
+         typename InterruptNamer>
 class GenericInterruptDispatcher {
 public:
     static constexpr size_t MAX_HANDLERS = 256;
@@ -77,9 +79,6 @@ public:
         return should_panic;
     }
 
-protected:
-    virtual const char* get_interrupt_name(unsigned interrupt_number) = 0;
-
 private:
     LockType lock_;
     Handler handlers_[MAX_HANDLERS];
@@ -96,6 +95,11 @@ private:
         panic("No handler for interrupt \"%s\" (%u)\n",
             get_interrupt_name(interrupt_number),
             interrupt_number);
+    }
+    
+    const char* get_interrupt_name(unsigned interrupt_number) const
+    {
+        return InterruptNamer::get_interrupt_name(interrupt_number);
     }
 };
 
