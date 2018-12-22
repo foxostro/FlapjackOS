@@ -10,7 +10,7 @@ class PageFaultInterruptHandler : public GenericInterruptHandler<InterruptParame
 public:
     PageFaultInterruptHandler();
 
-    void int_handler(const InterruptParameters& params) noexcept override;
+    void int_handler(const InterruptParameters& params) override;
 };
 
 } // namespace i386

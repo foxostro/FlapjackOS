@@ -24,7 +24,7 @@ public:
     // Sets the handler for the specified interrupt number.
     // Pass a null handler to specify that no action should be taken.
     // The dispatcher does not take ownership of the handler object.
-    void set_handler(unsigned interrupt_number, const Handler& handler) noexcept
+    void set_handler(unsigned interrupt_number, const Handler& handler)
     {
         assert(interrupt_number < MAX_HANDLERS);
         lock_.lock();
@@ -33,7 +33,7 @@ public:
     }
 
     // Gets the specified interrupt handler.
-    Handler get_handler(unsigned interrupt_number) noexcept
+    Handler get_handler(unsigned interrupt_number)
     {
         lock_.lock();
         Handler handler = handlers_[interrupt_number];
@@ -42,7 +42,7 @@ public:
     }
 
     // Invoked when an interrupt occurs to redirect to the appropriate handler.
-    void dispatch(const Params& params) noexcept
+    void dispatch(const Params& params)
     {
         assert(params.size == sizeof(Params));
         unsigned interrupt_number = params.interrupt_number;
@@ -61,14 +61,14 @@ public:
     // Indicates that the kernel should panic if the handler is null.
     // This is useful for handling faults early in the boot process, before the
     // memory allocators are available.
-    void set_should_panic_on_null_handler(bool should_panic) noexcept
+    void set_should_panic_on_null_handler(bool should_panic)
     {
         lock_.lock();
         should_panic_on_null_handler_ = should_panic;
         lock_.unlock();
     }
 
-    bool should_panic_on_null_handler() noexcept
+    bool should_panic_on_null_handler()
     {
         bool should_panic; 
         lock_.lock();
@@ -86,12 +86,12 @@ private:
     bool should_panic_on_null_handler_;
     HardwareInterruptController& hardware_interrupt_controller_;
 
-    bool clear_hardware_interrupt(unsigned interrupt_number) noexcept
+    bool clear_hardware_interrupt(unsigned interrupt_number)
     {
         return hardware_interrupt_controller_.clear(interrupt_number);
     }
 
-    void panic_on_null_handler(unsigned interrupt_number) noexcept
+    void panic_on_null_handler(unsigned interrupt_number)
     {
         panic("No handler for interrupt \"%s\" (%u)\n",
             get_interrupt_name(interrupt_number),

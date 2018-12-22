@@ -92,7 +92,7 @@ bool PS2KeyboardDevice::step_state_machine(KeyboardDriverState &state, KeyboardE
     return true;
 }
 
-void PS2KeyboardDevice::on_interrupt() noexcept
+void PS2KeyboardDevice::on_interrupt()
 {
     KeyboardDriverState state = IDLE;
     KeyboardEvent event;
@@ -148,4 +148,4 @@ PS2KeyboardDevice::PS2KeyboardDevice()
     }
 }
 
-PS2KeyboardDevice::~PS2KeyboardDevice() noexcept = default;
+PS2KeyboardDevice::~PS2KeyboardDevice() = default;

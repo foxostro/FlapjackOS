@@ -8,7 +8,7 @@ class DummyKeyboardDevice : public KeyboardDevice {
     std::vector<KeyboardEvent> _events;
 
 public:
-    virtual ~DummyKeyboardDevice() noexcept = default;
+    virtual ~DummyKeyboardDevice() = default;
 
     const char* keycode_name(Keycode) override
     {

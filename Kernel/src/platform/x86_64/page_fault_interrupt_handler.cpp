@@ -23,7 +23,7 @@ static const char* get_page_fault_error_string(unsigned error_code)
 
 PageFaultInterruptHandler::PageFaultInterruptHandler() = default;
 
-void PageFaultInterruptHandler::int_handler(const InterruptParameters& params) noexcept
+void PageFaultInterruptHandler::int_handler(const InterruptParameters& params)
 {
     char message[128]={0};
     snprintf(message, sizeof(message),

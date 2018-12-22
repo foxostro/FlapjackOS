@@ -23,7 +23,7 @@ public:
                    int leap_ticks);
 
     // Timer interrupt handler. To be called when the timer interrupt fires.
-    void on_interrupt() noexcept;
+    void on_interrupt();
 
     unsigned ticks() override;
     unsigned seconds() override;

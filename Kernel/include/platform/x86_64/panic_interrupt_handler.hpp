@@ -10,7 +10,7 @@ class PanicInterruptHandler : public GenericInterruptHandler<InterruptParameters
 public:
     PanicInterruptHandler(const char *message, bool error_code_present);
 
-    void int_handler(const InterruptParameters& params) noexcept override;
+    void int_handler(const InterruptParameters& params) override;
 
 private:
     char message_[64];

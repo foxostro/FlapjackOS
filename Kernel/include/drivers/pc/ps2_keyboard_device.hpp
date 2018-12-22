@@ -6,13 +6,13 @@
 
 class PS2KeyboardDevice : public KeyboardDevice {
 public:
-    virtual ~PS2KeyboardDevice() noexcept;
+    virtual ~PS2KeyboardDevice();
     PS2KeyboardDevice();
 
     // Keyboard interrupt handler.
     // Implements the lower half of PS/2 keyboard driver. To be called when the
     // keyboard interrupt fires.
-    void on_interrupt() noexcept;
+    void on_interrupt();
 
     const char* keycode_name(Keycode key) override;
     KeyboardEvent get_event() override;

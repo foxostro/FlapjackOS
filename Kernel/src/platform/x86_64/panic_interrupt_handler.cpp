@@ -13,7 +13,7 @@ PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_cod
     memcpy(message_, message, MIN(sizeof(message_), strlen(message))-1);
 }
 
-void PanicInterruptHandler::int_handler(const InterruptParameters& params) noexcept
+void PanicInterruptHandler::int_handler(const InterruptParameters& params)
 {
     // This is a lot of characters. We need to ensure this memory is allocated
     // in .data and specifically NOT on the stack. Do this by marking it as

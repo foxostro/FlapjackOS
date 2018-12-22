@@ -9,9 +9,9 @@ template<typename ParameterPackage>
 class GenericInterruptHandler {
 public:
 
-    virtual ~GenericInterruptHandler() noexcept = default;
+    virtual ~GenericInterruptHandler() = default;
 
-    virtual void int_handler(const ParameterPackage& params) noexcept = 0;
+    virtual void int_handler(const ParameterPackage& params) = 0;
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_GENERIC_INTERRUPT_HANDLER_HPP

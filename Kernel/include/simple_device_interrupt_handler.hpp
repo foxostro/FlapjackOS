@@ -10,7 +10,7 @@ public:
      : device_(device)
     {}
 
-    void int_handler(const InterruptParameters&) noexcept override
+    void int_handler(const InterruptParameters&) override
     {
         device_.on_interrupt();
     }
