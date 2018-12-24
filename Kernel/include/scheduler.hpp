@@ -19,7 +19,7 @@ public:
     void yield();
 
     // The current thread exits.
-    void vanish();
+    __attribute__((noreturn)) void vanish();
 
     template<typename T>
     void exchange(T& a, T& b)

@@ -36,7 +36,7 @@ public:
     }
 
     // The current thread exits.
-    void vanish()
+    __attribute__((noreturn)) void vanish()
     {
         scheduler_.vanish();
     }

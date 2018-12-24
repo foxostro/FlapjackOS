@@ -35,6 +35,7 @@ void Scheduler::vanish()
     swap_runnable_and_exhausted_if_necessary();
     current_thread_ = runnable_.pop_front();
     previous_thread->switch_away(*current_thread_);
+    __builtin_unreachable();
 }
 
 void Scheduler::swap_runnable_and_exhausted_if_necessary()
