@@ -54,63 +54,82 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
-static char g_stack_a[PAGE_SIZE] __attribute__ ((aligned(4))) = {0};
-static char* g_stack_pointer_a = g_stack_a + sizeof(g_stack_a);
-
-static char g_stack_b[PAGE_SIZE] __attribute__ ((aligned(4))) = {0};
-static char* g_stack_pointer_b = g_stack_b + sizeof(g_stack_b);
-
-template<typename T>
-static void push(char*& stack_pointer, T value)
-{
-	stack_pointer -= sizeof(value);
-    memcpy(stack_pointer, &value, sizeof(value));
-}
-
-static void setup_thread(char*& stack_pointer,
-                         uintptr_t instruction_pointer)
-{
-    push(stack_pointer, /*EIP=*/instruction_pointer);
-    char* EBP = stack_pointer - sizeof(EBP);
-	push(stack_pointer, /*EBP=*/EBP);
-    char* ESP = stack_pointer;
-	push(stack_pointer, /*POPA, EAX=*/0xcdcdcdcd);
-	push(stack_pointer, /*POPA, ECX=*/0xcdcdcdcd);
-	push(stack_pointer, /*POPA, EDX=*/0xcdcdcdcd);
-	push(stack_pointer, /*POPA, EBX=*/0xcdcdcdcd);
-	push(stack_pointer, /*POPA, ESP=*/ESP);
-	push(stack_pointer, /*POPA, EBP=*/EBP);
-	push(stack_pointer, /*POPA, ESI=*/0xcdcdcdcd);
-	push(stack_pointer, /*POPA, EDI=*/0xcdcdcdcd);
-}
-
 extern "C"
 void context_switch(char** old_stack_pointer,
                     char* new_stack_pointer); // implemented in context_switch.S
 
-static void thread_a()
+class Thread {
+public:
+    Thread(void* instruction_pointer)
+    {
+        memset(stack_, 0, sizeof(stack_));
+        stack_pointer_ = stack_ + sizeof(stack_);
+
+        push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
+        char* EBP = stack_pointer_ - sizeof(EBP);
+        push(/*EBP=*/EBP);
+        char* ESP = stack_pointer_;
+        push(/*POPA, EAX=*/InitialRegisterValue);
+        push(/*POPA, ECX=*/InitialRegisterValue);
+        push(/*POPA, EDX=*/InitialRegisterValue);
+        push(/*POPA, EBX=*/InitialRegisterValue);
+        push(/*POPA, ESP=*/ESP);
+        push(/*POPA, EBP=*/EBP);
+        push(/*POPA, ESI=*/InitialRegisterValue);
+        push(/*POPA, EDI=*/InitialRegisterValue);
+    }
+
+    void context_switch()
+    {
+        char* old_stack_pointer = nullptr;
+        ::context_switch(&old_stack_pointer, stack_pointer_);
+    }
+
+    void context_switch(Thread& next)
+    {
+        ::context_switch(&stack_pointer_, next.stack_pointer_);
+    }
+
+private:
+    static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
+    static constexpr size_t StackSize = PAGE_SIZE;
+    alignas(4) char stack_[StackSize];
+    char* stack_pointer_;
+
+    template<typename T>
+    void push(T value)
+    {
+        stack_pointer_ -= sizeof(value);
+        memcpy(stack_pointer_, &value, sizeof(value));
+    }
+};
+
+static void fn_a();
+static void fn_b();
+
+Thread g_thread_a((void*)fn_a);
+Thread g_thread_b((void*)fn_b);
+
+static void fn_a()
 {
     while (true) {
         g_terminal->puts("a\n");
-        context_switch(&g_stack_pointer_a, g_stack_pointer_b);
+        g_thread_a.context_switch(g_thread_b);
     }
 }
 
-static void thread_b()
+static void fn_b()
 {
     while (true) {
         g_terminal->puts("b\n");
-        context_switch(&g_stack_pointer_b, g_stack_pointer_a);
+        g_thread_b.context_switch(g_thread_a);
     }
 }
 
 void Kernel::run()
 {
     TRACE("Running...");
-	setup_thread(g_stack_pointer_a, (uintptr_t)thread_a);
-	setup_thread(g_stack_pointer_b, (uintptr_t)thread_b);
-    char* old_stack_pointer = nullptr;
-    context_switch(&old_stack_pointer, g_stack_pointer_a);
+    g_thread_a.context_switch();
 }
 
 void Kernel::setup_terminal()
