@@ -2,13 +2,14 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP
 
 #include <page_size.hpp>
+#include <interrupt_lock.hpp>
 #include <common/static_stack.hpp>
 
 class Thread {
 public:
     virtual ~Thread() = default;
-    virtual char* switch_to() = 0;
-    virtual void switch_away(Thread& next) = 0;
+    virtual char* switch_to(InterruptLock& lock) = 0;
+    virtual void switch_away(InterruptLock& lock, Thread& next) = 0;
 
     StaticStack<PAGE_SIZE> stack_;
 

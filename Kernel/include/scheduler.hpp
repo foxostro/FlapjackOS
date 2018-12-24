@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    // AFOX_TODO: scheduler needs some locking
+    InterruptLock lock_;
     Vector<ThreadPointer> runnable_;
     Vector<ThreadPointer> exhausted_;
     ThreadPointer current_thread_;

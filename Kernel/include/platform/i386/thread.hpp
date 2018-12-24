@@ -33,15 +33,17 @@ public:
         stack_.push(/*POPA, EDI=*/InitialRegisterValue);
     }
 
-    char* switch_to() override
+    char* switch_to(InterruptLock& lock) override
     {
+        lock.unlock();
         char* old_stack_pointer = nullptr;
         i386_context_switch(&old_stack_pointer, stack_.stack_pointer);
         return old_stack_pointer;
     }
 
-    void switch_away(::Thread& next) override
+    void switch_away(InterruptLock& lock, ::Thread& next) override
     {
+        lock.unlock();
         i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
 };

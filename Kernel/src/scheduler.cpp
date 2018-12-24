@@ -6,32 +6,37 @@ Scheduler::Scheduler() = default;
 
 void Scheduler::add(ThreadPointer thread)
 {
+    lock_.lock();
     runnable_.emplace_back(std::move(thread));
+    lock_.unlock();
 }
 
 void Scheduler::begin()
 {
+    lock_.lock();
     assert(!runnable_.empty());
     take_current_thread_from_runnable_queue();
-    current_thread_->switch_to();
+    current_thread_->switch_to(lock_);
 }
 
 void Scheduler::yield()
 {
+    lock_.lock();
     assert(current_thread_);
     Thread& previous_thread = *current_thread_;
     swap_runnable_and_exhausted_if_necessary();
     move_to_next_runnable_thread();
-    previous_thread.switch_away(*current_thread_);
+    previous_thread.switch_away(lock_, *current_thread_);
 }
 
 void Scheduler::vanish()
 {
+    lock_.lock();
     assert(current_thread_);
     Thread& previous_thread = *current_thread_;
     swap_runnable_and_exhausted_if_necessary();
     take_current_thread_from_runnable_queue();
-    previous_thread.switch_away(*current_thread_);
+    previous_thread.switch_away(lock_, *current_thread_);
     __builtin_unreachable();
 }
 
