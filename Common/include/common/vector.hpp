@@ -187,6 +187,20 @@ public:
         return at(i);
     }
 
+    // Gets the first element.
+    value_type& front()
+    {
+        assert(!empty());
+        return at(0);
+    }
+
+    // Gets the last element.
+    value_type& back()
+    {
+        assert(!empty());
+        return at(size()-1);
+    }
+
     // Increases the capacity of the vector such that at least the specified
     // number of elements may be inserted before additional allocations occur.
     void reserve(size_type new_capacity)
