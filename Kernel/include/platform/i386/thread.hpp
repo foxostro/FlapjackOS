@@ -2,15 +2,16 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_THREAD_HPP
 
 #include "context_switch.hpp"
-#include <page_size.hpp>
-#include <common/static_stack.hpp>
+#include <thread.hpp>
 #include <cstdint>
 
 namespace i386 {
 
 // Represents a thread of execution on i386.
-class Thread {
+class Thread final : public ::Thread {
 public:
+    static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
+
     Thread() = default;
     
     explicit Thread(void* instruction_pointer)
@@ -29,20 +30,17 @@ public:
         stack_.push(/*POPA, EDI=*/InitialRegisterValue);
     }
 
-    void context_switch()
+    char* switch_to() override
     {
         char* old_stack_pointer = nullptr;
         i386_context_switch(&old_stack_pointer, stack_.stack_pointer);
+        return old_stack_pointer;
     }
 
-    void context_switch(Thread& next)
+    void context_switch(::Thread& next) override
     {
         i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
-
-private:
-    static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
-    StaticStack<PAGE_SIZE> stack_;
 };
 
 } // namespace i386

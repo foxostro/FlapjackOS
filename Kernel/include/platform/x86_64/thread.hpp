@@ -2,15 +2,16 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_THREAD_HPP
 
 #include "context_switch.hpp"
-#include <page_size.hpp>
-#include <common/static_stack.hpp>
+#include <thread.hpp>
 #include <cstdint>
 
 namespace x86_64 {
 
 // Represents a thread of execution on x86_64.
-class Thread {
+class Thread final : public ::Thread  {
 public:
+    static constexpr uint64_t InitialRegisterValue = 0xcdcdcdcdcdcdcdcd;
+
     Thread() = default;
 
     explicit Thread(void* instruction_pointer)
@@ -37,20 +38,17 @@ public:
         stack_.push(/*R15=*/InitialRegisterValue);
     }
 
-    void context_switch()
+    char* switch_to() override
     {
         char* old_stack_pointer = nullptr;
         x86_64_context_switch(&old_stack_pointer, stack_.stack_pointer);
+        return old_stack_pointer;
     }
 
-    void context_switch(Thread& next)
+    void context_switch(::Thread& next) override
     {
         x86_64_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
-
-private:
-    static constexpr uint64_t InitialRegisterValue = 0xcdcdcdcdcdcdcdcd;
-    StaticStack<PAGE_SIZE> stack_;
 };
 
 } // namespace x86_64

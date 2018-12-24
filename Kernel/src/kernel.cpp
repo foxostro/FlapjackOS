@@ -79,7 +79,7 @@ static void fn_b()
 void Kernel::run()
 {
     TRACE("Running...");
-    g_thread_a.context_switch();
+    g_thread_a.switch_to();
 }
 
 void Kernel::setup_terminal()
