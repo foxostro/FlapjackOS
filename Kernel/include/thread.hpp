@@ -13,4 +13,6 @@ public:
     StaticStack<PAGE_SIZE> stack_;
 };
 
+// The current thread yields the remainder of its time slice to the next one.
+extern "C" void yield();
 #endif // FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP

@@ -4,6 +4,7 @@
 #include <multiboot.h>
 #include <page_frame_allocator.hpp>
 #include <kernel_policy.hpp>
+#include <scheduler.hpp>
 #include <common/text_terminal.hpp>
 #include <cstdint>
 
@@ -28,6 +29,12 @@ public:
         interrupt_controller_.dispatch(params);
     }
 
+    // The current thread yields its time slice to the next one.
+    void yield()
+    {
+        scheduler_.yield();
+    }
+
 private:
     multiboot_info_t *mb_info_;
     uintptr_t istack_;
@@ -40,6 +47,7 @@ private:
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PhysicalMemoryMap phys_map_;
     PageFrameAllocator page_frame_allocator_;
+    Scheduler scheduler_;
 
     // Setup the VGA console and terminal.
     void setup_terminal();
