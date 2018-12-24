@@ -14,6 +14,20 @@ public:
         stack_pointer = backing_ + sizeof(backing_);
     }
 
+    StaticStack(const StaticStack& other)
+    {
+        memmove(backing_, other.backing_, sizeof(backing_));
+        ptrdiff_t offset = other.stack_pointer - other.backing_;
+        stack_pointer = backing_ + offset;
+    }
+
+    StaticStack(StaticStack&& other)
+    {
+        memmove(backing_, other.backing_, sizeof(backing_));
+        ptrdiff_t offset = other.stack_pointer - other.backing_;
+        stack_pointer = backing_ + offset;
+    }
+
     template<typename T>
     void push(T value)
     {
