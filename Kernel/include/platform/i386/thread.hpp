@@ -37,7 +37,7 @@ public:
         return old_stack_pointer;
     }
 
-    void context_switch(::Thread& next) override
+    void switch_away(::Thread& next) override
     {
         i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }

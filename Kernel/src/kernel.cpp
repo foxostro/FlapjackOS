@@ -64,7 +64,7 @@ static void fn_a()
 {
     while (true) {
         g_terminal->puts("a\n");
-        g_thread_a.context_switch(g_thread_b);
+        g_thread_a.switch_away(g_thread_b);
     }
 }
 
@@ -72,7 +72,7 @@ static void fn_b()
 {
     while (true) {
         g_terminal->puts("b\n");
-        g_thread_b.context_switch(g_thread_a);
+        g_thread_b.switch_away(g_thread_a);
     }
 }
 

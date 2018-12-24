@@ -8,7 +8,7 @@ class Thread {
 public:
     virtual ~Thread() = default;
     virtual char* switch_to() = 0;
-    virtual void context_switch(Thread& next) = 0;
+    virtual void switch_away(Thread& next) = 0;
 
     StaticStack<PAGE_SIZE> stack_;
 };
