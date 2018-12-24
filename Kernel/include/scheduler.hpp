@@ -2,15 +2,19 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_SCHEDULER_HPP
 
 #include <common/vector.hpp>
+#include <common/unique_pointer.hpp>
 #include <thread.hpp>
+#include <interrupt_lock.hpp>
 
 class Scheduler {
 public:
+    using ThreadPointer = UniquePointer<Thread, InterruptLock>;
+
     Scheduler();
 
     // Adds a new runnable thread.
     // The scheduler takes ownership of the pointer.
-    void add(Thread* thread);
+    void add(ThreadPointer thread);
 
     // Begin executing the first thread.
     void begin();
@@ -30,10 +34,10 @@ public:
     }
 
 private:
-    Vector<Thread*> runnable_; // AFOX_TODO: might want these to use a smart pointer class
-    Vector<Thread*> exhausted_;
-    Thread* current_thread_;
-    // AFOX_TODO: need to add some lock to Scheduler. Maybe InterruptLock?
+    // AFOX_TODO: scheduler needs some locking
+    Vector<ThreadPointer> runnable_;
+    Vector<ThreadPointer> exhausted_;
+    ThreadPointer current_thread_;
 
     void take_current_thread_from_runnable_queue();
     void swap_runnable_and_exhausted_if_necessary();

@@ -2,13 +2,11 @@
 #include <logger.hpp>
 #include <cassert>
 
-Scheduler::Scheduler()
-    : current_thread_(nullptr)
-{}
+Scheduler::Scheduler() = default;
 
-void Scheduler::add(Thread* thread)
+void Scheduler::add(ThreadPointer thread)
 {
-    runnable_.push_back(thread);
+    runnable_.push_back(std::move(thread)); // AFOX_TODO: implement Vector::emplace_{back,front} methods
 }
 
 void Scheduler::begin()
@@ -21,20 +19,19 @@ void Scheduler::begin()
 void Scheduler::yield()
 {
     assert(current_thread_);
-    Thread* previous_thread = current_thread_;
+    Thread& previous_thread = *current_thread_;
     swap_runnable_and_exhausted_if_necessary();
     move_to_next_runnable_thread();
-    previous_thread->switch_away(*current_thread_);
+    previous_thread.switch_away(*current_thread_);
 }
 
 void Scheduler::vanish()
 {
-    // AFOX_TODO: Scheduler::vanish() leaks threads
     assert(current_thread_);
-    Thread* previous_thread = current_thread_;
+    Thread& previous_thread = *current_thread_;
     swap_runnable_and_exhausted_if_necessary();
     take_current_thread_from_runnable_queue();
-    previous_thread->switch_away(*current_thread_);
+    previous_thread.switch_away(*current_thread_);
     __builtin_unreachable();
 }
 
@@ -55,7 +52,7 @@ void Scheduler::swap_runnable_and_exhausted_if_necessary()
 void Scheduler::move_to_next_runnable_thread()
 {
     if (!runnable_.empty()) {
-        exhausted_.push_back(current_thread_);
+        exhausted_.push_back(std::move(current_thread_));
         take_current_thread_from_runnable_queue();
     }
 }

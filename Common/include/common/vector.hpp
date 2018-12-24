@@ -225,14 +225,14 @@ public:
     // Inserts an item at the end of the collection.
     void push_back(value_type value)
     {
-        insert(count_, value);
+        insert(count_, std::move(value));
     }
 
     // Inserts an item at the beginning of the collection.
     // All existing items are moved to make room at the beginning.
     void push_front(value_type value)
     {
-        insert(0, value);
+        insert(0, std::move(value));
     }
 
     // Inserts an item at the specified index of the collection.
@@ -249,7 +249,7 @@ public:
             prev.~value_type();
         }
 
-        new (data() + index) value_type(value);
+        new (data() + index) value_type(std::move(value));
         count_++;
     }
 

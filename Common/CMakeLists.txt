@@ -34,6 +34,7 @@ set(SOURCE_FILES
     "include/common/bit_array.hpp"
     "include/common/spin_lock.hpp" "include/common/spin_lock.h" "src/spin_lock.c"
     "include/common/shared_pointer.hpp"
+    "include/common/unique_pointer.hpp"
     "include/common/cmpxchg.h" "src/cmpxchg.c"
 
     "include/common/test/mock_memory_management_unit.hpp"

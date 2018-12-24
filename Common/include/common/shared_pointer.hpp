@@ -5,7 +5,7 @@
 #include <atomic>
 #include <cassert>
 
-// Shared Pointer class implemented with a spin lock.
+// Shared Pointer class, roughly equivalent to std::shared_pointer.
 template<typename Type, typename LockType = SpinLock>
 class SharedPointer {
 public:
