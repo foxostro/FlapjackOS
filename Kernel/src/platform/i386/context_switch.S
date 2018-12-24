@@ -5,6 +5,7 @@
 .globl i386_context_switch
 .type i386_context_switch, @function
 i386_context_switch:
+#ifdef __i386__
     # Setup a stack frame.
 	pushl %ebp
 	movl %esp, %ebp
@@ -26,3 +27,10 @@ i386_context_switch:
 	popl %ebp
     
 	ret
+#elif __x86_64__
+    ud2
+#elif __arm__
+    udf
+#else
+#error "Unknown arch. Need a stub for i386_context_switch."
+#endif

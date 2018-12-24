@@ -56,7 +56,7 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
-extern "C" void i386_context_switch(char** old_stack_pointer, char* new_stack_pointer); // implemented in context_switch.S
+#include <platform/i386/context_switch.hpp>
 
 // Represents a thread of execution on i386.
 class Thread {
@@ -85,7 +85,7 @@ public:
 
     void context_switch(Thread& next)
     {
-        ::i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
+        i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
 
 private:
