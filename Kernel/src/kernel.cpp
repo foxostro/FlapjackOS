@@ -91,7 +91,7 @@ void context_switch(char** old_stack_pointer,
 static void thread_a()
 {
     while (true) {
-        g_terminal->putchar('a');
+        g_terminal->puts("a\n");
         context_switch(&g_stack_pointer_a, g_stack_pointer_b);
     }
 }
@@ -99,7 +99,7 @@ static void thread_a()
 static void thread_b()
 {
     while (true) {
-        g_terminal->putchar('b');
+        g_terminal->puts("b\n");
         context_switch(&g_stack_pointer_b, g_stack_pointer_a);
     }
 }
