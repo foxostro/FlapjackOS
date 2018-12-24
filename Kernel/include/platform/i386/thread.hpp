@@ -11,7 +11,9 @@ namespace i386 {
 // Represents a thread of execution on i386.
 class Thread {
 public:
-    Thread(void* instruction_pointer)
+    Thread() = default;
+    
+    explicit Thread(void* instruction_pointer)
     {
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
