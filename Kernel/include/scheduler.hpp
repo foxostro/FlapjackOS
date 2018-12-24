@@ -35,6 +35,7 @@ private:
     Thread* current_thread_;
     // AFOX_TODO: need to add some lock to Scheduler. Maybe InterruptLock?
 
+    void take_current_thread_from_runnable_queue();
     void swap_runnable_and_exhausted_if_necessary();
     void move_to_next_runnable_thread();
 };

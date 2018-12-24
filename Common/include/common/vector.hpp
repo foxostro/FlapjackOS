@@ -255,12 +255,9 @@ public:
 
     // Removes the index'th element of the collection.
     // Returns the value of the removed element.
-    // TODO: Change return value to "void" to avoid copying the old value.
-    value_type remove(size_type index)
+    void remove(size_type index)
     {
         assert(index >= 0 && index < count_);
-
-        value_type old_value = data()[index];
 
         for (size_type i = index; i < count_-1; ++i) {
             value_type &curr = data()[i];
@@ -271,24 +268,20 @@ public:
         }
 
         count_--;
-
-        return old_value;
     }
 
     // Removes the last element of the collection.
     // Returns the value of the removed element.
-    // TODO: Change return value to "void" to avoid copying the old value.
-    value_type pop_back()
+    void pop_back()
     {
-        return remove(size()-1);
+        remove(size()-1);
     }
 
     // Removes the first element of the collection.
     // Returns the value of the removed element.
-    // TODO: Change return value to "void" to avoid copying the old value.
-    value_type pop_front()
+    void pop_front()
     {
-        return remove(0);
+        remove(0);
     }
 
 private:

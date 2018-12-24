@@ -14,7 +14,7 @@ void Scheduler::add(Thread* thread)
 void Scheduler::begin()
 {
     assert(!runnable_.empty());
-    current_thread_ = runnable_.pop_front();
+    take_current_thread_from_runnable_queue();
     current_thread_->switch_to();
 }
 
@@ -33,9 +33,15 @@ void Scheduler::vanish()
     assert(current_thread_);
     Thread* previous_thread = current_thread_;
     swap_runnable_and_exhausted_if_necessary();
-    current_thread_ = runnable_.pop_front();
+    take_current_thread_from_runnable_queue();
     previous_thread->switch_away(*current_thread_);
     __builtin_unreachable();
+}
+
+void Scheduler::take_current_thread_from_runnable_queue()
+{
+    current_thread_ = std::move(runnable_.front());
+    runnable_.pop_front();
 }
 
 void Scheduler::swap_runnable_and_exhausted_if_necessary()
@@ -50,6 +56,6 @@ void Scheduler::move_to_next_runnable_thread()
 {
     if (!runnable_.empty()) {
         exhausted_.push_back(current_thread_);
-        current_thread_ = runnable_.pop_front();
+        take_current_thread_from_runnable_queue();
     }
 }
