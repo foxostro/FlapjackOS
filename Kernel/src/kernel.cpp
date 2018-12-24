@@ -82,7 +82,6 @@ void Kernel::run()
     scheduler_.add(new Thread((void*)fn_b));
     scheduler_.add(new Thread((void*)fn_c));
     scheduler_.begin();
-    panic("unreachable");
 }
 
 void Kernel::setup_terminal()

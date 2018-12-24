@@ -29,10 +29,16 @@ public:
         interrupt_controller_.dispatch(params);
     }
 
-    // The current thread yields its time slice to the next one.
+    // The current thread yields to the next runnable thread.
     void yield()
     {
         scheduler_.yield();
+    }
+
+    // The current thread exits.
+    void vanish()
+    {
+        scheduler_.vanish();
     }
 
 private:
