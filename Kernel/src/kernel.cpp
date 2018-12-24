@@ -54,31 +54,87 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
-static Thread *g_thread_a = nullptr;
-static Thread *g_thread_b = nullptr;
+class Scheduler {
+public:
+    Scheduler()
+     : current_thread_(nullptr)
+    {}
+
+    void add(Thread* thread)
+    {
+        runnable_.push_back(thread);
+    }
+
+    void begin()
+    {
+        assert(!runnable_.empty());
+        current_thread_ = runnable_.pop_front();
+        current_thread_->switch_to();
+    }
+
+    void yield()
+    {
+        assert(current_thread_);
+
+        Thread*& previous_thread = current_thread_;
+
+        if (runnable_.empty()) {
+            exchange(runnable_, exhausted_);
+        }
+
+        if (!runnable_.empty()) {
+            Thread* next_thread = runnable_.pop_front();
+            assert(next_thread);
+
+            exhausted_.push_back(current_thread_);
+            current_thread_ = next_thread;
+        }
+
+        previous_thread->switch_away(*current_thread_);
+    }
+
+    template<typename T>
+    void exchange(T& a, T& b)
+    {
+        auto temp = std::move(a);
+        a = std::move(b);
+        b = std::move(a);
+    }
+
+private:
+    Vector<Thread*> runnable_; // AFOX_TODO: might want these to use a smart pointer class
+    Vector<Thread*> exhausted_;
+    Thread* current_thread_;
+    // AFOX_TODO: need to add some lock to Scheduler. Maybe InterruptLock?
+};
+
+Scheduler g_scheduler;
 
 static void fn_a()
 {
     while (true) {
         g_terminal->puts("a\n");
-        g_thread_a->switch_away(*g_thread_b);
+        g_scheduler.yield();
     }
+    panic("needs to be unreachbale");
 }
 
 static void fn_b()
 {
     while (true) {
         g_terminal->puts("b\n");
-        g_thread_b->switch_away(*g_thread_a);
+        g_scheduler.yield();
     }
+    panic("needs to be unreachbale");
 }
 
 void Kernel::run()
 {
     TRACE("Running...");
-    g_thread_a = new KernelPolicy::Thread((void*)fn_a);
-    g_thread_b = new KernelPolicy::Thread((void*)fn_b);
-    g_thread_a->switch_to();
+    g_scheduler.add(new KernelPolicy::Thread((void*)fn_a));
+    g_scheduler.add(new KernelPolicy::Thread((void*)fn_b));
+    g_scheduler.begin();
+    panic("unreachable");
 }
 
 void Kernel::setup_terminal()
