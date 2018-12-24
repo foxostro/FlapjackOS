@@ -16,6 +16,7 @@ public:
     
     explicit Thread(void* instruction_pointer)
     {
+        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
         stack_.push(/*EBP=*/EBP);

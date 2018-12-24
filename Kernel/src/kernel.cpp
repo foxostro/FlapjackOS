@@ -60,7 +60,6 @@ static void fn_a()
         g_terminal->puts("a\n");
         yield();
     }
-    panic("needs to be unreachable");
 }
 
 static void fn_b()
@@ -69,7 +68,11 @@ static void fn_b()
         g_terminal->puts("b\n");
         yield();
     }
-    panic("needs to be unreachable");
+}
+
+static void fn_c()
+{
+    g_terminal->puts("CCCCCCCCCCCC\n");
 }
 
 void Kernel::run()
@@ -77,6 +80,7 @@ void Kernel::run()
     TRACE("Running...");
     scheduler_.add(new Thread((void*)fn_a));
     scheduler_.add(new Thread((void*)fn_b));
+    scheduler_.add(new Thread((void*)fn_c));
     scheduler_.begin();
     panic("unreachable");
 }

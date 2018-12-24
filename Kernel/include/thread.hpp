@@ -15,4 +15,8 @@ public:
 
 // The current thread yields the remainder of its time slice to the next one.
 extern "C" void yield();
+
+// The current thread exits.
+extern "C" __attribute__((noreturn)) void vanish();
+
 #endif // FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP
