@@ -25,14 +25,6 @@ public:
     // The current thread exits.
     __attribute__((noreturn)) void vanish();
 
-    template<typename T>
-    void exchange(T& a, T& b)
-    {
-        auto temp = std::move(a);
-        a = std::move(b);
-        b = std::move(temp);
-    }
-
 private:
     InterruptLock lock_;
     Vector<ThreadPointer> runnable_;

@@ -1,6 +1,7 @@
 #include <scheduler.hpp>
 #include <logger.hpp>
 #include <cassert>
+#include <utility>
 
 Scheduler::Scheduler() = default;
 
@@ -50,7 +51,7 @@ void Scheduler::swap_runnable_and_exhausted_if_necessary()
 {
     assert(!(runnable_.empty() && exhausted_.empty()));
     if (runnable_.empty()) {
-        exchange(runnable_, exhausted_);
+        std::swap(runnable_, exhausted_);
     }
 }
 
