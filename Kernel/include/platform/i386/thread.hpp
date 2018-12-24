@@ -12,7 +12,9 @@ class Thread final : public ::Thread {
 public:
     static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
 
-    Thread() = default;
+    Thread() = delete;
+    Thread(const Thread&) = delete;
+    Thread(Thread&& other) : ::Thread(std::move(other)) {}
     
     explicit Thread(void* instruction_pointer)
     {
