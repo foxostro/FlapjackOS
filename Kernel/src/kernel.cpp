@@ -54,54 +54,66 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
+// Statically allocated, unstructured stack.
+template<size_t StackSize>
+class StaticStack {
+public:
+    StaticStack()
+    {
+        memset(backing_, 0, sizeof(backing_));
+        stack_pointer = backing_ + sizeof(backing_);
+    }
+
+    template<typename T>
+    void push(T value)
+    {
+        stack_pointer -= sizeof(value);
+        memcpy(stack_pointer, &value, sizeof(value));
+    }
+
+    char* stack_pointer;
+
+private:
+    alignas(alignof(void*)) char backing_[StackSize];
+};
+
 extern "C"
 void context_switch(char** old_stack_pointer,
                     char* new_stack_pointer); // implemented in context_switch.S
 
+// Represents a thread of execution on i386.
 class Thread {
 public:
     Thread(void* instruction_pointer)
     {
-        memset(stack_, 0, sizeof(stack_));
-        stack_pointer_ = stack_ + sizeof(stack_);
-
-        push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
-        char* EBP = stack_pointer_ - sizeof(EBP);
-        push(/*EBP=*/EBP);
-        char* ESP = stack_pointer_;
-        push(/*POPA, EAX=*/InitialRegisterValue);
-        push(/*POPA, ECX=*/InitialRegisterValue);
-        push(/*POPA, EDX=*/InitialRegisterValue);
-        push(/*POPA, EBX=*/InitialRegisterValue);
-        push(/*POPA, ESP=*/ESP);
-        push(/*POPA, EBP=*/EBP);
-        push(/*POPA, ESI=*/InitialRegisterValue);
-        push(/*POPA, EDI=*/InitialRegisterValue);
+        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
+        char* EBP = stack_.stack_pointer - sizeof(EBP);
+        stack_.push(/*EBP=*/EBP);
+        char* ESP = stack_.stack_pointer;
+        stack_.push(/*POPA, EAX=*/InitialRegisterValue);
+        stack_.push(/*POPA, ECX=*/InitialRegisterValue);
+        stack_.push(/*POPA, EDX=*/InitialRegisterValue);
+        stack_.push(/*POPA, EBX=*/InitialRegisterValue);
+        stack_.push(/*POPA, ESP=*/ESP);
+        stack_.push(/*POPA, EBP=*/EBP);
+        stack_.push(/*POPA, ESI=*/InitialRegisterValue);
+        stack_.push(/*POPA, EDI=*/InitialRegisterValue);
     }
 
     void context_switch()
     {
         char* old_stack_pointer = nullptr;
-        ::context_switch(&old_stack_pointer, stack_pointer_);
+        ::context_switch(&old_stack_pointer, stack_.stack_pointer);
     }
 
     void context_switch(Thread& next)
     {
-        ::context_switch(&stack_pointer_, next.stack_pointer_);
+        ::context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
 
 private:
     static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
-    static constexpr size_t StackSize = PAGE_SIZE;
-    alignas(4) char stack_[StackSize];
-    char* stack_pointer_;
-
-    template<typename T>
-    void push(T value)
-    {
-        stack_pointer_ -= sizeof(value);
-        memcpy(stack_pointer_, &value, sizeof(value));
-    }
+    StaticStack<PAGE_SIZE> stack_;
 };
 
 static void fn_a();
