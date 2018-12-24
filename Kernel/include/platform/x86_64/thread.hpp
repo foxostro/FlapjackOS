@@ -16,10 +16,10 @@ public:
     Thread(const Thread&) = delete;
     Thread(Thread&& other) : ::Thread(std::move(other)) {}
 
-    explicit Thread(void* instruction_pointer)
+    explicit Thread(void (*function)())
     {
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(vanish));
-        stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
+        stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(function));
         char* RBP = stack_.stack_pointer - sizeof(RBP);
         stack_.push(/*RBP=*/RBP);
         char* RSP = stack_.stack_pointer;

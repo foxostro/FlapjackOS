@@ -15,11 +15,11 @@ public:
     Thread() = delete;
     Thread(const Thread&) = delete;
     Thread(Thread&& other) : ::Thread(std::move(other)) {}
-    
-    explicit Thread(void* instruction_pointer)
+
+    explicit Thread(void (*function)())
     {
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(vanish));
-        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
+        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(function));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
         stack_.push(/*EBP=*/EBP);
         char* ESP = stack_.stack_pointer;

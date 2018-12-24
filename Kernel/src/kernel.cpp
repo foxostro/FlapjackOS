@@ -78,9 +78,9 @@ static void fn_c()
 void Kernel::run()
 {
     TRACE("Running...");
-    scheduler_.add(new Thread((void*)fn_a));
-    scheduler_.add(new Thread((void*)fn_b));
-    scheduler_.add(new Thread((void*)fn_c));
+    scheduler_.add(new Thread(fn_a));
+    scheduler_.add(new Thread(fn_b));
+    scheduler_.add(new Thread(fn_c));
     scheduler_.begin();
 }
 
