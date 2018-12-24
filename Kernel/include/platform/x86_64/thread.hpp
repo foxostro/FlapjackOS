@@ -1,14 +1,14 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_THREAD_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_THREAD_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_THREAD_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_THREAD_HPP
 
 #include "context_switch.hpp"
 #include <page_size.hpp>
 #include <common/static_stack.hpp>
 #include <cstdint>
 
-namespace i386 {
+namespace x86_64 {
 
-// Represents a thread of execution on i386.
+// Represents a thread of execution on x86_64.
 class Thread {
 public:
     Thread(void* instruction_pointer)
@@ -30,19 +30,19 @@ public:
     void context_switch()
     {
         char* old_stack_pointer = nullptr;
-        i386_context_switch(&old_stack_pointer, stack_.stack_pointer);
+        x86_64_context_switch(&old_stack_pointer, stack_.stack_pointer);
     }
 
     void context_switch(Thread& next)
     {
-        i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
+        x86_64_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
 
 private:
-    static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
+    static constexpr uint64_t InitialRegisterValue = 0xcdcdcdcdcdcdcdcd;
     StaticStack<PAGE_SIZE> stack_;
 };
 
-} // namespace i386
+} // namespace x86_64
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_THREAD_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_THREAD_HPP

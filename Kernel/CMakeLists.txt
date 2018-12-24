@@ -99,6 +99,8 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/lidt.hpp" "src/platform/x86_64/lidt.S"
     "include/platform/x86_64/idt.hpp"
     "include/platform/x86_64/interrupt_descriptor.hpp"
+    "include/platform/x86_64/context_switch.hpp" "src/platform/x86_64/context_switch.S"
+    "include/platform/x86_64/thread.hpp"
     )
 
 set(PC_SOURCE_FILES

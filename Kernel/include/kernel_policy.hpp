@@ -10,7 +10,7 @@
 #include <platform/x86_64/interrupt_controller.hpp>
 #include <platform/x86_64/device_drivers.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
-#include <platform/i386/thread.hpp>
+#include <platform/x86_64/thread.hpp>
 
 struct KernelPolicy {
 	using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
@@ -21,7 +21,7 @@ struct KernelPolicy {
 	using InterruptParameters = x86_64::InterruptParameters;
 	using DeviceDrivers = x86_64::DeviceDrivers;
 	using TextDisplayDevice = VGATextDisplayDevice;
-	using Thread = i386::Thread; // STUB
+	using Thread = x86_64::Thread;
 };
 
 #elif defined(__i386__)
