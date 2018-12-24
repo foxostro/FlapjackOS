@@ -57,7 +57,7 @@ const char* Kernel::get_platform() const
 static void fn_a()
 {
     while (true) {
-        g_terminal->puts("a\n");
+        g_terminal->putchar('a');
         yield();
     }
 }
@@ -65,14 +65,14 @@ static void fn_a()
 static void fn_b()
 {
     while (true) {
-        g_terminal->puts("b\n");
+        g_terminal->putchar('b');
         yield();
     }
 }
 
 static void fn_c()
 {
-    g_terminal->puts("CCCCCCCCCCCC\n");
+    g_terminal->puts("\nCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\n");
 }
 
 void Kernel::run()
