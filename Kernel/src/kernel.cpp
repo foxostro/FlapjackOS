@@ -54,17 +54,14 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
-static void fn_a();
-static void fn_b();
-
-KernelPolicy::Thread g_thread_a((void*)fn_a);
-KernelPolicy::Thread g_thread_b((void*)fn_b);
+static Thread *g_thread_a = nullptr;
+static Thread *g_thread_b = nullptr;
 
 static void fn_a()
 {
     while (true) {
         g_terminal->puts("a\n");
-        g_thread_a.switch_away(g_thread_b);
+        g_thread_a->switch_away(*g_thread_b);
     }
 }
 
@@ -72,14 +69,16 @@ static void fn_b()
 {
     while (true) {
         g_terminal->puts("b\n");
-        g_thread_b.switch_away(g_thread_a);
+        g_thread_b->switch_away(*g_thread_a);
     }
 }
 
 void Kernel::run()
 {
     TRACE("Running...");
-    g_thread_a.switch_to();
+    g_thread_a = new KernelPolicy::Thread((void*)fn_a);
+    g_thread_b = new KernelPolicy::Thread((void*)fn_b);
+    g_thread_a->switch_to();
 }
 
 void Kernel::setup_terminal()
