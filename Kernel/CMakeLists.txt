@@ -64,6 +64,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/idt.hpp"
     "include/platform/i386/interrupt_descriptor.hpp"
     "include/platform/i386/context_switch.hpp" "src/platform/i386/context_switch.S"
+    "include/platform/i386/thread.hpp"
     )
 
 set(X86_64_SOURCE_FILES

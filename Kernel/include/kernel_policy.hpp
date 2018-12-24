@@ -10,6 +10,7 @@
 #include <platform/x86_64/interrupt_controller.hpp>
 #include <platform/x86_64/device_drivers.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
+#include <platform/i386/thread.hpp>
 
 struct KernelPolicy {
 	using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
@@ -20,6 +21,7 @@ struct KernelPolicy {
 	using InterruptParameters = x86_64::InterruptParameters;
 	using DeviceDrivers = x86_64::DeviceDrivers;
 	using TextDisplayDevice = VGATextDisplayDevice;
+	using Thread = i386::Thread; // STUB
 };
 
 #elif defined(__i386__)
@@ -31,6 +33,7 @@ struct KernelPolicy {
 #include <platform/i386/interrupt_controller.hpp>
 #include <platform/i386/device_drivers.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
+#include <platform/i386/thread.hpp>
 
 struct KernelPolicy {
 	using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;
@@ -41,6 +44,7 @@ struct KernelPolicy {
 	using InterruptParameters = i386::InterruptParameters;
 	using DeviceDrivers = i386::DeviceDrivers;
 	using TextDisplayDevice = VGATextDisplayDevice;
+	using Thread = i386::Thread;
 };
 
 #elif defined(__arm__)

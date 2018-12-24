@@ -1,5 +1,3 @@
-#include <common/static_stack.hpp>
-
 #include <kernel.hpp>
 
 #include <inout.h>
@@ -56,48 +54,11 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
-#include <platform/i386/context_switch.hpp>
-
-// Represents a thread of execution on i386.
-class Thread {
-public:
-    Thread(void* instruction_pointer)
-    {
-        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(instruction_pointer));
-        char* EBP = stack_.stack_pointer - sizeof(EBP);
-        stack_.push(/*EBP=*/EBP);
-        char* ESP = stack_.stack_pointer;
-        stack_.push(/*POPA, EAX=*/InitialRegisterValue);
-        stack_.push(/*POPA, ECX=*/InitialRegisterValue);
-        stack_.push(/*POPA, EDX=*/InitialRegisterValue);
-        stack_.push(/*POPA, EBX=*/InitialRegisterValue);
-        stack_.push(/*POPA, ESP=*/ESP);
-        stack_.push(/*POPA, EBP=*/EBP);
-        stack_.push(/*POPA, ESI=*/InitialRegisterValue);
-        stack_.push(/*POPA, EDI=*/InitialRegisterValue);
-    }
-
-    void context_switch()
-    {
-        char* old_stack_pointer = nullptr;
-        i386_context_switch(&old_stack_pointer, stack_.stack_pointer);
-    }
-
-    void context_switch(Thread& next)
-    {
-        i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
-    }
-
-private:
-    static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
-    StaticStack<PAGE_SIZE> stack_;
-};
-
 static void fn_a();
 static void fn_b();
 
-Thread g_thread_a((void*)fn_a);
-Thread g_thread_b((void*)fn_b);
+KernelPolicy::Thread g_thread_a((void*)fn_a);
+KernelPolicy::Thread g_thread_b((void*)fn_b);
 
 static void fn_a()
 {

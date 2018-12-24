@@ -3,7 +3,6 @@
 # void i386_context_switch(uintptr_t *old_stack_pointer,
 #                          uintptr_t new_stack_pointer);
 .globl i386_context_switch
-.type i386_context_switch, @function
 i386_context_switch:
 #ifdef __i386__
     # Setup a stack frame.
