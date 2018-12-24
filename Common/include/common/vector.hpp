@@ -228,11 +228,23 @@ public:
         insert(count_, std::move(value));
     }
 
+    template<typename... Args>
+    void emplace_back(Args&&... args)
+    {
+        push_back(std::move(value_type{std::forward<Args>(args)...}));
+    }
+
     // Inserts an item at the beginning of the collection.
     // All existing items are moved to make room at the beginning.
     void push_front(value_type value)
     {
         insert(0, std::move(value));
+    }
+
+    template<typename... Args>
+    void emplace_front(Args&&... args)
+    {
+        push_front(std::move(value_type{std::forward<Args>(args)...}));
     }
 
     // Inserts an item at the specified index of the collection.

@@ -6,7 +6,7 @@ Scheduler::Scheduler() = default;
 
 void Scheduler::add(ThreadPointer thread)
 {
-    runnable_.push_back(std::move(thread)); // AFOX_TODO: implement Vector::emplace_{back,front} methods
+    runnable_.emplace_back(std::move(thread));
 }
 
 void Scheduler::begin()
@@ -52,7 +52,7 @@ void Scheduler::swap_runnable_and_exhausted_if_necessary()
 void Scheduler::move_to_next_runnable_thread()
 {
     if (!runnable_.empty()) {
-        exhausted_.push_back(std::move(current_thread_));
+        exhausted_.emplace_back(std::move(current_thread_));
         take_current_thread_from_runnable_queue();
     }
 }
