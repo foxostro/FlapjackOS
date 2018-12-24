@@ -1,3 +1,5 @@
+#include <common/static_stack.hpp>
+
 #include <kernel.hpp>
 
 #include <inout.h>
@@ -54,32 +56,7 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
-// Statically allocated, unstructured stack.
-template<size_t StackSize>
-class StaticStack {
-public:
-    StaticStack()
-    {
-        memset(backing_, 0, sizeof(backing_));
-        stack_pointer = backing_ + sizeof(backing_);
-    }
-
-    template<typename T>
-    void push(T value)
-    {
-        stack_pointer -= sizeof(value);
-        memcpy(stack_pointer, &value, sizeof(value));
-    }
-
-    char* stack_pointer;
-
-private:
-    alignas(alignof(void*)) char backing_[StackSize];
-};
-
-extern "C"
-void context_switch(char** old_stack_pointer,
-                    char* new_stack_pointer); // implemented in context_switch.S
+extern "C" void i386_context_switch(char** old_stack_pointer, char* new_stack_pointer); // implemented in context_switch.S
 
 // Represents a thread of execution on i386.
 class Thread {
@@ -103,12 +80,12 @@ public:
     void context_switch()
     {
         char* old_stack_pointer = nullptr;
-        ::context_switch(&old_stack_pointer, stack_.stack_pointer);
+        i386_context_switch(&old_stack_pointer, stack_.stack_pointer);
     }
 
     void context_switch(Thread& next)
     {
-        ::context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
+        ::i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
 
 private:

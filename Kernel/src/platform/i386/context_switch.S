@@ -1,10 +1,10 @@
 # Switch execution to a new thread.
 # Implement a function context_switch() with a definition like so:
-# void context_switch(uintptr_t *old_stack_pointer,
-#                    uintptr_t new_stack_pointer);
-.globl context_switch
-.type context_switch, @function
-context_switch:
+# void i386_context_switch(uintptr_t *old_stack_pointer,
+#                          uintptr_t new_stack_pointer);
+.globl i386_context_switch
+.type i386_context_switch, @function
+i386_context_switch:
     # Setup a stack frame.
 	pushl %ebp
 	movl %esp, %ebp

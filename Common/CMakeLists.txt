@@ -26,6 +26,7 @@ set(SOURCE_FILES
     "include/common/ring_buffer.hpp"
     "include/common/vec2.hpp"
     "include/common/minmax.hpp"
+    "include/common/static_stack.hpp"
 
     "include/common/line_editor.hpp" "src/line_editor.cpp"
     "include/common/text_line.hpp" "src/text_line.cpp"
