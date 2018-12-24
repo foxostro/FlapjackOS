@@ -54,23 +54,63 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
+static char g_stack_a[PAGE_SIZE] __attribute__ ((aligned(4))) = {0};
+static char* g_stack_pointer_a = g_stack_a + sizeof(g_stack_a);
+
+static char g_stack_b[PAGE_SIZE] __attribute__ ((aligned(4))) = {0};
+static char* g_stack_pointer_b = g_stack_b + sizeof(g_stack_b);
+
+template<typename T>
+static void push(char*& stack_pointer, T value)
+{
+	stack_pointer -= sizeof(value);
+    memcpy(stack_pointer, &value, sizeof(value));
+}
+
+static void setup_thread(char*& stack_pointer,
+                         uintptr_t instruction_pointer)
+{
+    push(stack_pointer, /*EIP=*/instruction_pointer);
+    char* EBP = stack_pointer - sizeof(EBP);
+	push(stack_pointer, /*EBP=*/EBP);
+    char* ESP = stack_pointer;
+	push(stack_pointer, /*POPA, EAX=*/0xcdcdcdcd);
+	push(stack_pointer, /*POPA, ECX=*/0xcdcdcdcd);
+	push(stack_pointer, /*POPA, EDX=*/0xcdcdcdcd);
+	push(stack_pointer, /*POPA, EBX=*/0xcdcdcdcd);
+	push(stack_pointer, /*POPA, ESP=*/ESP);
+	push(stack_pointer, /*POPA, EBP=*/EBP);
+	push(stack_pointer, /*POPA, ESI=*/0xcdcdcdcd);
+	push(stack_pointer, /*POPA, EDI=*/0xcdcdcdcd);
+}
+
+extern "C"
+void context_switch(char** old_stack_pointer,
+                    char* new_stack_pointer); // implemented in context_switch.S
+
+static void thread_a()
+{
+    while (true) {
+        g_terminal->putchar('a');
+        context_switch(&g_stack_pointer_a, g_stack_pointer_b);
+    }
+}
+
+static void thread_b()
+{
+    while (true) {
+        g_terminal->putchar('b');
+        context_switch(&g_stack_pointer_b, g_stack_pointer_a);
+    }
+}
+
 void Kernel::run()
 {
     TRACE("Running...");
-
-    KeyboardDevice& keyboard = device_drivers_.get_keyboard();
-
-    // Read lines of user input forever, but don't do anything with them.
-    // (This operating system doesn't do much yet.)
-    terminal_.puts("Entering console loop:\n");
-    LineEditor ed(terminal_, keyboard);
-    while (true) {
-        auto user_input = ed.getline();
-        terminal_.puts("Got: ");
-        terminal_.putv(user_input);
-        terminal_.puts("\n");
-        ed.add_history(std::move(user_input));
-    }
+	setup_thread(g_stack_pointer_a, (uintptr_t)thread_a);
+	setup_thread(g_stack_pointer_b, (uintptr_t)thread_b);
+    char* old_stack_pointer = nullptr;
+    context_switch(&old_stack_pointer, g_stack_pointer_a);
 }
 
 void Kernel::setup_terminal()
