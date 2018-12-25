@@ -19,9 +19,11 @@ void TextTerminal::putchar(char ch)
 {
     if (ch == '\n') {
         move_cursor_for_newline();
+    } else if (ch == '\b') {
+        display_->draw_char(cursor_, display_->make_char(0));
+        advance_cursor_backward();
     } else {
-        auto character = display_->make_char(ch);
-        display_->draw_char(cursor_, character);
+        display_->draw_char(cursor_, display_->make_char(ch));
         advance_cursor_forward();
     }
 }
@@ -37,6 +39,13 @@ void TextTerminal::advance_cursor_forward()
     cursor_.x++;
     if (is_cursor_past_max_width()) {
         move_cursor_for_newline();
+    }
+}
+
+void TextTerminal::advance_cursor_backward()
+{
+    if (cursor_.x > 0) {
+        cursor_.x--;
     }
 }
 

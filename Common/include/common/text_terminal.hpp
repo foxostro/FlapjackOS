@@ -58,6 +58,7 @@ private:
 
     void move_cursor_for_newline();
     void advance_cursor_forward();
+    void advance_cursor_backward();
     bool is_cursor_past_max_width();
 };
 

@@ -102,3 +102,18 @@ TEST_CASE("putchar('\n') advances to the next line", "[TextTerminal]")
     REQUIRE("a" == dummy_display.get_line(0));
     REQUIRE("b" == dummy_display.get_line(1));
 }
+
+TEST_CASE("putchar('\b') removes a character and moves cursor backwards", "[TextTerminal]")
+{
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar('a');
+    term.putchar('\b');
+    term.putchar('b');
+
+    REQUIRE("b" == dummy_display.get_line(0));
+}
