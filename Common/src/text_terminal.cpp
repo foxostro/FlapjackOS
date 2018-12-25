@@ -1,4 +1,6 @@
 #include <common/text_terminal.hpp>
+#include <cstdarg>
+#include <cstdio>
 
 TextTerminal::~TextTerminal() = default;
 
@@ -31,9 +33,19 @@ void TextTerminal::puts(const char *s)
     }
 }
 
-int TextTerminal::printf([[maybe_unused]] const char *fmt, ...)
+int TextTerminal::printf(const char *fmt, ...)
 {
-    return 0;
+    constexpr size_t BUFFER_SIZE = 256;
+    char buffer[BUFFER_SIZE] = {0};
+
+    va_list args;
+    va_start(args, fmt);
+    int r = vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+
+    puts(buffer);
+
+    return r;
 }
 
 void TextTerminal::move_cursor_left() {}
