@@ -17,12 +17,17 @@ void TextTerminal::init(TextDisplayDevice *display)
 
 void TextTerminal::putchar(char ch)
 {
-    auto character = display_->make_char(ch);
-    display_->draw_char(cursor_, character);
-    cursor_.x++;
-    if (cursor_.x >= display_->dimensions().width) {
+    if (ch == '\n') {
         cursor_.x = 0;
         cursor_.y++;
+    } else {
+        auto character = display_->make_char(ch);
+        display_->draw_char(cursor_, character);
+        cursor_.x++;
+        if (cursor_.x >= display_->dimensions().width) {
+            cursor_.x = 0;
+            cursor_.y++;
+        }
     }
 }
 
