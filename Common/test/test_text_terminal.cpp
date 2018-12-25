@@ -140,3 +140,17 @@ TEST_CASE("putchar('\b') does not move back into the previous line", "[TextTermi
     REQUIRE(std::string(CONSOLE_WIDTH, 'a') == dummy_display.get_line(0));
     REQUIRE("" == dummy_display.get_line(1));
 }
+
+TEST_CASE("putchar(0) does nothing", "[TextTerminal]")
+{
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar(0);
+    term.putchar('a');
+
+    REQUIRE("a" == dummy_display.get_line(0));
+}

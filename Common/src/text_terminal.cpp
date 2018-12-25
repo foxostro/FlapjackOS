@@ -17,7 +17,9 @@ void TextTerminal::init(TextDisplayDevice *display)
 
 void TextTerminal::putchar(char ch)
 {
-    if (ch == '\n') {
+    if (ch == 0) {
+        // do nothing
+    } else if (ch == '\n') {
         move_cursor_for_newline();
     } else if (ch == '\b') {
         draw_char(0);
