@@ -55,6 +55,8 @@ public:
 private:
     TextDisplayDevice *display_;
     Point2 cursor_;
+
+    void move_cursor_for_newline();
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP

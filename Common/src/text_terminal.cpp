@@ -18,17 +18,21 @@ void TextTerminal::init(TextDisplayDevice *display)
 void TextTerminal::putchar(char ch)
 {
     if (ch == '\n') {
-        cursor_.x = 0;
-        cursor_.y++;
+        move_cursor_for_newline();
     } else {
         auto character = display_->make_char(ch);
         display_->draw_char(cursor_, character);
         cursor_.x++;
         if (cursor_.x >= display_->dimensions().width) {
-            cursor_.x = 0;
-            cursor_.y++;
+            move_cursor_for_newline();
         }
     }
+}
+
+void TextTerminal::move_cursor_for_newline()
+{
+    cursor_.x = 0;
+    cursor_.y++;
 }
 
 void TextTerminal::puts(const char *s)
