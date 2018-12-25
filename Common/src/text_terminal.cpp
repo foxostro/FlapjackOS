@@ -22,10 +22,7 @@ void TextTerminal::putchar(char ch)
     } else {
         auto character = display_->make_char(ch);
         display_->draw_char(cursor_, character);
-        cursor_.x++;
-        if (cursor_.x >= display_->dimensions().width) {
-            move_cursor_for_newline();
-        }
+        advance_cursor();
     }
 }
 
@@ -33,6 +30,14 @@ void TextTerminal::move_cursor_for_newline()
 {
     cursor_.x = 0;
     cursor_.y++;
+}
+
+void TextTerminal::advance_cursor()
+{
+    cursor_.x++;
+    if (cursor_.x >= display_->dimensions().width) {
+        move_cursor_for_newline();
+    }
 }
 
 void TextTerminal::puts(const char *s)

@@ -57,6 +57,7 @@ private:
     Point2 cursor_;
 
     void move_cursor_for_newline();
+    void advance_cursor();
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP
