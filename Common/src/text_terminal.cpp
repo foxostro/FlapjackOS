@@ -22,7 +22,7 @@ void TextTerminal::putchar(char ch)
     } else {
         auto character = display_->make_char(ch);
         display_->draw_char(cursor_, character);
-        advance_cursor();
+        advance_cursor_forward();
     }
 }
 
@@ -32,7 +32,7 @@ void TextTerminal::move_cursor_for_newline()
     cursor_.y++;
 }
 
-void TextTerminal::advance_cursor()
+void TextTerminal::advance_cursor_forward()
 {
     cursor_.x++;
     if (is_cursor_past_max_width()) {

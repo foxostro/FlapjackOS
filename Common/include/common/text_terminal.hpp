@@ -57,7 +57,7 @@ private:
     Point2 cursor_;
 
     void move_cursor_for_newline();
-    void advance_cursor();
+    void advance_cursor_forward();
     bool is_cursor_past_max_width();
 };
 
