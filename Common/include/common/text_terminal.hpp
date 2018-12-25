@@ -56,6 +56,7 @@ private:
     TextDisplayDevice *display_;
     Point2 cursor_;
 
+    void draw_char(char ch);
     void move_cursor_for_newline();
     void advance_cursor_forward();
     void advance_cursor_backward();

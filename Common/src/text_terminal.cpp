@@ -20,12 +20,17 @@ void TextTerminal::putchar(char ch)
     if (ch == '\n') {
         move_cursor_for_newline();
     } else if (ch == '\b') {
-        display_->draw_char(cursor_, display_->make_char(0));
+        draw_char(0);
         advance_cursor_backward();
     } else {
-        display_->draw_char(cursor_, display_->make_char(ch));
+        draw_char(ch);
         advance_cursor_forward();
     }
+}
+
+void TextTerminal::draw_char(char ch)
+{
+    display_->draw_char(cursor_, display_->make_char(ch));
 }
 
 void TextTerminal::move_cursor_for_newline()
