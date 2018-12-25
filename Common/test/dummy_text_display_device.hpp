@@ -70,7 +70,12 @@ public:
         std::string str;
         Point2 pos{0, (int)row};
         for (pos.x = 0; pos.x < CONSOLE_WIDTH; ++pos.x) {
-            str += get_char(pos).attr.ch;
+            char ch = get_char(pos).attr.ch;
+            if (ch == 0) {
+                break;
+            } else {
+                str += ch;
+            }
         }
         return str;
     }

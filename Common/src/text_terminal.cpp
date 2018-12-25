@@ -14,8 +14,8 @@ void TextTerminal::init(TextDisplayDevice *display)
 
 void TextTerminal::putchar([[maybe_unused]] char ch)
 {
-    // auto character = display_->make_char(ch);
-    // display_->draw_char(Point2{0, 0}, character);
+    auto character = display_->make_char(ch);
+    display_->draw_char(Point2{0, 0}, character);
 }
 
 void TextTerminal::puts([[maybe_unused]] const char *s) {}
