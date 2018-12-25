@@ -5,9 +5,7 @@
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
-
-// TODO: Move SWAP() to own header as header as library template function?
-#define SWAP(x, y) do { __typeof__(x) tmp = x; x = y; y = tmp; } while (0)
+#include <utility>
 
 static const char digits_lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 static const char digits_upper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
@@ -15,7 +13,7 @@ static const char digits_upper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
 static void reverse(char *begin, char *end)
 {
     while (end > begin) {
-        SWAP(*begin, *end);
+        std::swap(*begin, *end);
         begin++;
         end--;
     }
