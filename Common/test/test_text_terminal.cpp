@@ -59,3 +59,15 @@ TEST_CASE("puts() prints a string of characters", "[TextTerminal]")
     term.puts("Hello, world!");
     REQUIRE("Hello, world!" == dummy_display.get_line(0));
 }
+
+TEST_CASE("puts() prints nothing when passed nullptr", "[TextTerminal]")
+{
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.puts(nullptr);
+    REQUIRE("" == dummy_display.get_line(0));
+}

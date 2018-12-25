@@ -26,7 +26,7 @@ void TextTerminal::putchar(char ch)
 
 void TextTerminal::puts(const char *s)
 {
-    while (*s) {
+    if (s) while (*s) {
         putchar(*s++);
     }
 }
