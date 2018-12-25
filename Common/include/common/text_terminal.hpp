@@ -53,8 +53,8 @@ public:
     void move_cursor_to_end();
 
 private:
-    // Displays monospace text on the screen.
     TextDisplayDevice *display_;
+    Point2 cursor_;
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP

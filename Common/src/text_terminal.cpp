@@ -3,7 +3,8 @@
 TextTerminal::~TextTerminal() = default;
 
 TextTerminal::TextTerminal()
- : display_(nullptr)
+ : display_(nullptr),
+   cursor_{0, 0}
 {}
 
 void TextTerminal::init(TextDisplayDevice *display)
@@ -12,10 +13,15 @@ void TextTerminal::init(TextDisplayDevice *display)
     display_ = display;
 }
 
-void TextTerminal::putchar([[maybe_unused]] char ch)
+void TextTerminal::putchar(char ch)
 {
     auto character = display_->make_char(ch);
-    display_->draw_char(Point2{0, 0}, character);
+    display_->draw_char(cursor_, character);
+    cursor_.x++;
+    if (cursor_.x >= display_->dimensions().width) {
+        cursor_.x = 0;
+        cursor_.y++;
+    }
 }
 
 void TextTerminal::puts([[maybe_unused]] const char *s) {}
