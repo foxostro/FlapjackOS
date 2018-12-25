@@ -24,7 +24,12 @@ void TextTerminal::putchar(char ch)
     }
 }
 
-void TextTerminal::puts([[maybe_unused]] const char *s) {}
+void TextTerminal::puts(const char *s)
+{
+    while (*s) {
+        putchar(*s++);
+    }
+}
 
 int TextTerminal::printf([[maybe_unused]] const char *fmt, ...)
 {
