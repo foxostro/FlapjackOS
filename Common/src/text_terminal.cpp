@@ -22,12 +22,22 @@ void TextTerminal::putchar(char ch)
     } else if (ch == '\n') {
         move_cursor_for_newline();
     } else if (ch == '\b') {
-        draw_char(0);
-        advance_cursor_backward();
+        backspace();
     } else {
-        draw_char(ch);
-        advance_cursor_forward();
+        put_normal_character(ch);
     }
+}
+
+void TextTerminal::backspace()
+{
+    draw_char(0);
+    advance_cursor_backward();
+}
+
+void TextTerminal::put_normal_character(char ch)
+{
+    draw_char(ch);
+    advance_cursor_forward();
 }
 
 void TextTerminal::draw_char(char ch)
