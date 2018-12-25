@@ -35,9 +35,14 @@ void TextTerminal::move_cursor_for_newline()
 void TextTerminal::advance_cursor()
 {
     cursor_.x++;
-    if (cursor_.x >= display_->dimensions().width) {
+    if (is_cursor_past_max_width()) {
         move_cursor_for_newline();
     }
+}
+
+bool TextTerminal::is_cursor_past_max_width()
+{
+    return cursor_.x >= display_->dimensions().width;
 }
 
 void TextTerminal::puts(const char *s)
