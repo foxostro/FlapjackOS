@@ -117,3 +117,26 @@ TEST_CASE("putchar('\b') removes a character and moves cursor backwards", "[Text
 
     REQUIRE("b" == dummy_display.get_line(0));
 }
+
+TEST_CASE("putchar('\b') does not move back into the previous line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    for (size_t i = 0; i < CONSOLE_WIDTH; ++i) {
+        term.putchar('a');
+    }
+    term.putchar('b');
+
+    // Action
+    term.putchar('\b');
+    term.putchar('\b');
+
+    // Test
+    REQUIRE(std::string(CONSOLE_WIDTH, 'a') == dummy_display.get_line(0));
+    REQUIRE("" == dummy_display.get_line(1));
+}
