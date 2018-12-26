@@ -4,10 +4,9 @@
 #include "spin_lock.hpp"
 #include <atomic>
 
-extern "C" void yield();
-
 class Mutex {
 public:
+    static void (*yield)();
     explicit Mutex(bool value = false) : lock_(value) {}
     Mutex(const Mutex& other) = delete;
     Mutex(Mutex&& other) = delete;

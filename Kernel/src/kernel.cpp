@@ -14,10 +14,10 @@
 // We pass the terminal around globally because it severely clutters the
 // interface of assert() and panic() if we are reqired to pass the terminal
 // around literally everywhere.
-TextTerminal *g_terminal = nullptr;
+TextTerminal* g_terminal = nullptr;
 
 
-Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
+Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
  : mb_info_(mb_info),
    istack_(istack),
    device_drivers_(interrupt_controller_),
@@ -27,6 +27,7 @@ Kernel::Kernel(multiboot_info_t *mb_info, uintptr_t istack)
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
     
+    Mutex::yield = ::yield;
     hardware_task_configuration_.init(istack_);
     interrupt_controller_.initialize_hardware();
     setup_terminal();

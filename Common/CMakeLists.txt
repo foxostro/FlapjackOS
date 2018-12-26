@@ -33,7 +33,7 @@ set(SOURCE_FILES
     "include/common/text_terminal.hpp" "src/text_terminal.cpp"
     "include/common/bit_array.hpp"
     "include/common/spin_lock.hpp" "include/common/spin_lock.h" "src/spin_lock.c"
-    "include/common/mutex.hpp"
+    "include/common/mutex.hpp" "src/mutex.cpp"
     "include/common/shared_pointer.hpp"
     "include/common/unique_pointer.hpp"
     "include/common/cmpxchg.h" "src/cmpxchg.c"
