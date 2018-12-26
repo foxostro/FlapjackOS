@@ -55,14 +55,21 @@ public:
 private:
     TextDisplayDevice *display_;
     Point2 cursor_;
+    RingBuffer<TextLine, CONSOLE_HEIGHT> lines_;
 
     void backspace();
     void put_normal_character(char ch);
-    void draw_char(char ch);
+    void insert_char(char ch);
+    void redraw_current_line();
+    void redraw_line(int row);
+    char get_line_character(TextLine& line, int column);
+    void draw_char(const Point2 &pos, char ch);
     void move_cursor_for_newline();
     void advance_cursor_forward();
     void advance_cursor_backward();
     bool is_cursor_past_max_width();
+    int width();
+    int height();
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP

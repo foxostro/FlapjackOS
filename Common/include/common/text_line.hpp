@@ -62,6 +62,11 @@ public:
     // The string is nul-terminated.
     Vector<char> str() const;
 
+    inline char at(size_t index) const
+    {
+        return data_.at(index);
+    }
+
     // Inserts a character at the end of the line.
     // If the character won't fit on the line then the line remains unmodified
     // and this call returns false.
