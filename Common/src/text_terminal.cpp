@@ -100,6 +100,12 @@ void TextTerminal::move_cursor_for_newline()
 {
     cursor_.x = 0;
     cursor_.y++;
+    set_display_cursor_position();
+}
+
+void TextTerminal::set_display_cursor_position()
+{
+    display_->set_cursor_position(cursor_);
 }
 
 void TextTerminal::advance_cursor_forward()
@@ -108,6 +114,7 @@ void TextTerminal::advance_cursor_forward()
     if (cursor_.x >= width()) {
         move_cursor_for_newline();
     }
+    set_display_cursor_position();
 }
 
 void TextTerminal::advance_cursor_backward()
@@ -115,6 +122,7 @@ void TextTerminal::advance_cursor_backward()
     if (cursor_.x > 0) {
         cursor_.x--;
     }
+    set_display_cursor_position();
 }
 
 int TextTerminal::width()
@@ -161,11 +169,13 @@ void TextTerminal::move_cursor_right()
     if (cursor_.x > line_width) {
         cursor_.x = line_width;
     }
+    set_display_cursor_position();
 }
 
 void TextTerminal::move_cursor_to_end()
 {
     cursor_.x = get_line_width();
+    set_display_cursor_position();
 }
 
 int TextTerminal::get_line_width()
