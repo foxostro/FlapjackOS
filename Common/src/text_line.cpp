@@ -55,6 +55,15 @@ int TextLine::draw(TextDisplayDevice& display, int row)
     return row + 1;
 }
 
+int TextLine::get_physical_column_for_index(TextDisplayDevice& display, size_type index)
+{
+    int col = 0;
+    for (size_type i = 0; i < index; ++i) {
+        col += step_for_char(display.get_tab_width(), col, data_[i]);
+    }
+    return col;
+}
+
 Vector<char> TextLine::str() const
 {
     Vector<char> chars;

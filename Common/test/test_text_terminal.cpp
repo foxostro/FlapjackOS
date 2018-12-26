@@ -519,6 +519,40 @@ TEST_CASE("putchar('\b') moves the cursor back one column for regular characters
     REQUIRE(0 == dummy_display.get_cursor_position().y);
 }
 
+TEST_CASE("putchar('\t') moves the cursor several columns", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    
+    // Action
+    term.putchar('\t');
+
+    // Test
+    REQUIRE(dummy_display.get_tab_width() == dummy_display.get_cursor_position().x);
+}
+
+TEST_CASE("backspace over a tab moves the cursor several columns", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    term.putchar('\t');
+    
+    // Action
+    term.putchar('\b');
+
+    // Test
+    REQUIRE(1 == dummy_display.get_cursor_position().x);
+}
+
 TEST_CASE("move_cursor_left() does not move the cursor when at beginning of line", "[TextTerminal]")
 {
     // Setup

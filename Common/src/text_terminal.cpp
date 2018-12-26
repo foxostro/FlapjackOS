@@ -89,7 +89,10 @@ void TextTerminal::move_cursor_for_newline()
 
 void TextTerminal::set_display_cursor_position()
 {
-    display_->set_cursor_position(cursor_);
+    Point2 physical_cursor;
+    physical_cursor.y = cursor_.y;
+    physical_cursor.x = lines_.at(cursor_.y).get_physical_column_for_index(*display_, cursor_.x);
+    display_->set_cursor_position(physical_cursor);
 }
 
 void TextTerminal::advance_cursor_forward()

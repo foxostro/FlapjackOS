@@ -66,6 +66,9 @@ public:
     // Gets the number of characters in the text line.
     size_type size() const;
 
+    // Gets the physical column associated with the character at `index'.
+    int get_physical_column_for_index(TextDisplayDevice& display, size_type index);
+
 private:
     CharacterData data_;
 
