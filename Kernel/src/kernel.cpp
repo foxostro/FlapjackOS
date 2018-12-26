@@ -2,6 +2,7 @@
 
 #include <inout.h>
 #include <logger.hpp>
+#include <mutex.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 #include <malloc/malloc_zone.hpp>
@@ -54,25 +55,33 @@ const char* Kernel::get_platform() const
     return platform;
 }
 
+static Mutex g_mutex_a(true);
+static Mutex g_mutex_b(true);
+
 static void fn_a()
 {
-    while (true) {
+    for (int i = 0; i < 200; ++i) {
         g_terminal->putchar('a');
         yield();
     }
+    g_mutex_a.unlock();
 }
 
 static void fn_b()
 {
-    while (true) {
+    for (int i = 0; i < 200; ++i) {
         g_terminal->putchar('b');
         yield();
     }
+    g_mutex_b.unlock();
 }
 
 static void fn_c()
 {
-    g_terminal->puts("\nCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\n");
+    g_terminal->puts("\nC will now attempt to take the locks.\n");
+    g_mutex_a.lock();
+    g_mutex_b.lock();
+    g_terminal->puts("\nC did take the locks.\n");
 }
 
 void Kernel::run()
