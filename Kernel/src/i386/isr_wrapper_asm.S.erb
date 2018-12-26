@@ -8,7 +8,6 @@
 <% [8, 10..14].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    cli
     pusha
     pushl $<%= isr %>
     pushl $48 # Push the size of the context structure
@@ -19,7 +18,6 @@ isr_wrapper_<%= isr %>:
     addl $4, %esp # Clean up the interrupt number.
     popa
     addl $4, %esp  # Clean up the error code.
-    sti
     iret
 <% end %>
 
@@ -27,7 +25,6 @@ isr_wrapper_<%= isr %>:
 <% [0..7, 9, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    cli
     pusha
     pushl $<%= isr %>
     pushl $48 # Push the size of the context structure
@@ -37,6 +34,5 @@ isr_wrapper_<%= isr %>:
     addl $4, %esp # Clean up the size of the context structures
     addl $4, %esp # Clean up the interrupt number.
     popa
-    sti
     iret
 <% end %>

@@ -49,9 +49,7 @@ addq $8, %rsp  # Clean up the size of the structure
 <% [8, 10..14].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    cli
     ISR_WRAPPER $<%= isr %>
-    sti
     iretq
 <% end %>
 
@@ -59,10 +57,8 @@ isr_wrapper_<%= isr %>:
 <% [0..7, 9, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    cli
     pushq $0 # Push a zero for the error code value.
     ISR_WRAPPER $<%= isr %>
     addq $8, %rsp  # Clean up the fake error code value.
-    sti
     iretq
 <% end %>
