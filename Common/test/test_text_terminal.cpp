@@ -155,7 +155,6 @@ TEST_CASE("putchar(0) does nothing", "[TextTerminal]")
     REQUIRE("a" == dummy_display.get_line(0));
 }
 
-#if 0
 TEST_CASE("putchar() before the end of the line inserts there", "[TextTerminal]")
 {
     // Setup
@@ -174,4 +173,3 @@ TEST_CASE("putchar() before the end of the line inserts there", "[TextTerminal]"
     // Test
     REQUIRE("ab" == dummy_display.get_line(0));
 }
-#endif
