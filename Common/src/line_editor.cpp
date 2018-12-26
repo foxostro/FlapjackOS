@@ -125,7 +125,7 @@ LineEditor::Line LineEditor::getline()
                     case '\t':
                     default:
                         if ((isprint(ch) || ch == '\t') &&
-                            user_input.size() < MAXLINE) {
+                            user_input.size() < user_input.CAPACITY) {
 
                             user_input.insert(linear_cursor++, ch);
                             terminal_.putchar(ch);

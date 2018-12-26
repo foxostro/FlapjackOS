@@ -18,14 +18,15 @@
 // RingBuffer is not a vector-like or array-like container because elements are
 // not guaranteed to be contiguous in memory. However, you can often use it like
 // a vector that happens to be statically allocated.
-template<typename TYPE, int CAPACITY>
+template<typename TYPE, int CAPACITY_>
 class RingBuffer {
 public:
     using value_type = TYPE;
     using size_type = int;
+    static constexpr int CAPACITY = CAPACITY_;
+    static_assert(CAPACITY > 0, "CAPACITY must be greater than zero.");
 
 private:
-    static_assert(CAPACITY > 0, "CAPACITY must be greater than zero.");
     using internal_type = typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type;
 
     // An index into the buffer which wraps around at CAPACITY.

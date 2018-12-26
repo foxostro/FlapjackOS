@@ -14,15 +14,17 @@ class TextLine {
     // The logical line is bound to a physical display.
     TextDisplayDevice *display_;
 
-    // The characters in the logical line. This is limited to MAXLINE chars.
-    RingBuffer<char, MAXLINE> data_;
+    using CharacterData = RingBuffer<char, CONSOLE_WIDTH>;
+
+    // The characters in the logical line.
+    CharacterData data_;
 
     // When we change the contents of the text line, we measure the number of
     // physical lines and rows needed to display the logical line.
     Size2 cached_display_size_;
 
 public:
-    using size_type = RingBuffer<char, MAXLINE>::size_type;
+    using size_type = CharacterData::size_type;
 
     // The number of columns this character will take up.
     static int step_for_char(int tab_width, int col, char ch);

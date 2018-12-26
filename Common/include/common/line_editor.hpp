@@ -7,14 +7,14 @@
 #include <common/text_terminal.hpp>
 #include <common/keyboard_device.hpp>
 
-// Maxiumum size of a prompt in LineEditor.
-static constexpr int MAXPROMPT = 16;
+// Maxium size of a prompt in LineEditor.
+static constexpr int MAXPROMPT = 3;
 
 // This can be used to read lines of user input from the terminal and provides
 // useful UI affordances such as nice editing functionality, a prompt, history,
 class LineEditor {
 public:
-    using Line = RingBuffer<char, MAXLINE>;
+    using Line = RingBuffer<char, CONSOLE_WIDTH-MAXPROMPT>;
 
     ~LineEditor();
 

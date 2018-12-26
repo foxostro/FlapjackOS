@@ -16,7 +16,7 @@ TEST_CASE("TextLine::push_back", "[TextLine]")
 {
     DummyTextDisplayDevice display;
 
-    constexpr Vector<char>::size_type WIDTH = MAXLINE;
+    constexpr Vector<char>::size_type WIDTH = CONSOLE_WIDTH;
 
     Vector<char> expected;
     for (Vector<char>::size_type i = 0; i < WIDTH; ++i) {
@@ -35,12 +35,7 @@ TEST_CASE("TextLine::push_back", "[TextLine]")
     
     // Make sure the line contains the data we expect.
     REQUIRE(std::string(line.str().data()) == std::string(expected.data()));
-
-    // The logical line spans several display lines.
-    Size2 phys_size = line.measure();
-
-    REQUIRE(phys_size.width == display.dimensions().width);
-    REQUIRE(phys_size.height == 4);
+    REQUIRE(line.measure().width == display.dimensions().width);
 }
 
 TEST_CASE("TextLine::pop_back", "[TextLine]")

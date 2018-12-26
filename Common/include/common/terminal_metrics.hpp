@@ -4,6 +4,5 @@
 constexpr int CONSOLE_WIDTH = 80;
 constexpr int CONSOLE_HEIGHT = 25;
 constexpr int TAB_WIDTH = 8;
-constexpr int MAXLINE = 256;
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TERMINAL_METRICS_HPP
