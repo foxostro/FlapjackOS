@@ -7,9 +7,11 @@
 
 class Thread {
 public:
+    using Lock = InterruptLock;
     virtual ~Thread() = default;
-    virtual char* switch_to(InterruptLock& lock) = 0;
-    virtual void switch_away(InterruptLock& lock, Thread& next) = 0;
+    virtual char* switch_to(Lock& lock) = 0;
+    virtual void switch_away(Lock& lock, Thread& next) = 0;
+    virtual char*& get_stack_pointer() = 0;
 };
 
 // The current thread yields the remainder of its time slice to the next one.

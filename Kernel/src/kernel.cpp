@@ -92,7 +92,6 @@ void Kernel::run()
     scheduler_.add(new Thread(fn_c));
     scheduler_.begin();
 }
-}
 
 void Kernel::setup_terminal()
 {

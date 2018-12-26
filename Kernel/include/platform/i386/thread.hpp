@@ -7,8 +7,25 @@
 
 namespace i386 {
 
+class Thread_i386_Base : public ::Thread {
+public:
+    char* switch_to(Lock& lock) override
+    {
+        lock.unlock();
+        char* old_stack_pointer = nullptr;
+        i386_context_switch(&old_stack_pointer, get_stack_pointer());
+        return old_stack_pointer;
+    }
+
+    void switch_away(Lock& lock, ::Thread& next) override
+    {
+        lock.unlock();
+        i386_context_switch(&get_stack_pointer(), next.get_stack_pointer());
+    }
+};
+
 // Represents a thread of execution on i386.
-class Thread final : public ::Thread {
+class Thread final : public Thread_i386_Base {
 public:
     static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
 
@@ -34,23 +51,33 @@ public:
         stack_.push(/*POPA, EDI=*/InitialRegisterValue);
     }
 
-    char* switch_to(InterruptLock& lock) override
+    char*& get_stack_pointer() override
     {
-        lock.unlock();
-        char* old_stack_pointer = nullptr;
-        i386_context_switch(&old_stack_pointer, stack_.stack_pointer);
-        return old_stack_pointer;
-    }
-
-    void switch_away(InterruptLock& lock, ::Thread& next) override
-    {
-        lock.unlock();
-        i386_context_switch(&stack_.stack_pointer,
-                            static_cast<Thread&>(next).stack_.stack_pointer);
+        return stack_.stack_pointer;
     }
 
 private:
     StaticStack<PAGE_SIZE> stack_;
+};
+
+// The kernel init thread is special.
+// The init thread is running even before this object or the scheduler is
+// instantiated.
+class InitThread final : public Thread_i386_Base {
+public:
+    virtual ~InitThread() = default;
+
+    InitThread() : stack_pointer_(nullptr) {}
+    InitThread(InitThread&& other) = default;
+    InitThread(const InitThread&) = delete;
+
+    char*& get_stack_pointer() override
+    {
+        return stack_pointer_;
+    }
+
+private:
+    char* stack_pointer_;
 };
 
 } // namespace i386
