@@ -3,7 +3,17 @@
 #include <cassert>
 #include <utility>
 
-Scheduler::Scheduler() = default;
+static Scheduler* g_scheduler = nullptr;
+
+extern "C" void thread_start()
+{
+    g_scheduler->unlock_at_thread_start();
+}
+
+Scheduler::Scheduler()
+{
+    g_scheduler = this;
+}
 
 void Scheduler::add(ThreadPointer thread)
 {
@@ -17,28 +27,40 @@ void Scheduler::begin(ThreadPointer init_thread)
     perform_with_lock(lock_, [&]{
         current_thread_ = std::move(init_thread);
     });
-    yield();
 }
 
 void Scheduler::yield()
 {
-    lock_.lock();
-    assert(current_thread_);
-    Thread& previous_thread = *current_thread_;
-    swap_runnable_and_exhausted_if_necessary();
-    move_to_next_runnable_thread();
-    previous_thread.switch_away(lock_, *current_thread_);
+    perform_with_lock(lock_, [&]{
+        TRACE("Scheduler::yield -- lock");
+        assert(current_thread_);
+        Thread& previous_thread = *current_thread_;
+        swap_runnable_and_exhausted_if_necessary();
+        move_to_next_runnable_thread();
+        previous_thread.switch_away(*current_thread_);
+        TRACE("Scheduler::yield -- unlock");
+    });
 }
 
 void Scheduler::vanish()
 {
     lock_.lock();
+    TRACE("Scheduler::vanish -- lock");
     assert(current_thread_);
     Thread& previous_thread = *current_thread_;
     swap_runnable_and_exhausted_if_necessary();
     take_current_thread_from_runnable_queue();
-    previous_thread.switch_away(lock_, *current_thread_);
+    previous_thread.switch_away(*current_thread_);
+
+    // The corresponding call to unlock() occurs when the other thread
+    // resumes execution in yield() or unlock_at_thread_start().
     __builtin_unreachable();
+}
+
+void Scheduler::unlock_at_thread_start()
+{
+    TRACE("Scheduler::unlock_at_thread_start -- unlock");
+    lock_.unlock();
 }
 
 void Scheduler::take_current_thread_from_runnable_queue()

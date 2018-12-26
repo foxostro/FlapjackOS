@@ -3,15 +3,16 @@
 
 #include "context_switch.hpp"
 #include <thread.hpp>
+#include <page_size.hpp>
+#include <common/static_stack.hpp>
 #include <cstdint>
 
 namespace x86_64 {
 
 class Thread_x86_64_Base : public Thread {
 public:
-    void switch_away(Lock& lock, Thread& next) override
+    void switch_away(Thread& next) override
     {
-        lock.unlock();
         x86_64_context_switch(&get_stack_pointer(), next.get_stack_pointer());
     }
 };
@@ -30,6 +31,7 @@ public:
     {
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(function));
+        stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* RBP = stack_.stack_pointer - sizeof(RBP);
         stack_.push(/*RBP=*/RBP);
         char* RSP = stack_.stack_pointer;

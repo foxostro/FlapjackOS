@@ -26,6 +26,9 @@ public:
     // The current thread exits.
     __attribute__((noreturn)) void vanish();
 
+    // When a thread starts, we need to unlock the scheduler.
+    void unlock_at_thread_start();
+
 private:
     InterruptLock lock_;
     Vector<ThreadPointer> runnable_;

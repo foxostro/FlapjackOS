@@ -3,15 +3,16 @@
 
 #include "context_switch.hpp"
 #include <thread.hpp>
+#include <page_size.hpp>
+#include <common/static_stack.hpp>
 #include <cstdint>
 
 namespace i386 {
 
 class Thread_i386_Base : public Thread {
 public:
-    void switch_away(Lock& lock, Thread& next) override
+    void switch_away(Thread& next) override
     {
-        lock.unlock();
         i386_context_switch(&get_stack_pointer(), next.get_stack_pointer());
     }
 };
@@ -30,6 +31,7 @@ public:
     {
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(function));
+        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
         stack_.push(/*EBP=*/EBP);
         char* ESP = stack_.stack_pointer;

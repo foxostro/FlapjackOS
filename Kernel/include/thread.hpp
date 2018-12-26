@@ -1,15 +1,12 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP
 
-#include <page_size.hpp>
-#include <interrupt_lock.hpp>
-#include <common/static_stack.hpp>
-
+// Represents a single thread of execution on the CPU.
+// The implementation must necesarily be platform-specific.
 class Thread {
 public:
-    using Lock = InterruptLock;
     virtual ~Thread() = default;
-    virtual void switch_away(Lock& lock, Thread& next) = 0;
+    virtual void switch_away(Thread& next) = 0;
     virtual char*& get_stack_pointer() = 0;
 };
 
@@ -18,5 +15,8 @@ extern "C" void yield();
 
 // The current thread exits.
 extern "C" __attribute__((noreturn)) void vanish();
+
+// Entry point for new threads.
+extern "C" void thread_start();
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP
