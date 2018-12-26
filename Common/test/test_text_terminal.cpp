@@ -234,6 +234,34 @@ TEST_CASE("tab characters move us to the end of the physical console line", "[Te
     REQUIRE(std::string(CONSOLE_WIDTH, ' ') == dummy_display.get_line(0));
 }
 
+TEST_CASE("we can overflow a physical line with fewer than CONSOLE_WIDTH characters", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar('\t'); // 8
+    term.putchar('\t'); // 16
+    term.putchar('\t'); // 24
+    term.putchar('\t'); // 32
+    term.putchar('\t'); // 40
+    term.putchar('\t'); // 48
+    term.putchar('\t'); // 56
+    term.putchar('\t'); // 64
+    term.putchar('\t'); // 72
+    term.putchar('\t'); // 80
+
+    // Action
+    term.putchar('a');
+
+    // Test
+    REQUIRE(std::string(CONSOLE_WIDTH, ' ') == dummy_display.get_line(0));
+    REQUIRE("a" == dummy_display.get_line(1));
+}
+
 TEST_CASE("cannot move cursor back further than column zero", "[TextTerminal]")
 {
     // Setup
