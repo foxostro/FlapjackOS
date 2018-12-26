@@ -194,3 +194,23 @@ TEST_CASE("cannot move cursor back further than column zero", "[TextTerminal]")
     // Test
     REQUIRE("ab" == dummy_display.get_line(0));
 }
+
+TEST_CASE("can move cursor right too", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar('a');
+    term.move_cursor_left();
+
+    // Action
+    term.move_cursor_right();
+    term.putchar('b');
+
+    // Test
+    REQUIRE("ab" == dummy_display.get_line(0));
+}

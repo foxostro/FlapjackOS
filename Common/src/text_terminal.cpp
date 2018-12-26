@@ -146,6 +146,12 @@ void TextTerminal::move_cursor_left()
     advance_cursor_backward();
 }
 
-void TextTerminal::move_cursor_right() {}
+void TextTerminal::move_cursor_right()
+{
+    cursor_.x++;
+    if (cursor_.x > width()) {
+        cursor_.x = width();
+    }
+}
 
 void TextTerminal::move_cursor_to_end() {}
