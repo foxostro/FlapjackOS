@@ -76,21 +76,29 @@ static void fn_b()
     g_mutex_b.unlock();
 }
 
-static void fn_c()
-{
-    g_terminal->puts("\nC will now attempt to take the locks.\n");
-    g_mutex_a.lock();
-    g_mutex_b.lock();
-    g_terminal->puts("\nC did take the locks.\n");
-}
-
 void Kernel::run()
 {
     TRACE("Running...");
     scheduler_.add(new Thread(fn_a));
     scheduler_.add(new Thread(fn_b));
-    scheduler_.add(new Thread(fn_c));
-    scheduler_.begin();
+    scheduler_.begin(new InitThread);
+
+    // Wait for threads to finish.
+    g_mutex_a.lock();
+    g_mutex_b.lock();
+    
+    // Read lines of user input forever, but don't do anything with them.
+    // (This operating system doesn't do much yet.)
+    terminal_.puts("Entering console loop:\n");
+    KeyboardDevice& keyboard = device_drivers_.get_keyboard();
+    LineEditor ed(terminal_, keyboard);
+    while (true) {
+        auto user_input = ed.getline();
+        terminal_.puts("Got: ");
+        terminal_.putv(user_input);
+        terminal_.puts("\n");
+        ed.add_history(std::move(user_input));
+    }
 }
 
 void Kernel::setup_terminal()

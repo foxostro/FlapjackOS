@@ -16,8 +16,9 @@ public:
     // The scheduler takes ownership of the pointer.
     void add(ThreadPointer thread);
 
-    // Begin executing the first thread.
-    void begin();
+    // Begin scheduling.
+    // init_thread -- Represents the kernel init thread.
+    void begin(ThreadPointer init_thread);
 
     // The current thread yields to the next runnable thread.
     void yield();

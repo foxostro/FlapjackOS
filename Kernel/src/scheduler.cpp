@@ -12,12 +12,10 @@ void Scheduler::add(ThreadPointer thread)
     lock_.unlock();
 }
 
-void Scheduler::begin()
+void Scheduler::begin(ThreadPointer init_thread)
 {
-    lock_.lock();
-    assert(!runnable_.empty());
-    take_current_thread_from_runnable_queue();
-    current_thread_->switch_to(lock_);
+    current_thread_ = std::move(init_thread);
+    yield();
 }
 
 void Scheduler::yield()
