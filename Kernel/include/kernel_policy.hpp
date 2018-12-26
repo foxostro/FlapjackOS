@@ -21,8 +21,8 @@ struct KernelPolicy {
     using InterruptParameters = x86_64::InterruptParameters;
     using DeviceDrivers = x86_64::DeviceDrivers;
     using TextDisplayDevice = VGATextDisplayDevice;
-    using Thread = x86_64::Thread;
-    using InitThread = x86_64::InitThread;
+    using Thread = x86_64::Thread_x86_64;
+    using InitThread = x86_64::InitThread_x86_64;
 };
 
 #elif defined(__i386__)
@@ -45,8 +45,8 @@ struct KernelPolicy {
     using InterruptParameters = i386::InterruptParameters;
     using DeviceDrivers = i386::DeviceDrivers;
     using TextDisplayDevice = VGATextDisplayDevice;
-    using Thread = i386::Thread;
-    using InitThread = i386::InitThread;
+    using Thread = i386::Thread_i386;
+    using InitThread = i386::InitThread_i386;
 };
 
 #elif defined(__arm__)

@@ -7,7 +7,7 @@
 
 namespace i386 {
 
-class Thread_i386_Base : public ::Thread {
+class Thread_i386_Base : public Thread {
 public:
     char* switch_to(Lock& lock) override
     {
@@ -17,7 +17,7 @@ public:
         return old_stack_pointer;
     }
 
-    void switch_away(Lock& lock, ::Thread& next) override
+    void switch_away(Lock& lock, Thread& next) override
     {
         lock.unlock();
         i386_context_switch(&get_stack_pointer(), next.get_stack_pointer());
@@ -25,16 +25,16 @@ public:
 };
 
 // Represents a thread of execution on i386.
-class Thread final : public Thread_i386_Base {
+class Thread_i386 final : public Thread_i386_Base {
 public:
     static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
 
-    virtual ~Thread() = default;
-    Thread() = default;
-    Thread(Thread&& other) = default;
-    Thread(const Thread&) = delete;
+    virtual ~Thread_i386() = default;
+    Thread_i386() = default;
+    Thread_i386(Thread_i386&& other) = default;
+    Thread_i386(const Thread_i386&) = delete;
 
-    explicit Thread(void (*function)())
+    explicit Thread_i386(void (*function)())
     {
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(function));
@@ -63,13 +63,13 @@ private:
 // The kernel init thread is special.
 // The init thread is running even before this object or the scheduler is
 // instantiated.
-class InitThread final : public Thread_i386_Base {
+class InitThread_i386 final : public Thread_i386_Base {
 public:
-    virtual ~InitThread() = default;
+    virtual ~InitThread_i386() = default;
 
-    InitThread() : stack_pointer_(nullptr) {}
-    InitThread(InitThread&& other) = default;
-    InitThread(const InitThread&) = delete;
+    InitThread_i386() : stack_pointer_(nullptr) {}
+    InitThread_i386(InitThread_i386&& other) = default;
+    InitThread_i386(const InitThread_i386&) = delete;
 
     char*& get_stack_pointer() override
     {

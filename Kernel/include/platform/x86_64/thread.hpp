@@ -7,7 +7,7 @@
 
 namespace x86_64 {
 
-class Thread_x86_64_Base : public ::Thread {
+class Thread_x86_64_Base : public Thread {
 public:
     char* switch_to(Lock& lock) override
     {
@@ -17,7 +17,7 @@ public:
         return old_stack_pointer;
     }
 
-    void switch_away(Lock& lock, ::Thread& next) override
+    void switch_away(Lock& lock, Thread& next) override
     {
         lock.unlock();
         x86_64_context_switch(&get_stack_pointer(), next.get_stack_pointer());
@@ -25,16 +25,16 @@ public:
 };
 
 // Represents a thread of execution on x86_64.
-class Thread final : public Thread_x86_64_Base {
+class Thread_x86_64 final : public Thread_x86_64_Base {
 public:
     static constexpr uint64_t InitialRegisterValue = 0xcdcdcdcdcdcdcdcd;
 
-    virtual ~Thread() = default;
-    Thread() = default;
-    Thread(Thread&& other) = default;
-    Thread(const Thread&) = delete;
+    virtual ~Thread_x86_64() = default;
+    Thread_x86_64() = default;
+    Thread_x86_64(Thread_x86_64&& other) = default;
+    Thread_x86_64(const Thread_x86_64&) = delete;
 
-    explicit Thread(void (*function)())
+    explicit Thread_x86_64(void (*function)())
     {
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(function));
@@ -71,13 +71,13 @@ private:
 // The kernel init thread is special.
 // The init thread is running even before this object or the scheduler is
 // instantiated.
-class InitThread final : public Thread_x86_64_Base {
+class InitThread_x86_64 final : public Thread_x86_64_Base {
 public:
-    virtual ~InitThread() = default;
+    virtual ~InitThread_x86_64() = default;
 
-    InitThread() : stack_pointer_(nullptr) {}
-    InitThread(InitThread&& other) = default;
-    InitThread(const InitThread&) = delete;
+    InitThread_x86_64() : stack_pointer_(nullptr) {}
+    InitThread_x86_64(InitThread_x86_64&& other) = default;
+    InitThread_x86_64(const InitThread_x86_64&) = delete;
 
     char*& get_stack_pointer() override
     {
