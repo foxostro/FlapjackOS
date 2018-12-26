@@ -12,9 +12,10 @@ class Thread final : public ::Thread {
 public:
     static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
 
-    Thread() = delete;
+    virtual ~Thread() = default;
+    Thread() = default;
+    Thread(Thread&& other) = default;
     Thread(const Thread&) = delete;
-    Thread(Thread&& other) : ::Thread(std::move(other)) {}
 
     explicit Thread(void (*function)())
     {
@@ -44,8 +45,12 @@ public:
     void switch_away(InterruptLock& lock, ::Thread& next) override
     {
         lock.unlock();
-        i386_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
+        i386_context_switch(&stack_.stack_pointer,
+                            static_cast<Thread&>(next).stack_.stack_pointer);
     }
+
+private:
+    StaticStack<PAGE_SIZE> stack_;
 };
 
 } // namespace i386

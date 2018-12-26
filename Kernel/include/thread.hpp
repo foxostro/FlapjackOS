@@ -10,13 +10,6 @@ public:
     virtual ~Thread() = default;
     virtual char* switch_to(InterruptLock& lock) = 0;
     virtual void switch_away(InterruptLock& lock, Thread& next) = 0;
-
-    StaticStack<PAGE_SIZE> stack_;
-
-protected:
-    Thread() = default;
-    Thread(const Thread&) = delete;
-    Thread(Thread&& other) : stack_(std::move(other.stack_)) {}
 };
 
 // The current thread yields the remainder of its time slice to the next one.

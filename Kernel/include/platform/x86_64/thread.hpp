@@ -12,9 +12,10 @@ class Thread final : public ::Thread  {
 public:
     static constexpr uint64_t InitialRegisterValue = 0xcdcdcdcdcdcdcdcd;
 
-    Thread() = delete;
+    virtual ~Thread() = default;
+    Thread() = default;
+    Thread(Thread&& other) = default;
     Thread(const Thread&) = delete;
-    Thread(Thread&& other) : ::Thread(std::move(other)) {}
 
     explicit Thread(void (*function)())
     {
@@ -54,6 +55,9 @@ public:
         lock.unlock();
         x86_64_context_switch(&stack_.stack_pointer, next.stack_.stack_pointer);
     }
+
+private:
+    StaticStack<PAGE_SIZE> stack_;
 };
 
 } // namespace x86_64
