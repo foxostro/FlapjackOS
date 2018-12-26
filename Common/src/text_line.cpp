@@ -47,7 +47,7 @@ int TextLine::draw(TextDisplayDevice& display, int row)
         }
     }
 
-    const auto space = display.make_char(' ');
+    const auto space = display.make_char(0);
     for (; col < max_columns; ++col) {
         display.draw_char(Point2{col, row}, space);
     }

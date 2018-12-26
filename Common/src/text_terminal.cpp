@@ -72,23 +72,7 @@ void TextTerminal::redraw_current_line()
 void TextTerminal::redraw_line(int y)
 {
     assert(y >= 0);
-    Point2 pos{0, y};
-    auto& line = lines_.at(pos.y);
-    for (pos.x = 0; pos.x < width(); ++pos.x) {
-        char ch = get_line_character(line, pos.x);
-        draw_char(pos, ch);
-    }
-}
-
-char TextTerminal::get_line_character(TextLine& line, int column)
-{
-    char ch;
-    if (column < line.size()) {
-        ch = line.at(column);
-    } else {
-        ch = 0;
-    }
-    return ch;
+    lines_.at(y).draw(*display_, y);
 }
 
 void TextTerminal::draw_char(const Point2 &pos, char ch)

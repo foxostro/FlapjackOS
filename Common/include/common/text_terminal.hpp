@@ -56,7 +56,7 @@ public:
     void scroll_one_line();
 
 private:
-    TextDisplayDevice *display_;
+    TextDisplayDevice* display_;
     Point2 cursor_;
     RingBuffer<TextLine, CONSOLE_HEIGHT> lines_;
 
@@ -65,7 +65,6 @@ private:
     void insert_char(char ch);
     void redraw_current_line();
     void redraw_line(int row);
-    char get_line_character(TextLine& line, int column);
     void draw_char(const Point2 &pos, char ch);
     void move_cursor_for_newline();
     void set_display_cursor_position();

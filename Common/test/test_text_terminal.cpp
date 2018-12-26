@@ -186,7 +186,7 @@ TEST_CASE("putchar('\t') prints a tab character spanning multiple columns", "[Te
     term.putchar('\t');
     term.putchar('b');
 
-    REQUIRE("a\tb" == dummy_display.get_line(0));
+    REQUIRE("a       b" == dummy_display.get_line(0));
 }
 
 TEST_CASE("cannot move cursor back further than column zero", "[TextTerminal]")
