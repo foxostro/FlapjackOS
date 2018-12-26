@@ -15,11 +15,8 @@ public:
     using CharacterData = RingBuffer<char, CONSOLE_WIDTH>;
     using size_type = CharacterData::size_type;
 
-    // Destructor.
-    ~TextLine();
-
     // Constructor.
-    TextLine(TextDisplayDevice& display);
+    TextLine();
 
     // Copy constructor.
     TextLine(const TextLine& line);
@@ -35,7 +32,7 @@ public:
 
     // Draws the text line at the specified line of the display.
     // Returns the display line where the next logical line should be placed.
-    int draw(int row);
+    int draw(TextDisplayDevice& display, int row);
 
     // Gets the characters in the text line.
     // The string is nul-terminated.
@@ -70,11 +67,10 @@ public:
     size_type size() const;
 
 private:
-    TextDisplayDevice& display_;
     CharacterData data_;
 
     // The number of columns this character will take up.
-    int step_for_char(int col, char ch);
+    int step_for_char(int tab_width, int col, char ch);
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_LINE_HPP

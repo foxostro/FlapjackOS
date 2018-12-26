@@ -5,8 +5,6 @@
 
 TEST_CASE("TextLine::push_back", "[TextLine]")
 {
-    DummyTextDisplayDevice display;
-
     constexpr Vector<char>::size_type WIDTH = CONSOLE_WIDTH;
 
     Vector<char> expected;
@@ -15,7 +13,7 @@ TEST_CASE("TextLine::push_back", "[TextLine]")
     }
     expected.push_back(0);
 
-    TextLine line(display);
+    TextLine line;
 
     for (Vector<char>::size_type i = 0; i < WIDTH; ++i) {
         REQUIRE(line.push_back('a') == true);
@@ -30,8 +28,7 @@ TEST_CASE("TextLine::push_back", "[TextLine]")
 
 TEST_CASE("TextLine::pop_back", "[TextLine]")
 {
-    DummyTextDisplayDevice display;
-    TextLine line(display);
+    TextLine line;
 
     REQUIRE(line.push_back('H') == true);
     REQUIRE(line.push_back('e') == true);
@@ -47,8 +44,7 @@ TEST_CASE("TextLine::pop_back", "[TextLine]")
 
 TEST_CASE("TextLine::pop_back, empty line", "[TextLine]")
 {
-    DummyTextDisplayDevice display;
-    TextLine line(display);
+    TextLine line;
     REQUIRE(std::string(line.str().data()) == "");
     line.pop_back();
     REQUIRE(std::string(line.str().data()) == "");
@@ -56,8 +52,7 @@ TEST_CASE("TextLine::pop_back, empty line", "[TextLine]")
 
 TEST_CASE("TextLine::insert", "[TextLine]")
 {
-    DummyTextDisplayDevice display;
-    TextLine line(display);
+    TextLine line;
     REQUIRE(std::string(line.str().data()) == "");
 
     line.insert(0, 'a');
@@ -72,8 +67,7 @@ TEST_CASE("TextLine::insert", "[TextLine]")
 
 TEST_CASE("TextLine::remove", "[TextLine]")
 {
-    DummyTextDisplayDevice display;
-    TextLine line(display);
+    TextLine line;
 
     line.push_back('a');
     line.push_back('b');

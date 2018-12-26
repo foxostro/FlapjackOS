@@ -15,7 +15,7 @@ void TextTerminal::init(TextDisplayDevice* display)
     display_ = display;
 
     for (int i = 0; i < height(); ++i) {
-        lines_.push_back(TextLine(*display_));
+        lines_.push_back(TextLine());
     }
 }
 
@@ -52,7 +52,7 @@ void TextTerminal::put_normal_character(char ch)
 void TextTerminal::scroll_one_line()
 {
     lines_.pop_front();
-    lines_.push_back(TextLine(*display_));
+    lines_.push_back(TextLine());
     for (int i = 0; i < height(); ++i) {
         redraw_line(i);
     }

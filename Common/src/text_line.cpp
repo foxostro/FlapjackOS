@@ -5,53 +5,39 @@
 #include <cassert>
 #include <cctype>
 
-TextLine::~TextLine() = default;
-
-TextLine::TextLine(TextDisplayDevice& display)
- : display_(display)
-{}
-
-TextLine::TextLine(const TextLine& line)
- : display_(line.display_),
-   data_(line.data_)
-{}
-
-TextLine::TextLine(TextLine&& line)
- : display_(line.display_),
-   data_(std::move(line.data_))
-{}
+TextLine::TextLine() = default;
+TextLine::TextLine(const TextLine& line) = default;
+TextLine::TextLine(TextLine&& line) : data_(std::move(line.data_)) {}
 
 TextLine& TextLine::operator=(const TextLine& other)
 {
     if (this != &other) {
-        display_ = other.display_;
         data_ = other.data_;
     }
-
     return *this;
 }
 
 TextLine& TextLine::operator=(TextLine&& other)
 {
     if (this != &other) {
-        display_ = other.display_;
         data_ = std::move(other.data_);
     }
     return *this;
 }
 
-int TextLine::draw(int row)
+int TextLine::draw(TextDisplayDevice& display, int row)
 {
     int col = 0;
-    const int max_columns = display_.dimensions().width;
+    const int tab_width = display.get_tab_width();
+    const int max_columns = display.dimensions().width;
 
     for (int i = 0; i < data_.size(); ++i) {
         char ch = data_[i];
-        int step = step_for_char(col, ch);
-        VGAChar vgachar = display_.make_char((ch=='\t') ? ' ' : ch);
+        int step = step_for_char(tab_width, col, ch);
+        VGAChar vgachar = display.make_char((ch=='\t') ? ' ' : ch);
 
         for (int j = col; j < MIN(col+step, max_columns); ++j) {
-            display_.draw_char(Point2{j, row}, vgachar);
+            display.draw_char(Point2{j, row}, vgachar);
         }
 
         col += step;
@@ -61,9 +47,9 @@ int TextLine::draw(int row)
         }
     }
 
-    const auto space = display_.make_char(' ');
+    const auto space = display.make_char(' ');
     for (; col < max_columns; ++col) {
-        display_.draw_char(Point2{col, row}, space);
+        display.draw_char(Point2{col, row}, space);
     }
 
     return row + 1;
@@ -112,9 +98,8 @@ TextLine::size_type TextLine::size() const
     return data_.size();
 }
 
-int TextLine::step_for_char(int col, char ch)
+int TextLine::step_for_char(int tab_width, int col, char ch)
 {
-    const int tab_width = display_.get_tab_width();
     int delta;
     if (ch == '\t') {
         delta = tab_width - (col % tab_width);
