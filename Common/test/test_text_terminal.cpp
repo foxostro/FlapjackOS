@@ -277,3 +277,102 @@ TEST_CASE("move_cursor_to_end() moves to the end of the line", "[TextTerminal]")
     // Test
     REQUIRE("abc" == dummy_display.get_line(0));
 }
+
+TEST_CASE("scroll_one_line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    auto print_line = [&](char ch){
+        for (size_t column = 0; column < CONSOLE_WIDTH; ++column) {
+            term.putchar(ch);
+        }
+    };
+
+    for (char ch = 'a'; ch < 'z'; ++ch) {
+        print_line(ch);
+    }
+
+    // Action
+    term.scroll_one_line();
+
+    // Test
+    REQUIRE(std::string(CONSOLE_WIDTH, 'b') == dummy_display.get_line(0));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'c') == dummy_display.get_line(1));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'd') == dummy_display.get_line(2));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'e') == dummy_display.get_line(3));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'f') == dummy_display.get_line(4));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'g') == dummy_display.get_line(5));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'h') == dummy_display.get_line(6));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'i') == dummy_display.get_line(7));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'j') == dummy_display.get_line(8));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'k') == dummy_display.get_line(9));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'l') == dummy_display.get_line(10));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'm') == dummy_display.get_line(11));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'n') == dummy_display.get_line(12));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'o') == dummy_display.get_line(13));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'p') == dummy_display.get_line(14));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'q') == dummy_display.get_line(15));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'r') == dummy_display.get_line(16));
+    REQUIRE(std::string(CONSOLE_WIDTH, 's') == dummy_display.get_line(17));
+    REQUIRE(std::string(CONSOLE_WIDTH, 't') == dummy_display.get_line(18));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'u') == dummy_display.get_line(19));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'v') == dummy_display.get_line(20));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'w') == dummy_display.get_line(21));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'x') == dummy_display.get_line(22));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'y') == dummy_display.get_line(23));
+}
+
+TEST_CASE("putchar at the bottom of the display scrolls a line off the top", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    auto print_line = [&](char ch){
+        for (size_t column = 0; column < CONSOLE_WIDTH; ++column) {
+            term.putchar(ch);
+        }
+    };
+
+    for (char ch = 'a'; ch < 'z'; ++ch) {
+        print_line(ch);
+    }
+
+    // Action
+    term.putchar('z');
+
+    // Test
+    REQUIRE(std::string(CONSOLE_WIDTH, 'b') == dummy_display.get_line(0));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'c') == dummy_display.get_line(1));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'd') == dummy_display.get_line(2));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'e') == dummy_display.get_line(3));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'f') == dummy_display.get_line(4));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'g') == dummy_display.get_line(5));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'h') == dummy_display.get_line(6));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'i') == dummy_display.get_line(7));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'j') == dummy_display.get_line(8));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'k') == dummy_display.get_line(9));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'l') == dummy_display.get_line(10));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'm') == dummy_display.get_line(11));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'n') == dummy_display.get_line(12));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'o') == dummy_display.get_line(13));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'p') == dummy_display.get_line(14));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'q') == dummy_display.get_line(15));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'r') == dummy_display.get_line(16));
+    REQUIRE(std::string(CONSOLE_WIDTH, 's') == dummy_display.get_line(17));
+    REQUIRE(std::string(CONSOLE_WIDTH, 't') == dummy_display.get_line(18));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'u') == dummy_display.get_line(19));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'v') == dummy_display.get_line(20));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'w') == dummy_display.get_line(21));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'x') == dummy_display.get_line(22));
+    REQUIRE(std::string(CONSOLE_WIDTH, 'y') == dummy_display.get_line(23));
+    REQUIRE("z" == dummy_display.get_line(24));
+}

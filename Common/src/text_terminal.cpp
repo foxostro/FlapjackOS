@@ -15,7 +15,7 @@ void TextTerminal::init(TextDisplayDevice* display)
     display_ = display;
 
     for (int i = 0; i < height(); ++i) {
-        lines_.push_back(TextLine(*display));
+        lines_.push_back(TextLine(*display_));
     }
 }
 
@@ -41,8 +41,21 @@ void TextTerminal::backspace()
 
 void TextTerminal::put_normal_character(char ch)
 {
+    if (cursor_.y >= height()) {
+        cursor_.y = height()-1;
+        scroll_one_line();
+    }
     insert_char(ch);
     advance_cursor_forward();
+}
+
+void TextTerminal::scroll_one_line()
+{
+    lines_.pop_front();
+    lines_.push_back(TextLine(*display_));
+    for (int i = 0; i < height(); ++i) {
+        redraw_line(i);
+    }
 }
 
 void TextTerminal::insert_char(char ch)
@@ -92,7 +105,7 @@ void TextTerminal::move_cursor_for_newline()
 void TextTerminal::advance_cursor_forward()
 {
     cursor_.x++;
-    if (is_cursor_past_max_width()) {
+    if (cursor_.x >= width()) {
         move_cursor_for_newline();
     }
 }
@@ -102,11 +115,6 @@ void TextTerminal::advance_cursor_backward()
     if (cursor_.x > 0) {
         cursor_.x--;
     }
-}
-
-bool TextTerminal::is_cursor_past_max_width()
-{
-    return cursor_.x >= width();
 }
 
 int TextTerminal::width()

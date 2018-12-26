@@ -52,6 +52,9 @@ public:
     // Moves the cursor all the way to the end of the line.
     void move_cursor_to_end();
 
+    // Scrolls one line off the top of the display.
+    void scroll_one_line();
+
 private:
     TextDisplayDevice *display_;
     Point2 cursor_;
