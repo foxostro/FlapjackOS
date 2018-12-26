@@ -87,15 +87,11 @@ static void fn_c()
 void Kernel::run()
 {
     TRACE("Running...");
-    scheduler_.add(create_thread(fn_a));
-    scheduler_.add(create_thread(fn_b));
-    scheduler_.add(create_thread(fn_c));
+    scheduler_.add(new Thread(fn_a));
+    scheduler_.add(new Thread(fn_b));
+    scheduler_.add(new Thread(fn_c));
     scheduler_.begin();
 }
-
-UniquePointer<::Thread, InterruptLock> Kernel::create_thread(void (*fn)())
-{
-    return new Thread(fn);
 }
 
 void Kernel::setup_terminal()
