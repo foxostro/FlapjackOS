@@ -2,13 +2,13 @@
 
 #include <inout.h>
 #include <logger.hpp>
-#include <mutex.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 #include <malloc/malloc_zone.hpp>
 #include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
+#include <common/mutex.hpp>
 
 
 // We pass the terminal around globally because it severely clutters the

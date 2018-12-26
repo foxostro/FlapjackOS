@@ -49,8 +49,7 @@ void interrupt_dispatch_trampoline(void* params)
     get_global_kernel().dispatch_interrupt(params);
 }
 
-extern "C"
-void yield(void)
+extern "C" void yield()
 {
     get_global_kernel().yield();
 }
