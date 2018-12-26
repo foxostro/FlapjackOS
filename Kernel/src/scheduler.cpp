@@ -44,7 +44,6 @@ void Scheduler::yield()
 void Scheduler::vanish()
 {
     lock_.lock();
-    TRACE("Scheduler::vanish -- lock");
     assert(current_thread_);
     Thread& previous_thread = *current_thread_;
     swap_runnable_and_exhausted_if_necessary();
@@ -58,7 +57,6 @@ void Scheduler::vanish()
 
 void Scheduler::unlock_at_thread_start()
 {
-    TRACE("Scheduler::unlock_at_thread_start -- unlock");
     lock_.unlock();
 }
 
