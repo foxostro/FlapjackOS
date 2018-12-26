@@ -81,6 +81,9 @@ private:
 
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
+
+    // Creates a new thread.
+    UniquePointer<::Thread, InterruptLock> create_thread(void (*fn)());
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
