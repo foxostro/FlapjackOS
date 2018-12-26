@@ -1,6 +1,7 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_MUTEX_HPP
 #define FLAPJACKOS_COMMON_INCLUDE_MUTEX_HPP
 
+#include "spin_lock.hpp"
 #include <atomic>
 
 extern "C" void yield();

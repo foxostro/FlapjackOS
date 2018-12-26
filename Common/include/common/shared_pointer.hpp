@@ -1,12 +1,12 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_SHARED_POINTER_HPP
 #define FLAPJACKOS_COMMON_INCLUDE_SHARED_POINTER_HPP
 
-#include <common/spin_lock.hpp>
+#include <common/mutex.hpp>
 #include <atomic>
 #include <cassert>
 
 // Shared Pointer class, roughly equivalent to std::shared_pointer.
-template<typename Type, typename LockType = SpinLock>
+template<typename Type, typename LockType = Mutex>
 class SharedPointer {
 public:
     ~SharedPointer()

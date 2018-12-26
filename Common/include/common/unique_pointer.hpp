@@ -1,11 +1,11 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_UNIQUE_POINTER_HPP
 #define FLAPJACKOS_COMMON_INCLUDE_UNIQUE_POINTER_HPP
 
-#include <common/spin_lock.hpp>
+#include <common/mutex.hpp>
 #include <cassert>
 
 // Unique Pointer class, roughly equivalent to std::unique_pointer.
-template<typename Type, typename LockType = SpinLock>
+template<typename Type, typename LockType = Mutex>
 class UniquePointer {
 public:
     ~UniquePointer()
