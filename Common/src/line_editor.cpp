@@ -109,8 +109,11 @@ LineEditor::Line LineEditor::getline()
                 switch (ch) {
                     case '\b':
                         if (user_input.size() > 0) {
-                            user_input.remove(--linear_cursor);
-                            terminal_.putchar('\b');
+                            --linear_cursor;
+                            if (linear_cursor >= 0) {
+                                user_input.remove(linear_cursor);
+                                terminal_.putchar('\b');
+                            }
                         }
                         break;
 

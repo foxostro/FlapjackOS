@@ -251,3 +251,30 @@ TEST_CASE("backspace after history recall", "[LineEditor]")
     REQUIRE(display.get_line( 1) == "> fo");
     ed.add_history(line);
 }
+
+TEST_CASE("backspace after pressing left arrow does nothing", "[LineEditor]")
+{
+    // This test case covers a bug fix. Pressing the left arrow and then hitting
+    // backspace was causing a crash.
+
+    DummyTextDisplayDevice display;
+    DummyKeyboardDevice keyboard;
+    TextTerminal term;
+    term.init(&display);
+
+    keyboard.set_events(std::vector<KeyboardEvent>{
+        KeyboardEvent(KEYCODE_A, PRESSED, 'a'),
+        KeyboardEvent(KEYCODE_A, RELEASED, 'a'),
+        KeyboardEvent(KEYCODE_LEFT_ARROW, PRESSED, 0),
+        KeyboardEvent(KEYCODE_LEFT_ARROW, RELEASED, 0),
+        KeyboardEvent(KEYCODE_BACKSPACE, PRESSED, '\b'),
+        KeyboardEvent(KEYCODE_BACKSPACE, RELEASED, '\b'),
+        KeyboardEvent(KEYCODE_ENTER, PRESSED, '\n'),
+        KeyboardEvent(KEYCODE_ENTER, RELEASED, '\n')
+    });
+
+    LineEditor ed(term, keyboard);
+    (void)ed.getline();
+
+    REQUIRE(display.get_line(0) == "> a");
+}
