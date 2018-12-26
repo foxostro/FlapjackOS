@@ -240,3 +240,25 @@ TEST_CASE("cannot move cursor further right than end of line contents", "[TextTe
     // Test
     REQUIRE("abcd" == dummy_display.get_line(0));
 }
+
+TEST_CASE("move_cursor_to_end() moves to the end of the line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar('a');
+    term.putchar('b');
+    term.move_cursor_left();
+    term.move_cursor_left();
+
+    // Action
+    term.move_cursor_to_end();
+    term.putchar('c');
+
+    // Test
+    REQUIRE("abc" == dummy_display.get_line(0));
+}

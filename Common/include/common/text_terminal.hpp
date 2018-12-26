@@ -70,6 +70,7 @@ private:
     bool is_cursor_past_max_width();
     int width();
     int height();
+    int get_line_width();
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP
