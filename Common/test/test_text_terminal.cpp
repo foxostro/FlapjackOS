@@ -214,3 +214,29 @@ TEST_CASE("can move cursor right too", "[TextTerminal]")
     // Test
     REQUIRE("ab" == dummy_display.get_line(0));
 }
+
+TEST_CASE("cannot move cursor further right than end of line contents", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar('b');
+    term.putchar('c');
+    term.move_cursor_left();
+    term.move_cursor_left();
+    term.putchar('a');
+
+    // Action
+    term.move_cursor_right();
+    term.move_cursor_right();
+    term.move_cursor_right();
+    term.move_cursor_right();
+    term.putchar('d');
+
+    // Test
+    REQUIRE("abcd" == dummy_display.get_line(0));
+}

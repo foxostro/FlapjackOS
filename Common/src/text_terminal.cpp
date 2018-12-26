@@ -149,8 +149,9 @@ void TextTerminal::move_cursor_left()
 void TextTerminal::move_cursor_right()
 {
     cursor_.x++;
-    if (cursor_.x > width()) {
-        cursor_.x = width();
+    const int line_width = lines_.at(cursor_.y).size();
+    if (cursor_.x > line_width) {
+        cursor_.x = line_width;
     }
 }
 
