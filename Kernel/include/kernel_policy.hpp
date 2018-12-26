@@ -22,7 +22,7 @@ struct KernelPolicy {
     using DeviceDrivers = x86_64::DeviceDrivers;
     using TextDisplayDevice = VGATextDisplayDevice;
     using Thread = x86_64::Thread_x86_64;
-    using InitThread = x86_64::InitThread_x86_64;
+    using ThreadExternalStack = x86_64::Thread_x86_64_ExternalStack;
 };
 
 #elif defined(__i386__)
@@ -46,7 +46,7 @@ struct KernelPolicy {
     using DeviceDrivers = i386::DeviceDrivers;
     using TextDisplayDevice = VGATextDisplayDevice;
     using Thread = i386::Thread_i386;
-    using InitThread = i386::InitThread_i386;
+    using ThreadExternalStack = i386::Thread_i386_ExternalStack;
 };
 
 #elif defined(__arm__)

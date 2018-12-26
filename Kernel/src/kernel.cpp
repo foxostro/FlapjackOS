@@ -81,7 +81,7 @@ void Kernel::run()
     TRACE("Running...");
     scheduler_.add(new Thread(fn_a));
     scheduler_.add(new Thread(fn_b));
-    scheduler_.begin(new InitThread);
+    scheduler_.begin(new ThreadExternalStack);
 
     // Wait for threads to finish.
     g_mutex_a.lock();

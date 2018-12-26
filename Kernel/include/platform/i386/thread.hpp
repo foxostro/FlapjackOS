@@ -60,16 +60,17 @@ private:
     StaticStack<PAGE_SIZE> stack_;
 };
 
-// The kernel init thread is special.
-// The init thread is running even before this object or the scheduler is
-// instantiated.
-class InitThread_i386 final : public Thread_i386_Base {
+// An i386 thread which does not own the memory for its own stack.
+// This is useful to represent the initial kernel thread in the scheduler as
+// that thread stack is allocated at boot time before the memory subsystem is
+// even ready.
+class Thread_i386_ExternalStack final : public Thread_i386_Base {
 public:
-    virtual ~InitThread_i386() = default;
+    virtual ~Thread_i386_ExternalStack() = default;
 
-    InitThread_i386() : stack_pointer_(nullptr) {}
-    InitThread_i386(InitThread_i386&& other) = default;
-    InitThread_i386(const InitThread_i386&) = delete;
+    Thread_i386_ExternalStack() : stack_pointer_(nullptr) {}
+    Thread_i386_ExternalStack(Thread_i386_ExternalStack&& other) = default;
+    Thread_i386_ExternalStack(const Thread_i386_ExternalStack&) = delete;
 
     char*& get_stack_pointer() override
     {

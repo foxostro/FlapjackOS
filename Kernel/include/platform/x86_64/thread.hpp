@@ -68,16 +68,17 @@ private:
     StaticStack<PAGE_SIZE> stack_;
 };
 
-// The kernel init thread is special.
-// The init thread is running even before this object or the scheduler is
-// instantiated.
-class InitThread_x86_64 final : public Thread_x86_64_Base {
+// An x86_64 thread which does not own the memory for its own stack.
+// This is useful to represent the initial kernel thread in the scheduler as
+// that thread stack is allocated at boot time before the memory subsystem is
+// even ready.
+class Thread_x86_64_ExternalStack final : public Thread_x86_64_Base {
 public:
-    virtual ~InitThread_x86_64() = default;
+    virtual ~Thread_x86_64_ExternalStack() = default;
 
-    InitThread_x86_64() : stack_pointer_(nullptr) {}
-    InitThread_x86_64(InitThread_x86_64&& other) = default;
-    InitThread_x86_64(const InitThread_x86_64&) = delete;
+    Thread_x86_64_ExternalStack() : stack_pointer_(nullptr) {}
+    Thread_x86_64_ExternalStack(Thread_x86_64_ExternalStack&& other) = default;
+    Thread_x86_64_ExternalStack(const Thread_x86_64_ExternalStack&) = delete;
 
     char*& get_stack_pointer() override
     {
