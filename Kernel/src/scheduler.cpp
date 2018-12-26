@@ -32,13 +32,12 @@ void Scheduler::begin(ThreadPointer init_thread)
 void Scheduler::yield()
 {
     perform_with_lock(lock_, [&]{
-        TRACE("Scheduler::yield -- lock");
-        assert(current_thread_);
-        Thread& previous_thread = *current_thread_;
-        swap_runnable_and_exhausted_if_necessary();
-        move_to_next_runnable_thread();
-        previous_thread.switch_away(*current_thread_);
-        TRACE("Scheduler::yield -- unlock");
+        if (current_thread_) {
+            Thread& previous_thread = *current_thread_;
+            swap_runnable_and_exhausted_if_necessary();
+            move_to_next_runnable_thread();
+            previous_thread.switch_away(*current_thread_);
+        }
     });
 }
 
