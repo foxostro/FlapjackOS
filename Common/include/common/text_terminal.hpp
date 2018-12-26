@@ -5,15 +5,16 @@
 #include <common/ring_buffer.hpp>
 #include <common/text_line.hpp>
 #include <common/vec2.hpp>
+#include <common/mutex.hpp>
 
 // A text terminal displays lines of text on a text console display.
-class TextTerminal {
+class UnlockedTextTerminal {
 public:
-    ~TextTerminal();
+    ~UnlockedTextTerminal();
 
     // Two-phase initialization.
-    TextTerminal();
-    void init(TextDisplayDevice *display);
+    UnlockedTextTerminal();
+    void init(TextDisplayDevice* display);
 
     // Puts a character on the display at the current cursor position.
     // Increments the cursor to the next position. This may wrap the cursor to
@@ -27,11 +28,11 @@ public:
     void putchar(char ch);
 
     // Puts each character in the vector to the terminal.
-    void puts(const char *str);
+    void puts(const char* str);
 
     // Puts each character in the container to the terminal.
     template<typename T>
-    void putv(const T &buf)
+    void putv(const T& buf)
     {
         for (typename T::size_type i = 0, n = buf.size(); i < n; ++i) {
             putchar(buf[i]);
@@ -39,7 +40,7 @@ public:
     }
 
     // Prints a formatted string to the terminal.
-    int printf(const char *fmt, ...);
+    int printf(const char* fmt, ...);
 
     // Moves the cursor to the left.
     // If the cursor is at the beginning of the line then this does nothing.
@@ -65,7 +66,7 @@ private:
     void insert_char(char ch);
     void redraw_current_line();
     void redraw_line(int row);
-    void draw_char(const Point2 &pos, char ch);
+    void draw_char(const Point2& pos, char ch);
     void move_cursor_for_newline();
     void set_display_cursor_position();
     void advance_cursor_forward();
@@ -74,6 +75,75 @@ private:
     int width();
     int height();
     int get_line_width();
+};
+
+// A text terminal displays lines of text on a text console display.
+// Uses a mutex to ensure consistency in a multithreaded context.
+class TextTerminal {
+public:
+    void init(TextDisplayDevice* display)
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.init(display);
+        });
+    }
+
+    void putchar(char ch)
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.putchar(ch);
+        });
+    }
+
+    void puts(const char* str)
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.puts(str);
+        });
+    }
+
+    template<typename T>
+    void putv(const T& buf)
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.putv(buf);
+        });
+    }
+
+    template<typename... Args>
+    int printf(Args&&... args)
+    {
+        int r;
+        perform_with_lock(lock_, [&]{
+            r = impl_.printf(std::forward<Args>(args)...);
+        });
+        return r;
+    }
+
+    void move_cursor_left()
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.move_cursor_left();
+        });
+    }
+
+    void move_cursor_right()
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.move_cursor_right();
+        });
+    }
+
+    void move_cursor_to_end()
+    {
+        perform_with_lock(lock_, [&]{
+            impl_.move_cursor_to_end();
+        });
+    }
+
+private:
+    Mutex lock_;
+    UnlockedTextTerminal impl_;
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP

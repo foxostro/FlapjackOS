@@ -2,14 +2,14 @@
 #include <cstdarg>
 #include <cstdio>
 
-TextTerminal::~TextTerminal() = default;
+UnlockedTextTerminal::~UnlockedTextTerminal() = default;
 
-TextTerminal::TextTerminal()
+UnlockedTextTerminal::UnlockedTextTerminal()
  : display_(nullptr),
    cursor_{0, 0}
 {}
 
-void TextTerminal::init(TextDisplayDevice* display)
+void UnlockedTextTerminal::init(TextDisplayDevice* display)
 {
     assert(display);
     display_ = display;
@@ -19,7 +19,7 @@ void TextTerminal::init(TextDisplayDevice* display)
     }
 }
 
-void TextTerminal::putchar(char ch)
+void UnlockedTextTerminal::putchar(char ch)
 {
     if (ch == 0) {
         // do nothing
@@ -33,14 +33,14 @@ void TextTerminal::putchar(char ch)
     set_display_cursor_position();
 }
 
-void TextTerminal::backspace()
+void UnlockedTextTerminal::backspace()
 {
     advance_cursor_backward();
     lines_.at(cursor_.y).remove(cursor_.x);
     redraw_current_line();
 }
 
-void TextTerminal::put_normal_character(char ch)
+void UnlockedTextTerminal::put_normal_character(char ch)
 {
     if (cursor_.y >= height()) {
         cursor_.y = height()-1;
@@ -50,7 +50,7 @@ void TextTerminal::put_normal_character(char ch)
     advance_cursor_forward();
 }
 
-void TextTerminal::scroll_one_line()
+void UnlockedTextTerminal::scroll_one_line()
 {
     lines_.pop_front();
     lines_.push_back(TextLine());
@@ -59,35 +59,35 @@ void TextTerminal::scroll_one_line()
     }
 }
 
-void TextTerminal::insert_char(char ch)
+void UnlockedTextTerminal::insert_char(char ch)
 {
     lines_.at(cursor_.y).insert(cursor_.x, ch);
     redraw_current_line();
 }
 
-void TextTerminal::redraw_current_line()
+void UnlockedTextTerminal::redraw_current_line()
 {
     redraw_line(cursor_.y);
 }
 
-void TextTerminal::redraw_line(int y)
+void UnlockedTextTerminal::redraw_line(int y)
 {
     assert(y >= 0);
     lines_.at(y).draw(*display_, y);
 }
 
-void TextTerminal::draw_char(const Point2 &pos, char ch)
+void UnlockedTextTerminal::draw_char(const Point2 &pos, char ch)
 {
     display_->draw_char(pos, display_->make_char(ch));
 }
 
-void TextTerminal::move_cursor_for_newline()
+void UnlockedTextTerminal::move_cursor_for_newline()
 {
     cursor_.x = 0;
     cursor_.y++;
 }
 
-void TextTerminal::set_display_cursor_position()
+void UnlockedTextTerminal::set_display_cursor_position()
 {
     Point2 physical_cursor;
     physical_cursor.y = cursor_.y;
@@ -95,7 +95,7 @@ void TextTerminal::set_display_cursor_position()
     display_->set_cursor_position(physical_cursor);
 }
 
-void TextTerminal::advance_cursor_forward()
+void UnlockedTextTerminal::advance_cursor_forward()
 {
     cursor_.x++;
     if (cursor_.x >= width()) {
@@ -104,31 +104,31 @@ void TextTerminal::advance_cursor_forward()
     set_display_cursor_position();
 }
 
-void TextTerminal::advance_cursor_backward()
+void UnlockedTextTerminal::advance_cursor_backward()
 {
     if (cursor_.x > 0) {
         cursor_.x--;
     }
 }
 
-int TextTerminal::width()
+int UnlockedTextTerminal::width()
 {
     return display_->dimensions().width;
 }
 
-int TextTerminal::height()
+int UnlockedTextTerminal::height()
 {
     return display_->dimensions().height;
 }
 
-void TextTerminal::puts(const char* s)
+void UnlockedTextTerminal::puts(const char* s)
 {
     if (s) while (*s) {
         putchar(*s++);
     }
 }
 
-int TextTerminal::printf(const char* fmt, ...)
+int UnlockedTextTerminal::printf(const char* fmt, ...)
 {
     constexpr size_t BUFFER_SIZE = 256;
     char buffer[BUFFER_SIZE] = {0};
@@ -143,13 +143,13 @@ int TextTerminal::printf(const char* fmt, ...)
     return r;
 }
 
-void TextTerminal::move_cursor_left()
+void UnlockedTextTerminal::move_cursor_left()
 {
     advance_cursor_backward();
     set_display_cursor_position();
 }
 
-void TextTerminal::move_cursor_right()
+void UnlockedTextTerminal::move_cursor_right()
 {
     cursor_.x++;
     const int line_width = get_line_width();
@@ -159,13 +159,13 @@ void TextTerminal::move_cursor_right()
     set_display_cursor_position();
 }
 
-void TextTerminal::move_cursor_to_end()
+void UnlockedTextTerminal::move_cursor_to_end()
 {
     cursor_.x = get_line_width();
     set_display_cursor_position();
 }
 
-int TextTerminal::get_line_width()
+int UnlockedTextTerminal::get_line_width()
 {
     return lines_.at(cursor_.y).size();
 }

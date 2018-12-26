@@ -8,7 +8,7 @@ TEST_CASE("putchar prints a single character", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -21,7 +21,7 @@ TEST_CASE("putchar advances the cursor", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     for (size_t i = 0; i < CONSOLE_WIDTH; ++i) {
@@ -36,7 +36,7 @@ TEST_CASE("putchar flows to the next line too", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     for (size_t i = 0; i < CONSOLE_WIDTH; ++i) {
@@ -53,7 +53,7 @@ TEST_CASE("puts() prints a string of characters", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.puts("Hello, world!");
@@ -66,7 +66,7 @@ TEST_CASE("puts() prints nothing when passed nullptr", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.puts(nullptr);
@@ -79,7 +79,7 @@ TEST_CASE("printf() prints a formatted string", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.printf("test %d", 42);
@@ -92,7 +92,7 @@ TEST_CASE("putchar('\n') advances to the next line", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -108,7 +108,7 @@ TEST_CASE("putchar('\b') removes a character and moves cursor backwards", "[Text
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -124,7 +124,7 @@ TEST_CASE("putchar('\b') does not move back into the previous line", "[TextTermi
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     for (size_t i = 0; i < CONSOLE_WIDTH; ++i) {
@@ -146,7 +146,7 @@ TEST_CASE("putchar(0) does nothing", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar(0);
@@ -161,7 +161,7 @@ TEST_CASE("putchar() before the end of the line inserts there", "[TextTerminal]"
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('b');
@@ -179,7 +179,7 @@ TEST_CASE("putchar('\t') prints a tab character spanning multiple columns", "[Te
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -195,7 +195,7 @@ TEST_CASE("we can backspace over a tab spanning multiple columns", "[TextTermina
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -215,7 +215,7 @@ TEST_CASE("tab characters move us to the end of the physical console line", "[Te
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     // Action
@@ -240,7 +240,7 @@ TEST_CASE("we can overflow a physical line with fewer than CONSOLE_WIDTH charact
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('\t'); // 8
@@ -268,7 +268,7 @@ TEST_CASE("cannot move cursor back further than column zero", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('b');
@@ -289,7 +289,7 @@ TEST_CASE("can move cursor right too", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -309,7 +309,7 @@ TEST_CASE("cannot move cursor further right than end of line contents", "[TextTe
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('b');
@@ -335,7 +335,7 @@ TEST_CASE("move_cursor_to_end() moves to the end of the line", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     term.putchar('a');
@@ -357,7 +357,7 @@ TEST_CASE("scroll_one_line", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     auto print_line = [&](char ch){
@@ -406,7 +406,7 @@ TEST_CASE("putchar at the bottom of the display scrolls a line off the top", "[T
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
 
     auto print_line = [&](char ch){
@@ -456,7 +456,7 @@ TEST_CASE("putchar moves the cursor one column for regular characters", "[TextTe
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     
     // Action
@@ -472,7 +472,7 @@ TEST_CASE("putchar('\n') moves the cursor to the new line", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     
@@ -490,7 +490,7 @@ TEST_CASE("putchar('\b') does not move the cursor when at the beginning of line"
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     
     // Action
@@ -507,7 +507,7 @@ TEST_CASE("putchar('\b') moves the cursor back one column for regular characters
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     
@@ -525,7 +525,7 @@ TEST_CASE("putchar('\t') moves the cursor several columns", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     
     // Action
@@ -541,7 +541,7 @@ TEST_CASE("backspace over a tab moves the cursor several columns", "[TextTermina
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     term.putchar('\t');
@@ -559,7 +559,7 @@ TEST_CASE("move_cursor_left() does not move the cursor when at beginning of line
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     
     // Action
@@ -575,7 +575,7 @@ TEST_CASE("move_cursor_left() moves the cursor back one column", "[TextTerminal]
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     term.putchar('b');
@@ -593,7 +593,7 @@ TEST_CASE("move_cursor_right() moves right one column", "[TextTerminal]")
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     term.putchar('b');
@@ -613,7 +613,7 @@ TEST_CASE("move_cursor_right() cannot move further right than the end of line co
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     term.putchar('b');
@@ -631,7 +631,7 @@ TEST_CASE("move_cursor_to_end() moves to the end of the line content", "[TextTer
     DummyTextDisplayDevice dummy_display;
     dummy_display.clear();
 
-    TextTerminal term;
+    UnlockedTextTerminal term;
     term.init(&dummy_display);
     term.putchar('a');
     term.putchar('b');
