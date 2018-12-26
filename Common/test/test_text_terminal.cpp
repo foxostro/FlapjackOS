@@ -209,6 +209,31 @@ TEST_CASE("we can backspace over a tab spanning multiple columns", "[TextTermina
     REQUIRE("" == dummy_display.get_line(0));
 }
 
+TEST_CASE("tab characters move us to the end of the physical console line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    // Action
+    term.putchar('\t'); // 8
+    term.putchar('\t'); // 16
+    term.putchar('\t'); // 24
+    term.putchar('\t'); // 32
+    term.putchar('\t'); // 40
+    term.putchar('\t'); // 48
+    term.putchar('\t'); // 56
+    term.putchar('\t'); // 64
+    term.putchar('\t'); // 72
+    term.putchar('\t'); // 80
+
+    // Test
+    REQUIRE(std::string(CONSOLE_WIDTH, ' ') == dummy_display.get_line(0));
+}
+
 TEST_CASE("cannot move cursor back further than column zero", "[TextTerminal]")
 {
     // Setup
