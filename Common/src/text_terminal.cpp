@@ -30,6 +30,7 @@ void TextTerminal::putchar(char ch)
     } else {
         put_normal_character(ch);
     }
+    set_display_cursor_position();
 }
 
 void TextTerminal::backspace()
@@ -84,7 +85,6 @@ void TextTerminal::move_cursor_for_newline()
 {
     cursor_.x = 0;
     cursor_.y++;
-    set_display_cursor_position();
 }
 
 void TextTerminal::set_display_cursor_position()
@@ -106,7 +106,6 @@ void TextTerminal::advance_cursor_backward()
     if (cursor_.x > 0) {
         cursor_.x--;
     }
-    set_display_cursor_position();
 }
 
 int TextTerminal::width()
@@ -144,6 +143,7 @@ int TextTerminal::printf(const char* fmt, ...)
 void TextTerminal::move_cursor_left()
 {
     advance_cursor_backward();
+    set_display_cursor_position();
 }
 
 void TextTerminal::move_cursor_right()
