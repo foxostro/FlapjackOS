@@ -449,3 +449,164 @@ TEST_CASE("putchar at the bottom of the display scrolls a line off the top", "[T
     REQUIRE(std::string(CONSOLE_WIDTH, 'y') == dummy_display.get_line(23));
     REQUIRE("z" == dummy_display.get_line(24));
 }
+
+TEST_CASE("putchar moves the cursor one column for regular characters", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    
+    // Action
+    term.putchar('a');
+
+    // Test
+    REQUIRE(1 == dummy_display.get_cursor_position().x);
+}
+
+TEST_CASE("putchar('\n') moves the cursor to the new line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    
+    // Action
+    term.putchar('\n');
+
+    // Test
+    REQUIRE(0 == dummy_display.get_cursor_position().x);
+    REQUIRE(1 == dummy_display.get_cursor_position().y);
+}
+
+TEST_CASE("putchar('\b') does not move the cursor when at the beginning of line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    
+    // Action
+    term.putchar('\b');
+
+    // Test
+    REQUIRE(0 == dummy_display.get_cursor_position().x);
+    REQUIRE(0 == dummy_display.get_cursor_position().y);
+}
+
+TEST_CASE("putchar('\b') moves the cursor back one column for regular characters", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    
+    // Action
+    term.putchar('\b');
+
+    // Test
+    REQUIRE(0 == dummy_display.get_cursor_position().x);
+    REQUIRE(0 == dummy_display.get_cursor_position().y);
+}
+
+TEST_CASE("move_cursor_left() does not move the cursor when at beginning of line", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    
+    // Action
+    term.move_cursor_left();
+
+    // Test
+    REQUIRE(0 == dummy_display.get_cursor_position().x);
+}
+
+TEST_CASE("move_cursor_left() moves the cursor back one column", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    term.putchar('b');
+
+    // Action
+    term.move_cursor_left();
+
+    // Test
+    REQUIRE(1 == dummy_display.get_cursor_position().x);
+}
+
+TEST_CASE("move_cursor_right() moves right one column", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    term.putchar('b');
+    term.move_cursor_left();
+    term.move_cursor_left();
+
+    // Action
+    term.move_cursor_right();
+
+    // Test
+    REQUIRE(1 == dummy_display.get_cursor_position().x);
+}
+
+TEST_CASE("move_cursor_right() cannot move further right than the end of line content", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    term.putchar('b');
+
+    // Action
+    term.move_cursor_right();
+
+    // Test
+    REQUIRE(2 == dummy_display.get_cursor_position().x);
+}
+
+TEST_CASE("move_cursor_to_end() moves to the end of the line content", "[TextTerminal]")
+{
+    // Setup
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+    term.putchar('a');
+    term.putchar('b');
+    term.move_cursor_left();
+    term.move_cursor_left();
+
+    // Action
+    term.move_cursor_to_end();
+
+    // Test
+    REQUIRE(2 == dummy_display.get_cursor_position().x);
+}
