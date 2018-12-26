@@ -7,14 +7,16 @@ Scheduler::Scheduler() = default;
 
 void Scheduler::add(ThreadPointer thread)
 {
-    lock_.lock();
-    runnable_.emplace_back(std::move(thread));
-    lock_.unlock();
+    perform_with_lock(lock_, [&]{
+        runnable_.emplace_back(std::move(thread));
+    });
 }
 
 void Scheduler::begin(ThreadPointer init_thread)
 {
-    current_thread_ = std::move(init_thread);
+    perform_with_lock(lock_, [&]{
+        current_thread_ = std::move(init_thread);
+    });
     yield();
 }
 
