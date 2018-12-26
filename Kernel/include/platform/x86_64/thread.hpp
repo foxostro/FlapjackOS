@@ -9,14 +9,6 @@ namespace x86_64 {
 
 class Thread_x86_64_Base : public Thread {
 public:
-    char* switch_to(Lock& lock) override
-    {
-        lock.unlock();
-        char* old_stack_pointer = nullptr;
-        x86_64_context_switch(&old_stack_pointer, get_stack_pointer());
-        return old_stack_pointer;
-    }
-
     void switch_away(Lock& lock, Thread& next) override
     {
         lock.unlock();

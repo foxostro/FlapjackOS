@@ -9,7 +9,6 @@ class Thread {
 public:
     using Lock = InterruptLock;
     virtual ~Thread() = default;
-    virtual char* switch_to(Lock& lock) = 0;
     virtual void switch_away(Lock& lock, Thread& next) = 0;
     virtual char*& get_stack_pointer() = 0;
 };

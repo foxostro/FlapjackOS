@@ -9,14 +9,6 @@ namespace i386 {
 
 class Thread_i386_Base : public Thread {
 public:
-    char* switch_to(Lock& lock) override
-    {
-        lock.unlock();
-        char* old_stack_pointer = nullptr;
-        i386_context_switch(&old_stack_pointer, get_stack_pointer());
-        return old_stack_pointer;
-    }
-
     void switch_away(Lock& lock, Thread& next) override
     {
         lock.unlock();
