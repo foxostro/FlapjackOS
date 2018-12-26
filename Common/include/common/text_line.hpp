@@ -11,54 +11,31 @@
 // In the terminal, these are separated by line breaks. Though, each logical
 // line may flow across several physical display lines if they're long enough.
 class TextLine {
-    // The logical line is bound to a physical display.
-    TextDisplayDevice *display_;
-
-    using CharacterData = RingBuffer<char, CONSOLE_WIDTH>;
-
-    // The characters in the logical line.
-    CharacterData data_;
-
-    // When we change the contents of the text line, we measure the number of
-    // physical lines and rows needed to display the logical line.
-    Size2 cached_display_size_;
-
 public:
+    using CharacterData = RingBuffer<char, CONSOLE_WIDTH>;
     using size_type = CharacterData::size_type;
-
-    // The number of columns this character will take up.
-    static int step_for_char(int tab_width, int col, char ch);
 
     // Destructor.
     ~TextLine();
 
     // Constructor.
-    TextLine(TextDisplayDevice &display);
+    TextLine(TextDisplayDevice& display);
 
     // Copy constructor.
-    TextLine(const TextLine &line);
+    TextLine(const TextLine& line);
 
     // Move constructor.
-    TextLine(TextLine &&line);
+    TextLine(TextLine&& line);
 
     // Copy-assignment operator.
-    TextLine& operator=(const TextLine &other);
+    TextLine& operator=(const TextLine& other);
 
     // Move-assignment operator.
-    TextLine& operator=(TextLine &&other);
+    TextLine& operator=(TextLine&& other);
 
     // Draws the text line at the specified line of the display.
     // Returns the display line where the next logical line should be placed.
     int draw(int row);
-
-    // Count the number of columns and rows on the display needed to draw the
-    // text line.
-    Size2 measure() const;
-
-    // Convert the specified logical position to a physical position, relative
-    // to this row. We do not specify the logical row, because we're always
-    // referring to this row.
-    Point2 convert(int logi_col) const;
 
     // Gets the characters in the text line.
     // The string is nul-terminated.
@@ -92,25 +69,12 @@ public:
     // Gets the number of characters in the text line.
     size_type size() const;
 
-    // Indicates line needs to be redrawn.
-    // TODO: put some methods around `dirty'
-    bool dirty;
+private:
+    TextDisplayDevice& display_;
+    CharacterData data_;
 
-    // When we change the contents of the text line, we measure the number of
-    // physical lines and rows needed to display the logical line.
-    Size2 get_cached_display_size() const;
-
-    TextDisplayDevice& get_display()
-    {
-        assert(display_);
-        return *display_;
-    }
-
-    const TextDisplayDevice& get_display() const
-    {
-        assert(display_);
-        return *display_;
-    }
+    // The number of columns this character will take up.
+    int step_for_char(int col, char ch);
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_LINE_HPP

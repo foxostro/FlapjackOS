@@ -5,80 +5,53 @@
 #include <cassert>
 #include <cctype>
 
-int TextLine::step_for_char(int tab_width, int col, char ch)
-{
-    int delta;
-    if (ch == '\t') {
-        delta = tab_width - (col % tab_width);
-    } else if (isprint(ch)) {
-        delta = 1;
-    } else {
-        delta = 0;
-    }
-    return delta;
-}
-
 TextLine::~TextLine() = default;
 
-TextLine::TextLine(TextDisplayDevice &display)
- : display_(&display),
-   cached_display_size_{0, 0},
-   dirty(true)
+TextLine::TextLine(TextDisplayDevice& display)
+ : display_(display)
 {}
 
-TextLine::TextLine(const TextLine &line)
+TextLine::TextLine(const TextLine& line)
  : display_(line.display_),
-   data_(line.data_),
-   cached_display_size_(line.cached_display_size_),
-   dirty(true)
+   data_(line.data_)
 {}
 
-TextLine::TextLine(TextLine &&line)
+TextLine::TextLine(TextLine&& line)
  : display_(line.display_),
-   data_(std::move(line.data_)),
-   cached_display_size_(line.cached_display_size_),
-   dirty(true)
+   data_(std::move(line.data_))
 {}
 
-TextLine& TextLine::operator=(const TextLine &other)
+TextLine& TextLine::operator=(const TextLine& other)
 {
     if (this != &other) {
         display_ = other.display_;
         data_ = other.data_;
-        cached_display_size_ = other.cached_display_size_;
-        dirty = other.dirty;
     }
 
     return *this;
 }
 
-TextLine& TextLine::operator=(TextLine &&other)
+TextLine& TextLine::operator=(TextLine&& other)
 {
     if (this != &other) {
         display_ = other.display_;
         data_ = std::move(other.data_);
-        cached_display_size_ = other.cached_display_size_;
-        dirty = other.dirty;
     }
-
     return *this;
 }
 
 int TextLine::draw(int row)
 {
-    dirty = false;
-
     int col = 0;
-    const int tab_width = get_display().get_tab_width();
-    const int max_columns = get_display().dimensions().width;
+    const int max_columns = display_.dimensions().width;
 
     for (int i = 0; i < data_.size(); ++i) {
         char ch = data_[i];
-        int step = step_for_char(tab_width, col, ch);
-        VGAChar vgachar = get_display().make_char((ch=='\t') ? ' ' : ch);
+        int step = step_for_char(col, ch);
+        VGAChar vgachar = display_.make_char((ch=='\t') ? ' ' : ch);
 
         for (int j = col; j < MIN(col+step, max_columns); ++j) {
-            get_display().draw_char(Point2{j, row}, vgachar);
+            display_.draw_char(Point2{j, row}, vgachar);
         }
 
         col += step;
@@ -88,56 +61,12 @@ int TextLine::draw(int row)
         }
     }
 
-    const auto space = get_display().make_char(' ');
+    const auto space = display_.make_char(' ');
     for (; col < max_columns; ++col) {
-        get_display().draw_char(Point2{col, row}, space);
+        display_.draw_char(Point2{col, row}, space);
     }
 
     return row + 1;
-}
-
-Size2 TextLine::measure() const
-{
-    int col = 0, max_col = 0, row = 0;
-    const int tab_width = get_display().get_tab_width();
-    const int max_columns = get_display().dimensions().width;
-
-    for (int i = 0; i < data_.size(); ++i) {
-        const char ch = data_[i];
-        col += step_for_char(tab_width, col, ch);
-        max_col = MAX(max_col, MIN(col, max_columns));
-        if (col >= max_columns) {
-            col = 0;
-            row++;
-        }
-    }
-
-    return Size2{max_col, row + 1};
-}
-
-Point2 TextLine::convert(int logi_col) const
-{
-    int col = 0, row = 0;
-    const int tab_width = get_display().get_tab_width();
-    const int max_columns = get_display().dimensions().width;
-
-    for (int i = 0; i < data_.size(); ++i) {
-        char ch = data_[i];
-        int step = step_for_char(tab_width, col, ch);
-
-        if (i == logi_col) {
-            goto done;
-        }
-
-        col += step;
-        if (col >= max_columns) {
-            col = 0;
-            row++;
-        }
-    }
-
-done:
-    return Point2{col, row};
 }
 
 Vector<char> TextLine::str() const
@@ -154,18 +83,13 @@ bool TextLine::push_back(char ch)
 {
     assert(ch != '\n');
     assert(ch != '\b');
-    bool r = data_.push_back(ch);
-    dirty = true;
-    cached_display_size_ = measure();
-    return r;
+    return data_.push_back(ch);
 }
 
 void TextLine::pop_back()
 {
     if (!data_.empty()) {
         data_.pop_back();
-        dirty = true;
-        cached_display_size_ = measure();
     }
 }
 
@@ -173,18 +97,13 @@ bool TextLine::insert(size_type index, char ch)
 {
     assert(ch != '\n');
     assert(ch != '\b');
-    bool r = data_.insert(index, ch);
-    dirty = true;
-    cached_display_size_ = measure();
-    return r;
+    return data_.insert(index, ch);
 }
 
 void TextLine::remove(size_type index)
 {
     if (!data_.empty()) {
         data_.remove(index);
-        dirty = true;
-        cached_display_size_ = measure();
     }
 }
 
@@ -193,7 +112,16 @@ TextLine::size_type TextLine::size() const
     return data_.size();
 }
 
-Size2 TextLine::get_cached_display_size() const
+int TextLine::step_for_char(int col, char ch)
 {
-    return cached_display_size_;
+    const int tab_width = display_.get_tab_width();
+    int delta;
+    if (ch == '\t') {
+        delta = tab_width - (col % tab_width);
+    } else if (isprint(ch)) {
+        delta = 1;
+    } else {
+        delta = 0;
+    }
+    return delta;
 }
