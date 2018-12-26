@@ -55,7 +55,7 @@ TEST_CASE("LineEditor basic input", "[LineEditor]")
     line_t line = ed.getline();
 
     REQUIRE(line == expected);
-    REQUIRE(display.get_line( 0) == "> hello                                                                         ");
+    REQUIRE(display.get_line( 0) == "> hello");
 }
 
 TEST_CASE("LineEditor backspace at the end", "[LineEditor]")
@@ -100,7 +100,7 @@ TEST_CASE("LineEditor backspace at the end", "[LineEditor]")
 
     line_t line = ed.getline();
 
-    REQUIRE(display.get_line( 0) == "> f                                                                             ");
+    REQUIRE(display.get_line( 0) == "> f");
 }
 
 TEST_CASE("LineEditor left and right arrows", "[LineEditor]")
@@ -144,7 +144,7 @@ TEST_CASE("LineEditor left and right arrows", "[LineEditor]")
     line_t line = ed.getline();
 
     REQUIRE(line == expected);
-    REQUIRE(display.get_line( 0) == "> hello                                                                         ");
+    REQUIRE(display.get_line( 0) == "> hello");
 }
 
 TEST_CASE("LineEditor history navigation", "[LineEditor]")
@@ -243,11 +243,11 @@ TEST_CASE("backspace after history recall", "[LineEditor]")
 
     line = ed.getline();
     REQUIRE(to_string(line) == "foo");
-    REQUIRE(display.get_line( 0) == "> foo                                                                           ");
+    REQUIRE(display.get_line( 0) == "> foo");
     ed.add_history(line);
 
     line = ed.getline();
     REQUIRE(to_string(line) == "fo");
-    REQUIRE(display.get_line( 1) == "> fo                                                                            ");
+    REQUIRE(display.get_line( 1) == "> fo");
     ed.add_history(line);
 }

@@ -174,6 +174,21 @@ TEST_CASE("putchar() before the end of the line inserts there", "[TextTerminal]"
     REQUIRE("ab" == dummy_display.get_line(0));
 }
 
+TEST_CASE("putchar('\t') prints a tab character spanning multiple columns", "[TextTerminal]")
+{
+    DummyTextDisplayDevice dummy_display;
+    dummy_display.clear();
+
+    TextTerminal term;
+    term.init(&dummy_display);
+
+    term.putchar('a');
+    term.putchar('\t');
+    term.putchar('b');
+
+    REQUIRE("a\tb" == dummy_display.get_line(0));
+}
+
 TEST_CASE("cannot move cursor back further than column zero", "[TextTerminal]")
 {
     // Setup
