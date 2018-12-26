@@ -47,6 +47,9 @@ void VGATextDisplayDevice::clear()
 
 void VGATextDisplayDevice::draw_char(Point2 pos, VGAChar ch)
 {
+    if (ch.value_ == make_char(0).value_) {
+        ch = make_char(' ');
+    }
     if (pos.x >= 0 && pos.y >= 0 && pos.y < CONSOLE_HEIGHT && pos.x < CONSOLE_WIDTH && isprint(ch.attr.ch)) {
         const size_t index = pos.y * CONSOLE_WIDTH + pos.x;
         vga_text_buffer_set(ch, index);
