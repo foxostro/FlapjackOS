@@ -13,15 +13,15 @@
 #include <platform/x86_64/thread.hpp>
 
 struct KernelPolicy {
-	using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
-	using HardwareMemoryManagementUnit = x86_64::HardwareMemoryManagementUnit;
-	using KernelAddressSpaceBootstrapper = x86_64::KernelAddressSpaceBootstrapper<x86_64::HardwareMemoryManagementUnit>;
-	using PhysicalMemoryMap = x86_64::PhysicalMemoryMap<x86_64::HardwareMemoryManagementUnit>;
-	using InterruptController = x86_64::InterruptController;
-	using InterruptParameters = x86_64::InterruptParameters;
-	using DeviceDrivers = x86_64::DeviceDrivers;
-	using TextDisplayDevice = VGATextDisplayDevice;
-	using Thread = x86_64::Thread;
+    using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
+    using HardwareMemoryManagementUnit = x86_64::HardwareMemoryManagementUnit;
+    using KernelAddressSpaceBootstrapper = x86_64::KernelAddressSpaceBootstrapper<x86_64::HardwareMemoryManagementUnit>;
+    using PhysicalMemoryMap = x86_64::PhysicalMemoryMap<x86_64::HardwareMemoryManagementUnit>;
+    using InterruptController = x86_64::InterruptController;
+    using InterruptParameters = x86_64::InterruptParameters;
+    using DeviceDrivers = x86_64::DeviceDrivers;
+    using TextDisplayDevice = VGATextDisplayDevice;
+    using Thread = x86_64::Thread;
 };
 
 #elif defined(__i386__)
@@ -36,15 +36,15 @@ struct KernelPolicy {
 #include <platform/i386/thread.hpp>
 
 struct KernelPolicy {
-	using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;
-	using HardwareMemoryManagementUnit = i386::HardwareMemoryManagementUnit;
-	using KernelAddressSpaceBootstrapper = i386::KernelAddressSpaceBootstrapper<i386::HardwareMemoryManagementUnit>;
-	using PhysicalMemoryMap = i386::PhysicalMemoryMap<i386::HardwareMemoryManagementUnit>;
-	using InterruptController = i386::InterruptController;
-	using InterruptParameters = i386::InterruptParameters;
-	using DeviceDrivers = i386::DeviceDrivers;
-	using TextDisplayDevice = VGATextDisplayDevice;
-	using Thread = i386::Thread;
+    using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;
+    using HardwareMemoryManagementUnit = i386::HardwareMemoryManagementUnit;
+    using KernelAddressSpaceBootstrapper = i386::KernelAddressSpaceBootstrapper<i386::HardwareMemoryManagementUnit>;
+    using PhysicalMemoryMap = i386::PhysicalMemoryMap<i386::HardwareMemoryManagementUnit>;
+    using InterruptController = i386::InterruptController;
+    using InterruptParameters = i386::InterruptParameters;
+    using DeviceDrivers = i386::DeviceDrivers;
+    using TextDisplayDevice = VGATextDisplayDevice;
+    using Thread = i386::Thread;
 };
 
 #elif defined(__arm__)

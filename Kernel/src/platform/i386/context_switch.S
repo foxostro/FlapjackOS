@@ -6,26 +6,26 @@
 i386_context_switch:
 #ifdef __i386__
     # Setup a stack frame.
-	pushl %ebp
-	movl %esp, %ebp
-	
-	pusha
-	
-	# Return the old stack pointer so we can restore it later.
-	movl 8(%ebp), %eax
-	movl %esp, (%eax)
-	
-	# Switch to a new stack.
-	movl 12(%ebp), %eax
-	movl %eax, %esp
-	
-	popa
-	
-	# Tear down the stack frame.
-	movl %ebp, %esp
-	popl %ebp
+    pushl %ebp
+    movl %esp, %ebp
     
-	ret
+    pusha
+    
+    # Return the old stack pointer so we can restore it later.
+    movl 8(%ebp), %eax
+    movl %esp, (%eax)
+    
+    # Switch to a new stack.
+    movl 12(%ebp), %eax
+    movl %eax, %esp
+    
+    popa
+    
+    # Tear down the stack frame.
+    movl %ebp, %esp
+    popl %ebp
+    
+    ret
 #elif __x86_64__
     ud2
 #elif __arm__
