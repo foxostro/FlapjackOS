@@ -14,7 +14,9 @@ public:
     void lock()
     {
         while (lock_.exchange(true, std::memory_order_relaxed)) {
-            yield();
+            if (yield) {
+                yield();
+            }
         }
         std::atomic_thread_fence(std::memory_order_acquire);
     }
@@ -27,7 +29,9 @@ public:
         // Yield when releasing the lock so that the scheduler's round robin
         // queue can ensure those waiting on this lock will eventually be
         // serviced.
-        yield();
+        if (yield) {
+            yield();
+        }
     }
 
 private:
