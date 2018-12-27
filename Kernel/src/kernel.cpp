@@ -40,18 +40,8 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
 
 const char* Kernel::get_platform() const
 {
-    static const char platform[] = 
-#if defined(__x86_64__)
-    "x86_64"
-#elif defined(__i386__)
-    "i386"
-#elif defined(__arm__)
-    "ARM"
-#else
-    "unknown"
-#endif
-    ;
-    return platform;
+    PlatformNamer namer;
+    return namer.get_platform();
 }
 
 static Mutex g_mutex_a(true);

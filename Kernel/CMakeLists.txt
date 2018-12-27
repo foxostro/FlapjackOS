@@ -68,6 +68,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/interrupt_descriptor.hpp"
     "include/platform/i386/context_switch.hpp" "src/platform/i386/context_switch.S"
     "include/platform/i386/thread.hpp"
+    "include/platform/i386/platform_namer.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -105,6 +106,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/interrupt_descriptor.hpp"
     "include/platform/x86_64/context_switch.hpp" "src/platform/x86_64/context_switch.S"
     "include/platform/x86_64/thread.hpp"
+    "include/platform/x86_64/platform_namer.hpp"
     )
 
 set(PC_SOURCE_FILES
