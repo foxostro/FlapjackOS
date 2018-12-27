@@ -6,6 +6,7 @@
 #include <interrupt_lock.hpp>
 #include <halt.h>
 #include <inout.h>
+#include <common/mutex.hpp> // for perform_with_lock()
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
 //constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;
@@ -48,7 +49,7 @@ const char* PS2KeyboardDevice::keycode_name(Keycode key)
     }
 }
 
-void PS2KeyboardDevice::clear_input(void)
+void PS2KeyboardDevice::clear_input()
 {
     for (size_t i = 0; i < MAX_SCANCODE_BYTES; ++i) {
         (void)inb(KEYBOARD_DATA_PORT);
@@ -91,6 +92,10 @@ bool PS2KeyboardDevice::step_state_machine(KeyboardDriverState &state, KeyboardE
     return true;
 }
 
+extern "C" {
+    void yield(void);
+}
+
 void PS2KeyboardDevice::on_interrupt()
 {
     KeyboardDriverState state = IDLE;
@@ -113,6 +118,8 @@ void PS2KeyboardDevice::on_interrupt()
         // AFOX_TODO: Need better kernel synchronization primitives.
         events_.push_back(event);
     }
+
+    yield();
 }
 
 KeyboardEvent PS2KeyboardDevice::get_event()
