@@ -25,16 +25,6 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
     "include/logger.hpp" "src/logger.cpp"
-    "include/drivers/pc/ps2_keyboard_device.hpp" "src/drivers/pc/ps2_keyboard_device/ps2_keyboard_device.cpp"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make_escaped.inc"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_break.inc"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_ascii_uppercase.inc"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_names.inc"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_ascii_lowercase.inc"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
-    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make.inc"
-    "include/drivers/pc/vga_text_display_device.hpp" "src/drivers/pc/vga_text_display_device.cpp"
-    "include/drivers/pc/pit_timer_device.hpp" "src/drivers/pc/pit_timer_device.cpp"
     )
 
 set(I386_SOURCE_FILES
@@ -111,6 +101,16 @@ set(X86_64_SOURCE_FILES
 
 set(PC_SOURCE_FILES
     "include/platform/pc/pic.hpp" "src/platform/pc/pic.cpp"
+    "include/drivers/pc/ps2_keyboard_device.hpp" "src/drivers/pc/ps2_keyboard_device/ps2_keyboard_device.cpp"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make_escaped.inc"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_break.inc"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_ascii_uppercase.inc"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_names.inc"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_keycode_ascii_lowercase.inc"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_break_escaped.inc"
+    "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make.inc"
+    "include/drivers/pc/vga_text_display_device.hpp" "src/drivers/pc/vga_text_display_device.cpp"
+    "include/drivers/pc/pit_timer_device.hpp" "src/drivers/pc/pit_timer_device.cpp"
     )
 
 set(PLATFORM_SPECIFIC_SOURCE_FILES "${PC_SOURCE_FILES}")
