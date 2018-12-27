@@ -61,7 +61,7 @@ static Mutex g_mutex_b(true);
 
 static void fn_a()
 {
-    while (true) {
+    for (int i = 0; i < 100; ++i) {
         g_terminal->putchar('a');
     }
     g_mutex_a.unlock();
@@ -77,7 +77,7 @@ static void delay()
 
 static void fn_b()
 {
-    while (true) {
+    for (int i = 0; i < 10; ++i) {
         g_terminal->putchar('b');
         delay();
     }
