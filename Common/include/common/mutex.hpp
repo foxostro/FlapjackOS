@@ -23,6 +23,11 @@ public:
     {
         std::atomic_thread_fence(std::memory_order_release);
         lock_.store(false, std::memory_order_relaxed);
+
+        // Yield when releasing the lock so that the scheduler's round robin
+        // queue can ensure those waiting on this lock will eventually be
+        // serviced.
+        yield();
     }
 
 private:
