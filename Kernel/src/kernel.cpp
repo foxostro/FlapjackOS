@@ -70,7 +70,7 @@ static void fn_a()
 static void delay()
 {
     volatile bool whatever = false;
-    for (int i = 0; i < 10000000; ++i) {
+    for (int i = 0; i < 1000000; ++i) {
         whatever = !whatever;
     }
 }

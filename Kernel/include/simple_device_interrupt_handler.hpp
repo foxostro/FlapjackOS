@@ -3,6 +3,10 @@
 
 #include "generic_interrupt_handler.hpp"
 
+extern "C" {
+    void yield(void);
+}
+
 template<typename InterruptParameters, typename Device>
 class SimpleDeviceInterruptHandler : public GenericInterruptHandler<InterruptParameters> {
 public:
@@ -13,6 +17,7 @@ public:
     void int_handler(const InterruptParameters&) override
     {
         device_.on_interrupt();
+        yield();
     }
 
 private:
