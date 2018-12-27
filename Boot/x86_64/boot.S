@@ -3,11 +3,7 @@
 #include "creg_bits.h"
 #include "declare_gdt.h"
 #include "panic_asm.h"
-
-# This should match seg.h
-# TODO: Should seg.h be moved to libBoot?
-#define SEGSEL_KERNEL_CS (0x18)
-#define SEGSEL_KERNEL_DS (0x20)
+#include "seg.h"
 
 
 DECLARE_MULTIBOOT_HEADER

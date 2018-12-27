@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
 
-# AFOX_TODO: Some of these platform-agnostic source files really are not
-# platform-agnostic and assume an Intel CPU or a PC system. Need to address
-# that somehow...
 set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/backtrace.hpp" "src/backtrace.cpp"
     "include/panic.h"
@@ -21,7 +18,6 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/halt.h"
     "include/inout.h"
     "include/interrupt_asm.h"
-    "include/seg.h"
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
     "include/logger.hpp" "src/logger.cpp"
