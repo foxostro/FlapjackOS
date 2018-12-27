@@ -99,7 +99,7 @@ public:
         return !(*this == other);
     }
 
-    operator bool() const
+    explicit operator bool() const
     {
         bool is_nonnull;
         perform_with_lock(lock_, [&]{
