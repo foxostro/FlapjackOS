@@ -32,13 +32,18 @@ void Scheduler::begin(ThreadPointer init_thread)
 void Scheduler::yield()
 {
     perform_with_lock(lock_, [&]{
-        if (current_thread_) {
+        if (can_yield()) {
             Thread& previous_thread = *current_thread_;
             swap_runnable_and_exhausted_if_necessary();
             move_to_next_runnable_thread();
             previous_thread.switch_away(*current_thread_);
         }
     });
+}
+
+bool Scheduler::can_yield()
+{
+    return current_thread_ && !(runnable_.empty() && exhausted_.empty());
 }
 
 void Scheduler::vanish()

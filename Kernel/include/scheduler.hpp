@@ -35,6 +35,7 @@ private:
     Vector<ThreadPointer> exhausted_;
     ThreadPointer current_thread_;
 
+    bool can_yield();
     void take_current_thread_from_runnable_queue();
     void swap_runnable_and_exhausted_if_necessary();
     void move_to_next_runnable_thread();
