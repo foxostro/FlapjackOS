@@ -6,6 +6,7 @@
 #include <drivers/pc/ps2_keyboard_device.hpp>
 #include <drivers/pc/pit_timer_device.hpp>
 #include <simple_device_interrupt_handler.hpp>
+#include <common/unique_pointer.hpp>
 
 namespace i386 {
 
@@ -16,16 +17,8 @@ public:
     using InterruptController = typename Policy::InterruptController;
 
     GenericDeviceDrivers(InterruptController& interrupt_controller)
-     : interrupt_controller_(interrupt_controller),
-       keyboard_device_(nullptr),
-       timer_device_(nullptr)
+     : interrupt_controller_(interrupt_controller)
     {}
-
-    ~GenericDeviceDrivers()
-    {
-        delete keyboard_device_; // AFOX_TODO: Need something like std::unique_ptr here. Or perhaps std::optional if these do not need to be heap allocated.
-        delete timer_device_;
-    }
 
     void init()
     {
@@ -50,8 +43,8 @@ public:
 
 private:
     InterruptController& interrupt_controller_;
-    PS2KeyboardDevice* keyboard_device_;
-    PITTimerDevice* timer_device_;
+    UniquePointer<PS2KeyboardDevice> keyboard_device_;
+    UniquePointer<PITTimerDevice> timer_device_;
 };
 
 struct DeviceDriversPolicy {
