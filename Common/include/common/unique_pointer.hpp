@@ -27,36 +27,17 @@ public:
         });
     }
 
-    Type& operator*()
+    Type& operator*() const
     {
         return *get_pointer();
     }
 
-    const Type& operator*() const
-    {
-        return *get_pointer();
-    }
-
-    Type* operator->()
+    Type* operator->() const
     {
         return get_pointer();
     }
 
-    const Type* operator->() const
-    {
-        return get_pointer();
-    }
-
-    Type* get_pointer()
-    {
-        Type* data;
-        perform_with_lock(lock_, [&]{
-            data = data_;
-        });
-        return data;
-    }
-
-    const Type* get_pointer() const
+    Type* get_pointer() const
     {
         Type* data;
         perform_with_lock(lock_, [&]{
