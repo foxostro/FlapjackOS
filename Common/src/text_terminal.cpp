@@ -4,16 +4,10 @@
 
 UnlockedTextTerminal::~UnlockedTextTerminal() = default;
 
-UnlockedTextTerminal::UnlockedTextTerminal()
- : display_(nullptr),
+UnlockedTextTerminal::UnlockedTextTerminal(TextDisplayDevice& display)
+ : display_(&display),
    cursor_{0, 0}
-{}
-
-void UnlockedTextTerminal::init(TextDisplayDevice* display)
 {
-    assert(display);
-    display_ = display;
-
     for (int i = 0; i < height(); ++i) {
         lines_.push_back(TextLine());
     }

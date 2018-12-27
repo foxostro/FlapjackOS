@@ -31,8 +31,7 @@ void panic(const char *fmt, ...)
     // If the panic happened early in the boot process then we may not have
     // a text terminal yet. In this case, panic() makes its own.
     VGATextDisplayDevice display;
-    UnlockedTextTerminal terminal;
-    terminal.init(&display);
+    UnlockedTextTerminal terminal(display);
     terminal.printf("PANIC: %s\n\n", buffer);
 
     halt_forever();

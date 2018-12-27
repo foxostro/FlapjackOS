@@ -11,10 +11,8 @@
 class UnlockedTextTerminal {
 public:
     ~UnlockedTextTerminal();
-
-    // Two-phase initialization.
-    UnlockedTextTerminal();
-    void init(TextDisplayDevice* display);
+    
+    UnlockedTextTerminal(TextDisplayDevice& display);
 
     // Puts a character on the display at the current cursor position.
     // Increments the cursor to the next position. This may wrap the cursor to
@@ -81,12 +79,7 @@ private:
 // Uses a mutex to ensure consistency in a multithreaded context.
 class TextTerminal {
 public:
-    void init(TextDisplayDevice* display)
-    {
-        perform_with_lock(lock_, [&]{
-            impl_.init(display);
-        });
-    }
+    TextTerminal(TextDisplayDevice& display) : impl_(display) {}
 
     void putchar(char ch)
     {

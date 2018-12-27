@@ -11,16 +11,14 @@
 #include <common/mutex.hpp>
 
 
-// We pass the terminal around globally because it severely clutters the
-// interface of assert() and panic() if we are reqired to pass the terminal
-// around literally everywhere.
-TextTerminal* g_terminal = nullptr;
+static TextTerminal* g_terminal = nullptr; // AFOX_TODO: remove me when possible. only needed for threading experiments in kernel.cpp
 
 
 Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
  : mb_info_(mb_info),
    istack_(istack),
    device_drivers_(interrupt_controller_),
+   terminal_(display_),
    address_space_bootstrapper_(mmu_),
    phys_map_(mmu_)
 {
@@ -112,7 +110,6 @@ void Kernel::run()
 void Kernel::setup_terminal()
 {
     display_.clear();
-    terminal_.init(&display_);
     g_terminal = &terminal_;
 }
 
