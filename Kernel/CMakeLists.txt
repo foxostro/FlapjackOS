@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.6)
 # that somehow...
 set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/backtrace.hpp" "src/backtrace.cpp"
-    "include/panic.h" "src/panic.cpp"
+    "include/panic.h"
     "include/kernel_policy.hpp" 
     "include/kernel.hpp" "src/kernel.cpp" "src/kernel_main.cpp"
     "include/thread.hpp"
@@ -38,6 +38,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     )
 
 set(I386_SOURCE_FILES
+    "src/platform/i386/panic.cpp"
     "include/platform/i386/page_directory.hpp"
     "include/platform/i386/page_directory_entry.hpp"
     "include/platform/i386/page_table.hpp"
@@ -70,6 +71,7 @@ set(I386_SOURCE_FILES
     )
 
 set(X86_64_SOURCE_FILES
+    "src/platform/i386/panic.cpp"
     "include/platform/x86_64/hardware_task_configuration.hpp" "src/platform/x86_64/hardware_task_configuration.cpp"
     "include/platform/x86_64/tss.hpp"
     "include/platform/x86_64/gdt.hpp" "src/platform/x86_64/gdt.cpp"

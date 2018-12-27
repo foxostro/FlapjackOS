@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+// Prints a message to the screen and halts forever.
+// This is only called in emergencies.
 __attribute__((noreturn))
 void panic(const char *fmt, ...);
 
