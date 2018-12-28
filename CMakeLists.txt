@@ -135,14 +135,18 @@ if(CMAKE_CROSSCOMPILING)
         LINK_FLAGS "-T ${KERNEL_LAYOUT_FILE}"
     )
 
+    # Define the objects which will be loaded as Grub modules.
+    set(MODULES_DIR "${CMAKE_SOURCE_DIR}/modules")
+    set(MODULES "${MODULES_DIR}/test.bin")
+    
     # Add a custom target for the CD-ROM ISO image. Specify dependencies so that the
     # ISO will be rebuilt correctly after modifying the kernel binary, the Grub
     # configuration file, or the ISO build script itself.
     set(BUILD_ISO_TOOL "${CMAKE_SOURCE_DIR}/scripts/make_iso.sh")
     add_custom_command(
         OUTPUT ${CMAKE_PROJECT_NAME}.iso
-        COMMAND ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso
-        DEPENDS ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg"
+        COMMAND ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso "${MODULES_DIR}"
+        DEPENDS ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${MODULES}
         COMMENT "Build the bootable ISO."
         VERBATIM
     )
