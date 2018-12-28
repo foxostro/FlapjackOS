@@ -31,13 +31,6 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     interrupt_controller_.initialize_hardware();
     setup_terminal();
     print_welcome_message();
-
-    MultibootModuleEnumerator(mmu_, mb_info).enumerate([&](multiboot_module_t* module){
-        uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module->mod_start);
-        char* string = reinterpret_cast<char*>(mod_start);
-        terminal_.printf("module printed as a string: %s\n", string);
-    });
-
     prepare_kernel_address_space();
     report_installed_memory();
     initialize_page_frame_allocator();
@@ -166,9 +159,10 @@ void Kernel::initialize_page_frame_allocator()
                      (unsigned)sizeof(PageFrameAllocator),
                      (unsigned)sizeof(PageFrameAllocator)/1024);
 
-    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator, HardwareMemoryManagementUnit>;
+    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator, MultibootModuleEnumerator, HardwareMemoryManagementUnit>;
     Op operation((uintptr_t)g_kernel_image_end,
                  MultibootMemoryMapPageFrameEnumerator(mmu_, mb_info_),
+                 MultibootModuleEnumerator(mmu_, mb_info_),
                  mmu_);
     operation.configure(page_frame_allocator_);
 }

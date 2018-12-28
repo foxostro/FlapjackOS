@@ -34,13 +34,20 @@ private:
     size_t index_;
 };
 
-using Operation = PageFrameAllocatorConfigurationOperation<DummyPageFrameEnumerator, MockMemoryManagementUnit>;
+class DummyModuleEnumerator {
+public:
+    bool has_next() const { return false; }
+    multiboot_module_t* get_next() { return nullptr; }
+};
+
+using Operation = PageFrameAllocatorConfigurationOperation<DummyPageFrameEnumerator, DummyModuleEnumerator, MockMemoryManagementUnit>;
 
 TEST_CASE("test_page_frame_allocator_configuration_ctor", "[page_frame_allocator_configuration_operation]")
 {
     MockMemoryManagementUnit mmu;
     DummyPageFrameEnumerator enumerator(0);
-    Operation op(0, enumerator, mmu);
+    DummyModuleEnumerator module_enumerator;
+    Operation op(0, enumerator, module_enumerator, mmu);
 }
 
 TEST_CASE("test_page_frame_allocator_configuration_configure_all_free", "[page_frame_allocator_configuration_operation]")
@@ -48,7 +55,8 @@ TEST_CASE("test_page_frame_allocator_configuration_configure_all_free", "[page_f
     constexpr size_t NUMBER_OF_PAGE_FRAMES = 1;
     MockMemoryManagementUnit mmu;
     DummyPageFrameEnumerator enumerator(NUMBER_OF_PAGE_FRAMES);
-    Operation op(0, enumerator, mmu);
+    DummyModuleEnumerator module_enumerator;
+    Operation op(0, enumerator, module_enumerator, mmu);
     PageFrameAllocator page_frame_allocator;
 
     op.configure(page_frame_allocator);
@@ -61,7 +69,8 @@ TEST_CASE("test_page_frame_allocator_configuration_configure_none_free", "[page_
     constexpr size_t NUMBER_OF_PAGE_FRAMES = 1;
     MockMemoryManagementUnit mmu;
     DummyPageFrameEnumerator enumerator(NUMBER_OF_PAGE_FRAMES);
-    Operation op(~0, enumerator, mmu);
+    DummyModuleEnumerator module_enumerator;
+    Operation op(~0, enumerator, module_enumerator, mmu);
     PageFrameAllocator page_frame_allocator;
     
     op.configure(page_frame_allocator);

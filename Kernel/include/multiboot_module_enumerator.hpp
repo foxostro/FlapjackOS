@@ -34,14 +34,6 @@ public:
         return result;
     }
 
-    template<typename Function>
-    void enumerate(Function&& function)
-    {
-        while (has_next()) {
-            function(get_next());
-        }
-    }
-
 private:
     multiboot_info_t* mb_info_;
     multiboot_module_t* entry_;

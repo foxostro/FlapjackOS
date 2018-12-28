@@ -7,13 +7,10 @@
 #include <cassert>
 
 // Parses the mulitboot memory map and enumerates the available page frames.
-// This class cannot be unit tested because the unit test runner cannot ensure
-// the multiboot data structures are loaded at the expected memory addresses.
-// AFOX_TODO: Add unit tests for MultibootMemoryMapPageFrameEnumerator . Unit testing is possible now that the "MMU" type handles the conversion between logical and physical addresses.
 class MultibootMemoryMapPageFrameEnumerator {
 public:
     template<typename MMU>
-    MultibootMemoryMapPageFrameEnumerator(MMU &mmu, multiboot_info_t *mb_info)
+    MultibootMemoryMapPageFrameEnumerator(MMU& mmu, multiboot_info_t* mb_info)
      : mb_info_(mb_info)
     {
         assert(mb_info_);
@@ -31,8 +28,6 @@ public:
         remaining_length_of_entry_ = entry_->length_low;
         curr_page_frame_ = entry_->base_addr_low;
     }
-
-    MultibootMemoryMapPageFrameEnumerator(const MultibootMemoryMapPageFrameEnumerator &enumerator) = default;
 
     bool has_next() const
     {
@@ -60,9 +55,9 @@ public:
     }
 
 private:
-    multiboot_info_t *mb_info_;
-    multiboot_memory_map_t *entry_;
-    multiboot_memory_map_t *limit_;
+    multiboot_info_t* mb_info_;
+    multiboot_memory_map_t* entry_;
+    multiboot_memory_map_t* limit_;
     uintptr_t curr_page_frame_;
     size_t remaining_length_of_entry_;
 
@@ -74,7 +69,7 @@ private:
         curr_page_frame_ = entry_->base_addr_low;
     }
 
-    multiboot_memory_map_t* get_next_valid_entry(multiboot_memory_map_t *entry) const
+    multiboot_memory_map_t* get_next_valid_entry(multiboot_memory_map_t* entry) const
     {
         while (entry < limit_ && entry->size > 0) {
             entry = (multiboot_memory_map_t*)((uintptr_t)entry + entry->size + sizeof(entry->size));
