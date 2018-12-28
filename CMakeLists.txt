@@ -137,7 +137,10 @@ if(CMAKE_CROSSCOMPILING)
 
     # Define the objects which will be loaded as Grub modules.
     set(MODULES_DIR "${CMAKE_SOURCE_DIR}/modules")
-    set(MODULES "${MODULES_DIR}/test.bin")
+    set(MODULES
+        "${MODULES_DIR}/test.bin"
+        "${MODULES_DIR}/test2.bin"
+        )
     
     # Add a custom target for the CD-ROM ISO image. Specify dependencies so that the
     # ISO will be rebuilt correctly after modifying the kernel binary, the Grub
