@@ -21,7 +21,7 @@ _start:
     leal g_kernel_physical_end, %ecx
     cmpl $0x400000, %ecx
     jle kernel_is_not_too_big
-    PANIC kernel_too_big_string
+    PANIC kernel_too_big_string L1 L2
 kernel_is_not_too_big:
 
     # This will map the entire kernel image as read-write, but we'll fix this up

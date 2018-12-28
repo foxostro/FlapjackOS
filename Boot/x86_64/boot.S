@@ -21,6 +21,21 @@ _start:
     cli
     cld
 
+    # Check whether the CPU supports long mode, panic if it does not.
+    # I couldn't find documentation in the Intel manuals describing this, but
+    # it is described here: <https://www.felixcloutier.com/x86/cpuid>
+    # Also, we need a stack at this point to save/restore the registers around
+    # the call to cpuid.
+    leal cpuid_stack, %esp
+    pusha
+    movl $0x80000001, %eax
+    cpuid
+    andl $(1<<29), %edx
+    jnz has_x86_64_support
+    PANIC missing_x86_64_support L1 L2
+has_x86_64_support:
+    popa
+
     # The kernel must lie entirely within the first 2MB of physical memory.
     # This is because a single page table can only map 2MB of memory, and the
     # procedure below only maps a single page table.
@@ -28,7 +43,7 @@ _start:
     leal g_kernel_physical_end, %ecx
     cmpl $0x200000, %ecx
     jle kernel_is_not_too_big
-    PANIC kernel_too_big_string
+    PANIC kernel_too_big_string L3 L4
 kernel_is_not_too_big:
 
     SET_PML4_ENTRY GET_PHYSICAL_ADDRESS(pml4), GET_PHYSICAL_ADDRESS(low_pdpt), KERNEL_PHYSICAL_LOAD_ADDR
@@ -112,8 +127,15 @@ hang:
 .section .bootdata
 DECLARE_GDT gdt_table, gdt_table_end, gdt_ptr
 
+.align 4
+.skip 0x20
+cpuid_stack:
+
+missing_x86_64_support:
+.asciz "ERROR: The CPU does not support x86_64."
+
 kernel_too_big_string:
-.asciz "The kernel is too big. Must be 2MB or less."
+.asciz "ERROR: The kernel is too big. Must be 2MB or less."
 
 
 .section .bss
