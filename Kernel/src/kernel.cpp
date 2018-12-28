@@ -32,14 +32,11 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     setup_terminal();
     print_welcome_message();
 
-    MultibootModuleEnumerator enumerator{mmu_, mb_info};
-    multiboot_module_t* module;
-    while (enumerator.has_next()) {
-        module = enumerator.get_next();
+    MultibootModuleEnumerator(mmu_, mb_info).enumerate([&](multiboot_module_t* module){
         uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module->mod_start);
         char* string = reinterpret_cast<char*>(mod_start);
         terminal_.printf("module printed as a string: %s\n", string);
-    }
+    });
 
     prepare_kernel_address_space();
     report_installed_memory();
