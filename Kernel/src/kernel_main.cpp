@@ -31,18 +31,8 @@ static void call_global_constructors()
 
 // This is marked with "C" linkage because we call it from assembly in boot.S.
 extern "C" __attribute__((noreturn))
-void kernel_main(multiboot_info_t *mb_info, uintptr_t istack)
+void kernel_main(multiboot_info_t* mb_info, uintptr_t istack)
 {
-    if (mb_info->mods_count != 1) {
-        panic("unexpected number of mods detected: %d", mb_info->mods_count);
-    }
-    uintptr_t phys = mb_info->mods_addr;
-    uintptr_t virt = phys + KERNEL_VIRTUAL_START_ADDR;
-    multiboot_module_t* module = reinterpret_cast<multiboot_module_t*>(virt);
-    uintptr_t module_address = module->mod_start + KERNEL_VIRTUAL_START_ADDR;
-    auto string = reinterpret_cast<char*>(module_address);
-    panic("module printed as a string: %s", string);
-    
     g_kernel_pointer = (Kernel*)&g_kernel_storage;
     call_global_constructors();
     g_kernel_pointer = new (&g_kernel_storage) Kernel(mb_info, istack);

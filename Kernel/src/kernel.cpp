@@ -4,6 +4,7 @@
 #include <logger.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
+#include <multiboot_module_enumerator.hpp>
 #include <malloc/malloc_zone.hpp>
 #include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
@@ -30,6 +31,16 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     interrupt_controller_.initialize_hardware();
     setup_terminal();
     print_welcome_message();
+
+    MultibootModuleEnumerator enumerator{mmu_, mb_info};
+    multiboot_module_t* module;
+    while (enumerator.has_next()) {
+        module = enumerator.get_next();
+        uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module->mod_start);
+        char* string = reinterpret_cast<char*>(mod_start);
+        terminal_.printf("module printed as a string: %s\n", string);
+    }
+
     prepare_kernel_address_space();
     report_installed_memory();
     initialize_page_frame_allocator();

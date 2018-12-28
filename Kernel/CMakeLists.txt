@@ -10,6 +10,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/page_frame_allocator.hpp"
     "include/page_frame_allocator_configuration_operation.hpp"
     "include/multiboot_memory_map_page_frame_enumerator.hpp"
+    "include/multiboot_module_enumerator.hpp"
     "include/generic_interrupt_dispatcher.hpp"
     "include/interrupt_lock.hpp" "src/interrupt_lock.cpp"
     "include/generic_interrupt_handler.hpp"

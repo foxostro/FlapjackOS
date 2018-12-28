@@ -3,10 +3,13 @@
 
 #include <multiboot.h>
 #include <panic.h>
+#include <cstdint>
+#include <cassert>
 
 // Parses the mulitboot memory map and enumerates the available page frames.
 // This class cannot be unit tested because the unit test runner cannot ensure
 // the multiboot data structures are loaded at the expected memory addresses.
+// AFOX_TODO: Add unit tests for MultibootMemoryMapPageFrameEnumerator . Unit testing is possible now that the "MMU" type handles the conversion between logical and physical addresses.
 class MultibootMemoryMapPageFrameEnumerator {
 public:
     template<typename MMU>
