@@ -14,6 +14,20 @@ public:
         assert(data_ != nullptr);
     }
 
+    // Returns true if the image is marked as being appropriate for IA-32.
+    // That is, appropriate for Intel 32-bit or x86.
+    bool is_ia32() const
+    {
+        // Please refer to section 1-7, "Machine Information" for details.
+        return has_expected_magic() &&
+               is_header_size_valid() &&
+               is_version_valid() &&
+               header().e_ident[EI_CLASS] == ELFCLASS32 &&
+               header().e_ident[EI_DATA] == ELFDATA2LSB && 
+               header().e_machine == Machine::EM_386 &&
+               header().e_flags == 0;
+    }
+
     // Returns the ELF32 header.
     const Elf32_Ehdr& header() const
     {
@@ -29,20 +43,78 @@ public:
                header().e_ident[EI_MAG3] == ELFMAG3;
     }
 
-    // Returns true if the image is marked as being appropriate for IA-32.
-    // That is, appropriate for Intel 32-bit or x86.
-    bool is_ia32() const
+    // Check that the header size is as expected.
+    bool is_header_size_valid() const
     {
-        // Please refer to section 1-7, "Machine Information" for details.
-        return header().e_ident[EI_CLASS] == ELFCLASS32 &&
-               header().e_ident[EI_DATA] == ELFDATA2LSB && 
-               header().e_machine == Machine::EM_386 &&
-               header().e_flags == 0;
+        return header().e_ehsize == sizeof(Elf32_Ehdr);
+    }
+
+    // Checks that the ELF image version is as expected.
+    bool is_version_valid() const
+    {
+        return header().e_version == Version::EV_CURRENT &&
+               header().e_ident[EI_VERSION] == (unsigned)Version::EV_CURRENT;
+    }
+
+    // Returns true if the image is for an executable file.
+    // This may return false for libraries, for example.
+    bool is_executable() const
+    {
+        return header().e_type == Type::ET_EXEC;
+    }
+
+    // Returns a reference to the specified section header.
+    const Elf32_Shdr& get_section_header(size_t index) const
+    {
+        assert(index < get_number_of_section_headers());
+        assert(is_section_header_size_valid());
+        const Elf32_Shdr* section_headers = get_section_headers();
+        const Elf32_Shdr& section_header = section_headers[index];
+        return section_header;
+    }
+
+    // Returns the number of sections headers defined in this image.
+    size_t get_number_of_section_headers() const
+    {
+        return header().e_shnum;
+    }
+
+    // Returns a pointer to the section header table.
+    const Elf32_Shdr* get_section_headers() const
+    {
+        assert(is_section_header_size_valid());
+        return reinterpret_cast<const Elf32_Shdr*>(data_ + header().e_shoff);
+    }
+
+    // Returns true if e_shentsize does match the size of a section header.
+    bool is_section_header_size_valid() const
+    {
+        return header().e_shentsize == sizeof(Elf32_Shdr);
+    }
+
+    const char* get_section_name(size_t index) const
+    {
+        return get_section_name_string_table() + index;
+    }
+
+    const char* get_section_name_string_table() const
+    {
+        const Elf32_Shdr& section = get_section_name_string_table_section();
+        return reinterpret_cast<const char*>(data_ + section.sh_offset);
+    }
+
+    const Elf32_Shdr& get_section_name_string_table_section() const
+    {
+        assert(header().e_shstrndx != SHN_UNDEF);
+        const Elf32_Shdr& section = get_section_header(header().e_shstrndx);
+        assert(section.sh_type == SectionType::SHT_STRTAB);
+        assert(section.sh_size > 0);
+        return section;
     }
 
 private:
-    const size_t count_;
-    const unsigned char* data_;
+    size_t count_;
+    unsigned char* data_;
 };
 
 } // namespace elf32
