@@ -35,7 +35,6 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     report_installed_memory();
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
-    invoke_modules();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
 }
@@ -46,37 +45,44 @@ const char* Kernel::get_platform() const
     return namer.get_platform();
 }
 
+using ModuleFunction = int(*)();
+static ModuleFunction g_module_functions[2];
 static Mutex g_mutex_a(true);
 static Mutex g_mutex_b(true);
 
-static void fn_a()
+static void module_print_loop(size_t index)
 {
     for (int i = 0; i < 100; ++i) {
-        g_terminal->putchar('a');
+        ModuleFunction function = g_module_functions[index];
+        int result = function();
+        g_terminal->printf("0x%x ", result);
     }
-    g_mutex_a.unlock();
 }
 
-static void delay()
+static void fn_a()
 {
-    volatile bool whatever = false;
-    for (int i = 0; i < 1000000; ++i) {
-        whatever = !whatever;
-    }
+    module_print_loop(0);
+    g_mutex_a.unlock();
 }
 
 static void fn_b()
 {
-    for (int i = 0; i < 10; ++i) {
-        g_terminal->putchar('b');
-        delay();
-    }
+    module_print_loop(1);
     g_mutex_b.unlock();
 }
 
 void Kernel::run()
 {
     TRACE("Running...");
+
+    // Get the procedures defined in each multiboot module.
+    ModuleFunction* functions = g_module_functions;
+    MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
+        uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
+        *functions++ = reinterpret_cast<ModuleFunction>(mod_start);
+    });
+
+    // Schedule a thread for each procedure.
     scheduler_.add(new Thread(fn_a));
     scheduler_.add(new Thread(fn_b));
     scheduler_.begin(new ThreadExternalStack);
@@ -87,7 +93,7 @@ void Kernel::run()
     
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
-    terminal_.puts("Entering console loop:\n");
+    terminal_.puts("\nEntering console loop:\n");
     KeyboardDevice& keyboard = device_drivers_.get_keyboard();
     LineEditor ed(terminal_, keyboard);
     while (true) {
@@ -192,18 +198,4 @@ void Kernel::initialize_interrupts_and_device_drivers()
     interrupt_controller_.setup();
     device_drivers_.init();
     interrupt_controller_.become_ready();
-}
-
-void Kernel::invoke_modules()
-{
-    TRACE("Invoking modules...");
-    MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
-        uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
-        using Function = int(*)();
-        Function function = reinterpret_cast<Function>(mod_start);
-        TRACE("calling procedure %p", function);
-        int result = function();
-        TRACE("result --> 0x%x", result);
-    });
-    TRACE("Finished invoking modules");
 }
