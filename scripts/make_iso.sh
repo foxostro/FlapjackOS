@@ -1,10 +1,9 @@
 #!/bin/sh
 set -e
-KERNEL_BIN="$1"
-GRUB_CFG="$2"
-ISO_FN="$3"
-MODULES_1="$4"
-MODULES_2="$5"
+KERNEL_BIN="$1"; shift
+GRUB_CFG="$1"; shift
+ISO_FN="$1"; shift
+MODULES="$@"
 
 grub-file --is-x86-multiboot "$KERNEL_BIN"
 if [[ $? -ne 0 ]]; then
@@ -14,11 +13,16 @@ if [[ $? -ne 0 ]]; then
 fi
 
 ISODIR="$(mktemp -d)"
+
 mkdir -p "$ISODIR/boot/grub"
 cp "$KERNEL_BIN" "$ISODIR/boot"
 cp "$GRUB_CFG" "$ISODIR/boot/grub/grub.cfg"
+
 mkdir -p "$ISODIR/modules"
-cp "$MODULES_1" "$ISODIR/modules"
-cp "$MODULES_2" "$ISODIR/modules"
+for THIS_MODULE in $@; do
+cp "$THIS_MODULE" "$ISODIR/modules"
+done
+
 grub-mkrescue -o "$ISO_FN" "$ISODIR"
+
 rm -rf "$ISODIR"
