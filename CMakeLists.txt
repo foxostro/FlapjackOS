@@ -92,6 +92,7 @@ add_subdirectory("Common")
 add_subdirectory("Malloc")
 add_subdirectory("Boot")
 add_subdirectory("Kernel")
+add_subdirectory("User")
 
 
 # If we're cross-compiling to the target architecture then build a bootable ISO.
@@ -134,13 +135,6 @@ if(CMAKE_CROSSCOMPILING)
         SUFFIX ""
         LINK_FLAGS "-T ${KERNEL_LAYOUT_FILE}"
     )
-
-    # Define the objects which will be loaded as Grub modules.
-    set(MODULES_DIR "${CMAKE_SOURCE_DIR}/modules")
-    set(MODULES
-        "${MODULES_DIR}/test.bin"
-        "${MODULES_DIR}/test2.bin"
-        )
     
     # Add a custom target for the CD-ROM ISO image. Specify dependencies so that the
     # ISO will be rebuilt correctly after modifying the kernel binary, the Grub
@@ -148,7 +142,7 @@ if(CMAKE_CROSSCOMPILING)
     set(BUILD_ISO_TOOL "${CMAKE_SOURCE_DIR}/scripts/make_iso.sh")
     add_custom_command(
         OUTPUT ${CMAKE_PROJECT_NAME}.iso
-        COMMAND ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso "${MODULES_DIR}"
+        COMMAND ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.iso ${MODULES}
         DEPENDS ${BUILD_ISO_TOOL} ${CMAKE_BINARY_DIR}/${KERNEL_BIN} "${CMAKE_SOURCE_DIR}/grub.cfg" ${MODULES}
         COMMENT "Build the bootable ISO."
         VERBATIM
