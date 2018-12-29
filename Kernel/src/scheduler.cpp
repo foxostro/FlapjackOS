@@ -5,9 +5,10 @@
 
 static Scheduler* g_scheduler = nullptr;
 
-extern "C" void thread_start()
+extern "C" void thread_start(unsigned param, void(*function)(unsigned))
 {
     g_scheduler->unlock_at_thread_start();
+    function(param);
 }
 
 Scheduler::Scheduler()

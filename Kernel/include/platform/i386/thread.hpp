@@ -23,14 +23,15 @@ public:
     static constexpr uint32_t InitialRegisterValue = 0xcdcdcdcd;
 
     virtual ~Thread_i386() = default;
-    Thread_i386() = default;
+    Thread_i386() = delete;
     Thread_i386(Thread_i386&& other) = default;
     Thread_i386(const Thread_i386&) = delete;
 
-    explicit Thread_i386(void (*function)())
+    explicit Thread_i386(void (*function)(unsigned), unsigned param)
     {
-        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(vanish));
-        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(function));
+        stack_.push(/*second parameter=*/reinterpret_cast<uintptr_t>(function));
+        stack_.push(/*first parameter=*/static_cast<uint32_t>(param));
+        stack_.push(/*return address=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
         stack_.push(/*EBP=*/EBP);

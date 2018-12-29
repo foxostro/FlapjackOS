@@ -49,9 +49,9 @@ using ModuleFunction = int(*)();
 static ModuleFunction g_module_functions[10];
 static std::atomic<int> g_count{0};
 
-static void module_print_loop(size_t index)
+static void task(unsigned index)
 {
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 20; ++i) {
         ModuleFunction function = g_module_functions[index];
         int result = function();
         g_terminal->printf("0x%x ", result);
@@ -59,31 +59,20 @@ static void module_print_loop(size_t index)
     g_count--;
 }
 
-static void fn_a()
-{
-    module_print_loop(0);
-}
-
-static void fn_b()
-{
-    module_print_loop(1);
-}
-
 void Kernel::run()
 {
     TRACE("Running...");
 
-    // Get the procedures defined in each multiboot module.
+    // Schedule a thread for procedures defined in each multiboot module.
     ModuleFunction* functions = g_module_functions;
     MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
         uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
-        *functions++ = reinterpret_cast<ModuleFunction>(mod_start);
+        *functions = reinterpret_cast<ModuleFunction>(mod_start);
+        scheduler_.add(new Thread(task, g_count));
+        functions++;
         g_count++;
     });
 
-    // Schedule a thread for each procedure.
-    scheduler_.add(new Thread(fn_a));
-    scheduler_.add(new Thread(fn_b));
     scheduler_.begin(new ThreadExternalStack);
 
     // Wait for threads to finish.
@@ -93,7 +82,7 @@ void Kernel::run()
     
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
-    terminal_.puts("\nEntering console loop:\n");
+    terminal_.puts("\n\nEntering console loop:\n");
     KeyboardDevice& keyboard = device_drivers_.get_keyboard();
     LineEditor ed(terminal_, keyboard);
     while (true) {
