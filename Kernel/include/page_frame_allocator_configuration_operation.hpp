@@ -69,7 +69,7 @@ private:
                  this_page_frame < module.mod_end;
                  this_page_frame += PAGE_SIZE) {
 
-                page_frames.deallocate(this_page_frame);
+                page_frames.allocate(this_page_frame);
             }
         });
     }
