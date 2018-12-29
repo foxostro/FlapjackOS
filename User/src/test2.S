@@ -1,4 +1,4 @@
 .globl _start
 _start:
-xchg %bx, %bx
-int $0x80
+mov $0xcafed00d, %eax
+ret

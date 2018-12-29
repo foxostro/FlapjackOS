@@ -81,6 +81,9 @@ private:
 
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
+
+    // Invoke multiboot modules as procedures and print some debugging info.
+    void invoke_modules();
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP

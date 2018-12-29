@@ -38,6 +38,7 @@ class DummyModuleEnumerator {
 public:
     bool has_next() const { return false; }
     multiboot_module_t* get_next() { return nullptr; }
+    template<typename Function> void enumerate(Function&&) {}
 };
 
 using Operation = PageFrameAllocatorConfigurationOperation<DummyPageFrameEnumerator, DummyModuleEnumerator, MockMemoryManagementUnit>;

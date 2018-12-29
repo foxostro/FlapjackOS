@@ -35,13 +35,9 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     report_installed_memory();
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
+    invoke_modules();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
-
-    // Report information about multiboot modules.
-    MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
-        terminal_.printf("module.mod_start --> %p\n", module.mod_start);
-    });
 }
 
 const char* Kernel::get_platform() const
@@ -196,4 +192,18 @@ void Kernel::initialize_interrupts_and_device_drivers()
     interrupt_controller_.setup();
     device_drivers_.init();
     interrupt_controller_.become_ready();
+}
+
+void Kernel::invoke_modules()
+{
+    TRACE("Invoking modules...");
+    MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
+        uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
+        using Function = int(*)();
+        Function function = reinterpret_cast<Function>(mod_start);
+        TRACE("calling procedure %p", function);
+        int result = function();
+        TRACE("result --> 0x%x", result);
+    });
+    TRACE("Finished invoking modules");
 }
