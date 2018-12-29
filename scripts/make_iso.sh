@@ -16,7 +16,8 @@ ISODIR="$(mktemp -d)"
 
 mkdir -p "$ISODIR/boot/grub"
 cp "$KERNEL_BIN" "$ISODIR/boot"
-cp "$GRUB_CFG" "$ISODIR/boot/grub/grub.cfg"
+MODULES_ARG=$(printf " %s" "$@")
+erb modules="$MODULES_ARG" -- "$GRUB_CFG" > "$ISODIR/boot/grub/grub.cfg"
 
 mkdir -p "$ISODIR/modules"
 for THIS_MODULE in $@; do

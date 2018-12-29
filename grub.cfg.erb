@@ -3,7 +3,8 @@ set default=0
 
 menuentry "Flapjack OS" {
 	multiboot /boot/kernel.bin
-	module /modules/Test1
-	module /modules/Test2
+	<% modules.split.each do |fn| %>
+	module /modules/<%= File.basename fn %>
+	<% end %>
 	boot
 }
