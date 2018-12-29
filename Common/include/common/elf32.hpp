@@ -190,6 +190,140 @@ constexpr Elf32_Half SHN_COMMON = 0xfff2;
 constexpr Elf32_Half SHN_HIRESERVE = 0xffff;
 
 
+// A section header’s sh_type member specifies the section’s semantics.
+// See also "Elf32_Shdr::sh_type" and section 1-10 for details.
+enum class SectionType : Elf32_Word {
+    // This value marks the section header as inactive; it does not have an
+    // associated section. Other members of the section header have undefined
+    // values.
+    SHT_NULL = 0,
+
+    // The section holds information defined by the program, whose format and
+    // meaning are determined solely by the program.
+    SHT_PROGBITS = 1,
+
+    // This section holds a symbol table.
+    SHT_SYMTAB = 2,
+
+    // The section holds a string table. An object file may have multiple string
+    // table sections.
+    SHT_STRTAB = 3,
+
+    // The section holds relocation entries with explicit addends, such as type
+    // Elf32_Rela for the 32-bit class of object files. An object file may have
+    // multiple relocation sections.
+    SHT_RELA = 4,
+
+    // The section holds a symbol hash table.
+    SHT_HASH = 5,
+
+    // The section holds information for dynamic linking.
+    SHT_DYNAMIC = 6,
+
+    // The section holds information that marks the file in some way.
+    SHT_NOTE = 7,
+
+    // A section of this type occupies no space in the file but otherwise
+    // resembles SHT_PROGBITS. Although this section contains no bytes, the
+    // sh_offset member contains the conceptual file offset.
+    SHT_NOBITS = 8,
+
+    // The section holds relocation entries without explicit addends, such as
+    // type Elf32_Rel for the 32-bit class of object files.
+    SHT_REL = 9,
+
+    // This section type is reserved but has unspecified semantics.
+    // Programs that contain a section of this type do not conform to the ABI.
+    SHT_SHLIB = 10,
+
+    // This section holds a symbol table.
+    SHT_DYNSYM = 11,
+
+    // Values in the inclusive range [SHT_LOPROC, SHT_HIPROC] are reserved for
+    // processor-specific semantics.
+    SHT_LOPROC = 0x70000000,
+    SHT_HIPROC = 0x7fffffff,
+
+    // This value specifies the lower bound of the range of indexes reserved for
+    // application programs.
+    SHT_LOUSER = 0x80000000,
+
+    // This value specifies the upper bound of the range of indexes reserved for
+    // application programs.
+    SHT_HIUSER = 0xffffffff,
+};
+
+
+// An object file's section header table lets one locate the file's sections.
+// Refer to section 1-9.
+struct Elf32_Shdr {
+    // Specifies the name of the section. Its value is an index into the section
+    // header string table section, giving the location of a nul-terminated
+    // string.
+    Elf32_Word sh_name;
+
+    // Categorizes the section's contents and semantics.
+    SectionType sh_type;
+
+    // Sections support 1-bit flags that describe miscellaneous attributes.
+    Elf32_Word sh_flags;
+
+    // If the section will appear in the memory image of a process, this member
+    // the address at which the section's first byte should reside. Otherwise,
+    // the member contains 0.
+    Elf32_Addr sh_addr;
+
+    // This member's value gives the byte offset from the beginning of the file
+    // to the first byte in the section. One section type, SHT_NOBITS, occupies
+    // no space in the file, and its sh_offset member locates the conceptual
+    // placement in the file.
+    Elf32_Off sh_offset;
+
+    // This member gives the section's size in bytes. Unless the section type is
+    // SHT_NOBITS, the section occupies sh_size bytes in the file. A section of
+    // type SHT_NOBITS may have a non-zero size, but it occupies no space in the
+    // file.
+    Elf32_Word sh_size;
+
+    // This member holds a section header table index link, whose interpretation
+    // depends on the section type.
+    Elf32_Word sh_link;
+
+    // This member holds extra information, whose interpretation depends on the
+    // section type.
+    Elf32_Word sh_info;
+
+    // Some sections have address alignment constraints. Values 0 and 1 mean the
+    // section has no alignment constraints.
+    Elf32_Word sh_addralign;
+
+    // Some sections hold a table of fixed-size entries, such as a symbol table.
+    // For such a section, this member gives the size in bytes of each entry.
+    // The member contains 0 if the section does not hold a table of fixed-size
+    // entries.
+    Elf32_Word sh_entsize;
+ };
+
+
+// Bit flags in the field "Elf32_Shdr::sh_flags".
+// The section contains data that should be writable during process execution.
+constexpr Elf32_Word SHF_WRITE = 0x1;
+
+// Bit flags in the field "Elf32_Shdr::sh_flags".
+// The section occupies memory during process execution. Some control sections
+// do not reside in the memory image of an object file; this attribute is off
+// for those sections.
+constexpr Elf32_Word SHF_ALLOC = 0x2;
+
+// Bit flags in the field "Elf32_Shdr::sh_flags".
+// The section contains executable machine instructions.
+constexpr Elf32_Word SHF_EXECINSTR = 0x4;
+
+// Bit flags in the field "Elf32_Shdr::sh_flags".
+// All bits included in this mask are reserved for processor-specific semantics.
+constexpr Elf32_Word SHF_MASKPROC = 0xf0000000;
+
+
 } // namespace elf32
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_HPP
