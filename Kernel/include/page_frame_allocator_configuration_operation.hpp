@@ -52,18 +52,6 @@ private:
         }
     }
 
-    // Use the provided enumerator to enumerate multiboot modules.
-    // For each module, invoke the function `fn'.
-    template<typename Function>
-    void enumerate_modules(Function&& fn)
-    {
-        while (module_enumerator_.has_next()) {
-            multiboot_module_t* module = module_enumerator_.get_next();
-            assert(module);
-            fn(*module);
-        }
-    }
-
     void mark_unavailable_memory(PageFrameAllocator& page_frames)
     {
         enumerate_page_frames([&](uintptr_t page_frame){
@@ -76,7 +64,7 @@ private:
 
     void mark_modules_memory(PageFrameAllocator& page_frames)
     {
-        enumerate_modules([&](multiboot_module_t& module){
+        module_enumerator_.enumerate([&](multiboot_module_t& module){
             for (uintptr_t this_page_frame = module.mod_start;
                  this_page_frame < module.mod_end;
                  this_page_frame += PAGE_SIZE) {

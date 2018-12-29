@@ -37,6 +37,11 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     initialize_kernel_malloc();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
+
+    // Report information about multiboot modules.
+    MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
+        terminal_.printf("module.mod_start --> %p\n", module.mod_start);
+    });
 }
 
 const char* Kernel::get_platform() const

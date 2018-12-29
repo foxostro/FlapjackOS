@@ -25,13 +25,21 @@ public:
         return index_ < count_;
     }
 
-    multiboot_module_t* get_next()
+    multiboot_module_t& get_next()
     {
         assert(has_next());
         multiboot_module_t* result = entry_;
         index_++;
         entry_++;
-        return result;
+        return *result;
+    }
+
+    template<typename Function>
+    void enumerate(Function&& function)
+    {
+        while (has_next()) {
+            function(get_next());
+        }
     }
 
 private:
