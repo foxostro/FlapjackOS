@@ -46,9 +46,8 @@ const char* Kernel::get_platform() const
 }
 
 using ModuleFunction = int(*)();
-static ModuleFunction g_module_functions[2];
-static Mutex g_mutex_a(true);
-static Mutex g_mutex_b(true);
+static ModuleFunction g_module_functions[10];
+static std::atomic<int> g_count{0};
 
 static void module_print_loop(size_t index)
 {
@@ -57,18 +56,17 @@ static void module_print_loop(size_t index)
         int result = function();
         g_terminal->printf("0x%x ", result);
     }
+    g_count--;
 }
 
 static void fn_a()
 {
     module_print_loop(0);
-    g_mutex_a.unlock();
 }
 
 static void fn_b()
 {
     module_print_loop(1);
-    g_mutex_b.unlock();
 }
 
 void Kernel::run()
@@ -80,6 +78,7 @@ void Kernel::run()
     MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
         uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
         *functions++ = reinterpret_cast<ModuleFunction>(mod_start);
+        g_count++;
     });
 
     // Schedule a thread for each procedure.
@@ -88,8 +87,9 @@ void Kernel::run()
     scheduler_.begin(new ThreadExternalStack);
 
     // Wait for threads to finish.
-    g_mutex_a.lock();
-    g_mutex_b.lock();
+    while (g_count > 0) {
+        yield();
+    }
     
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
