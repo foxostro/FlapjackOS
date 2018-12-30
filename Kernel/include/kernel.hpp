@@ -7,6 +7,7 @@
 #include <scheduler.hpp>
 #include <common/text_terminal.hpp>
 #include <cstdint>
+#include <common/elf32_parser.hpp>
 
 // The kernel is the heart of the operating system.
 // It manages access to memory and resources on the system.
@@ -81,6 +82,19 @@ private:
 
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
+
+    struct Data {
+        size_t length;
+        unsigned char* data;
+    };
+
+    Data get_module_data(multiboot_module_t& module);
+
+    Data get_segment_data(const elf32::Elf32_Phdr& header,const Data& mod_data);
+
+    void print_segment_data(const Data& data);
+
+    void do_console_loop();
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP

@@ -10,7 +10,6 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 #include <common/mutex.hpp>
-#include <common/elf32_parser.hpp>
 
 
 Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
@@ -49,43 +48,66 @@ void Kernel::run()
 
     MultibootModuleEnumerator enumerator{mmu_, mb_info_};
 
-    multiboot_module_t& module = enumerator.get_next();
-    uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
-    unsigned char* mod_data = reinterpret_cast<unsigned char*>(mod_start);
-    uintptr_t mod_end = mmu_.convert_physical_to_logical_address(module.mod_end);
-    size_t mod_length = mod_end - mod_start + 1;
+    Data mod_data = get_module_data(enumerator.get_next());
 
-    elf32::Parser32 parser{mod_length, mod_data};
+    elf32::Parser32 parser{mod_data.length, mod_data.data};
     assert(parser.is_ia32());
     assert(parser.is_executable());
-    assert(parser.get_number_of_program_headers() > 0);
+    assert(parser.get_number_of_program_headers() == 1);
 
     const elf32::Elf32_Phdr& header = parser.get_program_header(0);
     assert(elf32::SegmentType::PT_LOAD == header.p_type);
 
-    unsigned char* segment_data = reinterpret_cast<unsigned char*>(mod_start) + header.p_offset;
-    size_t segment_length = header.p_memsz;
-    
-    terminal_.printf("Segment Data: ");
-    for (size_t i = 0; i < segment_length; ++i) {
-        terminal_.printf(" %x", (unsigned)segment_data[i]);
-    }
-    terminal_.printf("\n");
+    Data segment_data;
+    segment_data.data = mod_data.data + header.p_offset;
+    segment_data.length = header.p_memsz;
+
+    print_segment_data(segment_data);
 
     uintptr_t start_offset = parser.get_start_address() - header.p_vaddr;
-    terminal_.printf("start_offset = 0x%x\n", start_offset);
+    using Procedure = unsigned(*)();
+    Procedure procedure = reinterpret_cast<Procedure>(segment_data.data + start_offset);
 
-    uintptr_t procedure_addr = reinterpret_cast<uintptr_t>(segment_data + start_offset);
-    terminal_.printf("procedure_addr = 0x%x\n", procedure_addr);
-
-    using Procedure = int(*)();
-    Procedure procedure = reinterpret_cast<Procedure>(procedure_addr);
-
-    int result = procedure();
+    unsigned result = procedure();
     terminal_.printf("result = 0x%x\n", result);
+    assert(result == 0xdeadbeef);
 
     scheduler_.begin(new ThreadExternalStack);
-    
+    do_console_loop();
+}
+
+Kernel::Data Kernel::get_module_data(multiboot_module_t& module)
+{
+    uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
+    uintptr_t mod_end = mmu_.convert_physical_to_logical_address(module.mod_end);
+    Data mod_data;
+    mod_data.length = mod_end - mod_start + 1;
+    mod_data.data = reinterpret_cast<unsigned char*>(mod_start);
+    return mod_data;
+}
+
+Kernel::Data Kernel::get_segment_data(const elf32::Elf32_Phdr& header,
+                                      const Data& mod_data)
+{
+    assert(elf32::SegmentType::PT_LOAD == header.p_type);
+    Data segment_data;
+    segment_data.data = mod_data.data + header.p_offset;
+    segment_data.length = header.p_memsz;
+    return segment_data;
+}
+
+void Kernel::print_segment_data(const Data& data)
+{
+    terminal_.printf("Segment Data: ");
+    for (size_t i = 0; i < data.length; ++i) {
+        unsigned byte = (unsigned)data.data[i];
+        terminal_.printf(" %x", byte);
+    }
+    terminal_.printf("\n");
+}
+
+void Kernel::do_console_loop()
+{
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
     terminal_.puts("\n\nEntering console loop:\n");
