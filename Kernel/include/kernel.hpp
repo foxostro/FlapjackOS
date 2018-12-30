@@ -5,10 +5,10 @@
 #include <page_frame_allocator.hpp>
 #include <kernel_policy.hpp>
 #include <scheduler.hpp>
+#include <elf_loader.hpp>
 #include <common/text_terminal.hpp>
-#include <cstdint>
-#include <common/elf32_parser.hpp>
 #include <common/data.hpp>
+#include <cstdint>
 
 // The kernel is the heart of the operating system.
 // It manages access to memory and resources on the system.
@@ -86,7 +86,7 @@ private:
 
     Data get_module_data(multiboot_module_t& module);
 
-    Data get_segment_data(const elf32::Elf32_Phdr& header,const Data& mod_data);
+    ElfLoader create_elf_loader(const Data& elf_image);
 
     void do_console_loop();
 };

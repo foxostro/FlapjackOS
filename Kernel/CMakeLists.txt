@@ -22,6 +22,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
     "include/logger.hpp" "src/logger.cpp"
+    "include/elf_loader.hpp" "src/elf_loader.cpp"
     )
 
 set(I386_SOURCE_FILES

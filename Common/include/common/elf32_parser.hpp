@@ -147,6 +147,15 @@ public:
         return header().e_phentsize == sizeof(Elf32_Phdr);
     }
 
+    // Enumerate the program headers in the ELF image.
+    template<typename Function>
+    void enumerate(Function&& fn)
+    {
+        for (size_t i = 0, n = get_number_of_program_headers(); i < n; ++i) {
+            fn(get_program_header(i));
+        }
+    }
+
 private:
     size_t count_;
     unsigned char* data_;

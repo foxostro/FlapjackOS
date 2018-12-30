@@ -47,29 +47,10 @@ void Kernel::run()
     TRACE("Running...");
 
     MultibootModuleEnumerator enumerator{mmu_, mb_info_};
-
-    Data mod_data = get_module_data(enumerator.get_next());
-
-    elf32::Parser32 parser{mod_data.length, mod_data.bytes};
-    assert(parser.is_ia32());
-    assert(parser.is_executable());
-    assert(parser.get_number_of_program_headers() == 1);
-
-    const elf32::Elf32_Phdr& header = parser.get_program_header(0);
-    assert(elf32::SegmentType::PT_LOAD == header.p_type);
-
-    Data segment_data;
-    segment_data.bytes = mod_data.bytes + header.p_offset;
-    segment_data.length = header.p_memsz;
-
-    terminal_.printf("Segment Data: ");
-    segment_data.print(terminal_);
-
-    uintptr_t start_offset = parser.get_start_address() - header.p_vaddr;
-    using Procedure = unsigned(*)();
-    Procedure procedure = reinterpret_cast<Procedure>(segment_data.bytes + start_offset);
-
-    unsigned result = procedure();
+    assert(enumerator.has_next());
+    Data elf_image = get_module_data(enumerator.get_next());
+    auto elf_loader = create_elf_loader(elf_image);
+    unsigned result = elf_loader.exec();
     terminal_.printf("result = 0x%x\n", result);
     assert(result == 0xdeadbeef);
 
@@ -87,14 +68,9 @@ Data Kernel::get_module_data(multiboot_module_t& module)
     return mod_data;
 }
 
-Data Kernel::get_segment_data(const elf32::Elf32_Phdr& header,
-                              const Data& mod_data)
+ElfLoader Kernel::create_elf_loader(const Data& elf_image)
 {
-    assert(elf32::SegmentType::PT_LOAD == header.p_type);
-    Data segment_data;
-    segment_data.bytes = mod_data.bytes + header.p_offset;
-    segment_data.length = header.p_memsz;
-    return segment_data;
+    return ElfLoader{phys_map_, page_frame_allocator_, elf_image};
 }
 
 void Kernel::do_console_loop()
