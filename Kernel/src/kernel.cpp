@@ -62,7 +62,8 @@ void Kernel::run()
     segment_data.bytes = mod_data.bytes + header.p_offset;
     segment_data.length = header.p_memsz;
 
-    print_segment_data(segment_data);
+    terminal_.printf("Segment Data: ");
+    segment_data.print(terminal_);
 
     uintptr_t start_offset = parser.get_start_address() - header.p_vaddr;
     using Procedure = unsigned(*)();
@@ -94,16 +95,6 @@ Data Kernel::get_segment_data(const elf32::Elf32_Phdr& header,
     segment_data.bytes = mod_data.bytes + header.p_offset;
     segment_data.length = header.p_memsz;
     return segment_data;
-}
-
-void Kernel::print_segment_data(const Data& data)
-{
-    terminal_.printf("Segment Data: ");
-    for (size_t i = 0; i < data.length; ++i) {
-        unsigned byte = (unsigned)data.bytes[i];
-        terminal_.printf(" %x", byte);
-    }
-    terminal_.printf("\n");
 }
 
 void Kernel::do_console_loop()

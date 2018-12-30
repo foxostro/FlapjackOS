@@ -88,8 +88,6 @@ private:
 
     Data get_segment_data(const elf32::Elf32_Phdr& header,const Data& mod_data);
 
-    void print_segment_data(const Data& data);
-
     void do_console_loop();
 };
 
