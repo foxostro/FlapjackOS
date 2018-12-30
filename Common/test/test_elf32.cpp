@@ -34,6 +34,14 @@ TEST_CASE("Parser checks the image is appropriate for IA-32 executable", "[Elf32
     REQUIRE(parser.is_executable());
 }
 
+TEST_CASE("Parser checks the start address matches the test gold", "[Elf32]")
+{
+    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+
+    // This value was determined by running `objdump -x' on the original file.
+    REQUIRE(0x08048054 == parser.get_start_address());
+}
+
 TEST_CASE("Parser checks the image contains the expected number of sections", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};

@@ -63,6 +63,12 @@ public:
         return header().e_type == Type::ET_EXEC;
     }
 
+    // Gets the start address for the executable, or zero.
+    uintptr_t get_start_address() const
+    {
+        return static_cast<uintptr_t>(header().e_entry);
+    }
+
     // Returns a reference to the specified section header.
     const Elf32_Shdr& get_section_header(size_t index) const
     {
