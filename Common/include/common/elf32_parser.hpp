@@ -73,7 +73,7 @@ public:
         return section_header;
     }
 
-    // Returns the number of sections headers defined in this image.
+    // Returns the number of section headers defined in this image.
     size_t get_number_of_section_headers() const
     {
         return header().e_shnum;
@@ -110,6 +110,35 @@ public:
         assert(section.sh_type == SectionType::SHT_STRTAB);
         assert(section.sh_size > 0);
         return section;
+    }
+
+    // Returns a reference to the specified program header.
+    const Elf32_Phdr& get_program_header(size_t index) const
+    {
+        assert(index < get_number_of_program_headers());
+        assert(is_program_header_size_valid());
+        const Elf32_Phdr* program_headers = get_program_headers();
+        const Elf32_Phdr& program_header = program_headers[index];
+        return program_header;
+    }
+
+    // Returns the number of program headers defined in this image.
+    size_t get_number_of_program_headers() const
+    {
+        return header().e_phnum;
+    }
+
+    // Returns a pointer to the program header table.
+    const Elf32_Phdr* get_program_headers() const
+    {
+        assert(is_program_header_size_valid());
+        return reinterpret_cast<const Elf32_Phdr*>(data_ + header().e_phoff);
+    }
+
+    // Returns true if e_phentsize does match the size of a program header.
+    bool is_program_header_size_valid() const
+    {
+        return header().e_phentsize == sizeof(Elf32_Phdr);
     }
 
 private:

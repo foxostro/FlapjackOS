@@ -404,6 +404,12 @@ struct Elf32_Phdr {
 };
 
 
+// Bit flags in "Elf32_Phdr::p_flags".
+constexpr Elf32_Word PF_X = 0x1; // Executable
+constexpr Elf32_Word PF_W = 0x2; // Writable
+constexpr Elf32_Word PF_R = 0x4; // Readable
+
+
 } // namespace elf32
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_HPP

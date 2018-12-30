@@ -61,3 +61,20 @@ TEST_CASE("Parser checks the first section header is the expected null header", 
     REQUIRE(0 == header.sh_addralign);
     REQUIRE(0 == header.sh_entsize);
 }
+
+TEST_CASE("Parser checks that program headers match the test gold", "[Elf32]")
+{
+    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+
+    // These values were determined by running `objdump -x' on the original file.
+    REQUIRE(1 == parser.get_number_of_program_headers());
+    const elf32::Elf32_Phdr& header = parser.get_program_header(0);
+    REQUIRE(elf32::SegmentType::PT_LOAD == header.p_type);
+    REQUIRE(0x0 == header.p_offset);
+    REQUIRE(0x8048000 == header.p_vaddr);
+    REQUIRE(0x8048000 == header.p_paddr);
+    REQUIRE(0x5a == header.p_filesz);
+    REQUIRE(0x5a == header.p_memsz);
+    REQUIRE((elf32::PF_R | elf32::PF_X) == header.p_flags);
+    REQUIRE(4096 == header.p_align);
+}
