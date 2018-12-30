@@ -10,9 +10,7 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 #include <common/mutex.hpp>
-
-
-static TextTerminal* g_terminal = nullptr; // AFOX_TODO: remove me when possible. only needed for threading experiments in kernel.cpp
+#include <common/elf32_parser.hpp>
 
 
 Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
@@ -45,40 +43,48 @@ const char* Kernel::get_platform() const
     return namer.get_platform();
 }
 
-using ModuleFunction = int(*)();
-static ModuleFunction g_module_functions[10];
-static std::atomic<int> g_count{0};
-
-static void task(unsigned index)
-{
-    for (int i = 0; i < 20; ++i) {
-        ModuleFunction function = g_module_functions[index];
-        int result = function();
-        g_terminal->printf("0x%x ", result);
-    }
-    g_count--;
-}
-
 void Kernel::run()
 {
     TRACE("Running...");
 
-    // Schedule a thread for procedures defined in each multiboot module.
-    ModuleFunction* functions = g_module_functions;
-    MultibootModuleEnumerator(mmu_, mb_info_).enumerate([&](multiboot_module_t& module){
-        uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
-        *functions = reinterpret_cast<ModuleFunction>(mod_start);
-        scheduler_.add(new Thread(task, g_count));
-        functions++;
-        g_count++;
-    });
+    MultibootModuleEnumerator enumerator{mmu_, mb_info_};
+
+    multiboot_module_t& module = enumerator.get_next();
+    uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
+    unsigned char* mod_data = reinterpret_cast<unsigned char*>(mod_start);
+    uintptr_t mod_end = mmu_.convert_physical_to_logical_address(module.mod_end);
+    size_t mod_length = mod_end - mod_start + 1;
+
+    elf32::Parser32 parser{mod_length, mod_data};
+    assert(parser.is_ia32());
+    assert(parser.is_executable());
+    assert(parser.get_number_of_program_headers() > 0);
+
+    const elf32::Elf32_Phdr& header = parser.get_program_header(0);
+    assert(elf32::SegmentType::PT_LOAD == header.p_type);
+
+    unsigned char* segment_data = reinterpret_cast<unsigned char*>(mod_start) + header.p_offset;
+    size_t segment_length = header.p_memsz;
+    
+    terminal_.printf("Segment Data: ");
+    for (size_t i = 0; i < segment_length; ++i) {
+        terminal_.printf(" %x", (unsigned)segment_data[i]);
+    }
+    terminal_.printf("\n");
+
+    uintptr_t start_offset = parser.get_start_address() - header.p_vaddr;
+    terminal_.printf("start_offset = 0x%x\n", start_offset);
+
+    uintptr_t procedure_addr = reinterpret_cast<uintptr_t>(segment_data + start_offset);
+    terminal_.printf("procedure_addr = 0x%x\n", procedure_addr);
+
+    using Procedure = int(*)();
+    Procedure procedure = reinterpret_cast<Procedure>(procedure_addr);
+
+    int result = procedure();
+    terminal_.printf("result = 0x%x\n", result);
 
     scheduler_.begin(new ThreadExternalStack);
-
-    // Wait for threads to finish.
-    while (g_count > 0) {
-        yield();
-    }
     
     // Read lines of user input forever, but don't do anything with them.
     // (This operating system doesn't do much yet.)
@@ -97,7 +103,6 @@ void Kernel::run()
 void Kernel::setup_terminal()
 {
     display_.clear();
-    g_terminal = &terminal_;
 }
 
 void Kernel::print_welcome_message()
