@@ -8,6 +8,7 @@
 #include <common/text_terminal.hpp>
 #include <cstdint>
 #include <common/elf32_parser.hpp>
+#include <common/data.hpp>
 
 // The kernel is the heart of the operating system.
 // It manages access to memory and resources on the system.
@@ -82,11 +83,6 @@ private:
 
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
-
-    struct Data {
-        size_t length;
-        unsigned char* data;
-    };
 
     Data get_module_data(multiboot_module_t& module);
 

@@ -39,6 +39,7 @@ set(SOURCE_FILES
     "include/common/cmpxchg.h" "src/cmpxchg.c"
     "include/common/elf32.hpp"
     "include/common/elf32_parser.hpp"
+    "include/common/data.hpp"
 
     "include/common/test/mock_memory_management_unit.hpp"
     )

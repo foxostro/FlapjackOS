@@ -50,7 +50,7 @@ void Kernel::run()
 
     Data mod_data = get_module_data(enumerator.get_next());
 
-    elf32::Parser32 parser{mod_data.length, mod_data.data};
+    elf32::Parser32 parser{mod_data.length, mod_data.bytes};
     assert(parser.is_ia32());
     assert(parser.is_executable());
     assert(parser.get_number_of_program_headers() == 1);
@@ -59,14 +59,14 @@ void Kernel::run()
     assert(elf32::SegmentType::PT_LOAD == header.p_type);
 
     Data segment_data;
-    segment_data.data = mod_data.data + header.p_offset;
+    segment_data.bytes = mod_data.bytes + header.p_offset;
     segment_data.length = header.p_memsz;
 
     print_segment_data(segment_data);
 
     uintptr_t start_offset = parser.get_start_address() - header.p_vaddr;
     using Procedure = unsigned(*)();
-    Procedure procedure = reinterpret_cast<Procedure>(segment_data.data + start_offset);
+    Procedure procedure = reinterpret_cast<Procedure>(segment_data.bytes + start_offset);
 
     unsigned result = procedure();
     terminal_.printf("result = 0x%x\n", result);
@@ -76,22 +76,22 @@ void Kernel::run()
     do_console_loop();
 }
 
-Kernel::Data Kernel::get_module_data(multiboot_module_t& module)
+Data Kernel::get_module_data(multiboot_module_t& module)
 {
     uintptr_t mod_start = mmu_.convert_physical_to_logical_address(module.mod_start);
     uintptr_t mod_end = mmu_.convert_physical_to_logical_address(module.mod_end);
     Data mod_data;
     mod_data.length = mod_end - mod_start + 1;
-    mod_data.data = reinterpret_cast<unsigned char*>(mod_start);
+    mod_data.bytes = reinterpret_cast<unsigned char*>(mod_start);
     return mod_data;
 }
 
-Kernel::Data Kernel::get_segment_data(const elf32::Elf32_Phdr& header,
-                                      const Data& mod_data)
+Data Kernel::get_segment_data(const elf32::Elf32_Phdr& header,
+                              const Data& mod_data)
 {
     assert(elf32::SegmentType::PT_LOAD == header.p_type);
     Data segment_data;
-    segment_data.data = mod_data.data + header.p_offset;
+    segment_data.bytes = mod_data.bytes + header.p_offset;
     segment_data.length = header.p_memsz;
     return segment_data;
 }
@@ -100,7 +100,7 @@ void Kernel::print_segment_data(const Data& data)
 {
     terminal_.printf("Segment Data: ");
     for (size_t i = 0; i < data.length; ++i) {
-        unsigned byte = (unsigned)data.data[i];
+        unsigned byte = (unsigned)data.bytes[i];
         terminal_.printf(" %x", byte);
     }
     terminal_.printf("\n");
