@@ -324,6 +324,86 @@ constexpr Elf32_Word SHF_EXECINSTR = 0x4;
 constexpr Elf32_Word SHF_MASKPROC = 0xf0000000;
 
 
+// Indicates the type of segment in the program header table.
+// See also "Elf32_Phdr::p_type"
+enum class SegmentType : Elf32_Word {
+    // The array element is unused; other members' values are undefined. This
+    // type lets the program header table have ignored entries.
+    PT_NULL = 0,
+
+    // The array element specifies a loadable segment, described by p_filesz and
+    // p_memsz. The bytes from the file are mapped to the beginning of the
+    // memory segment. If the segment's memory size (p_memsz) is larger than the
+    // file size (p_filesz), the "extra" bytes are defined to hold the value 0
+    // and to follow the segment's initialized area. The file size may not be
+    // larger than the memory size. Loadable segment entries in the program
+    // header table appear in ascending order, sorted on the p_vaddr member.
+    PT_LOAD = 1,
+
+    // Specifies dynamic linking information.
+    PT_DYNAMIC = 2,
+
+    // Specifies the location and size of a null-terminated path name to invoke
+    // as an interpreter.
+    PT_INTERP = 3,
+
+    // Specifies the location and size of auxiliary information.
+    PT_NOTE = 4,
+
+    // This segment type is reserved but has unspecified semantics. Programs
+    // that contain an array element of this type do not conform to the ABI.
+    PT_SHLIB = 5,
+
+    // The array element, if present, specifies the location and size of the
+    // program header table itself, both in the file and in the memory image of
+    // the program.
+    PT_PHDR = 6,
+
+    // Values in the inclusive range [PT_LOPROC, PT_HIPROC] are reserved for
+    // processor-specific semantics.
+    PT_LOPROC = 0x70000000,
+    PT_HIPROC = 0x7fffffff
+};
+
+
+// An executable or shared object file's program header table is an array of
+// structures, each describing a segment or other information the system needs
+// to prepare the program for execution. See section 2-2.
+struct Elf32_Phdr {
+    // This member tells what kind of segment this array element describes or
+    // how to interpret the array element's information.
+    SegmentType p_type;
+
+    // This member gives the offset from the beginning of the file at which the
+    // first byte of the segment resides.
+    Elf32_Off p_offset;
+
+    // This member gives the virtual address at which the first byte of the
+    // segment resides in memory.
+    Elf32_Addr p_vaddr;
+
+    // This member specifies the segment's physical address. However, the
+    // specification declares that the contents of this member may be undefined
+    // for systems which do not consider physical addressing to be relevant.
+    Elf32_Addr p_paddr;
+
+    // This member gives the number of bytes in the file image of the segment;
+    // it may be zero.
+    Elf32_Word p_filesz;
+
+    // This member gives the number of bytes in the memory image of the segment;
+    // it may be zero.
+    Elf32_Word p_memsz;
+
+    // This member gives flags relevant to the segment.
+    Elf32_Word p_flags;
+
+    // This member gives the value to which the segments are aligned in memory
+    // and in the file. Values 0 and 1 mean no alignment is required.
+    Elf32_Word p_align;
+};
+
+
 } // namespace elf32
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_HPP
