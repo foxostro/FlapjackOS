@@ -111,6 +111,9 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
+        if (address == 0x0) {
+            return nullptr;
+        }
         PageDirectoryPointerTable* pdpt = (PageDirectoryPointerTable*)mmu_.convert_physical_to_logical_address(address);
         return pdpt;
     }
@@ -125,6 +128,9 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
+        if (address == 0x0) {
+            return nullptr;
+        }
         PageDirectory* pd = (PageDirectory*)mmu_.convert_physical_to_logical_address(address);
         return pd;
     }
@@ -139,6 +145,9 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
+        if (address == 0x0) {
+            return nullptr;
+        }
         PageTable* pt = (PageTable*)mmu_.convert_physical_to_logical_address(address);
         return pt;
     }

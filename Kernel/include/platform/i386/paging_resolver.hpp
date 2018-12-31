@@ -87,6 +87,9 @@ public:
             return nullptr;
         }
         uint64_t address = entry->get_address();
+        if (address == 0x0) {
+            return nullptr;
+        }
         PageTable* pt = (PageTable*)mmu_.convert_physical_to_logical_address(address);
         return pt;
     }
