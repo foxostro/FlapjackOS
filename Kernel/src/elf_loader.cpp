@@ -46,8 +46,8 @@ void ElfLoader::action_load(const elf32::Elf32_Phdr& header)
     TRACE("map_page(physical_address=%p, linear_address=%p, flags=physical_memory_map_.WRITABLE)",
           reinterpret_cast<char*>(physical_address),
           reinterpret_cast<char*>(linear_address));
-    physical_memory_map_.map_page(physical_address, linear_address, physical_memory_map_.WRITABLE);
-
+    physical_memory_map_.map_page(physical_address, linear_address, physical_memory_map_.WRITABLE | physical_memory_map_.SUPERVISOR);
+    
     // Populate the program segment. The segment in memory may be larger than
     // the data region in the file. The remainder is cleared to zero.
     memset(reinterpret_cast<char*>(linear_address), 0, header.p_memsz);

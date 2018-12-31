@@ -19,6 +19,7 @@ public:
     static constexpr unsigned PRESENT = (1 << 0);
     static constexpr unsigned WRITABLE = (1 << 1);
     static constexpr unsigned GLOBAL = (1 << 2);
+    static constexpr unsigned SUPERVISOR = (1 << 3);
 
     GenericPhysicalMemoryMap(MMU &mmu)
      : resolver_(mmu),
@@ -48,6 +49,7 @@ public:
         pte->set_present(physical_address != 0);
         pte->set_readwrite((flags & WRITABLE) == WRITABLE);
         pte->set_global((flags & GLOBAL) == GLOBAL);
+        pte->set_supervisor((flags & SUPERVISOR) == SUPERVISOR);
         invalidate_page(linear_address);
     }
 
