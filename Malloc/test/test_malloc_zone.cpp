@@ -8,6 +8,24 @@
 
 #include <malloc/malloc_zone.hpp>
 
+static void print_block(MallocBlock& block)
+{
+    printf("block = %p\n", &block);
+    printf("\tprev = %p\n", block.prev);
+    printf("\tnext = %p\n", block.next);
+    printf("\tsize = %u\n", (unsigned)block.size);
+    printf("\tinuse = %d\n", (int)block.inuse);
+}
+
+static void print_zone(const char* label, MallocZone& zone)
+{
+    printf("print_zone: %s\n", label);
+    for (MallocBlock* block = zone.head(); block; block = block->next) {
+        print_block(*block);
+    }
+    printf("\n");
+}
+
 constexpr unsigned SMALL = 64;
 
 static uint8_t s_buffer[1024];
@@ -43,6 +61,17 @@ TEST_CASE("test_malloc_really_big", "[Malloc]")
     MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
     void *allocation = zone->malloc(SIZE_MAX);
     REQUIRE(allocation == nullptr);
+}
+
+// Starting with an empty zone, we should be able to satisfy a small request.
+TEST_CASE("test_malloc_one_zero_size_request", "[Malloc]")
+{
+    memset(s_buffer, 0, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create((uintptr_t)s_buffer, sizeof(s_buffer));
+    void *allocation = zone->malloc(0);
+    print_zone("after malloc(0)", *zone);
+    REQUIRE(allocation != nullptr);
+    REQUIRE((uintptr_t)allocation % 4 == 0);
 }
 
 // Starting with an empty zone, we should be able to satisfy a small request.
@@ -451,4 +480,61 @@ TEST_CASE("test_realloc_shrink", "[Malloc]")
         REQUIRE(block->inuse == expected_inuse[count]);
         ++count;
     }
+}
+
+TEST_CASE("memalign(0, 0) allocates a minimum size object with arbitrary alignment requirements", "[Malloc]")
+{
+    memset(s_buffer, 0, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create(reinterpret_cast<uintptr_t>(s_buffer), sizeof(s_buffer));
+    void *allocation = zone->memalign(0, 0);
+    REQUIRE(allocation != nullptr);
+}
+
+TEST_CASE("memalign -- allocate a block that already has the desired alignment", "[Malloc]")
+{
+    constexpr size_t align = 4;
+    memset(s_buffer, 0, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create(reinterpret_cast<uintptr_t>(s_buffer), sizeof(s_buffer));
+    void *allocation = zone->memalign(512, align);
+    REQUIRE(allocation != nullptr);
+    REQUIRE(reinterpret_cast<uintptr_t>(allocation) % align == 0);
+    zone->~MallocZone();
+}
+
+TEST_CASE("memalign -- split a block to get the desired alignment", "[Malloc]")
+{
+    constexpr size_t size = 16;
+    constexpr size_t align = 256;
+    memset(s_buffer, 0, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create(reinterpret_cast<uintptr_t>(s_buffer), sizeof(s_buffer));
+    void *allocation = zone->memalign(size, align);
+    print_zone("after memalign", *zone);
+    printf("allocation=%p\n", allocation);
+    REQUIRE(allocation != nullptr);
+    REQUIRE(reinterpret_cast<uintptr_t>(allocation) % align == 0);
+    zone->~MallocZone();
+}
+
+TEST_CASE("free a previously allocated memalign'd object", "[Malloc]")
+{
+    // Setup
+    constexpr size_t size = 16;
+    constexpr size_t align = 256;
+    memset(s_buffer, 0, sizeof(s_buffer));
+    MallocZone *zone = MallocZone::create(reinterpret_cast<uintptr_t>(s_buffer), sizeof(s_buffer));
+    print_zone("before", *zone);
+    void *allocation = zone->memalign(size, align);
+    print_zone("after memalign", *zone);
+
+    // Action
+    zone->free(allocation);
+    print_zone("after free", *zone);
+
+    // Test
+    // Verify all free space was returned to the heap as expected.
+    REQUIRE(zone->head()->prev == nullptr);
+    REQUIRE(zone->head()->next == nullptr);
+    REQUIRE(zone->head()->inuse == false);
+    REQUIRE(zone->head()->size == 976);
+    zone->~MallocZone();
 }

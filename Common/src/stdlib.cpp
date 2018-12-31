@@ -13,6 +13,13 @@ void* MALLOC(size_t size)
 }
 
 extern "C"
+void* MEMALIGN(size_t size, size_t align)
+{
+    assert(g_allocator && "memalign() called without first specifying a global allocator.");
+    return g_allocator->memalign(size, align);
+}
+
+extern "C"
 void* REALLOC(void *ptr, size_t size)
 {
     assert(g_allocator && "realloc() called without first specifying a global allocator.");

@@ -3,6 +3,14 @@
 #include <cstdint>
 #include <cstring>
 #include <new>
+#include <cstdio>
+
+#define VERBOSE 0
+#if VERBOSE
+#define TRACE(...) printf(__VA_ARGS__)
+#else
+#define TRACE(...)
+#endif
 
 constexpr size_t ALIGN = 4;
 constexpr size_t MIN_SPLIT_SIZE = sizeof(MallocBlock);
@@ -106,6 +114,106 @@ void* MallocZone::malloc(size_t size)
 
     best->inuse = true;
     return (void *)((uintptr_t)best + sizeof(MallocBlock));
+}
+
+void* MallocZone::memalign(size_t size, size_t align)
+{
+    TRACE("memalign(0x%x, 0x%x)\n", static_cast<unsigned>(size), static_cast<unsigned>(align));
+
+    // AFOX_TODO: memalign needs to handle, or at least assert against, non-power-of-two alignments
+    if (align == 0) {
+        return malloc(size);
+    }
+
+    MallocBlock *best = nullptr;
+    
+    // Blocks for allocations are always multiples of four bytes in size.
+    // This ensures that blocks are always aligned on four byte boundaries
+    // given that the initial block is also aligned on a four byte boundary.
+    size = round_up_block_size(size);
+
+    // Search for a free block which already has the desired alignment.
+    best = find_best_fit(size, align);
+    if (best) {
+        consider_splitting_block(best, size);
+        best->inuse = true;
+        return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(best) + sizeof(MallocBlock));
+    }
+    
+    // Find the smallest block that is large enough to satisfy the request.
+    // The idea is to find a suitable free block and split it. One part becomes
+    // a new free block, and the second part provides an allocation with the
+    // desired alignment.
+    best = find_best_fit(size + MIN_SPLIT_SIZE + align);
+
+    TRACE("best = %p\n", reinterpret_cast<void*>(best));
+
+    uintptr_t request_block_address = reinterpret_cast<uintptr_t>(best) + sizeof(MallocBlock);
+    uintptr_t delta = (request_block_address + sizeof(MallocBlock)) % align;
+    TRACE("delta = %p\n", reinterpret_cast<void*>(delta));
+    request_block_address += align - delta;
+    TRACE("request_block_address = %p\n", reinterpret_cast<void*>(request_block_address));
+    TRACE("(request_block_address + sizeof(MallocBlock)) %% align --> 0x%x\n",
+           static_cast<unsigned>((request_block_address + sizeof(MallocBlock)) % align));
+    MallocBlock* request_block = reinterpret_cast<MallocBlock*>(request_block_address);
+
+    size_t old_size_for_best = best->size;
+    size_t new_size_for_best = request_block_address - reinterpret_cast<uintptr_t>(best) - sizeof(MallocBlock);
+
+    request_block->prev = best;
+    request_block->next = best->next;
+    request_block->size = old_size_for_best - new_size_for_best - sizeof(MallocBlock);
+    request_block->inuse = false;
+
+    best->size = new_size_for_best;
+    if (best->next) {
+        best->next->prev = request_block;
+    }
+    best->next = request_block;
+
+    // The block may well be larger than needed to service the request. If so,
+    // consider splitting the free space at the end into a separate block.
+    consider_splitting_block(request_block, size);
+    request_block->inuse = true;
+
+    // The result is the payload for the block we created to service the request
+    // and we should assert as a post-condition that it has the desired
+    // alignment.
+    void* result = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(request_block) + sizeof(MallocBlock));
+    assert(reinterpret_cast<uintptr_t>(result) % align == 0);
+    return result;
+}
+
+MallocBlock* MallocZone::find_best_fit(size_t size)
+{
+    MallocBlock *best = nullptr;
+
+    for (MallocBlock *block = head_; block; block = block->next) {
+        if (block->size >= size
+            && !block->inuse
+            && (!best || (block->size < best->size))) {
+            best = block;
+        }
+    }
+
+    return best;
+}
+
+MallocBlock* MallocZone::find_best_fit(size_t size, size_t align)
+{
+    MallocBlock *best = nullptr;
+
+    for (MallocBlock *block = head_; block; block = block->next) {
+        if (block->size >= size
+            && ((reinterpret_cast<uintptr_t>(block) + sizeof(MallocBlock)) % align == 0)
+            && !block->inuse
+            && (!best || (block->size < best->size))
+            ) {
+            best = block;
+        }
+    }
+
+    return best;
 }
 
 void MallocZone::free(void *ptr)

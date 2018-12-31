@@ -13,6 +13,11 @@ public:
     // If size is zero a new minimum-sized object is allocated.
     virtual void* malloc(size_t size) = 0;
 
+    // Allocates a block of memory of the given size and alignment.
+    // May return nullptr if the request cannot be satisfied.
+    // If size is zero a new minimum-sized object is allocated.
+    virtual void* memalign(size_t size, size_t align) = 0;
+
     // Tries to change the size of the allocation pointed to by ptr to size,
     // and returns the address of the new allocation. This may move the
     // allocation to a different part of the heap, copying as much of the old

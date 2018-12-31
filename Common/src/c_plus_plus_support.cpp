@@ -1,5 +1,6 @@
 #include "flapjack_libc/assert.h"
 #include <cstdlib>
+#include <new>
 
 // The C++ runtime needs this function in case a pure virtual function call is
 // made. Though, that should not be possible, anyhow.
@@ -12,14 +13,24 @@ extern "C" void __cxa_pure_virtual(void)
 #endif
 }
 
-void *operator new(size_t size)
+void* operator new(size_t size)
 {
     return malloc(size);
 }
 
-void *operator new[](size_t size)
+void* operator new[](size_t size)
 {
     return malloc(size);
+}
+
+void* operator new(size_t size, std::align_val_t align)
+{
+    return memalign(size, static_cast<size_t>(align));
+}
+
+void* operator new[](size_t size, std::align_val_t align)
+{
+    return memalign(size, static_cast<size_t>(align));
 }
 
 void operator delete(void* p)

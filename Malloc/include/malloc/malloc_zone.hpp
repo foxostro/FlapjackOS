@@ -19,6 +19,7 @@ public:
     static MallocZone* create(uintptr_t start, size_t size);
 
     void* malloc(size_t size) override;
+    void* memalign(size_t size, size_t align) override;
     void* realloc(void *ptr, size_t new_size) override;
     void free(void *ptr) override;
 
@@ -28,6 +29,8 @@ public:
 
 private:
     MallocZone();
+    MallocBlock* find_best_fit(size_t size);
+    MallocBlock* find_best_fit(size_t size, size_t align);
 
     MallocBlock *head_;
 };
