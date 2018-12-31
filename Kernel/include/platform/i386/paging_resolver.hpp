@@ -5,6 +5,7 @@
 #include "page_directory.hpp"
 #include "hardware_memory_management_unit.hpp"
 #include <cstdint>
+#include <limits>
 
 namespace i386 {
 
@@ -34,8 +35,9 @@ public:
                                           size_t length,
                                           Function&& fn)
     {
-        constexpr uintptr_t STEP = 0x400000;
-        for (size_t remaining_length = length;
+        assert(length < std::numeric_limits<int>::max());
+        constexpr int STEP = 0x400000;
+        for (int remaining_length = static_cast<int>(length);
              remaining_length > 0;
              remaining_length -= STEP) {
             PageDirectoryEntry* pde = get_page_directory_entry(&pd, linear_address);
