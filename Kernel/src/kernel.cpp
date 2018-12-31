@@ -46,13 +46,16 @@ void Kernel::run()
 {
     TRACE("Running...");
 
-    MultibootModuleEnumerator enumerator{mmu_, mb_info_};
-    assert(enumerator.has_next());
-    Data elf_image = get_module_data(enumerator.get_next());
-    auto elf_loader = create_elf_loader(elf_image);
-    unsigned result = elf_loader.exec();
-    terminal_.printf("result = 0x%x\n", result);
-    assert(result == 0xdeadbeef);
+    InterruptLock lock;
+    perform_with_lock(lock, [&]{
+        MultibootModuleEnumerator enumerator{mmu_, mb_info_};
+        assert(enumerator.has_next());
+        Data elf_image = get_module_data(enumerator.get_next());
+        auto elf_loader = create_elf_loader(elf_image);
+        unsigned result = elf_loader.exec();
+        terminal_.printf("result = 0x%x\n", result);
+        assert(result == 0xdeadbeef);
+    });
 
     scheduler_.begin(new ThreadExternalStack);
     do_console_loop();
