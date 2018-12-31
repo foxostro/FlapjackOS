@@ -86,11 +86,22 @@ public:
         if (!entry) {
             return nullptr;
         }
+
+#if 0
         uint64_t address = entry->get_address();
+#else
+        // Defeat the optimizer. Without this memcpy() the optimizer will
+        // remove the branch "if (address == 0x0)". I have no idea why.
+        uint64_t tmp = entry->get_address();
+        uint64_t address = 0;
+        memcpy(&address, &tmp, sizeof(tmp));
+#endif
+
         if (address == 0x0) {
             return nullptr;
         }
-        PageTable* pt = (PageTable*)mmu_.convert_physical_to_logical_address(address);
+        uintptr_t pt_addr = mmu_.convert_physical_to_logical_address(address);
+        PageTable* pt = reinterpret_cast<PageTable*>(pt_addr);
         return pt;
     }
 
