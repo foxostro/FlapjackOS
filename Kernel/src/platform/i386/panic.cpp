@@ -37,8 +37,8 @@ void panic(const char* fmt, ...)
     // a text terminal yet. In this case, panic() makes its own.
     VGATextDisplayDevice display;
     UnlockedTextTerminal terminal(display);
-    backtrace(terminal);
     terminal.printf("PANIC: %s\n\n", buffer);
+    backtrace(terminal);
 
     halt_forever();
 }
