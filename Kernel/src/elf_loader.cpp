@@ -38,16 +38,31 @@ void ElfLoader::action_load(const elf32::Elf32_Phdr& header)
     TRACE("begin");
     uintptr_t physical_address = page_frame_allocator_.allocate_span(header.p_memsz);
     uintptr_t linear_address = header.p_vaddr;
+
+    // Ensure the page directory has page tables for the region of memory.
     physical_memory_map_.populate_page_tables(linear_address, header.p_memsz);
-    auto flags = get_protection_flags(header);
-    TRACE("map_page");
-    physical_memory_map_.map_page(physical_address, linear_address, flags);
-    TRACE("memset");
+
+    // Map the page so the kernel can Write into it.
+    TRACE("map_page(physical_address=%p, linear_address=%p, flags=physical_memory_map_.WRITABLE)",
+          reinterpret_cast<char*>(physical_address),
+          reinterpret_cast<char*>(linear_address));
+    physical_memory_map_.map_page(physical_address, linear_address, physical_memory_map_.WRITABLE);
+
+    // Populate the program segment. The segment in memory may be larger than
+    // the data region in the file. The remainder is cleared to zero.
     memset(reinterpret_cast<char*>(linear_address), 0, header.p_memsz);
-    TRACE("memcpy");
     memcpy(reinterpret_cast<char*>(linear_address),
            image_.bytes + header.p_offset,
            header.p_filesz);
+    
+    // Map again with the appropriate protection. This may make it read-only.
+    auto flags = get_protection_flags(header);
+    TRACE("map_page(physical_address=%p, linear_address=%p, flags=%d)",
+          reinterpret_cast<char*>(physical_address),
+          reinterpret_cast<char*>(linear_address),
+          static_cast<int>(flags));
+    physical_memory_map_.map_page(physical_address, linear_address, flags);
+
     TRACE("end");
 }
 

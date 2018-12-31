@@ -76,10 +76,11 @@ public:
         invlpg(linear_address);
     }
 
-private:
+protected:
     PagingResolver resolver_;
     MMU &mmu_;
 
+private:
     inline void invlpg(uintptr_t linear_address)
     {
     #ifdef TESTING
