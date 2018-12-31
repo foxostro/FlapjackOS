@@ -39,6 +39,8 @@ set(SOURCE_FILES
     "include/common/cmpxchg.h" "src/cmpxchg.c"
     "include/common/elf32.hpp"
     "include/common/elf32_parser.hpp"
+    "include/common/elf64.hpp"
+    "include/common/elf64_parser.hpp"
     "include/common/data.hpp"
 
     "include/common/test/mock_memory_management_unit.hpp"
@@ -75,6 +77,7 @@ else(CMAKE_CROSSCOMPILING)
                    "test/test_stdio.cpp"
                    "test/test_shared_pointer.cpp"
                    "test/test_elf32.cpp"
+                   "test/test_elf64.cpp"
                    )
 
     target_link_libraries(CommonTest

@@ -1,16 +1,16 @@
-#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_PARSER_HPP
-#define FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_PARSER_HPP
+#ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF64_PARSER_HPP
+#define FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF64_PARSER_HPP
 
-#include "elf32.hpp"
+#include "elf64.hpp"
 
-namespace elf32 {
+namespace elf64 {
 
-class Parser32 {
+class Parser64 {
 public:
-    Parser32(size_t count, unsigned char* data)
+    Parser64(size_t count, unsigned char* data)
      : count_(count), data_(data)
     {
-        assert(count_ > sizeof(Elf32_Ehdr));
+        assert(count_ > sizeof(Elf64_Ehdr));
         assert(data_ != nullptr);
     }
 
@@ -18,13 +18,14 @@ public:
     // That is, appropriate for Intel 32-bit or x86.
     bool is_ia32() const
     {
-        // Please refer to section 1-7, "Machine Information" for details.
+        // This is described in the original ELF-32 specification document.
+        // I guess I'm just assuming that its the same for ELF-64.
         return has_expected_magic() &&
                is_header_size_valid() &&
                is_version_valid() &&
                header().e_ident[EI_CLASS] == ELFCLASS32 &&
                header().e_ident[EI_DATA] == ELFDATA2LSB && 
-               header().e_machine == Machine::EM_386 &&
+               header().e_machine == EM_386 &&
                header().e_flags == 0;
     }
 
@@ -32,13 +33,22 @@ public:
     // That is, appropriate for Intel 64-bit or x86_64.
     bool is_ia32e() const
     {
-        return false;
+        // This identification is described in the AMD64 machine specific
+        // supplement document, "System V Application Binary Interface AMD64
+        // Architecture Processor Supplement Draft Version 0.95"
+        // Refer to section 4.1.1, "Machine Information"
+        return has_expected_magic() &&
+               is_header_size_valid() &&
+               is_version_valid() &&
+               header().e_ident[EI_CLASS] == ELFCLASS64 &&
+               header().e_ident[EI_DATA] == ELFDATA2LSB && 
+               header().e_machine == EM_X86_64;
     }
 
-    // Returns the ELF32 header.
-    const Elf32_Ehdr& header() const
+    // Returns the ELF64 header.
+    const Elf64_Ehdr& header() const
     {
-        return *reinterpret_cast<const Elf32_Ehdr*>(data_);
+        return *reinterpret_cast<const Elf64_Ehdr*>(data_);
     }
 
     // Returns true if the image has the expected ELF magic numbers.
@@ -53,21 +63,21 @@ public:
     // Check that the header size is as expected.
     bool is_header_size_valid() const
     {
-        return header().e_ehsize == sizeof(Elf32_Ehdr);
+        return header().e_ehsize == sizeof(Elf64_Ehdr);
     }
 
     // Checks that the ELF image version is as expected.
     bool is_version_valid() const
     {
-        return header().e_version == Version::EV_CURRENT &&
-               header().e_ident[EI_VERSION] == (unsigned)Version::EV_CURRENT;
+        return header().e_version == EV_CURRENT &&
+               header().e_ident[EI_VERSION] == EV_CURRENT;
     }
 
     // Returns true if the image is for an executable file.
     // This may return false for libraries, for example.
     bool is_executable() const
     {
-        return header().e_type == Type::ET_EXEC;
+        return header().e_type == ET_EXEC;
     }
 
     // Gets the start address for the executable, or zero.
@@ -77,12 +87,12 @@ public:
     }
 
     // Returns a reference to the specified section header.
-    const Elf32_Shdr& get_section_header(size_t index) const
+    const Elf64_Shdr& get_section_header(size_t index) const
     {
         assert(index < get_number_of_section_headers());
         assert(is_section_header_size_valid());
-        const Elf32_Shdr* section_headers = get_section_headers();
-        const Elf32_Shdr& section_header = section_headers[index];
+        const Elf64_Shdr* section_headers = get_section_headers();
+        const Elf64_Shdr& section_header = section_headers[index];
         return section_header;
     }
 
@@ -93,16 +103,16 @@ public:
     }
 
     // Returns a pointer to the section header table.
-    const Elf32_Shdr* get_section_headers() const
+    const Elf64_Shdr* get_section_headers() const
     {
         assert(is_section_header_size_valid());
-        return reinterpret_cast<const Elf32_Shdr*>(data_ + header().e_shoff);
+        return reinterpret_cast<const Elf64_Shdr*>(data_ + header().e_shoff);
     }
 
     // Returns true if e_shentsize does match the size of a section header.
     bool is_section_header_size_valid() const
     {
-        return header().e_shentsize == sizeof(Elf32_Shdr);
+        return header().e_shentsize == sizeof(Elf64_Shdr);
     }
 
     const char* get_section_name(size_t index) const
@@ -112,26 +122,26 @@ public:
 
     const char* get_section_name_string_table() const
     {
-        const Elf32_Shdr& section = get_section_name_string_table_section();
+        const Elf64_Shdr& section = get_section_name_string_table_section();
         return reinterpret_cast<const char*>(data_ + section.sh_offset);
     }
 
-    const Elf32_Shdr& get_section_name_string_table_section() const
+    const Elf64_Shdr& get_section_name_string_table_section() const
     {
         assert(header().e_shstrndx != SHN_UNDEF);
-        const Elf32_Shdr& section = get_section_header(header().e_shstrndx);
-        assert(section.sh_type == SectionType::SHT_STRTAB);
+        const Elf64_Shdr& section = get_section_header(header().e_shstrndx);
+        assert(section.sh_type == SHT_STRTAB);
         assert(section.sh_size > 0);
         return section;
     }
 
     // Returns a reference to the specified program header.
-    const Elf32_Phdr& get_program_header(size_t index) const
+    const Elf64_Phdr& get_program_header(size_t index) const
     {
         assert(index < get_number_of_program_headers());
         assert(is_program_header_size_valid());
-        const Elf32_Phdr* program_headers = get_program_headers();
-        const Elf32_Phdr& program_header = program_headers[index];
+        const Elf64_Phdr* program_headers = get_program_headers();
+        const Elf64_Phdr& program_header = program_headers[index];
         return program_header;
     }
 
@@ -142,16 +152,16 @@ public:
     }
 
     // Returns a pointer to the program header table.
-    const Elf32_Phdr* get_program_headers() const
+    const Elf64_Phdr* get_program_headers() const
     {
         assert(is_program_header_size_valid());
-        return reinterpret_cast<const Elf32_Phdr*>(data_ + header().e_phoff);
+        return reinterpret_cast<const Elf64_Phdr*>(data_ + header().e_phoff);
     }
 
     // Returns true if e_phentsize does match the size of a program header.
     bool is_program_header_size_valid() const
     {
-        return header().e_phentsize == sizeof(Elf32_Phdr);
+        return header().e_phentsize == sizeof(Elf64_Phdr);
     }
 
     // Enumerate the program headers in the ELF image.
@@ -168,6 +178,6 @@ private:
     unsigned char* data_;
 };
 
-} // namespace elf32
+} // namespace elf64
 
-#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_PARSER_HPP
+#endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF64_PARSER_HPP

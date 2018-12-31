@@ -11,7 +11,7 @@ static unsigned char g_test_data_32[] = {
 };
 
 #if VERIFY_TEST_DATA
-TEST_CASE("Elf32 Test data has expected contents.", "[Elf32]")
+TEST_CASE("Elf32: Test data has expected contents.", "[Elf32]")
 {
     size_t length = sizeof(g_test_data_32);
     FILE* fp = fopen("/Users/andrewfox/src/FlapjackOS/build/i386/User/Test1", "rb");
@@ -27,14 +27,14 @@ TEST_CASE("Elf32 Test data has expected contents.", "[Elf32]")
 }
 #endif
 
-TEST_CASE("Parser checks the image is appropriate for IA-32 executable", "[Elf32]")
+TEST_CASE("Elf32: Parser checks the image is appropriate for IA-32 executable", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     REQUIRE(parser.is_ia32());
     REQUIRE(parser.is_executable());
 }
 
-TEST_CASE("Parser checks the start address matches the test gold", "[Elf32]")
+TEST_CASE("Elf32: Parser checks the start address matches the test gold", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
 
@@ -42,19 +42,19 @@ TEST_CASE("Parser checks the start address matches the test gold", "[Elf32]")
     REQUIRE(0x08048054 == parser.get_start_address());
 }
 
-TEST_CASE("Parser checks the image contains the expected number of sections", "[Elf32]")
+TEST_CASE("Elf32: Parser checks the image contains the expected number of sections", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     REQUIRE(5 == parser.get_number_of_section_headers());
 }
 
-TEST_CASE("Parser checks the image contains section headers of the expected size", "[Elf32]")
+TEST_CASE("Elf32: Parser checks the image contains section headers of the expected size", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     REQUIRE(parser.is_section_header_size_valid());
 }
 
-TEST_CASE("Parser checks the first section header is the expected null header", "[Elf32]")
+TEST_CASE("Elf32: Parser checks the first section header is the expected null header", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     const elf32::Elf32_Shdr& header = parser.get_section_header(0);
@@ -70,7 +70,7 @@ TEST_CASE("Parser checks the first section header is the expected null header", 
     REQUIRE(0 == header.sh_entsize);
 }
 
-TEST_CASE("Parser checks that program headers match the test gold", "[Elf32]")
+TEST_CASE("Elf32: Parser checks that program headers match the test gold", "[Elf32]")
 {
     elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
 
