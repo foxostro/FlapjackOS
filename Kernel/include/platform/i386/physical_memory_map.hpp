@@ -3,11 +3,24 @@
 
 #include "generic_physical_memory_map.hpp"
 #include "paging_resolver.hpp"
+#include "hardware_memory_management_unit.hpp"
 
 namespace i386 {
 
-template<typename MMU>
-using PhysicalMemoryMap = GenericPhysicalMemoryMap< i386::PagingResolver<MMU> >;
+template<typename MemoryManagementUnit>
+class PhysicalMemoryMap : public GenericPhysicalMemoryMap<i386::PagingResolver<MemoryManagementUnit>>
+{
+public:
+    PhysicalMemoryMap(MemoryManagementUnit& mmu)
+     : GenericPhysicalMemoryMap<i386::PagingResolver<MemoryManagementUnit>>(mmu)
+    {}
+    
+    void populate_page_tables([[maybe_unused]] uintptr_t begin,
+                              [[maybe_unused]] size_t length) override
+    {
+        assert(!"stub");
+    }
+};
 
 } // namespace i386
 

@@ -40,6 +40,8 @@ private:
     ElfParser create_parser();
     void process_program_header(const elf32::Elf32_Phdr& header);
     void action_load(const elf32::Elf32_Phdr& header);
+    void populate_page_tables(uintptr_t begin, size_t length);
+    void populate_page_table(uintptr_t linear_address);
     Data get_segment_data(const elf32::Elf32_Phdr& header);
     PhysicalMemoryMap::ProtectionFlags get_protection_flags(const elf32::Elf32_Phdr& header);
 };
