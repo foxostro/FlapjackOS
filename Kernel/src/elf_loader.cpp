@@ -35,17 +35,13 @@ void ElfLoader::process_program_header(const elf32::Elf32_Phdr& header)
 void ElfLoader::action_load(const elf32::Elf32_Phdr& header)
 {
     // AFOX_TODO: need some way to track ownership of page frames and free them when they are no longer in use
-    TRACE("begin");
     uintptr_t physical_address = page_frame_allocator_.allocate_span(header.p_memsz);
     uintptr_t linear_address = header.p_vaddr;
 
     // Ensure the page directory has page tables for the region of memory.
     physical_memory_map_.populate_page_tables(linear_address, header.p_memsz);
 
-    // Map the page so the kernel can Write into it.
-    TRACE("map_page(physical_address=%p, linear_address=%p, flags=physical_memory_map_.WRITABLE)",
-          reinterpret_cast<char*>(physical_address),
-          reinterpret_cast<char*>(linear_address));
+    // Map the page so the kernel can populate its contents.
     physical_memory_map_.map_page(physical_address, linear_address, physical_memory_map_.WRITABLE | physical_memory_map_.SUPERVISOR);
     
     // Populate the program segment. The segment in memory may be larger than
@@ -56,14 +52,7 @@ void ElfLoader::action_load(const elf32::Elf32_Phdr& header)
            header.p_filesz);
     
     // Map again with the appropriate protection. This may make it read-only.
-    auto flags = get_protection_flags(header);
-    TRACE("map_page(physical_address=%p, linear_address=%p, flags=%d)",
-          reinterpret_cast<char*>(physical_address),
-          reinterpret_cast<char*>(linear_address),
-          static_cast<int>(flags));
-    physical_memory_map_.map_page(physical_address, linear_address, flags);
-
-    TRACE("end");
+    physical_memory_map_.map_page(physical_address, linear_address, get_protection_flags(header));
 }
 
 ElfLoader::PhysicalMemoryMap::ProtectionFlags
