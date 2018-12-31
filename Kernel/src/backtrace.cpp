@@ -1,35 +1,14 @@
 #include <backtrace.hpp>
-#include <get_frame_pointer.h>
+#include <logger.hpp>
 
-// Maximum number of stack frames in a backtrace.
-constexpr size_t MAXFRAMES = 16;
-
-void backtrace(TextTerminal &term)
+void backtrace(UnlockedTextTerminal &term)
 {
-    size_t frame;
-    uintptr_t* frame_pointer;
-
-    frame_pointer = get_frame_pointer();
-
+    TRACE("begin");
     term.printf("Back Trace:\n");
-    for (frame = 0; frame < MAXFRAMES; ++frame) {
-        uintptr_t return_address;
-
-        if(frame_pointer == nullptr) {
-            // We set ebp to zero at the root stack frame.
-            break;
-        }
-
-        return_address = frame_pointer[1];
-
-        if(return_address == 0) {
-            // No return address?
-            break;
-        }
-
-        frame_pointer = (uintptr_t *)(frame_pointer[0]);
-        term.printf("[%p]\n", return_address);
-    }
-
+    enumerate_stack_frames([&](uintptr_t instruction_pointer){
+        TRACE("[%p]", instruction_pointer);
+        term.printf("[%p]\n", instruction_pointer);
+    });
+    TRACE("end");
     term.printf("\n");
 }
