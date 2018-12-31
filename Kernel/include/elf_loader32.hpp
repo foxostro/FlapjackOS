@@ -7,7 +7,7 @@
 #include <page_frame_allocator.hpp>
 
 // Loads the ELF executable into the current address space.
-class ElfLoader : private KernelPolicy {
+class ElfLoader32 : private KernelPolicy {
 public:
     using ElfParser = elf32::Parser32;
 
@@ -19,9 +19,9 @@ public:
     //                         physical memory to accomodate the executable's
     //                         memory segments. 
     // elf_image -- The ELF image in memory.
-    ElfLoader(PhysicalMemoryMap& physical_memory_map,
-              PageFrameAllocator& page_frame_allocator,
-              const Data& elf_image);
+    ElfLoader32(PhysicalMemoryMap& physical_memory_map,
+                PageFrameAllocator& page_frame_allocator,
+                const Data& elf_image);
 
     // Load the executable image into the current address space.
     // Then, execute at the specified start address.

@@ -5,7 +5,7 @@
 #include <page_frame_allocator.hpp>
 #include <kernel_policy.hpp>
 #include <scheduler.hpp>
-#include <elf_loader.hpp>
+#include <elf_loader32.hpp>
 #include <common/text_terminal.hpp>
 #include <common/data.hpp>
 #include <cstdint>
@@ -86,7 +86,7 @@ private:
 
     Data get_module_data(multiboot_module_t& module);
 
-    ElfLoader create_elf_loader(const Data& elf_image);
+    ElfLoader32 create_elf_loader(const Data& elf_image);
 
     void do_console_loop();
 };

@@ -1,14 +1,14 @@
-#include <elf_loader.hpp>
+#include <elf_loader32.hpp>
 
-ElfLoader::ElfLoader(PhysicalMemoryMap& phys_map,
-                     PageFrameAllocator& page_frame_allocator,
-                     const Data& elf_image)
+ElfLoader32::ElfLoader32(PhysicalMemoryMap& phys_map,
+                         PageFrameAllocator& page_frame_allocator,
+                         const Data& elf_image)
  : physical_memory_map_(phys_map),
    page_frame_allocator_(page_frame_allocator),
    image_(elf_image)
 {}
 
-ElfLoader::Function ElfLoader::load()
+ElfLoader32::Function ElfLoader32::load()
 {
     // AFOX_TODO: handle error conditions in exec() too!
     auto parser = create_parser();
@@ -20,19 +20,19 @@ ElfLoader::Function ElfLoader::load()
     return reinterpret_cast<Function>(parser.get_start_address());
 }
 
-auto ElfLoader::create_parser() -> ElfParser
+auto ElfLoader32::create_parser() -> ElfParser
 {
     return ElfParser{image_.length, image_.bytes};
 }
 
-void ElfLoader::process_program_header(const elf32::Elf32_Phdr& header)
+void ElfLoader32::process_program_header(const elf32::Elf32_Phdr& header)
 {
     if (elf32::SegmentType::PT_LOAD == header.p_type) {
         action_load(header);
     }
 }
 
-void ElfLoader::action_load(const elf32::Elf32_Phdr& header)
+void ElfLoader32::action_load(const elf32::Elf32_Phdr& header)
 {
     // AFOX_TODO: need some way to track ownership of page frames and free them when they are no longer in use
     uintptr_t physical_address = page_frame_allocator_.allocate_span(header.p_memsz);
@@ -55,10 +55,10 @@ void ElfLoader::action_load(const elf32::Elf32_Phdr& header)
     physical_memory_map_.map_page(physical_address, linear_address, get_protection_flags(header));
 }
 
-ElfLoader::PhysicalMemoryMap::ProtectionFlags
-ElfLoader::get_protection_flags(const elf32::Elf32_Phdr& header)
+ElfLoader32::PhysicalMemoryMap::ProtectionFlags
+ElfLoader32::get_protection_flags(const elf32::Elf32_Phdr& header)
 {
-    ElfLoader::PhysicalMemoryMap::ProtectionFlags flags = 0;
+    PhysicalMemoryMap::ProtectionFlags flags = 0;
     if (header.p_flags & elf32::PF_W) {
         flags = flags | physical_memory_map_.WRITABLE;
     }

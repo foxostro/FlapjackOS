@@ -71,9 +71,9 @@ Data Kernel::get_module_data(multiboot_module_t& module)
     return mod_data;
 }
 
-ElfLoader Kernel::create_elf_loader(const Data& elf_image)
+ElfLoader32 Kernel::create_elf_loader(const Data& elf_image)
 {
-    return ElfLoader{phys_map_, page_frame_allocator_, elf_image};
+    return ElfLoader32{phys_map_, page_frame_allocator_, elf_image};
 }
 
 void Kernel::do_console_loop()
