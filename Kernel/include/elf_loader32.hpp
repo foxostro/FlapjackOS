@@ -10,7 +10,7 @@
 // Loads the ELF executable into the current address space.
 class ElfLoader32 : public ElfLoader, private KernelPolicy {
 public:
-    using ElfParser = elf32::Parser32;
+    using ElfParser = elf::Parser32;
 
     // Constructor.
     // physical_memory_map -- The ELF loader needs to be able adjust virtual
@@ -42,12 +42,12 @@ private:
 
     Function load();
     ElfParser create_parser();
-    void process_program_header(const elf32::Elf32_Phdr& header);
-    void action_load(const elf32::Elf32_Phdr& header);
+    void process_program_header(const elf::Elf32_Phdr& header);
+    void action_load(const elf::Elf32_Phdr& header);
     void populate_page_tables(uintptr_t begin, size_t length);
     void populate_page_table(uintptr_t linear_address);
-    Data get_segment_data(const elf32::Elf32_Phdr& header);
-    PhysicalMemoryMap::ProtectionFlags get_protection_flags(const elf32::Elf32_Phdr& header);
+    Data get_segment_data(const elf::Elf32_Phdr& header);
+    PhysicalMemoryMap::ProtectionFlags get_protection_flags(const elf::Elf32_Phdr& header);
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF_LOADER32_HPP

@@ -3,7 +3,7 @@
 
 #include "elf32.hpp"
 
-namespace elf32 {
+namespace elf {
 
 class Parser32 {
 public:
@@ -24,7 +24,7 @@ public:
                is_version_valid() &&
                header().e_ident[EI_CLASS] == ELFCLASS32 &&
                header().e_ident[EI_DATA] == ELFDATA2LSB && 
-               header().e_machine == Machine::EM_386 &&
+               header().e_machine == EM_386 &&
                header().e_flags == 0;
     }
 
@@ -59,15 +59,15 @@ public:
     // Checks that the ELF image version is as expected.
     bool is_version_valid() const
     {
-        return header().e_version == Version::EV_CURRENT &&
-               header().e_ident[EI_VERSION] == (unsigned)Version::EV_CURRENT;
+        return header().e_version == EV_CURRENT &&
+               header().e_ident[EI_VERSION] == EV_CURRENT;
     }
 
     // Returns true if the image is for an executable file.
     // This may return false for libraries, for example.
     bool is_executable() const
     {
-        return header().e_type == Type::ET_EXEC;
+        return header().e_type == ET_EXEC;
     }
 
     // Gets the start address for the executable, or zero.
@@ -120,7 +120,7 @@ public:
     {
         assert(header().e_shstrndx != SHN_UNDEF);
         const Elf32_Shdr& section = get_section_header(header().e_shstrndx);
-        assert(section.sh_type == SectionType::SHT_STRTAB);
+        assert(section.sh_type == SHT_STRTAB);
         assert(section.sh_size > 0);
         return section;
     }
@@ -168,6 +168,6 @@ private:
     unsigned char* data_;
 };
 
-} // namespace elf32
+} // namespace elf
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_PARSER_HPP

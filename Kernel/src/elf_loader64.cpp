@@ -38,7 +38,7 @@ auto ElfLoader64::create_parser() -> ElfParser
 
 void ElfLoader64::process_program_header(const ProgramHeader& header)
 {
-    if (elf64::PT_LOAD == header.p_type) {
+    if (elf::PT_LOAD == header.p_type) {
         action_load(header);
     }
 }
@@ -70,7 +70,7 @@ ElfLoader64::PhysicalMemoryMap::ProtectionFlags
 ElfLoader64::get_protection_flags(const ProgramHeader& header)
 {
     PhysicalMemoryMap::ProtectionFlags flags = 0;
-    if (header.p_flags & elf64::PF_W) {
+    if (header.p_flags & elf::PF_W) {
         flags = flags | physical_memory_map_.WRITABLE;
     }
     // AFOX_TODO: handle the executable flag too in get_protection_flags()

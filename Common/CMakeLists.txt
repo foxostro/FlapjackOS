@@ -37,9 +37,10 @@ set(SOURCE_FILES
     "include/common/shared_pointer.hpp"
     "include/common/unique_pointer.hpp"
     "include/common/cmpxchg.h" "src/cmpxchg.c"
+    "include/common/elf.hpp"
     "include/common/elf32.hpp"
-    "include/common/elf32_parser.hpp"
     "include/common/elf64.hpp"
+    "include/common/elf32_parser.hpp"
     "include/common/elf64_parser.hpp"
     "include/common/data.hpp"
 

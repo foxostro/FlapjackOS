@@ -29,14 +29,14 @@ TEST_CASE("Elf64: Test data has expected contents.", "[Elf64]")
 
 TEST_CASE("Elf64: Parser checks the image is appropriate for IA-32e executable", "[Elf64]")
 {
-    elf64::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
+    elf::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
     REQUIRE(parser.is_ia32e());
     REQUIRE(parser.is_executable());
 }
 
 TEST_CASE("Elf64: Parser checks the start address matches the test gold", "[Elf64]")
 {
-    elf64::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
+    elf::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
 
     // This value was determined by running `objdump -x' on the original file.
     REQUIRE(0x0000000000400078 == parser.get_start_address());
@@ -44,7 +44,7 @@ TEST_CASE("Elf64: Parser checks the start address matches the test gold", "[Elf6
 
 TEST_CASE("Elf64: Parser checks the image contains the expected number of sections", "[Elf64]")
 {
-    elf64::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
+    elf::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
 
     // This value was determined by running `objdump -x' on the original file.
     REQUIRE(5 == parser.get_number_of_section_headers());
@@ -52,21 +52,21 @@ TEST_CASE("Elf64: Parser checks the image contains the expected number of sectio
 
 TEST_CASE("Elf64: Parser checks the image contains section headers of the expected size", "[Elf64]")
 {
-    elf64::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
+    elf::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
     REQUIRE(parser.is_section_header_size_valid());
 }
 
 TEST_CASE("Elf64: Parser checks the first section header is the expected null header", "[Elf64]")
 {
-    elf64::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
-    const elf64::Elf64_Shdr& header = parser.get_section_header(0);
+    elf::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
+    const elf::Elf64_Shdr& header = parser.get_section_header(0);
     REQUIRE(0 == header.sh_name);
     REQUIRE(std::string() == parser.get_section_name(header.sh_name));
-    REQUIRE(elf64::SHT_NULL == header.sh_type);
+    REQUIRE(elf::SHT_NULL == header.sh_type);
     REQUIRE(0 == header.sh_flags);
     REQUIRE(0 == header.sh_addr);
     REQUIRE(0 == header.sh_offset);
-    REQUIRE(elf64::SHN_UNDEF == header.sh_link);
+    REQUIRE(elf::SHN_UNDEF == header.sh_link);
     REQUIRE(0 == header.sh_info);
     REQUIRE(0 == header.sh_addralign);
     REQUIRE(0 == header.sh_entsize);
@@ -74,17 +74,17 @@ TEST_CASE("Elf64: Parser checks the first section header is the expected null he
 
 TEST_CASE("Elf64: Parser checks that program headers match the test gold", "[Elf64]")
 {
-    elf64::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
+    elf::Parser64 parser{sizeof(g_test_data_64), g_test_data_64};
 
     // These values were determined by running `objdump -x' on the original file.
     REQUIRE(1 == parser.get_number_of_program_headers());
-    const elf64::Elf64_Phdr& header = parser.get_program_header(0);
-    REQUIRE(elf64::PT_LOAD == header.p_type);
+    const elf::Elf64_Phdr& header = parser.get_program_header(0);
+    REQUIRE(elf::PT_LOAD == header.p_type);
     REQUIRE(0x0000000000000000 == header.p_offset);
     REQUIRE(0x0000000000400000 == header.p_vaddr);
     REQUIRE(0x0000000000400000 == header.p_paddr);
     REQUIRE(0x000000000000007e == header.p_filesz);
     REQUIRE(0x000000000000007e == header.p_memsz);
-    REQUIRE((elf64::PF_R | elf64::PF_X) == header.p_flags);
+    REQUIRE((elf::PF_R | elf::PF_X) == header.p_flags);
     REQUIRE(2097152 == header.p_align);
 }

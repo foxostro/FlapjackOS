@@ -20,7 +20,7 @@ ElfLoader32::Function ElfLoader32::load()
     
     // AFOX_TODO: handle error conditions in exec() too!
     auto parser = create_parser();
-    parser.enumerate([&](const elf32::Elf32_Phdr& header){
+    parser.enumerate([&](const elf::Elf32_Phdr& header){
         process_program_header(header);
     });
     return reinterpret_cast<Function>(parser.get_start_address());
@@ -31,14 +31,14 @@ auto ElfLoader32::create_parser() -> ElfParser
     return ElfParser{image_.length, image_.bytes};
 }
 
-void ElfLoader32::process_program_header(const elf32::Elf32_Phdr& header)
+void ElfLoader32::process_program_header(const elf::Elf32_Phdr& header)
 {
-    if (elf32::SegmentType::PT_LOAD == header.p_type) {
+    if (elf::PT_LOAD == header.p_type) {
         action_load(header);
     }
 }
 
-void ElfLoader32::action_load(const elf32::Elf32_Phdr& header)
+void ElfLoader32::action_load(const elf::Elf32_Phdr& header)
 {
     // AFOX_TODO: need some way to track ownership of page frames and free them when they are no longer in use
     uintptr_t physical_address = page_frame_allocator_.allocate_span(header.p_memsz);
@@ -62,10 +62,10 @@ void ElfLoader32::action_load(const elf32::Elf32_Phdr& header)
 }
 
 ElfLoader32::PhysicalMemoryMap::ProtectionFlags
-ElfLoader32::get_protection_flags(const elf32::Elf32_Phdr& header)
+ElfLoader32::get_protection_flags(const elf::Elf32_Phdr& header)
 {
     PhysicalMemoryMap::ProtectionFlags flags = 0;
-    if (header.p_flags & elf32::PF_W) {
+    if (header.p_flags & elf::PF_W) {
         flags = flags | physical_memory_map_.WRITABLE;
     }
     // AFOX_TODO: handle the executable flag too in get_protection_flags()

@@ -32,8 +32,8 @@ public:
 
 private:
     using Function = unsigned(*)();
-    using ElfParser = elf64::Parser64;
-    using ProgramHeader = elf64::Elf64_Phdr;
+    using ElfParser = elf::Parser64;
+    using ProgramHeader = elf::Elf64_Phdr;
 
     PhysicalMemoryMap& physical_memory_map_;
     PageFrameAllocator& page_frame_allocator_;

@@ -29,14 +29,14 @@ TEST_CASE("Elf32: Test data has expected contents.", "[Elf32]")
 
 TEST_CASE("Elf32: Parser checks the image is appropriate for IA-32 executable", "[Elf32]")
 {
-    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+    elf::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     REQUIRE(parser.is_ia32());
     REQUIRE(parser.is_executable());
 }
 
 TEST_CASE("Elf32: Parser checks the start address matches the test gold", "[Elf32]")
 {
-    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+    elf::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
 
     // This value was determined by running `objdump -x' on the original file.
     REQUIRE(0x08048054 == parser.get_start_address());
@@ -44,27 +44,27 @@ TEST_CASE("Elf32: Parser checks the start address matches the test gold", "[Elf3
 
 TEST_CASE("Elf32: Parser checks the image contains the expected number of sections", "[Elf32]")
 {
-    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+    elf::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     REQUIRE(5 == parser.get_number_of_section_headers());
 }
 
 TEST_CASE("Elf32: Parser checks the image contains section headers of the expected size", "[Elf32]")
 {
-    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+    elf::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
     REQUIRE(parser.is_section_header_size_valid());
 }
 
 TEST_CASE("Elf32: Parser checks the first section header is the expected null header", "[Elf32]")
 {
-    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
-    const elf32::Elf32_Shdr& header = parser.get_section_header(0);
+    elf::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+    const elf::Elf32_Shdr& header = parser.get_section_header(0);
     REQUIRE(0 == header.sh_name);
     REQUIRE(std::string() == parser.get_section_name(header.sh_name));
-    REQUIRE(elf32::SectionType::SHT_NULL == header.sh_type);
+    REQUIRE(elf::SHT_NULL == header.sh_type);
     REQUIRE(0 == header.sh_flags);
     REQUIRE(0 == header.sh_addr);
     REQUIRE(0 == header.sh_offset);
-    REQUIRE(elf32::SHN_UNDEF == header.sh_link);
+    REQUIRE(elf::SHN_UNDEF == header.sh_link);
     REQUIRE(0 == header.sh_info);
     REQUIRE(0 == header.sh_addralign);
     REQUIRE(0 == header.sh_entsize);
@@ -72,17 +72,17 @@ TEST_CASE("Elf32: Parser checks the first section header is the expected null he
 
 TEST_CASE("Elf32: Parser checks that program headers match the test gold", "[Elf32]")
 {
-    elf32::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
+    elf::Parser32 parser{sizeof(g_test_data_32), g_test_data_32};
 
     // These values were determined by running `objdump -x' on the original file.
     REQUIRE(1 == parser.get_number_of_program_headers());
-    const elf32::Elf32_Phdr& header = parser.get_program_header(0);
-    REQUIRE(elf32::SegmentType::PT_LOAD == header.p_type);
+    const elf::Elf32_Phdr& header = parser.get_program_header(0);
+    REQUIRE(elf::PT_LOAD == header.p_type);
     REQUIRE(0x0 == header.p_offset);
     REQUIRE(0x8048000 == header.p_vaddr);
     REQUIRE(0x8048000 == header.p_paddr);
     REQUIRE(0x5a == header.p_filesz);
     REQUIRE(0x5a == header.p_memsz);
-    REQUIRE((elf32::PF_R | elf32::PF_X) == header.p_flags);
+    REQUIRE((elf::PF_R | elf::PF_X) == header.p_flags);
     REQUIRE(4096 == header.p_align);
 }
