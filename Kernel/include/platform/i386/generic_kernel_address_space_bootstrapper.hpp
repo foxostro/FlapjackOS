@@ -52,17 +52,9 @@ private:
     void prepare_address_space_internal()
     {
         memset(page_tables_, 0, sizeof(page_tables_));
-        PageDirectory& pd = get_relevant_page_directory();
-        resolver_.enumerate_page_directory_entries(pd, mmu_.get_kernel_virtual_start_address(), KERNEL_MEMORY_REGION_SIZE, [&](PageDirectoryEntry& pde){
+        resolver_.enumerate_page_directory_entries(mmu_.get_kernel_virtual_start_address(), KERNEL_MEMORY_REGION_SIZE, [&](PageDirectoryEntry& pde){
             prepare_page_directory_entry(pde);
         });
-    }
-
-    PageDirectory& get_relevant_page_directory()
-    {
-        PageDirectory* pd = resolver_.get_page_directory(mmu_.get_kernel_virtual_start_address());
-        assert(pd && "expected a page directory for the kernel memory region");
-        return *pd;
     }
 
     void prepare_page_directory_entry(PageDirectoryEntry& pde)

@@ -12,17 +12,16 @@ template<typename MemoryManagementUnit>
 class PhysicalMemoryMap : public GenericPhysicalMemoryMap<i386::PagingResolver<MemoryManagementUnit>>
 {
 public:
+    using PagingResolver = i386::PagingResolver<MemoryManagementUnit>;
+
     PhysicalMemoryMap(MemoryManagementUnit& mmu)
      : GenericPhysicalMemoryMap<i386::PagingResolver<MemoryManagementUnit>>(mmu)
     {}
     
     void populate_page_tables(uintptr_t begin, size_t length) override
     {
-        using PagingResolver = i386::PagingResolver<MemoryManagementUnit>;
         PagingResolver& resolver = this->resolver_;
-        i386::PageDirectory* pd = resolver.get_page_directory();
-        assert(pd);
-        resolver.enumerate_page_directory_entries(*pd, begin, length, [&](PageDirectoryEntry& pde){
+        resolver.enumerate_page_directory_entries(begin, length, [&](PageDirectoryEntry& pde){
             populate_page_table(pde);
         });
     }
@@ -38,7 +37,7 @@ private:
             pde.set_address(physical_address);
             pde.set_present(true);
             pde.set_readwrite(true);
-            pde.set_supervisor(linear_address >= KERNEL_VIRTUAL_START_ADDR);
+            pde.set_supervisor(false);
         }
     }
 };

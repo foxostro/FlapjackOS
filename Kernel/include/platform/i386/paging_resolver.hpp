@@ -29,18 +29,24 @@ public:
         cr3_ = value;
     }
 
+    // Enumerate PDEs governing the specified memory range:
+    //     [linear_address, linear_address+length)
+    // For each PDE, execute fn(pde) where pde is a "PageDirectoryEntry*".
+    // Each page table governs 4MB of memory.
     template<typename Function>
-    void enumerate_page_directory_entries(PageDirectory& pd,
-                                          uintptr_t linear_address,
+    void enumerate_page_directory_entries(uintptr_t linear_address,
                                           size_t length,
                                           Function&& fn)
     {
         assert(length < std::numeric_limits<int>::max());
+
+        // Each page table governs 4MB of memory.
         constexpr int STEP = 0x400000;
+        
         for (int remaining_length = static_cast<int>(length);
              remaining_length > 0;
              remaining_length -= STEP) {
-            PageDirectoryEntry* pde = get_page_directory_entry(&pd, linear_address);
+            PageDirectoryEntry* pde = get_page_directory_entry(get_page_directory(), linear_address);
             assert(pde);
             fn(*pde);
             linear_address += STEP;

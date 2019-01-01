@@ -7,6 +7,7 @@
 #include "page_map_level_four.hpp"
 #include "hardware_memory_management_unit.hpp"
 #include <cstdint>
+#include <climits>
 
 namespace x86_64 {
 
@@ -30,17 +31,79 @@ public:
         cr3_ = value;
     }
 
+    // Enumerate PML4Es governing the specified memory range:
+    //     [linear_address, linear_address+length)
+    // For each PML4E, execute fn(pml4e) where pml4e is a "PageMapLevelFourEntry*".
+    // Each page directory pointer table governs 512GB of memory.
     template<typename Function>
-    void enumerate_page_directory_entries(PageDirectory& pd,
-                                          uintptr_t linear_address,
+    void enumerate_page_map_level_four_entries(uintptr_t linear_address,
+                                               size_t length,
+                                               Function&& fn)
+    {
+        assert(length < INT_MAX);
+
+        PageMapLevelFour* pml4 = get_page_map_level_four();
+        assert(pml4);
+
+        // Each page directory pointer table governs 512GB of memory.
+        constexpr int64_t STEP = 0x8000000000;
+        for (int64_t remaining_length = static_cast<int64_t>(length);
+             remaining_length > 0;
+             remaining_length -= STEP) {
+            PageMapLevelFourEntry* pml4e = get_page_map_level_four_entry(pml4, linear_address);
+            assert(pml4e);
+            fn(*pml4e);
+            linear_address += STEP;
+        }
+    }
+
+    // Enumerate PDPTEs governing the specified memory range:
+    //     [linear_address, linear_address+length)
+    // For each PDPTE, execute fn(pdpte) where pdpte is a "PageDirectoryPointerTableEntry*".
+    // Each page directory governs 1GB of memory.
+    template<typename Function>
+    void enumerate_page_directory_pointer_table_entries(uintptr_t linear_address,
+                                                        size_t length,
+                                                        Function&& fn)
+    {
+        assert(length < INT_MAX);
+
+        PageMapLevelFour* pml4 = get_page_map_level_four();
+        assert(pml4);
+
+        // Each page directory governs 1GB of memory.
+        constexpr int64_t STEP = 0x40000000;
+        for (int64_t remaining_length = static_cast<int64_t>(length);
+             remaining_length > 0;
+             remaining_length -= STEP) {
+            PageDirectoryPointerTable* pdpt = get_page_directory_pointer_table(pml4, linear_address);
+            assert(pdpt);
+            PageDirectoryPointerTableEntry* pdpte = get_page_directory_pointer_table_entry(pdpt, linear_address);
+            assert(pdpte);
+            fn(*pdpte);
+            linear_address += STEP;
+        }
+    }
+
+    // Enumerate PDEs governing the specified memory range:
+    //     [linear_address, linear_address+length)
+    // For each PDE, execute fn(pde) where pde is a "PageDirectoryEntry*".
+    // Each page table governs 2MB of memory.
+    template<typename Function>
+    void enumerate_page_directory_entries(uintptr_t linear_address,
                                           size_t length,
                                           Function&& fn)
     {
-        constexpr uintptr_t STEP = 0x200000;
-        for (size_t remaining_length = length;
+        assert(length < INT_MAX);
+
+        // Each page table governs 2MB of memory.
+        constexpr int64_t STEP = 0x200000;
+        for (int64_t remaining_length = static_cast<int64_t>(length);
              remaining_length > 0;
              remaining_length -= STEP) {
-            PageDirectoryEntry* pde = get_page_directory_entry(&pd, linear_address);
+            PageDirectory* pd = get_page_directory(linear_address);
+            assert(pd);
+            PageDirectoryEntry* pde = get_page_directory_entry(pd, linear_address);
             assert(pde);
             fn(*pde);
             linear_address += STEP;
