@@ -5,6 +5,7 @@
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 #include <multiboot_module_enumerator.hpp>
+#include <elf_loader_factory.hpp>
 #include <malloc/malloc_zone.hpp>
 #include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
@@ -52,7 +53,7 @@ void Kernel::run()
         assert(enumerator.has_next());
         Data elf_image = get_module_data(enumerator.get_next());
         auto elf_loader = create_elf_loader(elf_image);
-        unsigned result = elf_loader.exec();
+        unsigned result = elf_loader->exec();
         terminal_.printf("result = 0x%x\n", result);
         assert(result == 0xdeadbeef);
     });
@@ -71,9 +72,10 @@ Data Kernel::get_module_data(multiboot_module_t& module)
     return mod_data;
 }
 
-ElfLoader32 Kernel::create_elf_loader(const Data& elf_image)
+UniquePointer<ElfLoader> Kernel::create_elf_loader(const Data& elf_image)
 {
-    return ElfLoader32{phys_map_, page_frame_allocator_, elf_image};
+    ElfLoaderFactory factory;
+    return factory.create_loader(phys_map_, page_frame_allocator_, elf_image);
 }
 
 void Kernel::do_console_loop()

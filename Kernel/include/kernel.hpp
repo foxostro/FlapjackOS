@@ -86,7 +86,7 @@ private:
 
     Data get_module_data(multiboot_module_t& module);
 
-    ElfLoader32 create_elf_loader(const Data& elf_image);
+    UniquePointer<ElfLoader> create_elf_loader(const Data& elf_image);
 
     void do_console_loop();
 };

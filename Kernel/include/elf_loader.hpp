@@ -4,6 +4,8 @@
 // Interface for a class which can load an ELF image into memory for exec().
 class ElfLoader {
 public:
+    virtual ~ElfLoader() = default;
+    
     // Load the executable image into the current address space.
     // Then, execute at the specified start address.
     virtual unsigned exec() = 0;
