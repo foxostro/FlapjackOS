@@ -23,9 +23,9 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/logical_addressing.hpp"
     "include/logger.hpp" "src/logger.cpp"
     "include/elf_loader.hpp"
+    "include/elf_loader32.hpp"
+    "include/elf_loader64.hpp"
     "include/elf_loader_factory.hpp" "src/elf_loader_factory.cpp"
-    "include/elf_loader32.hpp" "src/elf_loader32.cpp"
-    "include/elf_loader64.hpp" "src/elf_loader64.cpp"
     )
 
 set(I386_SOURCE_FILES

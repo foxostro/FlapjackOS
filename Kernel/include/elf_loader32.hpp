@@ -8,7 +8,7 @@
 #include <elf_loader.hpp>
 
 // Loads the ELF executable into the current address space.
-class ElfLoader32 : public ElfLoader, private KernelPolicy {
+class ElfLoader32 : public ElfLoaderBase<elf::Parser32, elf::Elf32_Phdr> {
 public:
     using ElfParser = elf::Parser32;
 
@@ -22,32 +22,16 @@ public:
     // elf_image -- The ELF image in memory.
     ElfLoader32(PhysicalMemoryMap& physical_memory_map,
                 PageFrameAllocator& page_frame_allocator,
-                const Data& elf_image);
+                const Data& elf_image)
+     : ElfLoaderBase(physical_memory_map, page_frame_allocator, elf_image)
+    {}
 
     // Returns true if the image is acceptable and this loader can exec().
-    bool can_exec() override;
-
-    // Load the executable image into the current address space.
-    // Then, execute at the specified start address.
-    unsigned exec() override
+    bool can_exec() override
     {
-        return load()();
+        auto parser = create_parser();
+        return parser.is_ia32() && parser.is_executable();
     }
-
-private:
-    using Function = unsigned(*)();
-    PhysicalMemoryMap& physical_memory_map_;
-    PageFrameAllocator& page_frame_allocator_;
-    const Data& image_;
-
-    Function load();
-    ElfParser create_parser();
-    void process_program_header(const elf::Elf32_Phdr& header);
-    void action_load(const elf::Elf32_Phdr& header);
-    void populate_page_tables(uintptr_t begin, size_t length);
-    void populate_page_table(uintptr_t linear_address);
-    Data get_segment_data(const elf::Elf32_Phdr& header);
-    PhysicalMemoryMap::ProtectionFlags get_protection_flags(const elf::Elf32_Phdr& header);
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF_LOADER32_HPP

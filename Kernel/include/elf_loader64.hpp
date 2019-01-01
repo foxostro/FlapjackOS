@@ -8,8 +8,7 @@
 #include <elf_loader.hpp>
 
 // Loads the ELF executable into the current address space.
-// AFOX_TODO: Can ElfLoader32 and ElfLoader64 be consolidated into a single class? Perhaps reduce code duplication by moving code to a super class.
-class ElfLoader64 : public ElfLoader, private KernelPolicy {
+class ElfLoader64 : public ElfLoaderBase<elf::Parser64, elf::Elf64_Phdr> {
 public:
     // Constructor.
     // physical_memory_map -- The ELF loader needs to be able adjust virtual
@@ -21,32 +20,16 @@ public:
     // elf_image -- The ELF image in memory.
     ElfLoader64(PhysicalMemoryMap& physical_memory_map,
                 PageFrameAllocator& page_frame_allocator,
-                const Data& elf_image);
+                const Data& elf_image)
+     : ElfLoaderBase(physical_memory_map, page_frame_allocator, elf_image)
+    {}
 
     // Returns true if the image is acceptable and this loader can exec().
-    bool can_exec() override;
-
-    // Load the executable image into the current address space.
-    // Then, execute at the specified start address.
-    unsigned exec() override;
-
-private:
-    using Function = unsigned(*)();
-    using ElfParser = elf::Parser64;
-    using ProgramHeader = elf::Elf64_Phdr;
-
-    PhysicalMemoryMap& physical_memory_map_;
-    PageFrameAllocator& page_frame_allocator_;
-    const Data& image_;
-
-    Function load();
-    ElfParser create_parser();
-    void process_program_header(const ProgramHeader& header);
-    void action_load(const ProgramHeader& header);
-    void populate_page_tables(uintptr_t begin, size_t length);
-    void populate_page_table(uintptr_t linear_address);
-    Data get_segment_data(const ProgramHeader& header);
-    PhysicalMemoryMap::ProtectionFlags get_protection_flags(const ProgramHeader& header);
+    bool can_exec() override
+    {
+        auto parser = create_parser();
+        return parser.is_ia32e() && parser.is_executable();
+    }
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF_LOADER64_HPP
