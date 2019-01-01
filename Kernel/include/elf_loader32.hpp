@@ -24,6 +24,9 @@ public:
                 PageFrameAllocator& page_frame_allocator,
                 const Data& elf_image);
 
+    // Returns true if the image is acceptable and this loader can exec().
+    bool can_exec() override;
+
     // Load the executable image into the current address space.
     // Then, execute at the specified start address.
     unsigned exec() override

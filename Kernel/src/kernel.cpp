@@ -53,6 +53,9 @@ void Kernel::run()
         assert(enumerator.has_next());
         Data elf_image = get_module_data(enumerator.get_next());
         auto elf_loader = create_elf_loader(elf_image);
+        if (!elf_loader) {
+            panic("cannot execute program");
+        }
         unsigned result = elf_loader->exec();
         terminal_.printf("result = 0x%x\n", result);
         assert(result == 0xdeadbeef);

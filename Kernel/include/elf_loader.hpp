@@ -6,6 +6,9 @@ class ElfLoader {
 public:
     virtual ~ElfLoader() = default;
     
+    // Returns true if the image is acceptable and this loader can exec().
+    virtual bool can_exec() = 0;
+    
     // Load the executable image into the current address space.
     // Then, execute at the specified start address.
     virtual unsigned exec() = 0;

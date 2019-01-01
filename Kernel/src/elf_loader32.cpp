@@ -8,12 +8,18 @@ ElfLoader32::ElfLoader32(PhysicalMemoryMap& phys_map,
    image_(elf_image)
 {}
 
+bool ElfLoader32::can_exec()
+{
+    auto parser = create_parser();
+    return parser.is_ia32() && parser.is_executable();
+}
+
 ElfLoader32::Function ElfLoader32::load()
 {
+    assert(can_exec());
+    
     // AFOX_TODO: handle error conditions in exec() too!
     auto parser = create_parser();
-    assert(parser.is_ia32());
-    assert(parser.is_executable());
     parser.enumerate([&](const elf32::Elf32_Phdr& header){
         process_program_header(header);
     });
