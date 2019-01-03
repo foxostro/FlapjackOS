@@ -26,9 +26,9 @@ TEST_CASE("i386::PageMapLevelOneController -- page table is initially empty", "[
 {
     PML1 page_table;
     for (size_t i = 0, n = page_table.get_number_of_entries(); i < n; ++i) {
-        auto entry = page_table.get_entry(i);
-        REQUIRE(entry->get_page_frame() == nullptr);
-        REQUIRE(entry->is_present() == false);
+        auto& entry = page_table.get_entry(i);
+        REQUIRE(entry.get_page_frame() == nullptr);
+        REQUIRE(entry.is_present() == false);
     }
 }
 
@@ -38,14 +38,14 @@ TEST_CASE("i386::PageMapLevelOneController -- ensure we can stick page frames in
     PML1 page_table;
 
     {
-        auto entry = page_table.get_entry(0);
-        entry->set_page_frame(new i386::PageFrameController{allocator});
+        auto& entry = page_table.get_entry(0);
+        entry.set_page_frame(new i386::PageFrameController{allocator});
     }
 
     {
-        auto entry = page_table.get_entry(0);
-        REQUIRE(entry->get_page_frame() != nullptr);
-        REQUIRE(entry->is_present() == true);
+        auto& entry = page_table.get_entry(0);
+        REQUIRE(entry.get_page_frame() != nullptr);
+        REQUIRE(entry.is_present() == true);
     }
 }
 
@@ -56,20 +56,20 @@ TEST_CASE("i386::PageMapLevelOneController -- ensure we can remove page frame fr
     uintptr_t addr = 0;
 
     {
-        auto entry = page_table.get_entry(0);
-        entry->set_page_frame(new i386::PageFrameController{allocator});
-        addr = entry->get_page_frame()->get_page_frame();
+        auto& entry = page_table.get_entry(0);
+        entry.set_page_frame(new i386::PageFrameController{allocator});
+        addr = entry.get_page_frame()->get_page_frame();
     }
 
     {
-        auto entry = page_table.get_entry(0);
-        entry->set_page_frame(nullptr);
+        auto& entry = page_table.get_entry(0);
+        entry.set_page_frame(nullptr);
     }
 
     {
-        auto entry = page_table.get_entry(0);
-        REQUIRE(entry->get_page_frame() == nullptr);
-        REQUIRE(entry->is_present() == false);
+        auto& entry = page_table.get_entry(0);
+        REQUIRE(entry.get_page_frame() == nullptr);
+        REQUIRE(entry.is_present() == false);
         REQUIRE(allocator.is_free(addr) == true);
     }
 }
@@ -79,8 +79,8 @@ TEST_CASE("i386::PageMapLevelOneController -- ctor can accept a raw poinnter to 
     TestingAllocator allocator = create_page_frame_allocator();
     i386::PageTable* page_table = new i386::PageTable;
     PML1 controller{page_table};
-    auto entry = controller.get_entry(0);
-    entry->set_page_frame(new i386::PageFrameController{allocator});
-    uintptr_t addr = entry->get_page_frame()->get_page_frame();
+    auto& entry = controller.get_entry(0);
+    entry.set_page_frame(new i386::PageFrameController{allocator});
+    uintptr_t addr = entry.get_page_frame()->get_page_frame();
     REQUIRE(addr == page_table->entries[0].get_address());
 }

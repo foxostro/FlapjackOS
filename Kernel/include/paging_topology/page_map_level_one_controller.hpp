@@ -43,8 +43,8 @@ public:
     virtual size_t get_number_of_entries() const = 0;
 
     // Gets the specified entry in the table.
-    virtual Entry* get_entry(size_t index) = 0;
-    virtual const Entry* get_entry(size_t index) const = 0;
+    virtual Entry& get_entry(size_t index) = 0;
+    virtual const Entry& get_entry(size_t index) const = 0;
 };
 
 } // namespace PagingTopology

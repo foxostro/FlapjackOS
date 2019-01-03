@@ -69,9 +69,8 @@ public:
 
     PageFrameController(PageFrameController&& other)
     {
-        perform_with_lock(lock_, other.lock_, [&]{
-            impl_ = std::move(other.impl_);
-        });
+        LockGuard guard{other.lock_};
+        impl_ = std::move(other.impl_);
     }
 
     PageFrameController(const PageFrameController&) = delete;
@@ -79,20 +78,16 @@ public:
     PageFrameController& operator=(PageFrameController&& other)
     {
         if (this != &other) {
-            perform_with_lock(lock_, other.lock_, [&]{
-                impl_ = std::move(other.impl_);
-            });
+            LockGuard2 guard{lock_, other.lock_};
+            impl_ = std::move(other.impl_);
         }
         return *this;
     }
 
     uintptr_t get_page_frame() const override
     {
-        uintptr_t result;
-        perform_with_lock(lock_, [&]{
-            result = impl_.get_page_frame();
-        });
-        return result;
+        LockGuard guard{lock_};
+        return impl_.get_page_frame();
     }
 
 private:
