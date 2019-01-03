@@ -91,8 +91,8 @@ private:
         // the data region in the file. The remainder is cleared to zero.
         memset(reinterpret_cast<char*>(linear_address), 0, header.p_memsz);
         memcpy(reinterpret_cast<char*>(linear_address),
-            image_.bytes + header.p_offset,
-            header.p_filesz);
+               image_.bytes + header.p_offset,
+               header.p_filesz);
         
         // Map again with the appropriate protection. This may make it read-only.
         physical_memory_map_.map_page(physical_address, linear_address, get_protection_flags(header));

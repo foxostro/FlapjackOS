@@ -46,7 +46,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/interrupt_controller.hpp"
     "include/platform/i386/interrupt_parameters.hpp"
     "include/platform/i386/interrupt_dispatcher.hpp"
-	"include/platform/i386/panic_interrupt_handler.hpp" "src/platform/i386/panic_interrupt_handler.cpp"
+    "include/platform/i386/panic_interrupt_handler.hpp" "src/platform/i386/panic_interrupt_handler.cpp"
     "include/platform/i386/page_fault_interrupt_handler.hpp" "src/platform/i386/page_fault_interrupt_handler.cpp"
     "include/platform/i386/hardware_interrupt_controller.hpp"
     "include/platform/i386/device_drivers.hpp"
@@ -80,7 +80,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/interrupt_controller.hpp"
     "include/platform/x86_64/interrupt_parameters.hpp"
     "include/platform/x86_64/interrupt_dispatcher.hpp"
-	"include/platform/x86_64/panic_interrupt_handler.hpp" "src/platform/x86_64/panic_interrupt_handler.cpp"
+    "include/platform/x86_64/panic_interrupt_handler.hpp" "src/platform/x86_64/panic_interrupt_handler.cpp"
     "include/platform/x86_64/page_fault_interrupt_handler.hpp" "src/platform/x86_64/page_fault_interrupt_handler.cpp"
     "include/platform/x86_64/hardware_interrupt_controller.hpp"
     "include/platform/x86_64/device_drivers.hpp"
@@ -172,7 +172,7 @@ target_link_libraries(Kernel
 
 if (NOT CMAKE_CROSSCOMPILING)
 
-	set(TEST_SOURCE_FILES
+    set(TEST_SOURCE_FILES
         "test/test_main.cpp"
         "test/test_page_frame_allocator.cpp"
         "test/test_page_frame_allocator_configuration_operation.cpp"
