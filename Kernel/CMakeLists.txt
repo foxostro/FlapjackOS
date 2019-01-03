@@ -34,6 +34,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/page_directory_entry.hpp"
     "include/platform/i386/page_table.hpp"
     "include/platform/i386/page_table_entry.hpp"
+    "include/platform/i386/page_frame_controller.hpp"
     "include/platform/i386/generic_physical_memory_map.hpp"
     "include/platform/i386/physical_memory_map.hpp"
     "include/platform/i386/generic_kernel_address_space_bootstrapper.hpp"
@@ -186,6 +187,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_page_table_entry.cpp"
              "test/test_i386_physical_memory_map.cpp"
              "test/test_i386_kernel_address_space_bootstrapper.cpp"
+             "test/test_i386_page_frame_controller.cpp"
              )
     elseif (${BUILD_ARCH} STREQUAL "x86_64")
         list(APPEND TEST_SOURCE_FILES
