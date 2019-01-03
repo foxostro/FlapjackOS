@@ -3,6 +3,7 @@
 
 #include <paging_topology/page_frame_controller.hpp>
 #include <common/mutex.hpp>
+#include <common/perform_with_lock.hpp>
 
 namespace i386 {
 

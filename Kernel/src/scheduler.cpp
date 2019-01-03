@@ -2,6 +2,7 @@
 #include <logger.hpp>
 #include <cassert>
 #include <utility>
+#include <common/perform_with_lock.hpp>
 
 static Scheduler* g_scheduler = nullptr;
 

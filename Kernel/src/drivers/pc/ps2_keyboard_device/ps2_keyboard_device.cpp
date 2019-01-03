@@ -6,7 +6,7 @@
 #include <interrupt_lock.hpp>
 #include <halt.h>
 #include <inout.h>
-#include <common/spin_lock.hpp> // for perform_with_lock()
+#include <common/perform_with_lock.hpp>
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
 //constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;

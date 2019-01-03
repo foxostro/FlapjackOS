@@ -2,6 +2,7 @@
 #define FLAPJACKOS_COMMON_INCLUDE_SHARED_POINTER_HPP
 
 #include <common/mutex.hpp>
+#include <common/perform_with_lock.hpp>
 #include <atomic>
 #include <cassert>
 

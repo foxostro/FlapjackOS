@@ -6,6 +6,7 @@
 #include <common/text_line.hpp>
 #include <common/vec2.hpp>
 #include <common/mutex.hpp>
+#include <common/perform_with_lock.hpp>
 
 // A text terminal displays lines of text on a text console display.
 class UnlockedTextTerminal {
