@@ -32,7 +32,7 @@ public:
 
         virtual bool is_dirty() const = 0;
         virtual void set_dirty(bool dirty) = 0;
-        
+
         virtual bool is_global() const = 0;
         virtual void set_global(bool global) = 0;
     };
@@ -43,8 +43,8 @@ public:
     virtual size_t get_number_of_entries() const = 0;
 
     // Gets the specified entry in the table.
-    virtual Entry& get_entry(size_t index) = 0;
-    virtual const Entry& get_entry(size_t index) const = 0;
+    virtual Entry* get_entry(size_t index) = 0;
+    virtual const Entry* get_entry(size_t index) const = 0;
 };
 
 } // namespace PagingTopology

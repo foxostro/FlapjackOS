@@ -4,14 +4,15 @@
 #include <platform/i386/page_table.hpp>
 #include <paging_topology/page_map_level_one_controller.hpp>
 #include <common/unique_pointer.hpp>
+#include <common/mutex.hpp>
 #include <cassert>
 
 namespace i386 {
 
-// Owns a page table.
+// Owns a page table. Provides synchronized access.
 // On IA-32, the first level page map is called a Page Table.
 template<typename PageFrameAllocator>
-class UnlockedPageMapLevelOneController final : public PagingTopology::PageMapLevelOneController {
+class PageMapLevelOneController final : public PagingTopology::PageMapLevelOneController {
 public:
     // A single entry in the page map.
     // This controls the contents of one underlying Page Table Entry and also
@@ -20,7 +21,13 @@ public:
     public:
         virtual ~Entry() = default;
 
-        Entry() : pte_(nullptr) {}
+        Entry() : lock_(nullptr), pte_(nullptr) {}
+
+        void set_lock(Mutex* lock)
+        {
+            assert(lock);
+            lock_ = lock;
+        }
 
         void set_pte(PageTableEntry* pte)
         {
@@ -30,23 +37,28 @@ public:
 
         SharedPointer<PagingTopology::PageFrameController> get_page_frame() const override
         {
-            return page_frame_;
+            return perform_with_lock(*lock_, [&]{
+                return page_frame_;
+            });
         }
         
         void set_page_frame(SharedPointer<PagingTopology::PageFrameController> p) override
         {
             assert(pte_);
-            page_frame_ = std::move(p);
-            if (has_page_frame()) {
-                pte_->set_address(page_frame_->get_page_frame());
-                pte_->set_present(true);
-            } else {
-                pte_->set_address(0);
-                pte_->set_present(false);
-            }
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                page_frame_ = std::move(p);
+                if (has_page_frame_unlocked()) {
+                    pte_->set_address(page_frame_->get_page_frame());
+                    pte_->set_present(true);
+                } else {
+                    pte_->set_address(0);
+                    pte_->set_present(false);
+                }
+            });
         }
 
-        bool has_page_frame() const
+        bool has_page_frame_unlocked() const
         {
             return page_frame_ && (page_frame_->get_page_frame() != 0);
         }
@@ -54,95 +66,133 @@ public:
         bool is_present() const override
         {
             assert(pte_);
-            return pte_->is_present();
+            assert(lock_);
+            return perform_with_lock(*lock_, [&]{
+                return pte_->is_present();
+            });
         }
 
         void set_present(bool present) override
         {
             assert(pte_);
-            pte_->set_present(present);
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                pte_->set_present(present);
+            });
         }
 
         bool is_readwrite() const override
         {
             assert(pte_);
-            return pte_->is_readwrite();
+            assert(lock_);
+            return perform_with_lock(*lock_, [&]{
+                return pte_->is_readwrite();
+            });
         }
 
         void set_readwrite(bool readwrite) override
         {
             assert(pte_);
-            pte_->set_readwrite(readwrite);
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                pte_->set_readwrite(readwrite);
+            });
         }
 
         bool is_supervisor() const override
         {
             assert(pte_);
-            return pte_->is_supervisor();
+            assert(lock_);
+            return perform_with_lock(*lock_, [&]{
+                return pte_->is_supervisor();
+            });
         }
 
         void set_supervisor(bool supervisor) override
         {
             assert(pte_);
-            pte_->set_supervisor(supervisor);
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                pte_->set_supervisor(supervisor);
+            });
         }
 
         bool is_accessed() const override
         {
             assert(pte_);
-            return pte_->is_accessed();
+            assert(lock_);
+            return perform_with_lock(*lock_, [&]{
+                return pte_->is_accessed();
+            });
         }
 
         void set_accessed(bool accessed) override
         {
             assert(pte_);
-            pte_->set_accessed(accessed);
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                pte_->set_accessed(accessed);
+            });
         }
 
         bool is_dirty() const override
         {
             assert(pte_);
-            return pte_->is_dirty();
+            assert(lock_);
+            return perform_with_lock(*lock_, [&]{
+                return pte_->is_dirty();
+            });
         }
 
         void set_dirty(bool dirty) override
         {
             assert(pte_);
-            pte_->set_dirty(dirty);
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                pte_->set_dirty(dirty);
+            });
         }
         
         bool is_global() const override
         {
             assert(pte_);
-            return pte_->is_global();
+            assert(lock_);
+            return perform_with_lock(*lock_, [&]{
+                return pte_->is_global();
+            });
         }
         
         void set_global(bool global) override
         {
             assert(pte_);
-            pte_->set_global(global);
+            assert(lock_);
+            perform_with_lock(*lock_, [&]{
+                pte_->set_global(global);
+            });
         }
 
     private:
-        SharedPointer<PagingTopology::PageFrameController> page_frame_;
+        Mutex* lock_;
         PageTableEntry* pte_;
+        SharedPointer<PagingTopology::PageFrameController> page_frame_;
     };
 
     static constexpr size_t COUNT = PageTable::COUNT;
 
-    UnlockedPageMapLevelOneController()
-     : UnlockedPageMapLevelOneController(new PageTable)
+    PageMapLevelOneController()
+     : PageMapLevelOneController(new PageTable)
     {}
 
-    UnlockedPageMapLevelOneController(UniquePointer<PageTable> pt)
+    PageMapLevelOneController(UniquePointer<PageTable> pt)
      : page_table_(std::move(pt))
     {
         clear_table();
         feed_ptes();
+        feed_lock();
     }
 
-    UnlockedPageMapLevelOneController(const UnlockedPageMapLevelOneController&) = delete;
-    UnlockedPageMapLevelOneController(UnlockedPageMapLevelOneController&&) = delete;
+    PageMapLevelOneController(const PageMapLevelOneController&) = delete;
+    PageMapLevelOneController(PageMapLevelOneController&&) = delete;
 
     void clear_table()
     {
@@ -159,6 +209,13 @@ public:
         }
     }
 
+    void feed_lock()
+    {
+        for (size_t i = 0; i < COUNT; ++i) {
+            entries_[i].set_lock(&lock_);
+        }
+    }
+
     // Returns the number of entries in the table.
     size_t get_number_of_entries() const override
     {
@@ -166,20 +223,25 @@ public:
     }
 
     // Gets the specified entry in the table.
-    Entry& get_entry(size_t index) override
+    Entry* get_entry(size_t index) override
     {
         assert(index < COUNT);
-        return entries_[index];
+        return perform_with_lock(lock_, [&]{
+            return &entries_[index];
+        });
     }
 
     // Gets the specified entry in the table.
-    const Entry& get_entry(size_t index) const override
+    const Entry* get_entry(size_t index) const override
     {
         assert(index < COUNT);
-        return entries_[index];
+        return perform_with_lock(lock_, [&]{
+            return &entries_[index];
+        });
     }
 
 private:
+    mutable Mutex lock_;
     UniquePointer<PageTable> page_table_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.
 };
