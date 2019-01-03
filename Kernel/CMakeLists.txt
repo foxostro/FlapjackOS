@@ -26,6 +26,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/elf_loader32.hpp"
     "include/elf_loader64.hpp"
     "include/elf_loader_factory.hpp" "src/elf_loader_factory.cpp"
+    "include/paging_topology/page_frame_controller.hpp"
     )
 
 set(I386_SOURCE_FILES

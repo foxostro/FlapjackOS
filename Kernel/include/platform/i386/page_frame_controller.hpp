@@ -1,13 +1,13 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_PAGE_FRAME_CONTROLLER_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_PAGE_FRAME_CONTROLLER_HPP
 
-#include <page_size.hpp>
+#include <paging_topology/page_frame_controller.hpp>
 
 namespace i386 {
 
 // Owns a page frame.
 template<typename PageFrameAllocator>
-class PageFrameController {
+class PageFrameController : public PagingTopology::PageFrameController {
 public:
     ~PageFrameController()
     {
@@ -38,7 +38,7 @@ public:
         return *this;
     }
 
-    inline uintptr_t get_page_frame() const { return page_frame_; }
+    uintptr_t get_page_frame() const override { return page_frame_; }
 
 private:
     PageFrameAllocator* allocator_;
