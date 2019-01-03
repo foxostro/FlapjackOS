@@ -7,28 +7,28 @@ namespace i386 {
 
 // Owns a page frame.
 template<typename PageFrameAllocator>
-class PageFrameController : public PagingTopology::PageFrameController {
+class UnlockedPageFrameController : public PagingTopology::PageFrameController {
 public:
-    ~PageFrameController()
+    ~UnlockedPageFrameController()
     {
         release();
     }
 
-    explicit PageFrameController(PageFrameAllocator& allocator)
+    explicit UnlockedPageFrameController(PageFrameAllocator& allocator)
      : allocator_(&allocator),
        page_frame_(allocator.allocate_span(PAGE_SIZE))
     {}
 
-    PageFrameController(PageFrameController&& other)
+    UnlockedPageFrameController(UnlockedPageFrameController&& other)
      : allocator_(nullptr), page_frame_(0)
     {
         std::swap(other.allocator_, allocator_);
         std::swap(other.page_frame_, page_frame_);
     }
 
-    PageFrameController(const PageFrameController&) = delete;
+    UnlockedPageFrameController(const UnlockedPageFrameController&) = delete;
 
-    PageFrameController& operator=(PageFrameController&& other)
+    UnlockedPageFrameController& operator=(UnlockedPageFrameController&& other)
     {
         if (this != &other) {
             release();
