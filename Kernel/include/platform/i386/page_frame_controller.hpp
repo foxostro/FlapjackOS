@@ -2,6 +2,8 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_PAGE_FRAME_CONTROLLER_HPP
 
 #include <paging_topology/page_frame_controller.hpp>
+#include <interrupt_lock.hpp>
+#include <common/spin_lock.hpp> // for perform_with_lock()
 
 namespace i386 {
 
@@ -13,6 +15,10 @@ public:
     {
         release();
     }
+
+    UnlockedPageFrameController()
+     : allocator_(nullptr), page_frame_(0)
+    {}
 
     explicit UnlockedPageFrameController(PageFrameAllocator& allocator)
      : allocator_(&allocator),
@@ -38,12 +44,6 @@ public:
         return *this;
     }
 
-    uintptr_t get_page_frame() const override { return page_frame_; }
-
-private:
-    PageFrameAllocator* allocator_;
-    uintptr_t page_frame_;
-
     void release()
     {
         if (allocator_ != nullptr) {
@@ -51,6 +51,53 @@ private:
         }
         page_frame_ = 0;
     }
+
+    uintptr_t get_page_frame() const override { return page_frame_; }
+
+private:
+    PageFrameAllocator* allocator_;
+    uintptr_t page_frame_;
+};
+
+// Owns a page frame. Provides synchronized access.
+template<typename PageFrameAllocator>
+class PageFrameController : public PagingTopology::PageFrameController {
+public:
+    explicit PageFrameController(PageFrameAllocator& allocator)
+     : impl_(allocator)
+    {}
+
+    PageFrameController(PageFrameController&& other)
+    {
+        perform_with_lock(lock_, other.lock_, [&]{
+            impl_ = std::move(other.impl_);
+        });
+    }
+
+    PageFrameController(const PageFrameController&) = delete;
+
+    PageFrameController& operator=(PageFrameController&& other)
+    {
+        if (this != &other) {
+            perform_with_lock(lock_, other.lock_, [&]{
+                impl_ = std::move(other.impl_);
+            });
+        }
+        return *this;
+    }
+
+    uintptr_t get_page_frame() const override
+    {
+        uintptr_t result;
+        perform_with_lock(lock_, [&]{
+            result = impl_.get_page_frame();
+        });
+        return result;
+    }
+
+private:
+    mutable InterruptLock lock_;
+    UnlockedPageFrameController<PageFrameAllocator> impl_;
 };
 
 } // namespace i386
