@@ -5,7 +5,7 @@
 #include <cstddef>
 #include "elf.hpp"
 
-namespace elf {
+namespace Elf {
 
 // This file uses names and naming conventions from the ELF64 specification
 // document, "ELF-64 Object File Format, Version 1.5, Draft 2, May 27, 1998".
@@ -156,6 +156,6 @@ struct Elf64_Phdr {
 };
 
 
-} // namespace elf
+} // namespace Elf
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF64_HPP

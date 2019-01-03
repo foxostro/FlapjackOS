@@ -3,7 +3,7 @@
 
 #include "elf32.hpp"
 
-namespace elf {
+namespace Elf {
 
 class Parser32 {
 public:
@@ -168,6 +168,6 @@ private:
     unsigned char* data_;
 };
 
-} // namespace elf
+} // namespace Elf
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_PARSER_HPP

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace elf {
+namespace Elf {
 
 // This file uses names and naming conventions from the ELF64 specification
 // document, "ELF-64 Object File Format, Version 1.5, Draft 2, May 27, 1998".
@@ -147,6 +147,6 @@ constexpr unsigned PF_MASKOS = 0x00FF0000; // These flag bits are reserved for e
 constexpr unsigned PF_MASKPROC = 0xFF000000; // These flag bits are reserved for processor-specific use
 
 
-} // namespace elf
+} // namespace Elf
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF_HPP

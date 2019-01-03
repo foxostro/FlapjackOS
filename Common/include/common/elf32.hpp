@@ -5,7 +5,7 @@
 #include <cstddef>
 #include "elf.hpp"
 
-namespace elf {
+namespace Elf {
 
 // This file uses names and naming conventions from the ELF32 specification
 // document, "Executable and Linkable Format (ELF), Portable Formats
@@ -174,6 +174,6 @@ struct Elf32_Phdr {
 };
 
 
-} // namespace elf
+} // namespace Elf
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF32_HPP

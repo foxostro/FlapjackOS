@@ -70,7 +70,7 @@ private:
 
     void process_program_header(const ProgramHeader& header)
     {
-        if (elf::PT_LOAD == header.p_type) {
+        if (Elf::PT_LOAD == header.p_type) {
             action_load(header);
         }
     }
@@ -101,7 +101,7 @@ private:
     PhysicalMemoryMap::ProtectionFlags get_protection_flags(const ProgramHeader& header)
     {
         PhysicalMemoryMap::ProtectionFlags flags = 0;
-        if (header.p_flags & elf::PF_W) {
+        if (header.p_flags & Elf::PF_W) {
             flags = flags | physical_memory_map_.WRITABLE;
         }
         // AFOX_TODO: handle the executable flag too in get_protection_flags()

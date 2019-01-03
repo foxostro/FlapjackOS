@@ -8,9 +8,9 @@
 #include <elf_loader.hpp>
 
 // Loads the ELF executable into the current address space.
-class ElfLoader32 : public ElfLoaderBase<elf::Parser32, elf::Elf32_Phdr> {
+class ElfLoader32 : public ElfLoaderBase<Elf::Parser32, Elf::Elf32_Phdr> {
 public:
-    using ElfParser = elf::Parser32;
+    using ElfParser = Elf::Parser32;
 
     // Constructor.
     // physical_memory_map -- The ELF loader needs to be able adjust virtual

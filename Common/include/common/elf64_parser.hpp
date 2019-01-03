@@ -3,7 +3,7 @@
 
 #include "elf64.hpp"
 
-namespace elf {
+namespace Elf {
 
 class Parser64 {
 public:
@@ -178,6 +178,6 @@ private:
     unsigned char* data_;
 };
 
-} // namespace elf
+} // namespace Elf
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF64_PARSER_HPP
