@@ -27,6 +27,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/elf_loader64.hpp"
     "include/elf_loader_factory.hpp" "src/elf_loader_factory.cpp"
     "include/paging_topology/page_frame_controller.hpp"
+    "include/paging_topology/page_map_level_one_controller.hpp"
     )
 
 set(I386_SOURCE_FILES
@@ -35,7 +36,6 @@ set(I386_SOURCE_FILES
     "include/platform/i386/page_directory_entry.hpp"
     "include/platform/i386/page_table.hpp"
     "include/platform/i386/page_table_entry.hpp"
-    "include/platform/i386/page_frame_controller.hpp"
     "include/platform/i386/generic_physical_memory_map.hpp"
     "include/platform/i386/physical_memory_map.hpp"
     "include/platform/i386/generic_kernel_address_space_bootstrapper.hpp"
@@ -62,6 +62,8 @@ set(I386_SOURCE_FILES
     "include/platform/i386/context_switch.hpp" "src/platform/i386/context_switch.S"
     "include/platform/i386/thread.hpp"
     "include/platform/i386/platform_namer.hpp"
+    "include/platform/i386/page_frame_controller.hpp"
+    "include/platform/i386/page_map_level_one_controller.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -189,6 +191,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_physical_memory_map.cpp"
              "test/test_i386_kernel_address_space_bootstrapper.cpp"
              "test/test_i386_page_frame_controller.cpp"
+             "test/test_i386_page_map_level_one_controller.cpp"
              )
     elseif (${BUILD_ARCH} STREQUAL "x86_64")
         list(APPEND TEST_SOURCE_FILES

@@ -86,7 +86,7 @@ public:
         return *this;
     }
 
-    bool operator==(const SharedPointer& other)
+    bool operator==(const SharedPointer& other) const
     {
         if (this == &other) {
             return true;
@@ -99,7 +99,7 @@ public:
         return is_equal;
     }
 
-    inline bool operator!=(const SharedPointer& other)
+    inline bool operator!=(const SharedPointer& other) const
     {
         return !(*this == other);
     }

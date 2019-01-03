@@ -2,14 +2,13 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_PAGE_FRAME_CONTROLLER_HPP
 
 #include <paging_topology/page_frame_controller.hpp>
-#include <interrupt_lock.hpp>
-#include <common/spin_lock.hpp> // for perform_with_lock()
+#include <common/mutex.hpp>
 
 namespace i386 {
 
 // Owns a page frame.
 template<typename PageFrameAllocator>
-class UnlockedPageFrameController : public PagingTopology::PageFrameController {
+class UnlockedPageFrameController final : public PagingTopology::PageFrameController {
 public:
     ~UnlockedPageFrameController()
     {
@@ -61,7 +60,7 @@ private:
 
 // Owns a page frame. Provides synchronized access.
 template<typename PageFrameAllocator>
-class PageFrameController : public PagingTopology::PageFrameController {
+class PageFrameController final : public PagingTopology::PageFrameController {
 public:
     explicit PageFrameController(PageFrameAllocator& allocator)
      : impl_(allocator)
@@ -96,7 +95,7 @@ public:
     }
 
 private:
-    mutable InterruptLock lock_;
+    mutable Mutex lock_;
     UnlockedPageFrameController<PageFrameAllocator> impl_;
 };
 

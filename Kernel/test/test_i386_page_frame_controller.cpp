@@ -6,7 +6,7 @@ constexpr size_t MAX_PAGE_FRAMES = 10;
 using TestingAllocator = PageFrameAllocator_<MAX_PAGE_FRAMES>;
 using TestingPageFrameController = i386::PageFrameController<TestingAllocator>;
 
-TestingAllocator create_page_frame_allocator()
+static TestingAllocator create_page_frame_allocator()
 {
     TestingAllocator allocator;
     for (size_t i = 1; i < MAX_PAGE_FRAMES; ++i) {
