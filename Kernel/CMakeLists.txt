@@ -28,6 +28,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/elf_loader_factory.hpp" "src/elf_loader_factory.cpp"
     "include/paging_topology/page_frame_controller.hpp"
     "include/paging_topology/page_map_level_one_controller.hpp"
+    "include/paging_topology/page_map_level_two_controller.hpp"
     )
 
 set(I386_SOURCE_FILES
@@ -64,6 +65,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/platform_namer.hpp"
     "include/platform/i386/page_frame_controller.hpp"
     "include/platform/i386/page_map_level_one_controller.hpp"
+    "include/platform/i386/page_map_level_two_controller.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -192,6 +194,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_kernel_address_space_bootstrapper.cpp"
              "test/test_i386_page_frame_controller.cpp"
              "test/test_i386_page_map_level_one_controller.cpp"
+             "test/test_i386_page_map_level_two_controller.cpp"
              )
     elseif (${BUILD_ARCH} STREQUAL "x86_64")
         list(APPEND TEST_SOURCE_FILES

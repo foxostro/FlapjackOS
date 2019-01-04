@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <map>
+#include <boot.h> // for KERNEL_VIRTUAL_START_ADDR_{32,64}BIT
 
 // Mock MMU object.
 // The host system address space is the same size as the mock address space.

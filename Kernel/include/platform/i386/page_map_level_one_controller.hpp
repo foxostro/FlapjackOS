@@ -11,7 +11,7 @@ namespace i386 {
 
 // Owns a page table. Provides synchronized access.
 // On IA-32, the first level page map is called a Page Table.
-template<typename PageFrameAllocator>
+template<typename HardwareMemoryManagementUnit>
 class PageMapLevelOneController final : public PagingTopology::PageMapLevelOneController {
 public:
     // A single entry in the page map.
@@ -166,12 +166,14 @@ public:
 
     static constexpr size_t COUNT = PageTable::COUNT;
 
-    PageMapLevelOneController()
-     : PageMapLevelOneController(new PageTable)
+    PageMapLevelOneController(HardwareMemoryManagementUnit& mmu)
+     : PageMapLevelOneController(mmu, new PageTable)
     {}
 
-    PageMapLevelOneController(UniquePointer<PageTable> pt)
-     : page_table_(std::move(pt))
+    PageMapLevelOneController(HardwareMemoryManagementUnit& mmu,
+                              UniquePointer<PageTable> pt)
+     : mmu_(mmu),
+       page_table_(std::move(pt))
     {
         clear_table();
         feed_ptes();
@@ -209,6 +211,16 @@ public:
         return COUNT;
     }
 
+    // Gets the physical address of the underlying page table.
+    uintptr_t get_page_table_physical_address() const override
+    {
+        LockGuard guard{lock_};
+        PageTable* page_table = page_table_.get_pointer();
+        uintptr_t logical = reinterpret_cast<uintptr_t>(page_table);
+        uintptr_t physical = mmu_.convert_logical_to_physical_address(logical);
+        return physical;
+    }
+
     // Gets the specified entry in the table.
     Entry& get_entry(size_t index) override
     {
@@ -227,6 +239,7 @@ public:
 
 private:
     mutable Mutex lock_;
+    HardwareMemoryManagementUnit& mmu_;
     UniquePointer<PageTable> page_table_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.
 };

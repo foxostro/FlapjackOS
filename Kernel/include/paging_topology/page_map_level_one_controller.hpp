@@ -39,6 +39,9 @@ public:
 
     virtual ~PageMapLevelOneController() = default;
 
+    // Gets the physical address of the underlying page table.
+    virtual uintptr_t get_page_table_physical_address() const = 0;
+
     // Returns the number of entries in the table.
     virtual size_t get_number_of_entries() const = 0;
 
