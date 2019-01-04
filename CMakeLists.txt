@@ -68,7 +68,11 @@ else(CMAKE_CROSSCOMPILING)
     SET(TEST_BUILD_ARCH "x86_64" CACHE STRING "The architecture of the system-under-test. Though, all tests are built in the architecture of the host machine.")
 
     set(BUILD_ARCH "${TEST_BUILD_ARCH}")
-    set(BUILD_ARCH_FLAGS "") # implicitly, build the test suite with the native arch
+    if (BUILD_ARCH STREQUAL "i386")
+        set(BUILD_ARCH_FLAGS "-m32")
+    elseif (BUILD_ARCH STREQUAL "x86_64")
+        set(BUILD_ARCH_FLAGS "-m64")
+    endif ()
 
     # When the target system is the host system, we are building natively.
     # In this case, define a flag to indicate we are doing testing and choose

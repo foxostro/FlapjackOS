@@ -522,6 +522,7 @@ TEST_CASE("free a previously allocated memalign'd object", "[Malloc]")
     constexpr size_t align = 256;
     memset(s_buffer, 0, sizeof(s_buffer));
     MallocZone *zone = MallocZone::create(reinterpret_cast<uintptr_t>(s_buffer), sizeof(s_buffer));
+    size_t initial_size = zone->head()->size;
     print_zone("before", *zone);
     void *allocation = zone->memalign(size, align);
     print_zone("after memalign", *zone);
@@ -535,6 +536,6 @@ TEST_CASE("free a previously allocated memalign'd object", "[Malloc]")
     REQUIRE(zone->head()->prev == nullptr);
     REQUIRE(zone->head()->next == nullptr);
     REQUIRE(zone->head()->inuse == false);
-    REQUIRE(zone->head()->size == 976);
+    REQUIRE(zone->head()->size == initial_size);
     zone->~MallocZone();
 }
