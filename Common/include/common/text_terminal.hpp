@@ -107,11 +107,8 @@ public:
     template<typename... Args>
     int printf(Args&&... args)
     {
-        int r;
-        perform_with_lock(lock_, [&]{
-            r = impl_.printf(std::forward<Args>(args)...);
-        });
-        return r;
+        LockGuard guard{lock_};
+        return impl_.printf(args...);
     }
 
     void move_cursor_left()
