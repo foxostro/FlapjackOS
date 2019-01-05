@@ -65,3 +65,17 @@ TEST_CASE("i386::PageFrameController -- move ctor reassigns ownership of the pag
 
     REQUIRE(allocator.is_free(addr) == true);
 }
+
+TEST_CASE("i386::PageFrameController -- assign a page frame without an allocator to wrap an unmanaged page frame", "[i386]")
+{
+    auto allocator = create_page_frame_allocator();
+    
+    uintptr_t addr = allocator.allocate_span(PAGE_SIZE);
+
+    {
+        TestingPageFrameController page_frame{addr};
+        REQUIRE(addr == page_frame.get_page_frame());
+    }
+
+    REQUIRE(allocator.is_free(addr) == false);
+}

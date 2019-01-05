@@ -20,6 +20,11 @@ public:
      : allocator_(nullptr), page_frame_(0)
     {}
 
+    explicit UnlockedPageFrameController(uintptr_t page_frame)
+     : allocator_(nullptr),
+       page_frame_(page_frame)
+    {}
+
     explicit UnlockedPageFrameController(PageFrameAllocator& allocator)
      : allocator_(&allocator),
        page_frame_(allocator.allocate_span(PAGE_SIZE))
@@ -63,6 +68,10 @@ private:
 template<typename PageFrameAllocator>
 class PageFrameController final : public PagingTopology::PageFrameController {
 public:
+    explicit PageFrameController(uintptr_t page_frame)
+     : impl_(page_frame)
+    {}
+
     explicit PageFrameController(PageFrameAllocator& allocator)
      : impl_(allocator)
     {}
