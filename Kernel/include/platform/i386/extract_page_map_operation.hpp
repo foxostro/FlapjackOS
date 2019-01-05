@@ -107,8 +107,10 @@ private:
             auto& pml1_entry = pml1.get_entry(i);
             TRACE("get_address");
             uintptr_t address = static_cast<uintptr_t>(pte.get_address());
-            TRACE("set_page_frame");
-            pml1_entry.set_page_frame(new PageFrameController{address});
+            if (address != 0) {
+                TRACE("set_page_frame");
+                pml1_entry.set_page_frame(new PageFrameController{address});
+            }
         }
         TRACE("end");
     }
