@@ -22,10 +22,9 @@ public:
     using PageDirectory = typename PAGING_RESOLVER::PageDirectory;
     using PageTable = typename PAGING_RESOLVER::PageTable;
     using PageDirectoryEntry = decltype(PageDirectory::entries[0]);
-    using MMU = typename PAGING_RESOLVER::MMU;
     using PagingResolver = PAGING_RESOLVER;
 
-    GenericKernelAddressSpaceBootstrapper(MMU &mmu)
+    GenericKernelAddressSpaceBootstrapper(HardwareMemoryManagementUnit &mmu)
      : count_(NUMBER_OF_PAGE_TABLES),
        next_page_table_(&page_tables_[0]),
        resolver_(mmu),
@@ -47,7 +46,7 @@ private:
     size_t count_;
     PageTable* next_page_table_;
     PagingResolver resolver_;
-    MMU &mmu_;
+    HardwareMemoryManagementUnit &mmu_;
 
     void prepare_address_space_internal()
     {

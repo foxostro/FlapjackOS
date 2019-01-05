@@ -6,8 +6,7 @@
 
 namespace i386 {
 
-template<typename MMU>
-using KernelAddressSpaceBootstrapper = i386::GenericKernelAddressSpaceBootstrapper< i386::PagingResolver<MMU> >;
+using KernelAddressSpaceBootstrapper = GenericKernelAddressSpaceBootstrapper<PagingResolver>;
 
 } // namespace i386
 

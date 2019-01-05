@@ -13,7 +13,7 @@ TEST_CASE("test_i386_kernel_address_space_bootstrapper", "[i386]")
     uintptr_t cr3 = mmu.convert_logical_to_physical_address((uintptr_t)&pd);
     resolver.set_cr3(cr3);
     mmu.set_cr3(cr3);
-    i386::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit> bootstrapper(mmu);
+    i386::KernelAddressSpaceBootstrapper bootstrapper{mmu};
 
     // Action
     bootstrapper.prepare_address_space();

@@ -8,8 +8,8 @@ class TestPagingContext
 public:
     i386::PageDirectory page_directory_;
     MockMemoryManagementUnit mmu_;
-    i386::PagingResolver<MockMemoryManagementUnit> resolver_;
-    i386::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit> bootstrapper_;
+    i386::PagingResolver resolver_;
+    i386::KernelAddressSpaceBootstrapper bootstrapper_;
 
     TestPagingContext()
      : resolver_(mmu_),
@@ -31,7 +31,7 @@ TEST_CASE("i386::PhysicalMemoryMap::map_page -- basic example", "[i386]")
 
     // Setup
     TestPagingContext context;
-    i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
 
     // Action
@@ -54,7 +54,7 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- zero size region", "[i386]")
 
     // Setup
     TestPagingContext context;
-    i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -81,7 +81,7 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- one-byte region region", "[i
 
     // Setup
     TestPagingContext context;
-    i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -114,7 +114,7 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- one-page region region", "[i
 
     // Setup
     TestPagingContext context;
-    i386::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),

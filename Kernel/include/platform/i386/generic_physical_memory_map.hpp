@@ -13,7 +13,6 @@ template<typename PagingResolver>
 class GenericPhysicalMemoryMap {
 public:
     using PageTableEntry = typename std::remove_reference<decltype(PagingResolver::PageTable::entries[0])>::type;
-    using MMU = typename PagingResolver::MMU;
     using ProtectionFlags = unsigned;
 
     static constexpr unsigned PRESENT = (1 << 0);
@@ -21,7 +20,7 @@ public:
     static constexpr unsigned GLOBAL = (1 << 2);
     static constexpr unsigned SUPERVISOR = (1 << 3);
 
-    GenericPhysicalMemoryMap(MMU &mmu)
+    GenericPhysicalMemoryMap(HardwareMemoryManagementUnit &mmu)
      : resolver_(mmu),
        mmu_(mmu)
     {}
@@ -80,9 +79,10 @@ public:
 
 protected:
     PagingResolver resolver_;
-    MMU &mmu_;
+    HardwareMemoryManagementUnit &mmu_;
 
 private:
+    // AFOX_TODO: Perhaps invlpg() should move to HardwareMemoryManagementUnit?
     inline void invlpg(uintptr_t linear_address)
     {
     #ifdef TESTING

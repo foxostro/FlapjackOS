@@ -5,21 +5,19 @@
 #include "page_directory.hpp"
 #include "page_directory_pointer_table.hpp"
 #include "page_map_level_four.hpp"
-#include "concrete_hardware_memory_management_unit.hpp"
+#include <hardware_memory_management_unit.hpp>
 #include <cstdint>
 #include <climits>
 
 namespace x86_64 {
 
 // Walks the paging structures and understands the relationships between them.
-template<typename MMU_ = x86_64::ConcreteHardwareMemoryManagementUnit>
 class PagingResolver {
 public:
     using PageDirectory = x86_64::PageDirectory;
     using PageTable = x86_64::PageTable;
-    using MMU = MMU_;
 
-    PagingResolver(MMU &mmu) : cr3_(0), mmu_(mmu) {}
+    PagingResolver(HardwareMemoryManagementUnit &mmu) : cr3_(0), mmu_(mmu) {}
 
     uint64_t get_cr3() const
     {
@@ -305,7 +303,7 @@ public:
 
 private:
     uint64_t cr3_;
-    MMU &mmu_;
+    HardwareMemoryManagementUnit &mmu_;
 };
 
 } // namespace x86_64

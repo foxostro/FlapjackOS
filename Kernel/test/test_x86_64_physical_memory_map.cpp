@@ -10,8 +10,8 @@ public:
     x86_64::PageDirectoryPointerTable pdpt_;
     x86_64::PageDirectory page_directory_;
     MockMemoryManagementUnit mmu_;
-    x86_64::PagingResolver<MockMemoryManagementUnit> resolver_;
-    x86_64::KernelAddressSpaceBootstrapper<MockMemoryManagementUnit> bootstrapper_;
+    x86_64::PagingResolver resolver_;
+    x86_64::KernelAddressSpaceBootstrapper bootstrapper_;
 
     TestPagingContext()
      : resolver_(mmu_),
@@ -37,7 +37,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
 
     // Action
@@ -60,7 +60,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_6
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -87,7 +87,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -120,7 +120,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "
 
     // Setup
     TestPagingContext context;
-    x86_64::PhysicalMemoryMap<MockMemoryManagementUnit> phys_map(context.mmu_);
+    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),

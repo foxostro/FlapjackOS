@@ -3,17 +3,14 @@
 
 #include <platform/i386/generic_physical_memory_map.hpp>
 #include "paging_resolver.hpp"
-#include "concrete_hardware_memory_management_unit.hpp"
+#include <hardware_memory_management_unit.hpp>
 
 namespace x86_64 {
 
-template<typename MemoryManagementUnit>
-class PhysicalMemoryMap : public i386::GenericPhysicalMemoryMap<x86_64::PagingResolver<MemoryManagementUnit>> {
+class PhysicalMemoryMap : public i386::GenericPhysicalMemoryMap<PagingResolver> {
 public:
-    using PagingResolver = x86_64::PagingResolver<MemoryManagementUnit>;
-
-    PhysicalMemoryMap(MemoryManagementUnit& mmu)
-     : i386::GenericPhysicalMemoryMap<x86_64::PagingResolver<MemoryManagementUnit>>(mmu)
+    PhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
+     : i386::GenericPhysicalMemoryMap<PagingResolver>(mmu)
     {}
     
     void populate_page_tables(uintptr_t begin, size_t length) override
