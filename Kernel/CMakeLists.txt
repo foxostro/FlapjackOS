@@ -70,6 +70,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/page_map_level_one_controller.hpp"
     "include/platform/i386/page_map_level_two_controller.hpp"
     "include/platform/i386/extract_page_map_operation.hpp"
+    "include/platform/i386/concrete_physical_memory_map.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -196,6 +197,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_page_directory_entry.cpp"
              "test/test_i386_page_table_entry.cpp"
              "test/test_i386_early_physical_memory_map.cpp"
+             "test/test_i386_concrete_physical_memory_map.cpp"
              "test/test_i386_kernel_address_space_bootstrapper.cpp"
              "test/test_i386_page_frame_controller.cpp"
              "test/test_i386_page_map_level_one_controller.cpp"

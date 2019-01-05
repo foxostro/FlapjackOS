@@ -26,6 +26,7 @@ public:
     virtual void reload() = 0;
 
     // Allocate memory for page tables and insert them into the page directory.
+    // AFOX_TODO: Remove the populate_page_tables() method.
     virtual void populate_page_tables(uintptr_t begin, size_t length) = 0;
 
     // Map the specified physical page to the virtual page.
