@@ -84,10 +84,11 @@ public:
     }
 
     // Specifies that the object is to be intentionally leaked in the dtor.
-    void set_should_leak(bool leak)
+    // This is useful when the object was not allocated on the heap.
+    void set_should_leak()
     {
         LockGuard guard{lock_};
-        should_leak_ = leak;
+        should_leak_ = true;
     }
     
 private:

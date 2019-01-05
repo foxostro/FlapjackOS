@@ -95,7 +95,7 @@ public:
         release_unlocked();
         data_ = other.get_pointer();
         count_ = new std::atomic<int>(1);
-        other.set_should_leak(true);
+        other.set_should_leak();
         other = nullptr;
         return *this;
     }
