@@ -37,9 +37,9 @@ public:
 
         SharedPointer<PagingTopology::PageFrameController> get_page_frame() const override
         {
-            return perform_with_lock(*lock_, [&]{
-                return page_frame_;
-            });
+            assert(lock_);
+            LockGuard guard{*lock_};
+            return page_frame_;
         }
         
         void set_page_frame(SharedPointer<PagingTopology::PageFrameController> p) override
