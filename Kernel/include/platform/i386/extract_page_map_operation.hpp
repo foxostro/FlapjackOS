@@ -63,7 +63,10 @@ private:
     void configure_pml2_entry(PagingTopology::PageMapLevelTwoController::Entry& pml2_entry, PageDirectoryEntry& pde)
     {
         TRACE("begin");
-        pml2_entry.set_pml1(make_pml1(get_page_table(pde)));
+        PageTable* page_table = get_page_table(pde);
+        if (page_table) {
+            pml2_entry.set_pml1(make_pml1(page_table));
+        }
         TRACE("end");
     }
 
