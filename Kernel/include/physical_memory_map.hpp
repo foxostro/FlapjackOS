@@ -37,14 +37,6 @@ public:
 
     // Mark the specified range of virtual pages as read-only.
     virtual void set_readonly(uintptr_t begin, uintptr_t end) = 0;
-
-    // Invalidates the hardware MMU cache for the specified virtual addresses.
-    // AFOX_TODO: Should this method be on the MMU object instead?
-    virtual void invalidate_pages(uintptr_t begin, uintptr_t end) = 0;
-
-    // Invalidates the hardware MMU cache for the specified virtual address.
-    // AFOX_TODO: Should this method be on the MMU object instead?
-    virtual void invalidate_page(uintptr_t linear_address) = 0;
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_PHYSICAL_MEMORY_MAP_HPP

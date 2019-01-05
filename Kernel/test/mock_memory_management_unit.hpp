@@ -23,10 +23,11 @@ public:
         return cr3_;
     }
 
-    void reload() override
-    {
-        // nothing to do
-    }
+    void reload() override {}
+
+    void invalidate_pages(uintptr_t, uintptr_t) override {}
+
+    void invalidate_page(uintptr_t) override {}
 
     uintptr_t convert_physical_to_logical_address(uintptr_t physical_address) const override
     {

@@ -42,6 +42,22 @@ public:
     {
         return KERNEL_VIRTUAL_START_ADDR;
     }
+
+    void invalidate_pages(uintptr_t begin, uintptr_t end) override
+    {
+        for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
+            invalidate_page(page);
+        }
+    }
+
+    void invalidate_page(uintptr_t linear_address) override
+    {
+#ifdef TESTING
+        (void)linear_address;
+#else
+        asm volatile("invlpg (%0)" : : "b"(linear_address) : "memory");
+#endif
+    }
 };
 
 } // namespace i386

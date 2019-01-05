@@ -42,7 +42,7 @@ public:
         pte->set_readwrite((flags & WRITABLE) == WRITABLE);
         pte->set_global((flags & GLOBAL) == GLOBAL);
         pte->set_supervisor((flags & SUPERVISOR) == SUPERVISOR);
-        invalidate_page(linear_address);
+        mmu_.invalidate_page(linear_address);
     }
 
     // Mark the specified range of virtual pages as read-only.
@@ -53,37 +53,12 @@ public:
             assert(pte);
             pte->set_readwrite(false);
         }
-        invalidate_pages(begin, end);
-    }
-
-    // Invalidates the hardware MMU cache for the specified virtual addresses.
-    void invalidate_pages(uintptr_t begin, uintptr_t end) override
-    {
-        for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
-            invlpg(page);
-        }
-    }
-
-    // Invalidates the hardware MMU cache for the specified virtual address.
-    void invalidate_page(uintptr_t linear_address) override
-    {
-        invlpg(linear_address);
+        mmu_.invalidate_pages(begin, end);
     }
 
 protected:
     PagingResolver resolver_;
     HardwareMemoryManagementUnit &mmu_;
-
-private:
-    // AFOX_TODO: Perhaps invlpg() should move to HardwareMemoryManagementUnit?
-    inline void invlpg(uintptr_t linear_address)
-    {
-    #ifdef TESTING
-        (void)linear_address;
-    #else
-        asm volatile("invlpg (%0)" : : "b"(linear_address) : "memory");
-    #endif
-    }
 };
 
 } // namespace i386

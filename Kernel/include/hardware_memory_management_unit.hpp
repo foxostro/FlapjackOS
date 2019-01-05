@@ -17,6 +17,12 @@ public:
     // Reloads the hardware MMU and flushes the TLB.
     virtual void reload() = 0;
 
+    // Invalidates the hardware MMU cache for the specified virtual addresses.
+    virtual void invalidate_pages(uintptr_t begin, uintptr_t end) = 0;
+
+    // Invalidates the hardware MMU cache for the specified virtual address.
+    virtual void invalidate_page(uintptr_t linear_address) = 0;
+
     // Convert the given physical address to a logical address.
     // These addresses are easily converted between physical and virtual as they are
     // always offset by KERNEL_VIRTUAL_START_ADDR.
