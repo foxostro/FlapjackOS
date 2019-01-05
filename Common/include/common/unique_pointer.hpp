@@ -50,7 +50,7 @@ public:
     UniquePointer& operator=(UniquePointer&& other)
     {
         if (this != &other) {
-            LockGuard2 guard{lock_, other.lock_};
+            LockGuard guard{lock_, other.lock_};
             release_unlocked();
             data_ = other.data_;
             should_leak_ = other.should_leak_;
@@ -68,7 +68,7 @@ public:
             return true;
         }
 
-        LockGuard2 guard{lock_, other.lock_};
+        LockGuard guard{lock_, other.lock_};
         return (data_ == other.data_);
     }
 

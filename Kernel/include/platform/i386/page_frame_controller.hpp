@@ -86,7 +86,7 @@ public:
     PageFrameController& operator=(PageFrameController&& other)
     {
         if (this != &other) {
-            LockGuard2 guard{lock_, other.lock_};
+            LockGuard guard{lock_, other.lock_};
             impl_ = std::move(other.impl_);
         }
         return *this;

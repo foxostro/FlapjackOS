@@ -67,7 +67,7 @@ public:
     SharedPointer& operator=(const SharedPointer& other)
     {
         if (this != &other) {
-            LockGuard2 guard{lock_, other.lock_};
+            LockGuard guard{lock_, other.lock_};
             release_unlocked();
             data_ = other.data_;
             count_ = other.count_;
@@ -79,7 +79,7 @@ public:
     SharedPointer& operator=(SharedPointer&& other)
     {
         if (this != &other) {
-            LockGuard2 guard{lock_, other.lock_};
+            LockGuard guard{lock_, other.lock_};
             release_unlocked();
             data_ = other.data_;
             count_ = other.count_;
@@ -106,7 +106,7 @@ public:
             return true;
         }
 
-        LockGuard2 guard{lock_, other.lock_};
+        LockGuard guard{lock_, other.lock_};
         return (data_ == other.data_);
     }
 
