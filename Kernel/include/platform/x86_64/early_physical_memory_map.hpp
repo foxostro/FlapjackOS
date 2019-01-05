@@ -1,16 +1,16 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_PHYSICAL_MEMORY_MAP_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_PHYSICAL_MEMORY_MAP_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_EARLY_PHYSICAL_MEMORY_MAP_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_EARLY_PHYSICAL_MEMORY_MAP_HPP
 
-#include <platform/i386/generic_physical_memory_map.hpp>
+#include <platform/i386/generic_early_physical_memory_map.hpp>
 #include "paging_resolver.hpp"
 #include <hardware_memory_management_unit.hpp>
 
 namespace x86_64 {
 
-class PhysicalMemoryMap : public i386::GenericPhysicalMemoryMap<PagingResolver> {
+class EarlyPhysicalMemoryMap : public i386::GenericEarlyPhysicalMemoryMap<PagingResolver> {
 public:
-    PhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
-     : i386::GenericPhysicalMemoryMap<PagingResolver>(mmu)
+    EarlyPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
+     : i386::GenericEarlyPhysicalMemoryMap<PagingResolver>(mmu)
     {}
     
     void populate_page_tables(uintptr_t begin, size_t length) override
@@ -73,4 +73,4 @@ private:
 
 } // namespace x86_64
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_PHYSICAL_MEMORY_MAP_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_X86_64_EARLY_PHYSICAL_MEMORY_MAP_HPP

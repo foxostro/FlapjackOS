@@ -1,5 +1,5 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_PHYSICAL_MEMORY_MAP_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_PHYSICAL_MEMORY_MAP_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_EARLY_PHYSICAL_MEMORY_MAP_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_EARLY_PHYSICAL_MEMORY_MAP_HPP
 
 #include <cstdint>
 #include <type_traits>
@@ -11,7 +11,7 @@ namespace i386 {
 // Provides a platform-agnostic interface to the hardware MMU memory map.
 // It's physical because it's hardware.
 template<typename PagingResolver>
-class GenericPhysicalMemoryMap {
+class GenericEarlyPhysicalMemoryMap {
 public:
     using PageTableEntry = typename std::remove_reference<decltype(PagingResolver::PageTable::entries[0])>::type;
     using ProtectionFlags = unsigned;
@@ -21,14 +21,14 @@ public:
     static constexpr unsigned GLOBAL = (1 << 2);
     static constexpr unsigned SUPERVISOR = (1 << 3);
 
-    GenericPhysicalMemoryMap(HardwareMemoryManagementUnit &mmu)
+    GenericEarlyPhysicalMemoryMap(HardwareMemoryManagementUnit &mmu)
      : resolver_(mmu),
        mmu_(mmu)
     {}
 
     // Point the physical memory map at the paging structures active on the MMU.
-    // So, whatever the MMU is using right now is what PhysicalMemoryMap will
-    // now act upon.
+    // So, whatever the MMU is using right now is what EarlyPhysicalMemoryMap
+    // will now act upon.
     void reload()
     {
         resolver_.set_cr3(mmu_.get_cr3());
@@ -96,4 +96,4 @@ private:
 
 } // namespace i386
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_PHYSICAL_MEMORY_MAP_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_EARLY_PHYSICAL_MEMORY_MAP_HPP

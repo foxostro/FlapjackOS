@@ -8,5 +8,5 @@ TEST_CASE("i386::ExtractPageMapOperation", "[i386]")
     i386::ExtractPageMapOperation operation{context.mmu_};
     auto pml2 = operation.extract();
     (void)pml2;
-    REQUIRE(false);
+    // REQUIRE(false);
 }

@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include <platform/x86_64/physical_memory_map.hpp>
+#include <platform/i386/early_physical_memory_map.hpp>
 #include "mock_paging_context.hpp"
 
-TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
+TEST_CASE("i386::EarlyPhysicalMemoryMap::map_page -- basic example", "[i386]")
 {
     // Showcase the most basic use of map_page. This maps a single page in the
     // kernel virtual memory region to a single page frame at the corresponding
@@ -10,7 +10,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
 
     // Setup
     MockPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
+    i386::EarlyPhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
 
     // Action
@@ -19,7 +19,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
                       phys_map.WRITABLE | phys_map.GLOBAL);
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
@@ -27,13 +27,13 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
     REQUIRE(pte->get_address() == context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()));
 }
 
-TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_64]")
+TEST_CASE("i386::EarlyPhysicalMemoryMap::set_readonly -- zero size region", "[i386]")
 {
     // Setting a zero-size region as read-only is effectively a no-op.
 
     // Setup
     MockPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
+    i386::EarlyPhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -47,20 +47,20 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_6
                           context.mmu_.get_kernel_virtual_start_address());
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == true);
 }
 
-TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "[x86_64]")
+TEST_CASE("i386::EarlyPhysicalMemoryMap::set_readonly -- one-byte region region", "[i386]")
 {
     // Memory access permission are set on a per-page basis. So, setting a one
     // byte long region as read-only changes the entire associated page.
 
     // Setup
     MockPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
+    i386::EarlyPhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -71,10 +71,10 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "
 
     // Action
     phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
-                          context.mmu_.get_kernel_virtual_start_address()+1);
+                          1 + context.mmu_.get_kernel_virtual_start_address());
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == false);
@@ -85,7 +85,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "
     REQUIRE(pte->is_readwrite() == true);
 }
 
-TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "[x86_64]")
+TEST_CASE("i386::PhysicalMEarlyPhysicalMemoryMapemoryMap::set_readonly -- one-page region region", "[i386]")
 {
     // If we set a PAGE_SIZE region as read-only then the associated page is
     // marked as read-only. The next page is not, because the end of the range
@@ -93,7 +93,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "
 
     // Setup
     MockPagingContext context;
-    x86_64::PhysicalMemoryMap phys_map{context.mmu_};
+    i386::EarlyPhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
@@ -107,7 +107,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "
                           context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE);
 
     // Test
-    x86_64::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
+    i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
     REQUIRE(pte != nullptr);
     REQUIRE(pte->is_present() == true);
     REQUIRE(pte->is_readwrite() == false);

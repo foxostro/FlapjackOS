@@ -28,7 +28,7 @@ public:
     //                         physical memory to accomodate the executable's
     //                         memory segments. 
     // elf_image -- The ELF image in memory.
-    ElfLoaderBase(PhysicalMemoryMap& physical_memory_map,
+    ElfLoaderBase(EarlyPhysicalMemoryMap& physical_memory_map,
                   PageFrameAllocator& page_frame_allocator,
                   const Data& elf_image)
      : physical_memory_map_(physical_memory_map),
@@ -64,7 +64,7 @@ protected:
     }
 
 private:
-    PhysicalMemoryMap& physical_memory_map_;
+    EarlyPhysicalMemoryMap& physical_memory_map_;
     PageFrameAllocator& page_frame_allocator_;
     const Data& image_;
 
@@ -98,9 +98,9 @@ private:
         physical_memory_map_.map_page(physical_address, linear_address, get_protection_flags(header));
     }
     
-    PhysicalMemoryMap::ProtectionFlags get_protection_flags(const ProgramHeader& header)
+    EarlyPhysicalMemoryMap::ProtectionFlags get_protection_flags(const ProgramHeader& header)
     {
-        PhysicalMemoryMap::ProtectionFlags flags = 0;
+        EarlyPhysicalMemoryMap::ProtectionFlags flags = 0;
         if (header.p_flags & Elf::PF_W) {
             flags = flags | physical_memory_map_.WRITABLE;
         }
