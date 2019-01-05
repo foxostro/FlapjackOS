@@ -43,12 +43,22 @@ void operator delete(void* p, size_t)
     free(p);
 }
 
+void operator delete(void* p, size_t, std::align_val_t)
+{
+    free(p);
+}
+
 void operator delete[](void* p)
 {
     free(p);
 }
 
-void operator delete [](void* p, size_t)
+void operator delete[](void* p, size_t)
+{
+    free(p);
+}
+
+void operator delete[](void* p, size_t, std::align_val_t)
 {
     free(p);
 }
