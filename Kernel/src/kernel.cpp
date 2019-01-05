@@ -11,6 +11,7 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 #include <common/mutex.hpp>
+#include <platform/i386/extract_page_map_operation.hpp> // AFOX_TODO: Need a platform-independent implementation.
 
 
 Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
@@ -46,6 +47,14 @@ const char* Kernel::get_platform() const
 void Kernel::run()
 {
     TRACE("Running...");
+
+    {
+        i386::ExtractPageMapOperation operation{mmu_};
+        auto pml2 = operation.extract();
+        (void)pml2;
+        TRACE("just before scope exit");
+    }
+    TRACE("done with extract operation");
 
     InterruptLock lock;
     {
