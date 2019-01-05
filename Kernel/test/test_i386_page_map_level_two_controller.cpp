@@ -3,7 +3,7 @@
 #include <platform/i386/page_map_level_two_controller.hpp>
 #include <common/test/mock_memory_management_unit.hpp>
 
-using PML1 = i386::PageMapLevelOneController<MockMemoryManagementUnit32>;
+using PML1 = i386::PageMapLevelOneController<MockMemoryManagementUnit>;
 using PML2 = i386::PageMapLevelTwoController;
 
 TEST_CASE("i386::PageMapLevelTwoController -- PML2 has 1024 entries", "[i386]")
@@ -24,7 +24,7 @@ TEST_CASE("i386::PageMapLevelTwoController -- page directory is initially empty"
 
 TEST_CASE("i386::PageMapLevelTwoController -- ensure we can stick page tables in the directory", "[i386]")
 {
-    MockMemoryManagementUnit32 mmu;
+    MockMemoryManagementUnit mmu;
     PML2 page_directory;
 
     {
@@ -41,7 +41,7 @@ TEST_CASE("i386::PageMapLevelTwoController -- ensure we can stick page tables in
 
 TEST_CASE("i386::PageMapLevelTwoController -- ensure we can remove page tables from the directory", "[i386]")
 {
-    MockMemoryManagementUnit32 mmu;
+    MockMemoryManagementUnit mmu;
     PML2 page_directory;
     uintptr_t addr = 0;
 
