@@ -5,14 +5,14 @@
 #include "page_directory.hpp"
 #include "page_directory_pointer_table.hpp"
 #include "page_map_level_four.hpp"
-#include "hardware_memory_management_unit.hpp"
+#include "concrete_hardware_memory_management_unit.hpp"
 #include <cstdint>
 #include <climits>
 
 namespace x86_64 {
 
 // Walks the paging structures and understands the relationships between them.
-template<typename MMU_ = x86_64::HardwareMemoryManagementUnit>
+template<typename MMU_ = x86_64::ConcreteHardwareMemoryManagementUnit>
 class PagingResolver {
 public:
     using PageDirectory = x86_64::PageDirectory;

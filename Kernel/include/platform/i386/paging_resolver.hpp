@@ -3,14 +3,14 @@
 
 #include "page_table.hpp"
 #include "page_directory.hpp"
-#include "hardware_memory_management_unit.hpp"
+#include "concrete_hardware_memory_management_unit.hpp"
 #include <cstdint>
 #include <limits>
 
 namespace i386 {
 
 // Walks the paging structures and understands the relationships between them.
-template<typename MMU_ = i386::HardwareMemoryManagementUnit>
+template<typename MMU_ = i386::ConcreteHardwareMemoryManagementUnit>
 class PagingResolver {
 public:
     using PageDirectory = i386::PageDirectory;

@@ -51,7 +51,7 @@ private:
     DeviceDrivers device_drivers_;
     TextDisplayDevice display_;
     TextTerminal terminal_;
-    HardwareMemoryManagementUnit mmu_;
+    ConcreteHardwareMemoryManagementUnit mmu_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PhysicalMemoryMap phys_map_;
     ConcretePageFrameAllocator page_frame_allocator_;

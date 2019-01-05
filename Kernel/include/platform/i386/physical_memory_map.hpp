@@ -3,7 +3,7 @@
 
 #include "generic_physical_memory_map.hpp"
 #include "paging_resolver.hpp"
-#include "hardware_memory_management_unit.hpp"
+#include "concrete_hardware_memory_management_unit.hpp"
 #include "logger.hpp"
 
 namespace i386 {
