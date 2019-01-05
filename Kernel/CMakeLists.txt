@@ -28,6 +28,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/elf_loader64.hpp"
     "include/elf_loader_factory.hpp" "src/elf_loader_factory.cpp"
     "include/hardware_memory_management_unit.hpp"
+    "include/physical_memory_map.hpp"
     "include/paging_topology/page_frame_controller.hpp"
     "include/paging_topology/page_map_level_one_controller.hpp"
     "include/paging_topology/page_map_level_two_controller.hpp"

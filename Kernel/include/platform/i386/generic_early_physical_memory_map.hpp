@@ -5,21 +5,16 @@
 #include <type_traits>
 #include "page_size.hpp"
 #include <hardware_memory_management_unit.hpp>
+#include <physical_memory_map.hpp>
 
 namespace i386 {
 
 // Provides a platform-agnostic interface to the hardware MMU memory map.
 // It's physical because it's hardware.
 template<typename PagingResolver>
-class GenericEarlyPhysicalMemoryMap {
+class GenericEarlyPhysicalMemoryMap : public ::PhysicalMemoryMap {
 public:
     using PageTableEntry = typename std::remove_reference<decltype(PagingResolver::PageTable::entries[0])>::type;
-    using ProtectionFlags = unsigned;
-
-    static constexpr unsigned PRESENT = (1 << 0);
-    static constexpr unsigned WRITABLE = (1 << 1);
-    static constexpr unsigned GLOBAL = (1 << 2);
-    static constexpr unsigned SUPERVISOR = (1 << 3);
 
     GenericEarlyPhysicalMemoryMap(HardwareMemoryManagementUnit &mmu)
      : resolver_(mmu),
@@ -29,19 +24,16 @@ public:
     // Point the physical memory map at the paging structures active on the MMU.
     // So, whatever the MMU is using right now is what EarlyPhysicalMemoryMap
     // will now act upon.
-    void reload()
+    void reload() override
     {
         resolver_.set_cr3(mmu_.get_cr3());
     }
-
-    // Allocate memory for page tables and insert them into the page directory.
-    virtual void populate_page_tables(uintptr_t begin, size_t length) = 0;
 
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.
     void map_page(uintptr_t physical_address,
                   uintptr_t linear_address,
-                  ProtectionFlags flags)
+                  ProtectionFlags flags) override
     {
         PageTableEntry* pte = resolver_.get_page_table_entry(linear_address);
         assert(pte);
@@ -54,7 +46,7 @@ public:
     }
 
     // Mark the specified range of virtual pages as read-only.
-    void set_readonly(uintptr_t begin, uintptr_t end)
+    void set_readonly(uintptr_t begin, uintptr_t end) override
     {
         for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
             PageTableEntry* pte = resolver_.get_page_table_entry(page);
@@ -65,7 +57,7 @@ public:
     }
 
     // Invalidates the hardware MMU cache for the specified virtual addresses.
-    void invalidate_pages(uintptr_t begin, uintptr_t end)
+    void invalidate_pages(uintptr_t begin, uintptr_t end) override
     {
         for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
             invlpg(page);
@@ -73,7 +65,7 @@ public:
     }
 
     // Invalidates the hardware MMU cache for the specified virtual address.
-    void invalidate_page(uintptr_t linear_address)
+    void invalidate_page(uintptr_t linear_address) override
     {
         invlpg(linear_address);
     }
