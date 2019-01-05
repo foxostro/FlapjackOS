@@ -8,7 +8,6 @@
 #include <platform/i386/page_directory.hpp>
 #include <page_frame_allocator.hpp>
 #include <hardware_memory_management_unit.hpp>
-#include <logger.hpp>
 
 namespace i386 {
 
@@ -31,13 +30,11 @@ private:
 
     PML2Ptr make_pml2()
     {
-        TRACE("begin");
         PageDirectory* page_directory = get_current_page_directory();
         assert(page_directory);
         PML2Ptr pml2{new PageMapLevelTwoController{page_directory}};
         pml2->set_should_leak();
         configure_pml2(*pml2);
-        TRACE("end");
         return pml2;
     }
 
@@ -48,26 +45,21 @@ private:
 
     void configure_pml2(PagingTopology::PageMapLevelTwoController& pml2)
     {
-        TRACE("begin");
         PageDirectory* page_directory = get_current_page_directory();
         assert(page_directory);
         for (size_t i = 0, n = pml2.get_number_of_entries(); i < n; ++i) {
             auto& pde = page_directory->entries[i];
             auto& pml2_entry = pml2.get_entry(i);
-            TRACE("configure_pml2_entry, i=%d", (int)i);
             configure_pml2_entry(pml2_entry, pde);
         }
-        TRACE("end");
     }
 
     void configure_pml2_entry(PagingTopology::PageMapLevelTwoController::Entry& pml2_entry, PageDirectoryEntry& pde)
     {
-        TRACE("begin");
         PageTable* page_table = get_page_table(pde);
         if (page_table) {
             pml2_entry.set_pml1(make_pml1(page_table));
         }
-        TRACE("end");
     }
 
     PageTable* get_page_table(PageDirectoryEntry& pde)
@@ -83,39 +75,27 @@ private:
 
     PML1Ptr make_pml1(PageTable* page_table)
     {
-        TRACE("begin, page_table=%p", page_table);
-        TRACE("mmu_=%p", &mmu_);
+        assert(page_table);
         i386::PageMapLevelOneController* ptr = new i386::PageMapLevelOneController{mmu_, page_table};
-        TRACE("0");
         PML1Ptr pml1{ptr};
-        TRACE("a");
         pml1->set_should_leak();
-        TRACE("b");
         if (page_table) {
-            TRACE("c");
             configure_pml1(*pml1, page_table);
         }
-        TRACE("end");
         return pml1;
     }
 
     void configure_pml1(PagingTopology::PageMapLevelOneController &pml1, PageTable* page_table)
     {
-        TRACE("begin, page_table=%p", page_table);
         assert(page_table);
         for (size_t i = 0, n = pml1.get_number_of_entries(); i < n; ++i) {
-            TRACE("i = %d", (int)i);
             auto& pte = page_table->entries[i];
-            TRACE("get_entry");
             auto& pml1_entry = pml1.get_entry(i);
-            TRACE("get_address");
             uintptr_t address = static_cast<uintptr_t>(pte.get_address());
             if (address != 0) {
-                TRACE("set_page_frame");
                 pml1_entry.set_page_frame(new PageFrameController{address});
             }
         }
-        TRACE("end");
     }
 };
 
