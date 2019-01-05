@@ -42,7 +42,7 @@ public:
     template<typename Function> void enumerate(Function&&) {}
 };
 
-using Operation = PageFrameAllocatorConfigurationOperation<DummyPageFrameEnumerator, DummyModuleEnumerator, MockMemoryManagementUnit>;
+using Operation = PageFrameAllocatorConfigurationOperation<DummyPageFrameEnumerator, DummyModuleEnumerator>;
 
 TEST_CASE("test_page_frame_allocator_configuration_ctor", "[page_frame_allocator_configuration_operation]")
 {

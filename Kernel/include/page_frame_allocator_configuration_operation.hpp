@@ -4,6 +4,7 @@
 #include <multiboot.h>
 #include <page_frame_allocator.hpp>
 #include <page_size.hpp>
+#include <hardware_memory_management_unit.hpp>
 
 // Configures a page frame allocator for use at boot time.
 //
@@ -14,15 +15,13 @@
 // "PageFrameEnumerator" is a Functor which enumerates the page frames in the
 // system. This generally is implemented with logic to walk the multiboot memory
 // map.
-template<typename PageFrameEnumerator,
-         typename ModuleEnumerator,
-         typename MMU>
+template<typename PageFrameEnumerator, typename ModuleEnumerator>
 class PageFrameAllocatorConfigurationOperation {
 public:
     PageFrameAllocatorConfigurationOperation(uintptr_t break_address,
                                              PageFrameEnumerator page_frame_enumerator,
                                              ModuleEnumerator module_enumerator,
-                                             MMU& mmu)
+                                             HardwareMemoryManagementUnit& mmu)
      : break_address_(break_address),
        page_frame_enumerator_(page_frame_enumerator),
        module_enumerator_(module_enumerator),
@@ -40,7 +39,7 @@ private:
     const uintptr_t break_address_;
     PageFrameEnumerator page_frame_enumerator_;
     ModuleEnumerator module_enumerator_;
-    MMU& mmu_;
+    HardwareMemoryManagementUnit& mmu_;
 
     // Use the provided enumerator to enumerate page frames in the system.
     // For each page frame, invoke the function `fn'.

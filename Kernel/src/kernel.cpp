@@ -157,7 +157,7 @@ void Kernel::initialize_page_frame_allocator()
                      (unsigned)sizeof(ConcretePageFrameAllocator),
                      (unsigned)sizeof(ConcretePageFrameAllocator)/1024);
 
-    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator, MultibootModuleEnumerator, ConcreteHardwareMemoryManagementUnit>;
+    using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator, MultibootModuleEnumerator>;
     Op operation((uintptr_t)g_kernel_image_end,
                  MultibootMemoryMapPageFrameEnumerator(mmu_, mb_info_),
                  MultibootModuleEnumerator(mmu_, mb_info_),
