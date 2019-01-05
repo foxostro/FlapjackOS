@@ -1,6 +1,5 @@
 #include "kernel.hpp"
 #include <type_traits> // for std::aligned_storage
-#include <multiboot.h> // AFOX_TODO: REMOVE ME
 
 // Some things need direct access to the kernel object to manipulate the system.
 // There is only one kernel. So, it's exposed as a global.

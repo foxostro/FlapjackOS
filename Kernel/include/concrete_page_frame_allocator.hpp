@@ -17,6 +17,7 @@ public:
         mark_all_as_used();
     }
 
+    // AFOX_TODO: I'm really quite unhappy with the API in PageFrameAlloctor. Maybe rename the methods?
     uintptr_t allocate_span(size_t length) override
     {
         for (uintptr_t page_frame = PAGE_SIZE;
