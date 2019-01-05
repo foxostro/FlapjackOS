@@ -181,7 +181,7 @@ void Kernel::initialize_kernel_malloc()
     size_t length = EIGHT_MB;
     TRACE("Malloc zone size is %u KB.", (unsigned)length/1024);
 
-    uintptr_t begin_physical_addr = page_frame_allocator_.allocate_span(length);
+    uintptr_t begin_physical_addr = page_frame_allocator_.allocate(length);
     void* begin = (void*)mmu_.convert_physical_to_logical_address(begin_physical_addr);
 
     constexpr int MAGIC_NUMBER_UNINITIALIZED_HEAP = 0xCD;

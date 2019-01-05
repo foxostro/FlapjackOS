@@ -69,7 +69,7 @@ TEST_CASE("i386::PageFrameController -- assign a page frame without an allocator
 {
     auto allocator = create_page_frame_allocator();
     
-    uintptr_t addr = allocator.allocate_span(PAGE_SIZE);
+    uintptr_t addr = allocator.allocate(PAGE_SIZE);
 
     {
         i386::PageFrameController page_frame{addr};

@@ -11,14 +11,14 @@ public:
     // Returns the physical address of the first page frame on success.
     // Returns zero if the allocation fails.
     // This method will refuse to allocate page frame zero.
-    virtual uintptr_t allocate_span(size_t length) = 0;
+    virtual uintptr_t allocate(size_t length) = 0;
 
     // Returns true if all page frames in the specified span are free.
     virtual bool is_span_free(uintptr_t begin_page_frame, size_t length) = 0;
 
     // Allocates a specific page frame.
     // Returns true if the allocation was successful, false otherwise.
-    virtual bool allocate(uintptr_t page_frame) = 0;
+    virtual bool allocate_specific_page_frame(uintptr_t page_frame) = 0;
 
     // Deallocates a specific page frame.
     // If the page frame was already deallocated then this does nothing.

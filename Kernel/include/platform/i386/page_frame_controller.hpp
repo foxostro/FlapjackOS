@@ -27,7 +27,7 @@ public:
 
     explicit UnlockedPageFrameController(PageFrameAllocator& allocator)
      : allocator_(&allocator),
-       page_frame_(allocator.allocate_span(PAGE_SIZE))
+       page_frame_(allocator.allocate(PAGE_SIZE))
     {}
 
     UnlockedPageFrameController(UnlockedPageFrameController&& other)

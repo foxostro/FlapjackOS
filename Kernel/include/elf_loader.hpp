@@ -78,7 +78,7 @@ private:
     void action_load(const ProgramHeader& header)
     {
         // AFOX_TODO: need some way to track ownership of page frames and free them when they are no longer in use
-        uintptr_t physical_address = page_frame_allocator_.allocate_span(header.p_memsz);
+        uintptr_t physical_address = page_frame_allocator_.allocate(header.p_memsz);
         uintptr_t linear_address = header.p_vaddr;
 
         // Ensure the page directory has page tables for the region of memory.

@@ -17,8 +17,7 @@ public:
         mark_all_as_used();
     }
 
-    // AFOX_TODO: I'm really quite unhappy with the API in PageFrameAlloctor. Maybe rename the methods?
-    uintptr_t allocate_span(size_t length) override
+    uintptr_t allocate(size_t length) override
     {
         for (uintptr_t page_frame = PAGE_SIZE;
              page_frame < PAGE_SIZE*NUMBER_OF_PAGE_FRAMES;
@@ -27,7 +26,7 @@ public:
             if (is_span_free(page_frame, length)) {
                 uintptr_t result = page_frame;
                 for (; length >= PAGE_SIZE; length -= PAGE_SIZE) {
-                    allocate(page_frame);
+                    allocate_specific_page_frame(page_frame);
                     page_frame += PAGE_SIZE;
                 }
                 return result;
@@ -56,7 +55,7 @@ public:
         return true;
     }
 
-    bool allocate(uintptr_t page_frame) override
+    bool allocate_specific_page_frame(uintptr_t page_frame) override
     {
         size_t bit_index = page_frame / PAGE_SIZE;
         if (bitmap_.test(bit_index)) {
