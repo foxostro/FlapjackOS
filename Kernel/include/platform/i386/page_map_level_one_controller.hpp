@@ -167,7 +167,8 @@ public:
     static constexpr size_t COUNT = PageTable::COUNT;
 
     PageMapLevelOneController(HardwareMemoryManagementUnit& mmu)
-     : PageMapLevelOneController(mmu, new PageTable)
+     : mmu_(mmu),
+       page_table_(new PageTable)
     {
         clear_table();
         feed_ptes();
@@ -179,7 +180,9 @@ public:
      : mmu_(mmu),
        page_table_(std::move(pt))
     {
-        feed_ptes();
+        if (page_table_) {
+            feed_ptes();
+        }
         feed_lock();
     }
 

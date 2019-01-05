@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "page_size.hpp"
+#include <hardware_memory_management_unit.hpp>
 
 namespace i386 {
 

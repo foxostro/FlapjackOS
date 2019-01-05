@@ -1,33 +1,6 @@
 #include "catch.hpp"
-#include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <platform/x86_64/physical_memory_map.hpp>
-#include "mock_memory_management_unit.hpp"
-
-class TestPagingContext
-{
-public:
-    x86_64::PageMapLevelFour pml4_;
-    x86_64::PageDirectoryPointerTable pdpt_;
-    x86_64::PageDirectory page_directory_;
-    MockMemoryManagementUnit mmu_;
-    x86_64::PagingResolver resolver_;
-    x86_64::KernelAddressSpaceBootstrapper bootstrapper_;
-
-    TestPagingContext()
-     : resolver_(mmu_),
-       bootstrapper_(mmu_)
-    {
-        memset(&pml4_, 0, sizeof(pml4_));
-        memset(&pdpt_, 0, sizeof(pdpt_));
-        memset(&page_directory_, 0, sizeof(page_directory_));
-        uintptr_t cr3 = mmu_.convert_logical_to_physical_address((uintptr_t)&pml4_);
-        resolver_.set_cr3(cr3);
-        mmu_.set_cr3(cr3);
-        resolver_.get_page_map_level_four_entry(&pml4_, mmu_.get_kernel_virtual_start_address())->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&pdpt_));
-        resolver_.get_page_directory_pointer_table_entry(&pdpt_, mmu_.get_kernel_virtual_start_address())->set_address(mmu_.convert_logical_to_physical_address((uintptr_t)&page_directory_));
-        bootstrapper_.prepare_address_space();
-    }
-};
+#include "mock_paging_context.hpp"
 
 TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
 {
@@ -36,7 +9,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::map_page -- basic example", "[x86_64]")
     // physical address.
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
 
@@ -59,7 +32,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- zero size region", "[x86_6
     // Setting a zero-size region as read-only is effectively a no-op.
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
@@ -86,7 +59,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-byte region region", "
     // byte long region as read-only changes the entire associated page.
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
@@ -119,7 +92,7 @@ TEST_CASE("x86_64::PhysicalMemoryMap::set_readonly -- one-page region region", "
     // is exclusive, e.g., defined as [BEGIN, END)
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     x86_64::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,

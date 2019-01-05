@@ -1,27 +1,6 @@
 #include "catch.hpp"
-#include <platform/i386/kernel_address_space_bootstrapper.hpp>
 #include <platform/i386/physical_memory_map.hpp>
-#include "mock_memory_management_unit.hpp"
-
-class TestPagingContext
-{
-public:
-    i386::PageDirectory page_directory_;
-    MockMemoryManagementUnit mmu_;
-    i386::PagingResolver resolver_;
-    i386::KernelAddressSpaceBootstrapper bootstrapper_;
-
-    TestPagingContext()
-     : resolver_(mmu_),
-       bootstrapper_(mmu_)
-    {
-        memset(&page_directory_, 0, sizeof(page_directory_));
-        uintptr_t cr3 = mmu_.convert_logical_to_physical_address((uintptr_t)&page_directory_);
-        resolver_.set_cr3(cr3);
-        mmu_.set_cr3(cr3);
-        bootstrapper_.prepare_address_space();
-    }
-};
+#include "mock_paging_context.hpp"
 
 TEST_CASE("i386::PhysicalMemoryMap::map_page -- basic example", "[i386]")
 {
@@ -30,7 +9,7 @@ TEST_CASE("i386::PhysicalMemoryMap::map_page -- basic example", "[i386]")
     // physical address.
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
 
@@ -53,7 +32,7 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- zero size region", "[i386]")
     // Setting a zero-size region as read-only is effectively a no-op.
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
@@ -80,7 +59,7 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- one-byte region region", "[i
     // byte long region as read-only changes the entire associated page.
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
@@ -113,7 +92,7 @@ TEST_CASE("i386::PhysicalMemoryMap::set_readonly -- one-page region region", "[i
     // is exclusive, e.g., defined as [BEGIN, END)
 
     // Setup
-    TestPagingContext context;
+    MockPagingContext context;
     i386::PhysicalMemoryMap phys_map{context.mmu_};
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
