@@ -222,9 +222,13 @@ public:
     {
         LockGuard guard{lock_};
         PageTable* page_table = page_table_.get_pointer();
-        uintptr_t logical = reinterpret_cast<uintptr_t>(page_table);
-        uintptr_t physical = mmu_.convert_logical_to_physical_address(logical);
-        return physical;
+        if (page_table) {
+            uintptr_t logical = reinterpret_cast<uintptr_t>(page_table);
+            uintptr_t physical = mmu_.convert_logical_to_physical_address(logical);
+            return physical;
+        } else {
+            return 0;
+        }
     }
 
     // Gets the specified entry in the table.
