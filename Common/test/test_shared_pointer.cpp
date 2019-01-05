@@ -134,3 +134,24 @@ TEST_CASE("SharedPointer move-assignment operator", "[SharedPointer]")
 
     REQUIRE(TestObject::count == 0);
 }
+
+TEST_CASE("SharedPointer move from UniquePointer", "[SharedPointer]")
+{
+    TestObject::count = 0;
+
+    {
+        UniquePointer<TestObject> ptr1(new TestObject);
+        SharedPointer<TestObject> ptr2;
+
+        REQUIRE(ptr2.get_count() == 0);
+        REQUIRE(TestObject::count == 1);
+
+        ptr2 = std::move(ptr1);
+
+        REQUIRE(ptr1.get_pointer() == nullptr);
+        REQUIRE(ptr2.get_count() == 1);
+        REQUIRE(TestObject::count == 1);
+    }
+
+    REQUIRE(TestObject::count == 0);
+}

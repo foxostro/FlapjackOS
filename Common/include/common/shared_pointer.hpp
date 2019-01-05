@@ -2,7 +2,8 @@
 #define FLAPJACKOS_COMMON_INCLUDE_SHARED_POINTER_HPP
 
 #include <common/mutex.hpp>
-#include <common/perform_with_lock.hpp>
+#include <common/lock_guard.hpp>
+#include <common/unique_pointer.hpp>
 #include <atomic>
 #include <cassert>
 
@@ -24,21 +25,27 @@ public:
 
     SharedPointer(const SharedPointer& other)
     {
-        perform_with_lock(other.lock_, [&]{
-            data_ = other.data_;
-            count_ = other.count_;
-            acquire_unlocked();
-        });
+        LockGuard guard{other.lock_};
+        data_ = other.data_;
+        count_ = other.count_;
+        acquire_unlocked();
     }
 
     SharedPointer(SharedPointer&& other)
     {
-        perform_with_lock(other.lock_, [&]{
-            data_ = other.data_;
-            count_ = other.count_;
-            other.data_ = nullptr;
-            other.count_ = nullptr;
-        });
+        LockGuard guard{other.lock_};
+        data_ = other.data_;
+        count_ = other.count_;
+        other.data_ = nullptr;
+        other.count_ = nullptr;
+    }
+
+    SharedPointer(UniquePointer<Type>&& other)
+    {
+        data_ = other.get_pointer();
+        count_ = new std::atomic<int>(1);
+        other.set_should_leak(true);
+        other = nullptr;
     }
 
     Type& operator*() const
@@ -53,22 +60,18 @@ public:
 
     Type* get_pointer() const
     {
-        Type* data;
-        perform_with_lock(lock_, [&]{
-            data = data_;
-        });
-        return data;
+        LockGuard guard{lock_};
+        return data_;
     }
 
     SharedPointer& operator=(const SharedPointer& other)
     {
         if (this != &other) {
-            perform_with_lock(lock_, other.lock_, [&]{
-                release_unlocked();
-                data_ = other.data_;
-                count_ = other.count_;
-                acquire_unlocked();
-            });
+            LockGuard2 guard{lock_, other.lock_};
+            release_unlocked();
+            data_ = other.data_;
+            count_ = other.count_;
+            acquire_unlocked();
         }
         return *this;
     }
@@ -76,14 +79,24 @@ public:
     SharedPointer& operator=(SharedPointer&& other)
     {
         if (this != &other) {
-            perform_with_lock(lock_, other.lock_, [&]{
-                release_unlocked();
-                data_ = other.data_;
-                count_ = other.count_;
-                other.data_ = nullptr;
-                other.count_ = nullptr;
-            });
+            LockGuard2 guard{lock_, other.lock_};
+            release_unlocked();
+            data_ = other.data_;
+            count_ = other.count_;
+            other.data_ = nullptr;
+            other.count_ = nullptr;
         }
+        return *this;
+    }
+
+    SharedPointer& operator=(UniquePointer<Type>&& other)
+    {
+        LockGuard guard{lock_};
+        release_unlocked();
+        data_ = other.get_pointer();
+        count_ = new std::atomic<int>(1);
+        other.set_should_leak(true);
+        other = nullptr;
         return *this;
     }
 
@@ -93,11 +106,8 @@ public:
             return true;
         }
 
-        bool is_equal;
-        perform_with_lock(lock_, other.lock_, [&]{
-            is_equal = (data_ == other.data_);
-        });
-        return is_equal;
+        LockGuard2 guard{lock_, other.lock_};
+        return (data_ == other.data_);
     }
 
     inline bool operator!=(const SharedPointer& other) const
@@ -107,20 +117,14 @@ public:
 
     explicit operator bool() const
     {
-        bool is_nonnull;
-        perform_with_lock(lock_, [&]{
-            is_nonnull = (data_ != nullptr);
-        });
-        return is_nonnull;
+        LockGuard guard{lock_};
+        return (data_ != nullptr);
     }
 
     int get_count() const
     {
-        int count;
-        perform_with_lock(lock_, [&]{
-            count = (count_ ? count_->load() : 0);
-        });
-        return count;
+        LockGuard guard{lock_};
+        return (count_ ? count_->load() : 0);
     }
     
 private:
