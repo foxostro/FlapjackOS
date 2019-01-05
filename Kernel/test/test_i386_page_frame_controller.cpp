@@ -1,10 +1,9 @@
 #include "catch.hpp"
 #include <platform/i386/page_frame_controller.hpp>
-#include <page_frame_allocator.hpp>
+#include <concrete_page_frame_allocator.hpp>
 
 constexpr size_t MAX_PAGE_FRAMES = 10;
-using TestingAllocator = PageFrameAllocator_<MAX_PAGE_FRAMES>;
-using TestingPageFrameController = i386::PageFrameController<TestingAllocator>;
+using TestingAllocator = GenericConcretePageFrameAllocator<MAX_PAGE_FRAMES>;
 
 static TestingAllocator create_page_frame_allocator()
 {
@@ -18,7 +17,7 @@ static TestingAllocator create_page_frame_allocator()
 TEST_CASE("i386::PageFrameController -- ctor allocates a page frame", "[i386]")
 {
     auto allocator = create_page_frame_allocator();
-    TestingPageFrameController page_frame{allocator};
+    i386::PageFrameController page_frame{allocator};
     REQUIRE(allocator.is_free(page_frame.get_page_frame()) == false);
 }
 
@@ -28,7 +27,7 @@ TEST_CASE("i386::PageFrameController -- dtor deallocates the page frame", "[i386
     uintptr_t addr;
 
     {
-        TestingPageFrameController page_frame{allocator};
+        i386::PageFrameController page_frame{allocator};
         addr = page_frame.get_page_frame();
     }
 
@@ -39,10 +38,10 @@ TEST_CASE("i386::PageFrameController -- move to reassign ownership of the page f
 {
     auto allocator = create_page_frame_allocator();
     
-    TestingPageFrameController page_frame1{allocator};
+    i386::PageFrameController page_frame1{allocator};
     uintptr_t addr1 = page_frame1.get_page_frame();
 
-    TestingPageFrameController page_frame2{allocator};
+    i386::PageFrameController page_frame2{allocator};
     uintptr_t addr2 = page_frame2.get_page_frame();
 
     page_frame1 = std::move(page_frame2);
@@ -55,11 +54,11 @@ TEST_CASE("i386::PageFrameController -- move ctor reassigns ownership of the pag
 {
     auto allocator = create_page_frame_allocator();
     
-    TestingPageFrameController page_frame1{allocator};
+    i386::PageFrameController page_frame1{allocator};
     uintptr_t addr = page_frame1.get_page_frame();
 
     {
-        TestingPageFrameController page_frame2{std::move(page_frame1)};
+        i386::PageFrameController page_frame2{std::move(page_frame1)};
         REQUIRE(addr == page_frame2.get_page_frame());
     }
 
@@ -73,7 +72,7 @@ TEST_CASE("i386::PageFrameController -- assign a page frame without an allocator
     uintptr_t addr = allocator.allocate_span(PAGE_SIZE);
 
     {
-        TestingPageFrameController page_frame{addr};
+        i386::PageFrameController page_frame{addr};
         REQUIRE(addr == page_frame.get_page_frame());
     }
 

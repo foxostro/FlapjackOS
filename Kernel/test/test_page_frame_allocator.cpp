@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include "page_frame_allocator.hpp"
+#include "concrete_page_frame_allocator.hpp"
 
 constexpr size_t CAPACITY = 10;
-using TestingAllocator = PageFrameAllocator_<CAPACITY>;
+using TestingAllocator = GenericConcretePageFrameAllocator<CAPACITY>;
 
 TEST_CASE("test_page_frame_allocator_default_ctor", "[page_frame_allocator]")
 {

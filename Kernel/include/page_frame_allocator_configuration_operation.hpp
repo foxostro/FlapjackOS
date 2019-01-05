@@ -3,6 +3,7 @@
 
 #include <multiboot.h>
 #include <page_frame_allocator.hpp>
+#include <page_size.hpp>
 
 // Configures a page frame allocator for use at boot time.
 //

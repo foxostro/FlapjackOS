@@ -8,6 +8,7 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/thread.hpp"
     "include/scheduler.hpp" "src/scheduler.cpp"
     "include/page_frame_allocator.hpp"
+    "include/concrete_page_frame_allocator.hpp"
     "include/page_frame_allocator_configuration_operation.hpp"
     "include/multiboot_memory_map_page_frame_enumerator.hpp"
     "include/multiboot_module_enumerator.hpp"

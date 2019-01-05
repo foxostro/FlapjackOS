@@ -154,8 +154,8 @@ void Kernel::report_free_page_frames()
 void Kernel::initialize_page_frame_allocator()
 {
     terminal_.printf("Page frame allocator will use %u bytes (%u KB)\n",
-                     (unsigned)sizeof(PageFrameAllocator),
-                     (unsigned)sizeof(PageFrameAllocator)/1024);
+                     (unsigned)sizeof(ConcretePageFrameAllocator),
+                     (unsigned)sizeof(ConcretePageFrameAllocator)/1024);
 
     using Op = PageFrameAllocatorConfigurationOperation<MultibootMemoryMapPageFrameEnumerator, MultibootModuleEnumerator, HardwareMemoryManagementUnit>;
     Op operation((uintptr_t)g_kernel_image_end,

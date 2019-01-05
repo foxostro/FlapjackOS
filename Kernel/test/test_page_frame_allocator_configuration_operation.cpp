@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "page_frame_allocator_configuration_operation.hpp"
+#include "concrete_page_frame_allocator.hpp"
 #include "boot.h"
 #include <common/test/mock_memory_management_unit.hpp>
 
@@ -58,7 +59,7 @@ TEST_CASE("test_page_frame_allocator_configuration_configure_all_free", "[page_f
     DummyPageFrameEnumerator enumerator(NUMBER_OF_PAGE_FRAMES);
     DummyModuleEnumerator module_enumerator;
     Operation op(0, enumerator, module_enumerator, mmu);
-    PageFrameAllocator page_frame_allocator;
+    ConcretePageFrameAllocator page_frame_allocator;
 
     op.configure(page_frame_allocator);
 
@@ -72,7 +73,7 @@ TEST_CASE("test_page_frame_allocator_configuration_configure_none_free", "[page_
     DummyPageFrameEnumerator enumerator(NUMBER_OF_PAGE_FRAMES);
     DummyModuleEnumerator module_enumerator;
     Operation op(~0, enumerator, module_enumerator, mmu);
-    PageFrameAllocator page_frame_allocator;
+    ConcretePageFrameAllocator page_frame_allocator;
     
     op.configure(page_frame_allocator);
 

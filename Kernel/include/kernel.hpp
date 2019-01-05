@@ -2,7 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_KERNEL_HPP
 
 #include <multiboot.h>
-#include <page_frame_allocator.hpp>
+#include <concrete_page_frame_allocator.hpp>
 #include <kernel_policy.hpp>
 #include <scheduler.hpp>
 #include <elf_loader32.hpp>
@@ -54,7 +54,7 @@ private:
     HardwareMemoryManagementUnit mmu_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     PhysicalMemoryMap phys_map_;
-    PageFrameAllocator page_frame_allocator_;
+    ConcretePageFrameAllocator page_frame_allocator_;
     Scheduler scheduler_;
 
     // Setup the VGA console and terminal.
