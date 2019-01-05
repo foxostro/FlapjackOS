@@ -48,7 +48,8 @@ void Kernel::run()
     TRACE("Running...");
 
     InterruptLock lock;
-    perform_with_lock(lock, [&]{
+    {
+        LockGuard guard{lock};
         MultibootModuleEnumerator enumerator{mmu_, mb_info_};
         assert(enumerator.has_next());
         Data elf_image = get_module_data(enumerator.get_next());
@@ -59,7 +60,7 @@ void Kernel::run()
         unsigned result = elf_loader->exec();
         terminal_.printf("result = 0x%x\n", result);
         assert(result == 0xdeadbeef);
-    });
+    }
 
     scheduler_.begin(new ThreadExternalStack);
     do_console_loop();

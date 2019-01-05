@@ -2,7 +2,6 @@
 #include <logger.hpp>
 #include <cassert>
 #include <utility>
-#include <common/perform_with_lock.hpp>
 
 static Scheduler* g_scheduler = nullptr;
 
@@ -19,28 +18,25 @@ Scheduler::Scheduler()
 
 void Scheduler::add(ThreadPointer thread)
 {
-    perform_with_lock(lock_, [&]{
-        runnable_.emplace_back(std::move(thread));
-    });
+    LockGuard guard{lock_};
+    runnable_.emplace_back(std::move(thread));
 }
 
 void Scheduler::begin(ThreadPointer init_thread)
 {
-    perform_with_lock(lock_, [&]{
-        current_thread_ = std::move(init_thread);
-    });
+    LockGuard guard{lock_};
+    current_thread_ = std::move(init_thread);
 }
 
 void Scheduler::yield()
 {
-    perform_with_lock(lock_, [&]{
-        if (can_yield()) {
-            Thread& previous_thread = *current_thread_;
-            swap_runnable_and_exhausted_if_necessary();
-            move_to_next_runnable_thread();
-            previous_thread.switch_away(*current_thread_);
-        }
-    });
+    LockGuard guard{lock_};
+    if (can_yield()) {
+        Thread& previous_thread = *current_thread_;
+        swap_runnable_and_exhausted_if_necessary();
+        move_to_next_runnable_thread();
+        previous_thread.switch_away(*current_thread_);
+    }
 }
 
 bool Scheduler::can_yield()

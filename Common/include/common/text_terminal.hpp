@@ -6,7 +6,7 @@
 #include <common/text_line.hpp>
 #include <common/vec2.hpp>
 #include <common/mutex.hpp>
-#include <common/perform_with_lock.hpp>
+#include <common/lock_guard.hpp>
 
 // A text terminal displays lines of text on a text console display.
 class UnlockedTextTerminal {
@@ -84,24 +84,21 @@ public:
 
     void putchar(char ch)
     {
-        perform_with_lock(lock_, [&]{
-            impl_.putchar(ch);
-        });
+        LockGuard guard{lock_};
+        impl_.putchar(ch);
     }
 
     void puts(const char* str)
     {
-        perform_with_lock(lock_, [&]{
-            impl_.puts(str);
-        });
+        LockGuard guard{lock_};
+        impl_.puts(str);
     }
 
     template<typename T>
     void putv(const T& buf)
     {
-        perform_with_lock(lock_, [&]{
-            impl_.putv(buf);
-        });
+        LockGuard guard{lock_};
+        impl_.putv(buf);
     }
 
     template<typename... Args>
@@ -113,23 +110,20 @@ public:
 
     void move_cursor_left()
     {
-        perform_with_lock(lock_, [&]{
-            impl_.move_cursor_left();
-        });
+        LockGuard guard{lock_};
+        impl_.move_cursor_left();
     }
 
     void move_cursor_right()
     {
-        perform_with_lock(lock_, [&]{
-            impl_.move_cursor_right();
-        });
+        LockGuard guard{lock_};
+        impl_.move_cursor_right();
     }
 
     void move_cursor_to_end()
     {
-        perform_with_lock(lock_, [&]{
-            impl_.move_cursor_to_end();
-        });
+        LockGuard guard{lock_};
+        impl_.move_cursor_to_end();
     }
 
 private:

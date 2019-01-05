@@ -6,7 +6,7 @@
 #include <interrupt_lock.hpp>
 #include <halt.h>
 #include <inout.h>
-#include <common/perform_with_lock.hpp>
+#include <common/lock_guard.hpp>
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;
 //constexpr unsigned KEYBOARD_CONTROL_PORT = 0x64;
@@ -107,9 +107,10 @@ void PS2KeyboardDevice::on_interrupt()
         const char* char_tbl = shift ? g_keyboard_keycode_ascii_uppercase : g_keyboard_keycode_ascii_lowercase;
         event.ch = char_tbl[event.key];
 
-        perform_with_lock(lock, [&]{
+        {
+            LockGuard guard{lock};
             events_.push_back(event);
-        });
+        }
     }
 }
 
@@ -125,13 +126,14 @@ KeyboardEvent PS2KeyboardDevice::get_event()
         // interrupts while reading the ring buffer. As there is only one CPU
         // (in use, at least) the only way a new thread can execute is through
         // an interrupt which invokes the scheduler or something like that.
-        perform_with_lock(lock, [&]{
+        {
+            LockGuard guard{lock};
             have_a_key = !events_.empty();
             if (have_a_key) {
                 event = events_.front();
                 events_.pop_front();
             }
-        });
+        }
         hlt();
     }
 
