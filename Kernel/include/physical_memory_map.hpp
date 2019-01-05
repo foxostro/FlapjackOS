@@ -21,7 +21,7 @@ public:
     virtual ~PhysicalMemoryMap() = default;
 
     // Point the physical memory map at the paging structures active on the MMU.
-    // So, whatever the MMU is using right now is what EarlyPhysicalMemoryMap
+    // So, whatever the MMU is using right now is what PhysicalMemoryMap
     // will now act upon.
     virtual void reload() = 0;
 

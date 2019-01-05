@@ -20,7 +20,7 @@ public:
     //                         physical memory to accomodate the executable's
     //                         memory segments. 
     // elf_image -- The ELF image in memory.
-    ElfLoader32(EarlyPhysicalMemoryMap& physical_memory_map,
+    ElfLoader32(PhysicalMemoryMap& physical_memory_map,
                 PageFrameAllocator& page_frame_allocator,
                 const Data& elf_image)
      : ElfLoaderBase(physical_memory_map, page_frame_allocator, elf_image)

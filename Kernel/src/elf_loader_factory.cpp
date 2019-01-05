@@ -3,7 +3,7 @@
 #include <elf_loader64.hpp>
 
 UniquePointer<ElfLoader>
-ElfLoaderFactory::create_loader(EarlyPhysicalMemoryMap& physical_memory_map,
+ElfLoaderFactory::create_loader(PhysicalMemoryMap& physical_memory_map,
                                 PageFrameAllocator& page_frame_allocator,
                                 const Data& image)
 {
