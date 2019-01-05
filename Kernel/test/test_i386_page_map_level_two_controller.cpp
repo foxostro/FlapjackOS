@@ -71,6 +71,16 @@ TEST_CASE("i386::PageMapLevelTwoController -- ctor can accept a raw pointer to a
     REQUIRE(controller.get_page_directory_pointer() == static_cast<void*>(page_directory));
 }
 
+TEST_CASE("i386::PageMapLevelTwoController -- ctor will not modify a page directory that it receives", "[i386]")
+{
+    i386::PageDirectory* actual = new i386::PageDirectory;
+    memset(actual, 0xAB, sizeof(i386::PageDirectory));
+    i386::PageDirectory* expected = new i386::PageDirectory;
+    memcpy(expected, actual, sizeof(i386::PageDirectory));
+    PML2 controller{actual};
+    REQUIRE(0 == memcmp(expected, actual, sizeof(i386::PageDirectory)));
+}
+
 TEST_CASE("i386::PageMapLevelTwoController -- can intentionally leak the underlying paging object on request", "[i386]")
 {
     // This mode is useful when the underlying paging object was allocated

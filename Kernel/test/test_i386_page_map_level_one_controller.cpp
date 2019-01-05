@@ -91,6 +91,17 @@ TEST_CASE("i386::PageMapLevelOneController -- ctor can accept a raw pointer to a
     REQUIRE(addr == page_table->entries[0].get_address());
 }
 
+TEST_CASE("i386::PageMapLevelOneController -- ctor will not modify a page table that it receives", "[i386]")
+{
+    i386::PageTable* actual = new i386::PageTable;
+    memset(actual, 0xAB, sizeof(i386::PageTable));
+    i386::PageTable* expected = new i386::PageTable;
+    memcpy(expected, actual, sizeof(i386::PageTable));
+    MockMemoryManagementUnit mmu;
+    PML1 controller{mmu, actual};
+    REQUIRE(0 == memcmp(expected, actual, sizeof(i386::PageTable)));
+}
+
 TEST_CASE("i386::PageMapLevelOneController -- can intentionally leak the underlying paging object on request", "[i386]")
 {
     // This mode is useful when the underlying paging object was allocated

@@ -168,14 +168,17 @@ public:
 
     PageMapLevelOneController(HardwareMemoryManagementUnit& mmu)
      : PageMapLevelOneController(mmu, new PageTable)
-    {}
+    {
+        clear_table();
+        feed_ptes();
+        feed_lock();
+    }
 
     PageMapLevelOneController(HardwareMemoryManagementUnit& mmu,
                               UniquePointer<PageTable> pt)
      : mmu_(mmu),
        page_table_(std::move(pt))
     {
-        clear_table();
         feed_ptes();
         feed_lock();
     }

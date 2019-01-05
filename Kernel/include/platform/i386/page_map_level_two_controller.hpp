@@ -135,12 +135,15 @@ public:
 
     PageMapLevelTwoController()
      : PageMapLevelTwoController(new PageDirectory)
-    {}
+    {
+        clear_directory();
+        feed_pdes();
+        feed_lock();
+    }
 
     PageMapLevelTwoController(UniquePointer<PageDirectory> pd)
      : page_directory_(std::move(pd))
     {
-        clear_directory();
         feed_pdes();
         feed_lock();
     }
