@@ -66,6 +66,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/page_frame_controller.hpp"
     "include/platform/i386/page_map_level_one_controller.hpp"
     "include/platform/i386/page_map_level_two_controller.hpp"
+    "include/platform/i386/extract_page_map_operation.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -195,6 +196,7 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_page_frame_controller.cpp"
              "test/test_i386_page_map_level_one_controller.cpp"
              "test/test_i386_page_map_level_two_controller.cpp"
+             "test/test_i386_extract_page_map_operation.cpp"
              )
     elseif (${BUILD_ARCH} STREQUAL "x86_64")
         list(APPEND TEST_SOURCE_FILES
