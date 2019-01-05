@@ -3,6 +3,7 @@
 
 #include <platform/i386/page_table.hpp>
 #include <paging_topology/page_map_level_one_controller.hpp>
+#include <hardware_memory_management_unit.hpp>
 #include <common/unique_pointer.hpp>
 #include <common/mutex.hpp>
 #include <cassert>
@@ -11,7 +12,6 @@ namespace i386 {
 
 // Owns a page table. Provides synchronized access.
 // On IA-32, the first level page map is called a Page Table.
-template<typename ConcreteHardwareMemoryManagementUnit>
 class PageMapLevelOneController final : public PagingTopology::PageMapLevelOneController {
 public:
     // A single entry in the page map.
@@ -166,7 +166,7 @@ public:
 
     static constexpr size_t COUNT = PageTable::COUNT;
 
-    PageMapLevelOneController(ConcreteHardwareMemoryManagementUnit& mmu)
+    PageMapLevelOneController(HardwareMemoryManagementUnit& mmu)
      : PageMapLevelOneController(mmu, new PageTable)
     {
         clear_table();
@@ -174,7 +174,7 @@ public:
         feed_lock();
     }
 
-    PageMapLevelOneController(ConcreteHardwareMemoryManagementUnit& mmu,
+    PageMapLevelOneController(HardwareMemoryManagementUnit& mmu,
                               UniquePointer<PageTable> pt)
      : mmu_(mmu),
        page_table_(std::move(pt))
@@ -250,7 +250,7 @@ public:
 
 private:
     mutable Mutex lock_;
-    ConcreteHardwareMemoryManagementUnit& mmu_;
+    HardwareMemoryManagementUnit& mmu_;
     UniquePointer<PageTable> page_table_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.
 };

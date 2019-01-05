@@ -3,7 +3,7 @@
 #include <platform/i386/page_map_level_two_controller.hpp>
 #include <common/test/mock_memory_management_unit.hpp>
 
-using PML1 = i386::PageMapLevelOneController<MockMemoryManagementUnit>;
+using PML1 = i386::PageMapLevelOneController;
 using PML2 = i386::PageMapLevelTwoController;
 
 TEST_CASE("i386::PageMapLevelTwoController -- PML2 has 1024 entries", "[i386]")

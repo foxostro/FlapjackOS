@@ -6,7 +6,7 @@
 
 constexpr size_t MAX_PAGE_FRAMES = 1024;
 using TestingAllocator = GenericConcretePageFrameAllocator<MAX_PAGE_FRAMES>;
-using PML1 = i386::PageMapLevelOneController<MockMemoryManagementUnit>;
+using PML1 = i386::PageMapLevelOneController;
 
 static TestingAllocator create_page_frame_allocator()
 {
