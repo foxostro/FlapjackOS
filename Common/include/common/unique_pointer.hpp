@@ -2,6 +2,7 @@
 #define FLAPJACKOS_COMMON_INCLUDE_UNIQUE_POINTER_HPP
 
 #include <common/mutex.hpp>
+#include <common/lock_guard.hpp>
 #include <cassert>
 
 // Unique Pointer class, roughly equivalent to std::unique_pointer.
@@ -15,16 +16,17 @@ public:
 
     UniquePointer() : UniquePointer(nullptr) {}
 
-    UniquePointer(Type* data) : data_(data) {}
+    UniquePointer(Type* data) : data_(data), should_leak_(false) {}
 
     UniquePointer(const UniquePointer& other) = delete;
 
     UniquePointer(UniquePointer&& other)
     {
-        perform_with_lock(other.lock_, [&]{
-            data_ = other.data_;
-            other.data_ = nullptr;
-        });
+        LockGuard guard{other.lock_};
+        should_leak_ = other.should_leak_;
+        data_ = other.data_;
+        other.data_ = nullptr;
+        other.should_leak_ = false;
     }
 
     Type& operator*() const
@@ -39,11 +41,8 @@ public:
 
     Type* get_pointer() const
     {
-        Type* data;
-        perform_with_lock(lock_, [&]{
-            data = data_;
-        });
-        return data;
+        LockGuard guard{lock_};
+        return data_;
     }
 
     UniquePointer& operator=(const UniquePointer& other) = delete;
@@ -51,11 +50,12 @@ public:
     UniquePointer& operator=(UniquePointer&& other)
     {
         if (this != &other) {
-            perform_with_lock(lock_, other.lock_, [&]{
-                release_unlocked();
-                data_ = other.data_;
-                other.data_ = nullptr;
-            });
+            LockGuard2 guard{lock_, other.lock_};
+            release_unlocked();
+            data_ = other.data_;
+            should_leak_ = other.should_leak_;
+            other.data_ = nullptr;
+            other.should_leak_ = false;
         }
         return *this;
     }
@@ -68,11 +68,8 @@ public:
             return true;
         }
 
-        bool is_equal;
-        perform_with_lock(lock_, other.lock_, [&]{
-            is_equal = (data_ == other.data_);
-        });
-        return is_equal;
+        LockGuard2 guard{lock_, other.lock_};
+        return (data_ == other.data_);
     }
 
     inline bool operator!=(const UniquePointer& other)
@@ -82,20 +79,27 @@ public:
 
     explicit operator bool() const
     {
-        bool is_nonnull;
-        perform_with_lock(lock_, [&]{
-            is_nonnull = (data_ != nullptr);
-        });
-        return is_nonnull;
+        LockGuard guard{lock_};
+        return (data_ != nullptr);
+    }
+
+    // Specifies that the object is to be intentionally leaked in the dtor.
+    void set_should_leak(bool leak)
+    {
+        LockGuard guard{lock_};
+        should_leak_ = leak;
     }
     
 private:
     Type* data_;
     mutable LockType lock_;
+    bool should_leak_;
 
     void release_unlocked()
     {
-        delete data_;
+        if (!should_leak_) {
+            delete data_;
+        }
         data_ = nullptr;
     }
 };
