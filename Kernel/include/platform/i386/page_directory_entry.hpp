@@ -75,6 +75,7 @@ public:
 
     bool is_supervisor() const
     {
+        // AFOX_TODO I think this bit should mean User, not Supervisor. So, it's been negated.
         return !!(data & SUPERVISOR);
     }
 
