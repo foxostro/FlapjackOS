@@ -62,3 +62,25 @@ TEST_CASE("i386::PageMapLevelTwoController -- ensure we can remove page tables f
         REQUIRE(entry.is_present() == false);
     }
 }
+
+TEST_CASE("i386::PageMapLevelTwoController -- ctor can accept a raw pointer to a page directory", "[i386]")
+{
+    i386::PageDirectory* page_directory = new i386::PageDirectory;
+    memset(page_directory, 0, sizeof(i386::PageDirectory));
+    PML2 controller{page_directory};
+    REQUIRE(controller.get_page_directory_pointer() == static_cast<void*>(page_directory));
+}
+
+TEST_CASE("i386::PageMapLevelTwoController -- can intentionally leak the underlying paging object on request", "[i386]")
+{
+    // This mode is useful when the underlying paging object was allocated
+    // statically in the kernel image, and not on the heap.
+    i386::PageDirectory* page_directory = new i386::PageDirectory;
+    memset(page_directory, 0, sizeof(i386::PageDirectory));
+    {
+        PML2 controller{page_directory};
+        controller.set_should_leak();
+    }
+    // AFOX_TODO: So how can I test that this object is still alive?
+    delete page_directory;
+}

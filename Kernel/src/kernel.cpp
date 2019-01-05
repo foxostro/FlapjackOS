@@ -22,7 +22,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
    phys_map_(mmu_)
 {
     TRACE("Flapjack OS (%s)", get_platform());
-    TRACE("mb_info=%p ; istack=0x%x", mb_info, istack);
+    TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
     
     Mutex::yield = ::yield;
     hardware_task_configuration_.init(istack_);

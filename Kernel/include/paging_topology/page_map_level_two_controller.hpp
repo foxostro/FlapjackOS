@@ -38,6 +38,13 @@ public:
     // Gets the specified entry in the table.
     virtual Entry& get_entry(size_t index) = 0;
     virtual const Entry& get_entry(size_t index) const = 0;
+
+    // Indicates that the underlying page directory object be allowed to leak.
+    // This is useful when the object was not allocated on the heap.
+    virtual void set_should_leak() = 0;
+
+    // Gets the linear address of the underlying page directory object.
+    virtual void* get_page_directory_pointer() const = 0;
 };
 
 } // namespace PagingTopology

@@ -237,6 +237,14 @@ public:
         return entries_[index];
     }
 
+    // Indicates that the underlying page table object be allowed to leak.
+    // This is useful when the object was not allocated on the heap.
+    void set_should_leak() override
+    {
+        LockGuard guard{lock_};
+        page_table_.set_should_leak();
+    }
+
 private:
     mutable Mutex lock_;
     HardwareMemoryManagementUnit& mmu_;

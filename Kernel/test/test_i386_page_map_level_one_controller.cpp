@@ -90,3 +90,17 @@ TEST_CASE("i386::PageMapLevelOneController -- ctor can accept a raw pointer to a
     uintptr_t addr = entry.get_page_frame()->get_page_frame();
     REQUIRE(addr == page_table->entries[0].get_address());
 }
+
+TEST_CASE("i386::PageMapLevelOneController -- can intentionally leak the underlying paging object on request", "[i386]")
+{
+    // This mode is useful when the underlying paging object was allocated
+    // statically in the kernel image, and not on the heap.
+    MockMemoryManagementUnit mmu;
+    i386::PageTable* page_table = new i386::PageTable;
+    {
+        PML1 controller{mmu, page_table};
+        controller.set_should_leak();
+    }
+    // AFOX_TODO: So how can I test that this object is still alive?
+    delete page_table;
+}
