@@ -2,7 +2,7 @@
 #include <platform/i386/page_frame_controller.hpp>
 #include <platform/i386/page_map_level_one_controller.hpp>
 #include <concrete_page_frame_allocator.hpp>
-#include <common/test/mock_memory_management_unit.hpp>
+#include "mock_memory_management_unit.hpp"
 
 constexpr size_t MAX_PAGE_FRAMES = 1024;
 using TestingAllocator = GenericConcretePageFrameAllocator<MAX_PAGE_FRAMES>;

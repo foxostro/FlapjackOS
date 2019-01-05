@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include <platform/i386/page_map_level_one_controller.hpp>
 #include <platform/i386/page_map_level_two_controller.hpp>
-#include <common/test/mock_memory_management_unit.hpp>
+#include "mock_memory_management_unit.hpp"
 
 using PML1 = i386::PageMapLevelOneController;
 using PML2 = i386::PageMapLevelTwoController;

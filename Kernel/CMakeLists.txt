@@ -185,6 +185,7 @@ if (NOT CMAKE_CROSSCOMPILING)
         "test/test_main.cpp"
         "test/test_page_frame_allocator.cpp"
         "test/test_page_frame_allocator_configuration_operation.cpp"
+        "test/mock_memory_management_unit.hpp"
         )
 
     if (${BUILD_ARCH} STREQUAL "i386")

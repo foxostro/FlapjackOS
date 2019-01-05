@@ -2,7 +2,7 @@
 #include "page_frame_allocator_configuration_operation.hpp"
 #include "concrete_page_frame_allocator.hpp"
 #include "boot.h"
-#include <common/test/mock_memory_management_unit.hpp>
+#include "mock_memory_management_unit.hpp"
 
 class DummyPageFrameEnumerator {
 public:

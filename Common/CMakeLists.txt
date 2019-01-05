@@ -45,8 +45,6 @@ set(SOURCE_FILES
     "include/common/elf32_parser.hpp"
     "include/common/elf64_parser.hpp"
     "include/common/data.hpp"
-
-    "include/common/test/mock_memory_management_unit.hpp"
     )
 
 if(CMAKE_CROSSCOMPILING)

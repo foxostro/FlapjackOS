@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <platform/x86_64/physical_memory_map.hpp>
-#include <common/test/mock_memory_management_unit.hpp>
+#include "mock_memory_management_unit.hpp"
 
 class TestPagingContext
 {
