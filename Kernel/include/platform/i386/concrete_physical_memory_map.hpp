@@ -3,6 +3,8 @@
 
 #include <platform/i386/extract_page_map_operation.hpp>
 #include <physical_memory_map.hpp>
+#include <common/mutex.hpp>
+#include <common/lock_guard.hpp>
 
 namespace i386 {
 
@@ -27,6 +29,7 @@ public:
                   uintptr_t linear_address,
                   ProtectionFlags flags) override
     {
+        LockGuard lock{mutex_};
         assert(pml2_);
         auto& pml1_entry = pml2_->get_pml1_entry_by_offset(linear_address);
         pml1_entry.set_mapping(physical_address, flags);
@@ -35,19 +38,15 @@ public:
 
     void set_readonly(uintptr_t begin, uintptr_t end) override
     {
+        LockGuard lock{mutex_};
         for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
-            set_readonly(page);
+            pml2_->get_pml1_entry_by_offset(page).set_readwrite(false);
         }
         mmu_.invalidate_pages(begin, end);
     }
 
-    void set_readonly(uintptr_t linear_address)
-    {
-        assert(pml2_);
-        pml2_->get_pml1_entry_by_offset(linear_address).set_readwrite(false);
-    }
-
 private:
+    Mutex mutex_;
     HardwareMemoryManagementUnit& mmu_;
     SharedPointer<PagingTopology::PageMapLevelTwoController> pml2_;
 };
