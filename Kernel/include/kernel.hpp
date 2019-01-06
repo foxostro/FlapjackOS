@@ -53,7 +53,8 @@ private:
     TextTerminal terminal_;
     ConcreteHardwareMemoryManagementUnit mmu_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
-    ConcretePhysicalMemoryMap phys_map_;
+    EarlyPhysicalMemoryMap early_phys_map_;
+    UniquePointer<ConcretePhysicalMemoryMap> phys_map_;
     ConcretePageFrameAllocator page_frame_allocator_;
     Scheduler scheduler_;
 
@@ -80,6 +81,10 @@ private:
 
     // Initialize the kernel malloc zone allocator.
     void initialize_kernel_malloc();
+
+    // Initialize the real phsyical memory map. This requires the kernel memory
+    // allocators to be ready first.
+    void initialize_physical_memory_map();
 
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();

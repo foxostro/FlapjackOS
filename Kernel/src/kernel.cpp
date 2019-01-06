@@ -20,7 +20,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
    device_drivers_(interrupt_controller_),
    terminal_(display_),
    address_space_bootstrapper_(mmu_),
-   phys_map_(mmu_)
+   early_phys_map_(mmu_)
 {
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
@@ -34,6 +34,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     report_installed_memory();
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
+    initialize_physical_memory_map();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
 }
@@ -48,14 +49,6 @@ void Kernel::run()
 {
     TRACE("Running...");
 
-    // {
-    //     i386::ExtractPageMapOperation operation{mmu_};
-    //     auto pml2 = operation.extract();
-    //     (void)pml2;
-    //     TRACE("just before scope exit");
-    // }
-    // TRACE("done with extract operation");
-
     InterruptLock lock;
     {
         LockGuard guard{lock};
@@ -66,6 +59,7 @@ void Kernel::run()
         if (!elf_loader) {
             panic("cannot execute program");
         }
+        TRACE("exec");
         unsigned result = elf_loader->exec();
         terminal_.printf("result = 0x%x\n", result);
         assert(result == 0xdeadbeef);
@@ -88,7 +82,7 @@ Data Kernel::get_module_data(multiboot_module_t& module)
 UniquePointer<ElfLoader> Kernel::create_elf_loader(const Data& elf_image)
 {
     ElfLoaderFactory factory;
-    return factory.create_loader(phys_map_, page_frame_allocator_, elf_image);
+    return factory.create_loader(*phys_map_, page_frame_allocator_, elf_image);
 }
 
 void Kernel::do_console_loop()
@@ -128,18 +122,18 @@ void Kernel::prepare_kernel_address_space()
          length > 0;
          length -= PAGE_SIZE) {
 
-        phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
-                           linear_address,
-                           WRITABLE | GLOBAL);
+        early_phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
+                                 linear_address,
+                                 WRITABLE | GLOBAL);
 
         linear_address += PAGE_SIZE;
     }
 
     // Setup correct permissions for the .text and .rodata sections.
-    phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,
-                           (uintptr_t)g_kernel_text_end);
-    phys_map_.set_readonly((uintptr_t)g_kernel_rodata_begin,
-                           (uintptr_t)g_kernel_rodata_end);
+    early_phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,
+                                 (uintptr_t)g_kernel_text_end);
+    early_phys_map_.set_readonly((uintptr_t)g_kernel_rodata_begin,
+                                 (uintptr_t)g_kernel_rodata_end);
 }
 
 void Kernel::report_installed_memory()
@@ -190,6 +184,14 @@ void Kernel::initialize_kernel_malloc()
 
     MemoryAllocator *alloc = MallocZone::create((uintptr_t)begin, length);
     set_global_allocator(alloc);
+}
+
+void Kernel::initialize_physical_memory_map()
+{
+    TRACE("Initializing physical memory map... (this is slow right now)");
+    terminal_.printf("Initializing physical memory map... (this is slow right now)\n");
+    phys_map_ = new ConcretePhysicalMemoryMap{mmu_};
+    TRACE("...done");
 }
 
 void Kernel::initialize_interrupts_and_device_drivers()
