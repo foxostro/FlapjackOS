@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <protection_flags.hpp>
 
 // Interface for the physical memory map.
 // The physical memory map is a memory map for use in the harware MMU.
@@ -11,13 +12,6 @@
 class PhysicalMemoryMap
 {
 public:
-    using ProtectionFlags = unsigned;
-
-    static constexpr unsigned PRESENT = (1 << 0);
-    static constexpr unsigned WRITABLE = (1 << 1);
-    static constexpr unsigned GLOBAL = (1 << 2);
-    static constexpr unsigned SUPERVISOR = (1 << 3);
-
     virtual ~PhysicalMemoryMap() = default;
 
     // Point the physical memory map at the paging structures active on the MMU.

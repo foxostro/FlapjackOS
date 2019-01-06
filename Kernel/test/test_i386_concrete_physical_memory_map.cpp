@@ -17,7 +17,7 @@ TEST_CASE("i386::ConcretePhysicalMemoryMap::map_page -- basic example", "[i386]"
     // Action
     phys_map.map_page(context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()),
                       context.mmu_.get_kernel_virtual_start_address(),
-                      phys_map.WRITABLE | phys_map.GLOBAL);
+                      WRITABLE | GLOBAL);
 
     // Test
     i386::PageTableEntry* pte = context.resolver_.get_page_table_entry(context.mmu_.get_kernel_virtual_start_address());
@@ -38,10 +38,10 @@ TEST_CASE("i386::ConcretePhysicalMemoryMap::set_readonly -- zero size region", "
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
-                      phys_map.WRITABLE);
+                      WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
                       context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
-                      phys_map.WRITABLE);
+                      WRITABLE);
 
     // Action
     phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
@@ -65,10 +65,10 @@ TEST_CASE("i386::ConcretePhysicalMemoryMap::set_readonly -- one-byte region regi
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
-                      phys_map.WRITABLE);
+                      WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
                       context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
-                      phys_map.WRITABLE);
+                      WRITABLE);
 
     // Action
     phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),
@@ -98,10 +98,10 @@ TEST_CASE("i386::ConcretePhysicalMemoryMap::set_readonly -- one-page region regi
     phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
-                      phys_map.WRITABLE);
+                      WRITABLE);
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR+PAGE_SIZE,
                       context.mmu_.get_kernel_virtual_start_address()+PAGE_SIZE,
-                      phys_map.WRITABLE);
+                      WRITABLE);
 
     // Action
     phys_map.set_readonly(context.mmu_.get_kernel_virtual_start_address(),

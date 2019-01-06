@@ -131,7 +131,7 @@ void Kernel::prepare_kernel_address_space()
 
         phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
                            linear_address,
-                           phys_map_.WRITABLE | phys_map_.GLOBAL);
+                           WRITABLE | GLOBAL);
 
         linear_address += PAGE_SIZE;
     }

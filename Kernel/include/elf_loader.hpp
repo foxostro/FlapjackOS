@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_ELF_LOADER_HPP
 
 #include <common/elf.hpp>
+#include <protection_flags.hpp>
 
 // Interface for a class which can load an ELF image into memory for exec().
 class ElfLoader {
@@ -85,7 +86,7 @@ private:
         physical_memory_map_.populate_page_tables(linear_address, header.p_memsz);
 
         // Map the page so the kernel can populate its contents.
-        physical_memory_map_.map_page(physical_address, linear_address, physical_memory_map_.WRITABLE | physical_memory_map_.SUPERVISOR);
+        physical_memory_map_.map_page(physical_address, linear_address, WRITABLE | SUPERVISOR);
         
         // Populate the program segment. The segment in memory may be larger than
         // the data region in the file. The remainder is cleared to zero.
@@ -98,11 +99,11 @@ private:
         physical_memory_map_.map_page(physical_address, linear_address, get_protection_flags(header));
     }
     
-    PhysicalMemoryMap::ProtectionFlags get_protection_flags(const ProgramHeader& header)
+    ProtectionFlags get_protection_flags(const ProgramHeader& header)
     {
-        PhysicalMemoryMap::ProtectionFlags flags = 0;
+        ProtectionFlags flags = 0;
         if (header.p_flags & Elf::PF_W) {
-            flags = flags | physical_memory_map_.WRITABLE;
+            flags = flags | WRITABLE;
         }
         // AFOX_TODO: handle the executable flag too in get_protection_flags()
         return flags;

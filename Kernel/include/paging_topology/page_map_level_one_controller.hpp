@@ -3,6 +3,7 @@
 
 #include <paging_topology/page_frame_controller.hpp>
 #include <common/shared_pointer.hpp>
+#include <protection_flags.hpp>
 
 namespace PagingTopology {
 

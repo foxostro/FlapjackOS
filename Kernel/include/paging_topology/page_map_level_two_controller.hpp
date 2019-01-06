@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
 
 #include <paging_topology/page_map_level_one_controller.hpp>
+#include <protection_flags.hpp>
 
 namespace PagingTopology {
 
