@@ -29,8 +29,7 @@ public:
     {
         assert(pml2_);
         auto& pml1_entry = pml2_->get_pml1_entry_by_offset(linear_address);
-        pml1_entry.set_mapping(physical_address);
-        pml1_entry.set_protection(flags);
+        pml1_entry.set_mapping(physical_address, flags);
         mmu_.invalidate_page(linear_address);
     }
 

@@ -164,23 +164,17 @@ public:
             pte_->set_global(global);
         }
         
-        void set_protection(ProtectionFlags flags) override
-        {
-            assert(pte_);
-            assert(lock_);
-            LockGuard guard{*lock_};
-            pte_->set_readwrite((flags & WRITABLE) != 0);
-            pte_->set_supervisor((flags & SUPERVISOR) != 0);
-            pte_->set_global((flags & GLOBAL) != 0);
-        }
-
-        void set_mapping(uintptr_t physical_address) override
+        void set_mapping(uintptr_t physical_address,
+                         ProtectionFlags flags) override
         {
             assert(pte_);
             assert(lock_);
             LockGuard guard{*lock_};
             set_page_frame_unlocked(create_page_frame_controller(physical_address));
             pte_->set_present(true);
+            pte_->set_readwrite((flags & WRITABLE) != 0);
+            pte_->set_supervisor((flags & SUPERVISOR) != 0);
+            pte_->set_global((flags & GLOBAL) != 0);
         }
         
         UniquePointer<PagingTopology::PageFrameController> create_page_frame_controller(uintptr_t page_frame) override

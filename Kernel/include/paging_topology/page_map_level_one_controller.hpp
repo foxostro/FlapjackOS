@@ -37,8 +37,9 @@ public:
         virtual bool is_global() const = 0;
         virtual void set_global(bool global) = 0;
 
-        virtual void set_protection(ProtectionFlags flags) = 0;
-        virtual void set_mapping(uintptr_t physical_address) = 0;
+        virtual void set_mapping(uintptr_t physical_address,
+                                 ProtectionFlags flags) = 0;
+
         virtual UniquePointer<PagingTopology::PageFrameController> create_page_frame_controller(uintptr_t page_frame) = 0;
     };
 
