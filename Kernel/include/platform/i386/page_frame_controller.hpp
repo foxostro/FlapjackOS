@@ -9,38 +9,40 @@
 namespace i386 {
 
 // Owns a page frame.
-class UnlockedPageFrameController final : public PagingTopology::PageFrameController {
+class PageFrameController final : public PagingTopology::PageFrameController {
 public:
-    ~UnlockedPageFrameController()
+    ~PageFrameController()
     {
         release();
     }
 
-    UnlockedPageFrameController()
+    PageFrameController()
      : allocator_(nullptr), page_frame_(0)
     {}
 
-    explicit UnlockedPageFrameController(uintptr_t page_frame)
+    explicit PageFrameController(uintptr_t page_frame)
      : allocator_(nullptr),
        page_frame_(page_frame)
     {}
 
-    explicit UnlockedPageFrameController(PageFrameAllocator& allocator)
+    explicit PageFrameController(PageFrameAllocator& allocator)
      : allocator_(&allocator),
        page_frame_(allocator.allocate(PAGE_SIZE))
     {}
 
-    UnlockedPageFrameController(UnlockedPageFrameController&& other)
+    PageFrameController(PageFrameController&& other)
      : allocator_(nullptr), page_frame_(0)
     {
+        LockGuard guard{other.lock_};
         std::swap(other.allocator_, allocator_);
         std::swap(other.page_frame_, page_frame_);
     }
 
-    UnlockedPageFrameController(const UnlockedPageFrameController&) = delete;
+    PageFrameController(const PageFrameController&) = delete;
 
-    UnlockedPageFrameController& operator=(UnlockedPageFrameController&& other)
+    PageFrameController& operator=(PageFrameController&& other)
     {
+        LockGuard guard{lock_, other.lock_};
         if (this != &other) {
             release();
             std::swap(other.allocator_, allocator_);
@@ -49,6 +51,17 @@ public:
         return *this;
     }
 
+    uintptr_t get_page_frame() const override
+    {
+        LockGuard guard{lock_};
+        return page_frame_;
+    }
+
+private:
+    mutable Mutex lock_;
+    PageFrameAllocator* allocator_;
+    uintptr_t page_frame_;
+
     void release()
     {
         if (allocator_ != nullptr) {
@@ -56,51 +69,6 @@ public:
         }
         page_frame_ = 0;
     }
-
-    uintptr_t get_page_frame() const override { return page_frame_; }
-
-private:
-    PageFrameAllocator* allocator_;
-    uintptr_t page_frame_;
-};
-
-// Owns a page frame. Provides synchronized access.
-class PageFrameController final : public PagingTopology::PageFrameController {
-public:
-    explicit PageFrameController(uintptr_t page_frame)
-     : impl_(page_frame)
-    {}
-
-    explicit PageFrameController(PageFrameAllocator& allocator)
-     : impl_(allocator)
-    {}
-
-    PageFrameController(PageFrameController&& other)
-    {
-        LockGuard guard{other.lock_};
-        impl_ = std::move(other.impl_);
-    }
-
-    PageFrameController(const PageFrameController&) = delete;
-
-    PageFrameController& operator=(PageFrameController&& other)
-    {
-        if (this != &other) {
-            LockGuard guard{lock_, other.lock_};
-            impl_ = std::move(other.impl_);
-        }
-        return *this;
-    }
-
-    uintptr_t get_page_frame() const override
-    {
-        LockGuard guard{lock_};
-        return impl_.get_page_frame();
-    }
-
-private:
-    mutable Mutex lock_;
-    UnlockedPageFrameController impl_;
 };
 
 } // namespace i386
