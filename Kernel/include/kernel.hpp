@@ -54,7 +54,7 @@ private:
     ConcreteHardwareMemoryManagementUnit mmu_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
     EarlyPhysicalMemoryMap early_phys_map_;
-    UniquePointer<ConcretePhysicalMemoryMap> phys_map_;
+    UniquePointer<PhysicalMemoryMap> phys_map_;
     ConcretePageFrameAllocator page_frame_allocator_;
     Scheduler scheduler_;
 

@@ -1,5 +1,5 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_CONCRETE_PHYSICAL_MEMORY_MAP_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_CONCRETE_PHYSICAL_MEMORY_MAP_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_MANAGED_PHYSICAL_MEMORY_MAP_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_MANAGED_PHYSICAL_MEMORY_MAP_HPP
 
 #include <platform/i386/extract_page_map_operation.hpp>
 #include <physical_memory_map.hpp>
@@ -8,9 +8,9 @@
 
 namespace i386 {
 
-class ConcretePhysicalMemoryMap : public PhysicalMemoryMap {
+class ManagedPhysicalMemoryMap : public PhysicalMemoryMap {
 public:
-    ConcretePhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
+    ManagedPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
      : mmu_(mmu)
     {
         ExtractPageMapOperation operation{mmu};
@@ -53,4 +53,4 @@ private:
 
 } // namespace i386
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_CONCRETE_PHYSICAL_MEMORY_MAP_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_MANAGED_PHYSICAL_MEMORY_MAP_HPP
