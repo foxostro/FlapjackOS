@@ -23,6 +23,7 @@ public:
     // Point the physical memory map at the paging structures active on the MMU.
     // So, whatever the MMU is using right now is what PhysicalMemoryMap
     // will now act upon.
+    // AFOX_TODO: Should this reload() method be removed, or moved to the MMU?
     virtual void reload() = 0;
 
     // Allocate memory for page tables and insert them into the page directory.

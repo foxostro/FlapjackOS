@@ -247,6 +247,12 @@ public:
         return entries_[index];
     }
 
+    // Gets the size of the region of memory governed by each entry.
+    size_t get_size_governed_by_entry() const override
+    {
+        return PAGE_SIZE;
+    }
+
     // Indicates that the underlying page table object be allowed to leak.
     // This is useful when the object was not allocated on the heap.
     void set_should_leak() override

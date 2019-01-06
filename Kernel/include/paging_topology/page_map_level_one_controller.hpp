@@ -49,6 +49,9 @@ public:
     virtual Entry& get_entry(size_t index) = 0;
     virtual const Entry& get_entry(size_t index) const = 0;
 
+    // Gets the size of the region of memory governed by each entry.
+    virtual size_t get_size_governed_by_entry() const = 0;
+
     // Indicates that the underlying page table object be allowed to leak.
     // This is useful when the object was not allocated on the heap.
     virtual void set_should_leak() = 0;
