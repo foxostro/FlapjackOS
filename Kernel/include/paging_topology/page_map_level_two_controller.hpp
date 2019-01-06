@@ -31,6 +31,8 @@ public:
         virtual void set_accessed(bool accessed) = 0;
 
         virtual void set_protection(ProtectionFlags flags) = 0;
+
+        virtual void populate() = 0;
     };
 
     virtual ~PageMapLevelTwoController() = default;
@@ -51,6 +53,11 @@ public:
 
     // Gets the linear address of the underlying page directory object.
     virtual void* get_page_directory_pointer() const = 0;
+
+    // Ensures the underlying paging objects have been populated for the
+    // specified offset into the PML2. This allocates memory for the
+    // corresponding PML1 object.
+    virtual void populate(uintptr_t offset) = 0;
 
     // Gets the PML1 entry associated with the specified offset.
     // The PML2 governs a region of memory and the offset is an offset from

@@ -24,6 +24,13 @@ public:
     {
         LockGuard lock{mutex_};
         assert(pml2_);
+        
+        pml2_->populate(linear_address);
+
+        // AFOX_TODO: We probably want to set the PML2 entry to the weakest protection afforded any PML1 entry within it.
+        auto& pml2_entry = pml2_->get_entry_by_offset(linear_address);
+        pml2_entry.set_protection(flags);
+
         auto& pml1_entry = pml2_->get_pml1_entry_by_offset(linear_address);
         pml1_entry.set_mapping(physical_address, flags);
         mmu_.invalidate_page(linear_address);

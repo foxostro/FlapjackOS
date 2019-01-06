@@ -32,7 +32,7 @@ private:
     {
         PageDirectory* page_directory = get_current_page_directory();
         assert(page_directory);
-        PML2Ptr pml2{new PageMapLevelTwoController{page_directory}};
+        PML2Ptr pml2{new PageMapLevelTwoController{mmu_, page_directory}};
         pml2->set_should_leak();
         configure_pml2(*pml2);
         return pml2;

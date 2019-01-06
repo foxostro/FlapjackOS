@@ -20,7 +20,7 @@ public:
     public:
         virtual ~Entry() = default;
 
-        Entry() : lock_(nullptr), pde_(nullptr) {}
+        Entry() : lock_(nullptr), pde_(nullptr), mmu_(nullptr) {}
 
         void set_lock(Mutex* lock)
         {
@@ -34,6 +34,12 @@ public:
             pde_ = pde;
         }
 
+        void set_mmu(HardwareMemoryManagementUnit* mmu)
+        {
+            assert(mmu);
+            mmu_ = mmu;
+        }
+
         SharedPointer<PagingTopology::PageMapLevelOneController> get_pml1() const override
         {
             assert(lock_);
@@ -43,9 +49,14 @@ public:
         
         void set_pml1(SharedPointer<PagingTopology::PageMapLevelOneController> p) override
         {
-            assert(pde_);
             assert(lock_);
             LockGuard guard{*lock_};
+            set_pml1_unlocked(p);
+        }
+        
+        void set_pml1_unlocked(SharedPointer<PagingTopology::PageMapLevelOneController> p)
+        {
+            assert(pde_);
             pml1_ = std::move(p);
             if (has_page_table_unlocked()) {
                 pde_->set_address(pml1_->get_page_table_physical_address());
@@ -133,28 +144,47 @@ public:
             pde_->set_readwrite((flags & WRITABLE) != 0);
             pde_->set_supervisor((flags & SUPERVISOR) != 0);
         }
+        
+        void populate() override
+        {
+            assert(lock_);
+            LockGuard guard{*lock_};
+            if (!pml1_) {
+                set_pml1_unlocked(create_pml1());
+            }
+        }
+
+        UniquePointer<PagingTopology::PageMapLevelOneController> create_pml1()
+        {
+            assert(mmu_);
+            i386::PageTable* page_table = new i386::PageTable;
+            memset(page_table, 0, sizeof(*page_table));
+            return new i386::PageMapLevelOneController{*mmu_, page_table};
+        }
 
     private:
         Mutex* lock_;
         PageDirectoryEntry* pde_;
+        HardwareMemoryManagementUnit* mmu_;
         SharedPointer<PagingTopology::PageMapLevelOneController> pml1_;
     };
 
     static constexpr size_t COUNT = PageDirectory::COUNT;
 
-    PageMapLevelTwoController()
-     : PageMapLevelTwoController(new PageDirectory)
+    PageMapLevelTwoController(HardwareMemoryManagementUnit& mmu)
+     : mmu_(mmu),
+       page_directory_(new PageDirectory)
     {
         clear_directory();
-        feed_pdes();
-        feed_lock();
+        feed();
     }
 
-    PageMapLevelTwoController(UniquePointer<PageDirectory> pd)
-     : page_directory_(std::move(pd))
+    PageMapLevelTwoController(HardwareMemoryManagementUnit& mmu,
+                              UniquePointer<PageDirectory> pd)
+     : mmu_(mmu),
+       page_directory_(std::move(pd))
     {
-        feed_pdes();
-        feed_lock();
+        feed();
     }
 
     PageMapLevelTwoController(const PageMapLevelTwoController&) = delete;
@@ -164,6 +194,13 @@ public:
     {
         assert(page_directory_);
         memset(page_directory_.get_pointer(), 0, sizeof(PageDirectory));
+    }
+
+    void feed()
+    {
+        feed_pdes();
+        feed_lock();
+        feed_mmu();
     }
 
     void feed_pdes()
@@ -179,6 +216,13 @@ public:
     {
         for (size_t i = 0; i < COUNT; ++i) {
             entries_[i].set_lock(&lock_);
+        }
+    }
+
+    void feed_mmu()
+    {
+        for (size_t i = 0; i < COUNT; ++i) {
+            entries_[i].set_mmu(&mmu_);
         }
     }
 
@@ -226,8 +270,17 @@ public:
         return page_directory_.get_pointer();
     }
 
+    // Ensures the underlying paging objects have been populated for the
+    // specified offset into the PML2. This allocates memory for the
+    // corresponding PML1 object.
+    void populate(uintptr_t offset) override
+    {
+        get_entry_by_offset(offset).populate();
+    }
+
 private:
     mutable Mutex lock_;
+    HardwareMemoryManagementUnit& mmu_;
     UniquePointer<PageDirectory> page_directory_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.
 };
