@@ -20,7 +20,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
    device_drivers_(interrupt_controller_),
    terminal_(display_),
    address_space_bootstrapper_(mmu_),
-   early_phys_map_(mmu_)
+   unmanaged_phys_map_(mmu_)
 {
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
@@ -122,18 +122,18 @@ void Kernel::prepare_kernel_address_space()
          length > 0;
          length -= PAGE_SIZE) {
 
-        early_phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
-                                 linear_address,
-                                 WRITABLE | GLOBAL);
+        unmanaged_phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
+                                     linear_address,
+                                     WRITABLE | GLOBAL);
 
         linear_address += PAGE_SIZE;
     }
 
     // Setup correct permissions for the .text and .rodata sections.
-    early_phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,
-                                 (uintptr_t)g_kernel_text_end);
-    early_phys_map_.set_readonly((uintptr_t)g_kernel_rodata_begin,
-                                 (uintptr_t)g_kernel_rodata_end);
+    unmanaged_phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,
+                                     (uintptr_t)g_kernel_text_end);
+    unmanaged_phys_map_.set_readonly((uintptr_t)g_kernel_rodata_begin,
+                                     (uintptr_t)g_kernel_rodata_end);
 }
 
 void Kernel::report_installed_memory()
@@ -190,7 +190,7 @@ void Kernel::initialize_physical_memory_map()
 {
     TRACE("Initializing physical memory map... (this is slow right now)");
     terminal_.printf("Initializing physical memory map... (this is slow right now)\n");
-    phys_map_ = new ConcretePhysicalMemoryMap{mmu_};
+    phys_map_ = new ManagedPhysicalMemoryMap{mmu_};
     TRACE("...done");
 }
 

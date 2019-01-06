@@ -53,7 +53,7 @@ private:
     TextTerminal terminal_;
     ConcreteHardwareMemoryManagementUnit mmu_;
     KernelAddressSpaceBootstrapper address_space_bootstrapper_;
-    EarlyPhysicalMemoryMap early_phys_map_;
+    UnmanagedPhysicalMemoryMap unmanaged_phys_map_;
     UniquePointer<PhysicalMemoryMap> phys_map_;
     ConcretePageFrameAllocator page_frame_allocator_;
     Scheduler scheduler_;

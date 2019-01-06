@@ -1,5 +1,5 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_EARLY_PHYSICAL_MEMORY_MAP_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_EARLY_PHYSICAL_MEMORY_MAP_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_UNMANAGED_PHYSICAL_MEMORY_MAP_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_UNMANAGED_PHYSICAL_MEMORY_MAP_HPP
 
 #include <cstdint>
 #include <type_traits>
@@ -11,12 +11,15 @@ namespace i386 {
 
 // Provides a platform-agnostic interface to the hardware MMU memory map.
 // It's physical because it's hardware.
+// This version is "unmanaged" in the sense that it provides no mechanisms for
+// tracking ownership of underlying paging objects or page frames, which is
+// perfectly acceptable before the heap is available.
 template<typename PagingResolver>
-class GenericEarlyPhysicalMemoryMap : public ::PhysicalMemoryMap {
+class GenericUnmanagedPhysicalMemoryMap : public ::PhysicalMemoryMap {
 public:
     using PageTableEntry = typename std::remove_reference<decltype(PagingResolver::PageTable::entries[0])>::type;
 
-    GenericEarlyPhysicalMemoryMap(HardwareMemoryManagementUnit &mmu)
+    GenericUnmanagedPhysicalMemoryMap(HardwareMemoryManagementUnit &mmu)
      : resolver_(mmu),
        mmu_(mmu)
     {}
@@ -59,4 +62,4 @@ protected:
 
 } // namespace i386
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_EARLY_PHYSICAL_MEMORY_MAP_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_UNMANAGED_PHYSICAL_MEMORY_MAP_HPP

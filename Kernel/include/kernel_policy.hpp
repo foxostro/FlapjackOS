@@ -6,7 +6,7 @@
 #include <platform/x86_64/hardware_task_configuration.hpp>
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <platform/x86_64/concrete_hardware_memory_management_unit.hpp>
-#include <platform/x86_64/early_physical_memory_map.hpp>
+#include <platform/x86_64/unmanaged_physical_memory_map.hpp>
 #include <platform/i386/managed_physical_memory_map.hpp> // AFOX_TODO: Write x86_64 version
 #include <platform/x86_64/interrupt_controller.hpp>
 #include <platform/x86_64/device_drivers.hpp>
@@ -18,8 +18,8 @@ struct KernelPolicy {
     using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
     using ConcreteHardwareMemoryManagementUnit = x86_64::ConcreteHardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = x86_64::KernelAddressSpaceBootstrapper;
-    using EarlyPhysicalMemoryMap = x86_64::EarlyPhysicalMemoryMap;
-    using ConcretePhysicalMemoryMap = i386::ManagedPhysicalMemoryMap; // AFOX_TODO: FIX ME
+    using UnmanagedPhysicalMemoryMap = x86_64::UnmanagedPhysicalMemoryMap;
+    using ManagedPhysicalMemoryMap = i386::ManagedPhysicalMemoryMap; // AFOX_TODO: FIX ME
     using InterruptController = x86_64::InterruptController;
     using InterruptParameters = x86_64::InterruptParameters;
     using DeviceDrivers = x86_64::DeviceDrivers;
@@ -34,7 +34,7 @@ struct KernelPolicy {
 #include <platform/i386/hardware_task_configuration.hpp>
 #include <platform/i386/kernel_address_space_bootstrapper.hpp>
 #include <platform/i386/concrete_hardware_memory_management_unit.hpp>
-#include <platform/i386/early_physical_memory_map.hpp>
+#include <platform/i386/unmanaged_physical_memory_map.hpp>
 #include <platform/i386/managed_physical_memory_map.hpp>
 #include <platform/i386/interrupt_controller.hpp>
 #include <platform/i386/device_drivers.hpp>
@@ -46,8 +46,8 @@ struct KernelPolicy {
     using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;
     using ConcreteHardwareMemoryManagementUnit = i386::ConcreteHardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = i386::KernelAddressSpaceBootstrapper;
-    using EarlyPhysicalMemoryMap = i386::EarlyPhysicalMemoryMap;
-    using ConcretePhysicalMemoryMap = i386::ManagedPhysicalMemoryMap;
+    using UnmanagedPhysicalMemoryMap = i386::UnmanagedPhysicalMemoryMap;
+    using ManagedPhysicalMemoryMap = i386::ManagedPhysicalMemoryMap;
     using InterruptController = i386::InterruptController;
     using InterruptParameters = i386::InterruptParameters;
     using DeviceDrivers = i386::DeviceDrivers;
