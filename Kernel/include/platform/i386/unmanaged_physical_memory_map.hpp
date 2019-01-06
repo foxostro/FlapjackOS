@@ -14,29 +14,6 @@ public:
     UnmanagedPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
      : GenericUnmanagedPhysicalMemoryMap<PagingResolver>(mmu)
     {}
-    
-    void populate_page_tables(uintptr_t begin, size_t length) override
-    {
-        PagingResolver& resolver = this->resolver_;
-        resolver.enumerate_page_directory_entries(begin, length, [&](PageDirectoryEntry& pde){
-            populate_page_table(pde);
-        });
-    }
-
-private:
-    void populate_page_table(PageDirectoryEntry& pde)
-    {
-        if (pde.is_present() == false) {
-            PageTable* page_table = new PageTable;
-            memset(page_table, 0, sizeof(PageTable));
-            uintptr_t linear_address = reinterpret_cast<uintptr_t>(page_table);
-            uintptr_t physical_address = this->mmu_.convert_logical_to_physical_address(linear_address);
-            pde.set_address(physical_address);
-            pde.set_present(true);
-            pde.set_readwrite(true);
-            pde.set_supervisor(false);
-        }
-    }
 };
 
 } // namespace i386

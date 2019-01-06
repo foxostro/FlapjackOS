@@ -24,16 +24,12 @@ public:
        mmu_(mmu)
     {}
 
-    // Allocate memory for page tables and insert them into the page directory.
-    virtual void populate_page_tables(uintptr_t begin, size_t length) = 0;
-
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.
     void map_page(uintptr_t physical_address,
                   uintptr_t linear_address,
                   ProtectionFlags flags) override
     {
-        populate_page_tables(linear_address, PAGE_SIZE);
         PageTableEntry* pte = resolver_.get_page_table_entry(linear_address);
         assert(pte);
         pte->set_address(physical_address);
