@@ -16,8 +16,10 @@ public:
     using PML1Ptr = SharedPointer<PagingTopology::PageMapLevelOneController>;
     using PML2Ptr = SharedPointer<PagingTopology::PageMapLevelTwoController>;
 
-    ExtractPageMapOperation(HardwareMemoryManagementUnit& mmu)
-     : mmu_(mmu)
+    ExtractPageMapOperation(HardwareMemoryManagementUnit& mmu,
+                            uintptr_t limit = 0xFFFFFFFF)
+     : mmu_(mmu),
+       limit_(limit)
     {}
 
     PML2Ptr extract()
@@ -27,6 +29,7 @@ public:
 
 private:
     HardwareMemoryManagementUnit& mmu_;
+    uintptr_t limit_;
 
     PML2Ptr make_pml2()
     {
@@ -47,7 +50,8 @@ private:
     {
         PageDirectory* page_directory = get_current_page_directory();
         assert(page_directory);
-        for (size_t i = 0, n = pml2.get_number_of_entries(); i < n; ++i) {
+        const size_t n = pml2.get_index_of_entry_by_offset(limit_);
+        for (size_t i = 0; i <= n; ++i) {
             auto& pde = page_directory->entries[i];
             auto& pml2_entry = pml2.get_entry(i);
             configure_pml2_entry(pml2_entry, pde);

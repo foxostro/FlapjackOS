@@ -10,10 +10,11 @@ namespace i386 {
 
 class ManagedPhysicalMemoryMap : public PhysicalMemoryMap {
 public:
-    ManagedPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
+    ManagedPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu,
+                             uintptr_t limit = 0xFFFFFFFF)
      : mmu_(mmu)
     {
-        ExtractPageMapOperation operation{mmu};
+        ExtractPageMapOperation operation{mmu, limit};
         pml2_ = operation.extract();
         assert(pml2_);
     }
@@ -22,7 +23,6 @@ public:
                   uintptr_t linear_address,
                   ProtectionFlags flags) override
     {
-        LockGuard lock{mutex_};
         assert(pml2_);
         
         pml2_->populate(linear_address);
@@ -38,7 +38,6 @@ public:
 
     void set_readonly(uintptr_t begin, uintptr_t end) override
     {
-        LockGuard lock{mutex_};
         for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
             pml2_->get_pml1_entry_by_offset(page).set_readwrite(false);
         }
@@ -46,7 +45,6 @@ public:
     }
 
 private:
-    Mutex mutex_;
     HardwareMemoryManagementUnit& mmu_;
     SharedPointer<PagingTopology::PageMapLevelTwoController> pml2_;
 };

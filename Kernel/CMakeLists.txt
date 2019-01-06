@@ -42,6 +42,7 @@ set(I386_SOURCE_FILES
     "include/platform/i386/page_table_entry.hpp"
     "include/platform/i386/generic_unmanaged_physical_memory_map.hpp"
     "include/platform/i386/unmanaged_physical_memory_map.hpp"
+    "include/platform/i386/concrete_physical_memory_map.hpp"
     "include/platform/i386/generic_kernel_address_space_bootstrapper.hpp"
     "include/platform/i386/kernel_address_space_bootstrapper.hpp"
     "include/platform/i386/paging_resolver.hpp"

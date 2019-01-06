@@ -5,7 +5,7 @@
 #include "page_directory.hpp"
 #include <hardware_memory_management_unit.hpp>
 #include <cstdint>
-#include <limits>
+#include <climits>
 
 namespace i386 {
 
@@ -38,7 +38,7 @@ public:
                                           size_t length,
                                           Function&& fn)
     {
-        assert(length < std::numeric_limits<int>::max());
+        assert(length < INT_MAX);
 
         // Each page table governs 4MB of memory.
         constexpr int STEP = 0x400000;
@@ -100,6 +100,7 @@ public:
 #else
         // Defeat the optimizer. Without this memcpy() the optimizer will
         // remove the branch "if (address == 0x0)". I have no idea why.
+        // AFOX_TODO: Figure out why this is necessary.
         uint64_t tmp = entry->get_address();
         uint64_t address = 0;
         memcpy(&address, &tmp, sizeof(tmp));
