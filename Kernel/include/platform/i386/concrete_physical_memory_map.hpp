@@ -1,7 +1,6 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_CONCRETE_PHYSICAL_MEMORY_MAP_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_CONCRETE_PHYSICAL_MEMORY_MAP_HPP
 
-#include <platform/i386/extract_page_map_operation.hpp>
 #include <platform/i386/unmanaged_physical_memory_map.hpp>
 #include <platform/i386/managed_physical_memory_map.hpp>
 #include <common/mutex.hpp>
@@ -26,7 +25,7 @@ public:
     void heap_is_ready()
     {
         LockGuard lock{mutex_};
-        managed_ = new ManagedPhysicalMemoryMap{mmu_, KERNEL_VIRTUAL_START_ADDR-1};
+        managed_ = new ManagedPhysicalMemoryMap{mmu_};
     }
 
     void map_page(uintptr_t physical_address,

@@ -1,22 +1,23 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_MANAGED_PHYSICAL_MEMORY_MAP_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_MANAGED_PHYSICAL_MEMORY_MAP_HPP
 
-#include <platform/i386/extract_page_map_operation.hpp>
 #include <physical_memory_map.hpp>
 #include <common/mutex.hpp>
 #include <common/lock_guard.hpp>
+#include <common/shared_pointer.hpp>
+#include <platform/i386/page_map_level_two_controller.hpp>
+#include <platform/i386/page_map_level_one_controller.hpp>
 
 namespace i386 {
 
 class ManagedPhysicalMemoryMap : public PhysicalMemoryMap {
 public:
-    ManagedPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu,
-                             uintptr_t limit = 0xFFFFFFFF)
+    ManagedPhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
      : mmu_(mmu)
     {
-        ExtractPageMapOperation operation{mmu, limit};
-        pml2_ = operation.extract();
-        assert(pml2_);
+        UniquePointer<PageDirectory> page_directory{reinterpret_cast<PageDirectory*>(mmu_.convert_physical_to_logical_address(mmu_.get_cr3()))};
+        page_directory.set_should_leak();
+        pml2_ = UniquePointer<PagingTopology::PageMapLevelTwoController>(new PageMapLevelTwoController{mmu_, std::move(page_directory)});
     }
 
     void map_page(uintptr_t physical_address,
