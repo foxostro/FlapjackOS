@@ -32,6 +32,8 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/paging_topology/page_frame_controller.hpp"
     "include/paging_topology/page_map_level_one_controller.hpp"
     "include/paging_topology/page_map_level_two_controller.hpp"
+    "include/paging_topology/page_map_level_three_controller.hpp"
+    "include/paging_topology/page_map_level_four_controller.hpp"
     )
 
 set(I386_SOURCE_FILES
@@ -115,6 +117,8 @@ set(X86_64_SOURCE_FILES
     "include/platform/i386/generic_page_map_level_one_controller.hpp"
     "include/platform/x86_64/page_map_level_one_controller.hpp"
     "include/platform/x86_64/page_map_level_two_controller.hpp"
+    "include/platform/x86_64/page_map_level_three_controller.hpp"
+    "include/platform/x86_64/page_map_level_four_controller.hpp"
     )
 
 set(PC_SOURCE_FILES
@@ -221,6 +225,8 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_i386_page_frame_controller.cpp"
              "test/test_x86_64_page_map_level_one_controller.cpp"
              "test/test_x86_64_page_map_level_two_controller.cpp"
+             "test/test_x86_64_page_map_level_three_controller.cpp"
+             "test/test_x86_64_page_map_level_four_controller.cpp"
              )
     endif ()
 

@@ -258,7 +258,7 @@ public:
     }
 
     // Gets the physical address of the underlying page table.
-    uintptr_t get_page_table_physical_address() const override
+    uintptr_t get_underlying_object_physical_address() const override
     {
         LockGuard guard{lock_};
         MyPageTable* page_table = page_table_.get_pointer();

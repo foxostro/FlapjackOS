@@ -1,28 +1,29 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_x86_64_PAGE_MAP_LEVEL_THREE_CONTROLLER_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_x86_64_PAGE_MAP_LEVEL_THREE_CONTROLLER_HPP
 
-#include <paging_topology/page_map_level_two_controller.hpp>
+#include <paging_topology/page_map_level_three_controller.hpp>
+#include <platform/x86_64/page_directory_pointer_table.hpp>
 #include <common/unique_pointer.hpp>
 #include <common/mutex.hpp>
 #include <cassert>
 
-namespace i386 {
+namespace x86_64 {
 
-// Owns a page directory. Provides synchronized access.
-// On IA-32, the second level page map is called a Page Directory.
-template<typename Policy>
-class GenericPageMapLevelTwoController final : public PagingTopology::PageMapLevelTwoController {
+// Owns a third level page map object. Provides synchronized access.
+// On IA-32e, the third level page map is called a Page Directory Pointer Table.
+class PageMapLevelThreeController final : public PagingTopology::PageMapLevelThreeController {
 public:
-    using ConcretePageMapLevelOneController = typename Policy::ConcretePageMapLevelOneController;
-    using MyPageTable = typename Policy::MyPageTable;
-    using MyPageDirectory = typename Policy::MyPageDirectory;
-    using MyPageDirectoryEntry = typename std::remove_reference<decltype(MyPageDirectory::entries[0])>::type;
-    static constexpr size_t COUNT = MyPageDirectory::COUNT;
+    using ConcretePageMapLevelTwoController = x86_64::PageMapLevelTwoController;
+    using MyPageDirectory = x86_64::PageDirectory;
+    using MyPageDirectoryPointerTable = x86_64::PageDirectoryPointerTable;
+    using MyPageDirectoryPointerTableEntry = typename std::remove_reference<decltype(MyPageDirectoryPointerTable::entries[0])>::type;
+    static constexpr size_t COUNT = x86_64::PageDirectoryPointerTable::COUNT;
+    static constexpr size_t SIZE_GOVERENED_BY_ENTRY = 0x40000000; // 1GB
 
     // A single entry in the page map.
     // This controls the contents of one underlying Page Directory Entry and
     // also owns the page table which is referenced therein.
-    class Entry final : public PagingTopology::PageMapLevelTwoController::Entry {
+    class Entry final : public PagingTopology::PageMapLevelThreeController::Entry {
     public:
         virtual ~Entry() = default;
 
@@ -34,7 +35,7 @@ public:
             lock_ = lock;
         }
 
-        void set_pde(MyPageDirectoryEntry* pde)
+        void set_pde(MyPageDirectoryPointerTableEntry* pde)
         {
             assert(pde);
             pde_ = pde;
@@ -46,26 +47,26 @@ public:
             mmu_ = mmu;
         }
 
-        SharedPointer<PagingTopology::PageMapLevelOneController> get_pml1() const override
+        SharedPointer<PagingTopology::PageMapLevelTwoController> get_pml2() const override
         {
             assert(lock_);
             LockGuard guard{*lock_};
-            return pml1_;
+            return pml2_;
         }
         
-        void set_pml1(SharedPointer<PagingTopology::PageMapLevelOneController> p) override
+        void set_pml2(SharedPointer<PagingTopology::PageMapLevelTwoController> p) override
         {
             assert(lock_);
             LockGuard guard{*lock_};
-            set_pml1_unlocked(p);
+            set_pml2_unlocked(p);
         }
         
-        void set_pml1_unlocked(SharedPointer<PagingTopology::PageMapLevelOneController> p)
+        void set_pml2_unlocked(SharedPointer<PagingTopology::PageMapLevelTwoController> p)
         {
             assert(pde_);
-            pml1_ = std::move(p);
+            pml2_ = std::move(p);
             if (has_page_table_unlocked()) {
-                pde_->set_address(pml1_->get_underlying_object_physical_address());
+                pde_->set_address(pml2_->get_underlying_object_physical_address());
                 pde_->set_present(true);
             } else {
                 pde_->set_address(0);
@@ -75,7 +76,7 @@ public:
 
         bool has_page_table_unlocked() const
         {
-            return pml1_ && (pml1_->get_underlying_object_physical_address() != 0);
+            return pml2_ && (pml2_->get_underlying_object_physical_address() != 0);
         }
         
         bool is_present() const override
@@ -151,48 +152,49 @@ public:
             pde_->set_supervisor((flags & SUPERVISOR) != 0);
         }
         
-        void populate([[maybe_unused]] uintptr_t offset) override
+        void populate(uintptr_t offset) override
         {
             assert(lock_);
             LockGuard guard{*lock_};
-            if (!pml1_) {
-                set_pml1_unlocked(create_pml1());
+            if (!pml2_) {
+                set_pml2_unlocked(create_pml2());
+                pml2_->populate(offset);
             }
         }
 
-        UniquePointer<PagingTopology::PageMapLevelOneController> create_pml1()
+        UniquePointer<PagingTopology::PageMapLevelTwoController> create_pml2()
         {
             assert(mmu_);
-            MyPageTable* page_table = new MyPageTable;
-            memset(page_table, 0, sizeof(*page_table));
-            return new ConcretePageMapLevelOneController{*mmu_, page_table};
+            MyPageDirectory* page_directory = new MyPageDirectory;
+            memset(page_directory, 0, sizeof(*page_directory));
+            return new ConcretePageMapLevelTwoController{*mmu_, page_directory};
         }
 
     private:
         Mutex* lock_;
-        MyPageDirectoryEntry* pde_;
+        MyPageDirectoryPointerTableEntry* pde_;
         HardwareMemoryManagementUnit* mmu_;
-        SharedPointer<PagingTopology::PageMapLevelOneController> pml1_;
+        SharedPointer<PagingTopology::PageMapLevelTwoController> pml2_;
     };
 
-    GenericPageMapLevelTwoController(HardwareMemoryManagementUnit& mmu)
+    PageMapLevelThreeController(HardwareMemoryManagementUnit& mmu)
      : mmu_(mmu),
-       page_directory_(new MyPageDirectory)
+       page_directory_(new MyPageDirectoryPointerTable)
     {
         clear_directory();
         feed();
     }
 
-    GenericPageMapLevelTwoController(HardwareMemoryManagementUnit& mmu,
-                                     UniquePointer<MyPageDirectory> pd)
+    PageMapLevelThreeController(HardwareMemoryManagementUnit& mmu,
+                                UniquePointer<MyPageDirectoryPointerTable> pdpt)
      : mmu_(mmu),
-       page_directory_(std::move(pd))
+       page_directory_(std::move(pdpt))
     {
         feed();
     }
 
-    GenericPageMapLevelTwoController(const GenericPageMapLevelTwoController&) = delete;
-    GenericPageMapLevelTwoController(GenericPageMapLevelTwoController&&) = delete;
+    PageMapLevelThreeController(const PageMapLevelThreeController&) = delete;
+    PageMapLevelThreeController(PageMapLevelThreeController&&) = delete;
 
     void clear_directory()
     {
@@ -255,21 +257,20 @@ public:
     // Gets the size of the region of memory governed by each entry.
     size_t get_size_governed_by_entry() const override
     {
-        return Policy::SIZE_GOVERENED_BY_ENTRY;
+        return SIZE_GOVERENED_BY_ENTRY;
     }
 
-    // Gets the linear address of the underlying page directory object.
-    // AFOX_TODO: rename to get_physical_object_pointer() or something
-    void* get_page_directory_pointer() const override
+    // Gets the linear address of the underlying PDPT object.
+    void* get_physical_object_pointer() const override
     {
         LockGuard guard{lock_};
         return page_directory_.get_pointer();
     }
 
-    // Gets the physical address of the underlying page directory object.
+    // Gets the physical address of the underlying PDPT object.
     uintptr_t get_underlying_object_physical_address() const override
     {
-        return mmu_.convert_logical_to_physical_address(reinterpret_cast<uintptr_t>(get_page_directory_pointer()));
+        return mmu_.convert_logical_to_physical_address(reinterpret_cast<uintptr_t>(get_physical_object_pointer()));
     }
 
     // Ensures the underlying paging objects have been populated for the
@@ -277,16 +278,16 @@ public:
     // corresponding PML1 object.
     void populate(uintptr_t offset) override
     {
-        get_entry_by_offset(offset).populate(get_corresponding_pml1_offset(offset));
+        get_entry_by_offset(offset).populate(get_corresponding_pml2_offset(offset));
     }
 
 private:
     mutable Mutex lock_;
     HardwareMemoryManagementUnit& mmu_;
-    UniquePointer<MyPageDirectory> page_directory_;
+    UniquePointer<MyPageDirectoryPointerTable> page_directory_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.
 };
 
-} // namespace i386
+} // namespace x86_64
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_GENERIC_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_x86_64_PAGE_MAP_LEVEL_THREE_CONTROLLER_HPP

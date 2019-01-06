@@ -1,22 +1,21 @@
-#ifndef FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
-#define FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
+#ifndef FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_FOUR_CONTROLLER_HPP
+#define FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_FOUR_CONTROLLER_HPP
 
-#include <paging_topology/page_map_level_one_controller.hpp>
-#include <protection_flags.hpp>
+#include <paging_topology/page_map_level_three_controller.hpp>
 
 namespace PagingTopology {
 
-// Owns a second level page map.
-// For example, on IA-32 and IA-32e this object is called a Page Directory.
-class PageMapLevelTwoController {
+// Owns a fourth level page map.
+// For example, on IA-32e this object is called a PML4.
+class PageMapLevelFourController {
 public:
     // A single entry in the page map.
     class Entry {
     public:
         virtual ~Entry() = default;
 
-        virtual SharedPointer<PageMapLevelOneController> get_pml1() const = 0;
-        virtual void set_pml1(SharedPointer<PageMapLevelOneController> p) = 0;
+        virtual SharedPointer<PageMapLevelThreeController> get_pml3() const = 0;
+        virtual void set_pml3(SharedPointer<PageMapLevelThreeController> p) = 0;
 
         virtual bool is_present() const = 0;
         virtual void set_present(bool present) = 0;
@@ -35,7 +34,7 @@ public:
         virtual void populate(uintptr_t offset) = 0;
     };
 
-    virtual ~PageMapLevelTwoController() = default;
+    virtual ~PageMapLevelFourController() = default;
 
     // Returns the number of entries in the table.
     virtual size_t get_number_of_entries() const = 0;
@@ -47,29 +46,29 @@ public:
     // Gets the size of the region of memory governed by each entry.
     virtual size_t get_size_governed_by_entry() const = 0;
 
-    // Gets the linear address of the underlying page directory object.
-    virtual void* get_page_directory_pointer() const = 0;
+    // Gets the linear address of the underlying physical paging object.
+    virtual void* get_physical_object_pointer() const = 0;
 
     // Gets the physical address of the underlying page directory object.
     virtual uintptr_t get_underlying_object_physical_address() const = 0;
 
     // Ensures the underlying paging objects have been populated for the
-    // specified offset into the PML2. This allocates memory for the
-    // corresponding PML1 object.
+    // specified offset into the PML4. This allocates memory for the
+    // corresponding PML3 object.
     virtual void populate(uintptr_t offset) = 0;
 
-    // Gets the PML1 entry associated with the specified offset.
-    // The PML2 governs a region of memory and the offset is an offset from
-    // the beginning of that region of memory. Each entry into the PML2, each
-    // PML1, and each entry into the PML1 are associated with ranges within
-    // this region of memory. All can be located with an offset into the PML2.
+    // Gets the PML3 entry associated with the specified offset.
+    // The PML4 governs a region of memory and the offset is an offset from
+    // the beginning of that region of memory. Each entry into the PML4, each
+    // PML3, and each entry into the PML3 are associated with ranges within
+    // this region of memory. All can be located with an offset into the PML4.
     // AFOX_TODO: Implement an Optional class so I can return "none" when intermediate paging objects are missing.
-    PageMapLevelOneController::Entry& get_pml1_entry_by_offset(uintptr_t offset)
+    PageMapLevelThreeController::Entry& get_pml3_entry_by_offset(uintptr_t offset)
     {
-        auto& pml2_entry = get_entry_by_offset(offset);
-        auto pml1 = pml2_entry.get_pml1();
-        assert(pml1 && "The PML1 is missing and there is no associated PML1 entry. (The page map is sparse.)");
-        return pml1->get_entry_by_offset(get_corresponding_pml1_offset(offset));
+        auto& pml4_entry = get_entry_by_offset(offset);
+        auto pml3 = pml4_entry.get_pml3();
+        assert(pml3 && "The PML3 is missing and there is no associated PML3 entry. (The page map is sparse.)");
+        return pml3->get_entry_by_offset(get_corresponding_pml3_offset(offset));
     }
 
     // Gets an entry associated with the specified offset into the page map.
@@ -92,19 +91,19 @@ public:
         return index;
     }
     
-    // Gets the corresponding offset into the corresponding PML1.
-    // Each offset into the region of memory governed by the PML2 is associated
-    // both with a specific PML1 and also with an offset into the region of
-    // memory governed by that PML1.
-    uintptr_t get_corresponding_pml1_offset(uintptr_t pml2_offset)
+    // Gets the corresponding offset into the corresponding PML3.
+    // Each offset into the region of memory governed by the PML4 is associated
+    // both with a specific PML3 and also with an offset into the region of
+    // memory governed by that PML3.
+    uintptr_t get_corresponding_pml3_offset(uintptr_t pml4_offset)
     {
-        size_t pml2_index = get_index_of_entry_by_offset(pml2_offset);
-        size_t pml2_entry_size = get_size_governed_by_entry();
-        uintptr_t pml1_offset = (pml2_offset - (pml2_index * pml2_entry_size));
-        return pml1_offset;
+        size_t pml4_index = get_index_of_entry_by_offset(pml4_offset);
+        size_t pml4_entry_size = get_size_governed_by_entry();
+        uintptr_t pml3_offset = (pml4_offset - (pml4_index * pml4_entry_size));
+        return pml3_offset;
     }
 };
 
 } // namespace PagingTopology
 
-#endif // FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_TWO_CONTROLLER_HPP
+#endif // FLAPJACKOS_KERNEL_INCLUDE_PAGING_TOPOLOGY_PAGE_MAP_LEVEL_FOUR_CONTROLLER_HPP

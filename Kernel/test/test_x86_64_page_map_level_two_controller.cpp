@@ -57,7 +57,7 @@ TEST_CASE("x86_64::PageMapLevelTwoController -- ensure we can remove page tables
     {
         auto& entry = page_directory.get_entry(0);
         entry.set_pml1(new PML1{mmu});
-        addr = entry.get_pml1()->get_page_table_physical_address();
+        addr = entry.get_pml1()->get_underlying_object_physical_address();
     }
 
     {
