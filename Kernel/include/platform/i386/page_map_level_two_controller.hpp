@@ -125,6 +125,15 @@ public:
             pde_->set_accessed(accessed);
         }
 
+        void set_protection(ProtectionFlags flags) override
+        {
+            assert(pde_);
+            assert(lock_);
+            LockGuard guard{*lock_};
+            pde_->set_readwrite((flags & WRITABLE) != 0);
+            pde_->set_supervisor((flags & SUPERVISOR) != 0);
+        }
+
     private:
         Mutex* lock_;
         PageDirectoryEntry* pde_;

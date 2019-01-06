@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_PLATFORM_I386_PAGE_MAP_LEVEL_ONE_CONTROLLER_HPP
 
 #include <platform/i386/page_table.hpp>
+#include <platform/i386/page_frame_controller.hpp>
 #include <paging_topology/page_map_level_one_controller.hpp>
 #include <hardware_memory_management_unit.hpp>
 #include <common/unique_pointer.hpp>
@@ -44,9 +45,14 @@ public:
         
         void set_page_frame(SharedPointer<PagingTopology::PageFrameController> p) override
         {
-            assert(pte_);
             assert(lock_);
             LockGuard guard{*lock_};
+            set_page_frame_unlocked(p);
+        }
+        
+        void set_page_frame_unlocked(SharedPointer<PagingTopology::PageFrameController> p)
+        {
+            assert(pte_);
             page_frame_ = std::move(p);
             if (has_page_frame_unlocked()) {
                 pte_->set_address(page_frame_->get_page_frame());
@@ -156,6 +162,30 @@ public:
             assert(lock_);
             LockGuard guard{*lock_};
             pte_->set_global(global);
+        }
+        
+        void set_protection(ProtectionFlags flags) override
+        {
+            assert(pte_);
+            assert(lock_);
+            LockGuard guard{*lock_};
+            pte_->set_readwrite((flags & WRITABLE) != 0);
+            pte_->set_supervisor((flags & SUPERVISOR) != 0);
+            pte_->set_global((flags & GLOBAL) != 0);
+        }
+
+        void set_mapping(uintptr_t physical_address) override
+        {
+            assert(pte_);
+            assert(lock_);
+            LockGuard guard{*lock_};
+            set_page_frame_unlocked(create_page_frame_controller(physical_address));
+            pte_->set_present(true);
+        }
+        
+        UniquePointer<PagingTopology::PageFrameController> create_page_frame_controller(uintptr_t page_frame) override
+        {
+            return new PageFrameController{page_frame};
         }
 
     private:

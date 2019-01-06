@@ -29,6 +29,8 @@ public:
 
         virtual bool is_accessed() const = 0;
         virtual void set_accessed(bool accessed) = 0;
+
+        virtual void set_protection(ProtectionFlags flags) = 0;
     };
 
     virtual ~PageMapLevelTwoController() = default;
