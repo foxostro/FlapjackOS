@@ -13,6 +13,13 @@ TEST_CASE("i386::PageMapLevelTwoController -- PML2 has 1024 entries", "[i386]")
     REQUIRE(1024 == page_directory.get_number_of_entries());
 }
 
+TEST_CASE("i386::PageMapLevelTwoController -- PML2 entry governs 4MB", "[i386]")
+{
+    MockMemoryManagementUnit mmu;
+    PML2 page_directory{mmu};
+    REQUIRE((4*1024*1024) == page_directory.get_size_governed_by_entry());
+}
+
 TEST_CASE("i386::PageMapLevelTwoController -- page directory is initially empty", "[i386]")
 {
     MockMemoryManagementUnit mmu;

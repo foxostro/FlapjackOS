@@ -255,8 +255,7 @@ public:
     // Gets the size of the region of memory governed by each entry.
     size_t get_size_governed_by_entry() const override
     {
-        constexpr uintptr_t FOUR_MEGS = 0x400000;
-        return FOUR_MEGS;
+        return Policy::SIZE_GOVERENED_BY_ENTRY;
     }
 
     // Gets the linear address of the underlying page directory object.

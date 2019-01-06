@@ -11,6 +11,7 @@ struct PageMapLevelTwoControllerPolicy {
     using MyPageTable = x86_64::PageTable;
     using MyPageDirectory = x86_64::PageDirectory;
     using ConcretePageMapLevelOneController = x86_64::PageMapLevelOneController;
+    static constexpr size_t SIZE_GOVERENED_BY_ENTRY = 0x200000;
 };
 
 using PageMapLevelTwoController = i386::GenericPageMapLevelTwoController<PageMapLevelTwoControllerPolicy>;
