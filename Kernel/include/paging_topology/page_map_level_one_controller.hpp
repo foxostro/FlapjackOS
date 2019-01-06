@@ -58,10 +58,6 @@ public:
     // Gets the size of the region of memory governed by each entry.
     virtual size_t get_size_governed_by_entry() const = 0;
 
-    // Indicates that the underlying page table object be allowed to leak.
-    // This is useful when the object was not allocated on the heap.
-    virtual void set_should_leak() = 0;
-
     // Gets an entry associated with the specified offset into the page map.
     // The page map governs a region of memory and the offset is an offset from
     // the beginning of that region of memory. Each entry is associated with a

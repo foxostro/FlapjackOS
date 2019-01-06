@@ -256,14 +256,6 @@ public:
         return FOUR_MEGS;
     }
 
-    // Indicates that the underlying page table object be allowed to leak.
-    // This is useful when the object was not allocated on the heap.
-    void set_should_leak() override
-    {
-        LockGuard guard{lock_};
-        page_directory_.set_should_leak();
-    }
-
     // Gets the linear address of the underlying page directory object.
     void* get_page_directory_pointer() const override
     {

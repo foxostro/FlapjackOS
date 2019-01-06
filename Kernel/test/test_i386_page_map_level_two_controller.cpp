@@ -85,21 +85,6 @@ TEST_CASE("i386::PageMapLevelTwoController -- ctor will not modify a page direct
     REQUIRE(0 == memcmp(expected, actual, sizeof(i386::PageDirectory)));
 }
 
-TEST_CASE("i386::PageMapLevelTwoController -- can intentionally leak the underlying paging object on request", "[i386]")
-{
-    // This mode is useful when the underlying paging object was allocated
-    // statically in the kernel image, and not on the heap.
-    MockMemoryManagementUnit mmu;
-    i386::PageDirectory* page_directory = new i386::PageDirectory;
-    memset(page_directory, 0, sizeof(i386::PageDirectory));
-    {
-        PML2 controller{mmu, page_directory};
-        controller.set_should_leak();
-    }
-    // AFOX_TODO: So how can I test that this object is still alive?
-    delete page_directory;
-}
-
 TEST_CASE("i386::PageMapLevelTwoController -- populate underlying page tables on request", "[i386]")
 {
     MockMemoryManagementUnit mmu;

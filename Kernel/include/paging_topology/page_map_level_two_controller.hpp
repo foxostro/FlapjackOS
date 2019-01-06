@@ -47,10 +47,6 @@ public:
     // Gets the size of the region of memory governed by each entry.
     virtual size_t get_size_governed_by_entry() const = 0;
 
-    // Indicates that the underlying page directory object be allowed to leak.
-    // This is useful when the object was not allocated on the heap.
-    virtual void set_should_leak() = 0;
-
     // Gets the linear address of the underlying page directory object.
     virtual void* get_page_directory_pointer() const = 0;
 
