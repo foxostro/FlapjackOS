@@ -68,7 +68,9 @@ set(I386_SOURCE_FILES
     "include/platform/i386/thread.hpp"
     "include/platform/i386/platform_namer.hpp"
     "include/platform/i386/page_frame_controller.hpp"
+    "include/platform/i386/generic_page_map_level_one_controller.hpp"
     "include/platform/i386/page_map_level_one_controller.hpp"
+    "include/platform/i386/generic_page_map_level_two_controller.hpp"
     "include/platform/i386/page_map_level_two_controller.hpp"
     "include/platform/i386/managed_physical_memory_map.hpp"
     )
@@ -110,6 +112,7 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/thread.hpp"
     "include/platform/x86_64/platform_namer.hpp"
     "include/platform/i386/page_frame_controller.hpp"
+    "include/platform/i386/generic_page_map_level_one_controller.hpp"
     "include/platform/x86_64/page_map_level_one_controller.hpp"
     )
 

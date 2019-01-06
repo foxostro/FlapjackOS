@@ -18,7 +18,7 @@ public:
     using MyPageFrameController = typename Policy::MyPageFrameController;
     using MyPageTable = typename Policy::MyPageTable;
     using MyPageTableEntry = typename std::remove_reference<decltype(MyPageTable::entries[0])>::type;
-    static constexpr size_t COUNT = Policy::MyPageTable::COUNT;
+    static constexpr size_t COUNT = MyPageTable::COUNT;
 
     // A single entry in the page map.
     // This controls the contents of one underlying Page Table Entry and also
