@@ -13,6 +13,7 @@ public:
     {
         ExtractPageMapOperation operation{mmu};
         pml2_ = operation.extract();
+        assert(pml2_);
     }
     
     void reload() override
@@ -26,15 +27,8 @@ public:
                   uintptr_t linear_address,
                   ProtectionFlags flags) override
     {
-        size_t pml2_entry_size = pml2_->get_size_governed_by_entry();
-        size_t pml2_index = linear_address / pml2_entry_size;
-        auto& pml2_entry = pml2_->get_entry(pml2_index);
-        pml2_entry.set_protection(flags);
-        auto pml1 = pml2_entry.get_pml1();
-        assert(pml1);
-        size_t pml1_entry_size = pml1->get_size_governed_by_entry();
-        size_t pml1_index = (linear_address - (pml2_index * pml2_entry_size)) / pml1_entry_size;
-        auto& pml1_entry = pml1->get_entry(pml1_index);
+        assert(pml2_);
+        auto& pml1_entry = pml2_->get_pml1_entry_by_offset(linear_address);
         pml1_entry.set_mapping(physical_address);
         pml1_entry.set_protection(flags);
         mmu_.invalidate_page(linear_address);
@@ -50,15 +44,8 @@ public:
 
     void set_readonly(uintptr_t linear_address)
     {
-        size_t pml2_entry_size = pml2_->get_size_governed_by_entry();
-        size_t pml2_index = linear_address / pml2_entry_size;
-        auto& pml2_entry = pml2_->get_entry(pml2_index);
-        auto pml1 = pml2_entry.get_pml1();
-        if (pml1) {
-            size_t pml1_entry_size = pml1->get_size_governed_by_entry();
-            size_t pml1_index = (linear_address - (pml2_index * pml2_entry_size)) / pml1_entry_size;
-            pml1->get_entry(pml1_index).set_readwrite(false);
-        }
+        assert(pml2_);
+        pml2_->get_pml1_entry_by_offset(linear_address).set_readwrite(false);
     }
 
 private:
