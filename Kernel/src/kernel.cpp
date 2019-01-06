@@ -48,13 +48,13 @@ void Kernel::run()
 {
     TRACE("Running...");
 
-    {
-        i386::ExtractPageMapOperation operation{mmu_};
-        auto pml2 = operation.extract();
-        (void)pml2;
-        TRACE("just before scope exit");
-    }
-    TRACE("done with extract operation");
+    // {
+    //     i386::ExtractPageMapOperation operation{mmu_};
+    //     auto pml2 = operation.extract();
+    //     (void)pml2;
+    //     TRACE("just before scope exit");
+    // }
+    // TRACE("done with extract operation");
 
     InterruptLock lock;
     {

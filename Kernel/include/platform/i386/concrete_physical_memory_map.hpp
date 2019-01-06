@@ -17,8 +17,6 @@ public:
         pml2_ = operation.extract();
         assert(pml2_);
     }
-    
-    void populate_page_tables(uintptr_t, size_t) override {}
 
     void map_page(uintptr_t physical_address,
                   uintptr_t linear_address,
