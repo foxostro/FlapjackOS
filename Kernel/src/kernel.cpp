@@ -120,7 +120,6 @@ void Kernel::print_welcome_message()
 void Kernel::prepare_kernel_address_space()
 {
     address_space_bootstrapper_.prepare_address_space();
-    phys_map_.reload();
 
     // Ensure the address space is mapped.
     uintptr_t linear_address = mmu_.get_kernel_virtual_start_address();

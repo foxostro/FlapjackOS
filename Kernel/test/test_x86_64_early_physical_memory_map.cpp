@@ -11,7 +11,6 @@ TEST_CASE("x86_64::EarlyPhysicalMemoryMap::map_page -- basic example", "[x86_64]
     // Setup
     MockPagingContext context;
     x86_64::EarlyPhysicalMemoryMap phys_map{context.mmu_};
-    phys_map.reload();
 
     // Action
     phys_map.map_page(context.mmu_.convert_logical_to_physical_address(context.mmu_.get_kernel_virtual_start_address()),
@@ -34,7 +33,6 @@ TEST_CASE("x86_64::EarlyPhysicalMemoryMap::set_readonly -- zero size region", "[
     // Setup
     MockPagingContext context;
     x86_64::EarlyPhysicalMemoryMap phys_map{context.mmu_};
-    phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
                       WRITABLE);
@@ -61,7 +59,6 @@ TEST_CASE("x86_64::EarlyPhysicalMemoryMap::set_readonly -- one-byte region regio
     // Setup
     MockPagingContext context;
     x86_64::EarlyPhysicalMemoryMap phys_map{context.mmu_};
-    phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
                       WRITABLE);
@@ -94,7 +91,6 @@ TEST_CASE("x86_64::EarlyPhysicalMemoryMap::set_readonly -- one-page region regio
     // Setup
     MockPagingContext context;
     x86_64::EarlyPhysicalMemoryMap phys_map{context.mmu_};
-    phys_map.reload();
     phys_map.map_page(KERNEL_PHYSICAL_LOAD_ADDR,
                       context.mmu_.get_kernel_virtual_start_address(),
                       WRITABLE);

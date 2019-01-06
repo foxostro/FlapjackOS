@@ -15,7 +15,9 @@ public:
     using PageDirectory = i386::PageDirectory;
     using PageTable = i386::PageTable;
 
-    PagingResolver(HardwareMemoryManagementUnit &mmu) : cr3_(0), mmu_(mmu) {}
+    PagingResolver(HardwareMemoryManagementUnit &mmu)
+     : cr3_(mmu.get_cr3()), mmu_(mmu)
+    {}
 
     uint32_t get_cr3() const
     {

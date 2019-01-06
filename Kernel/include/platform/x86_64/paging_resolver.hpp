@@ -17,7 +17,9 @@ public:
     using PageDirectory = x86_64::PageDirectory;
     using PageTable = x86_64::PageTable;
 
-    PagingResolver(HardwareMemoryManagementUnit &mmu) : cr3_(0), mmu_(mmu) {}
+    PagingResolver(HardwareMemoryManagementUnit &mmu)
+     : cr3_(mmu.get_cr3()), mmu_(mmu)
+    {}
 
     uint64_t get_cr3() const
     {

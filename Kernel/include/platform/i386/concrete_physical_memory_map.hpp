@@ -18,11 +18,6 @@ public:
         assert(pml2_);
     }
     
-    void reload() override
-    {
-        mmu_.reload();
-    }
-    
     void populate_page_tables(uintptr_t, size_t) override {}
 
     void map_page(uintptr_t physical_address,

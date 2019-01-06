@@ -14,12 +14,6 @@ class PhysicalMemoryMap
 public:
     virtual ~PhysicalMemoryMap() = default;
 
-    // Point the physical memory map at the paging structures active on the MMU.
-    // So, whatever the MMU is using right now is what PhysicalMemoryMap
-    // will now act upon.
-    // AFOX_TODO: Should this reload() method be removed, or moved to the MMU?
-    virtual void reload() = 0;
-
     // Allocate memory for page tables and insert them into the page directory.
     // AFOX_TODO: Remove the populate_page_tables() method.
     virtual void populate_page_tables(uintptr_t begin, size_t length) = 0;

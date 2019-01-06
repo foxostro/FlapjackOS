@@ -21,14 +21,6 @@ public:
        mmu_(mmu)
     {}
 
-    // Point the physical memory map at the paging structures active on the MMU.
-    // So, whatever the MMU is using right now is what EarlyPhysicalMemoryMap
-    // will now act upon.
-    void reload() override
-    {
-        resolver_.set_cr3(mmu_.get_cr3());
-    }
-
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.
     void map_page(uintptr_t physical_address,
