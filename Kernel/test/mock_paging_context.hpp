@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "mock_memory_management_unit.hpp"
+#include <concrete_page_frame_allocator.hpp>
 
 #if defined(__i386__)
 
@@ -15,6 +16,7 @@ public:
     MockMemoryManagementUnit mmu_;
     i386::PagingResolver resolver_;
     i386::KernelAddressSpaceBootstrapper bootstrapper_;
+    ConcretePageFrameAllocator page_frame_allocator_;
 
     MockPagingContext()
      : resolver_(mmu_),
@@ -41,6 +43,7 @@ public:
     MockMemoryManagementUnit mmu_;
     x86_64::PagingResolver resolver_;
     x86_64::KernelAddressSpaceBootstrapper bootstrapper_;
+    ConcretePageFrameAllocator page_frame_allocator_;
 
     MockPagingContext()
      : resolver_(mmu_),

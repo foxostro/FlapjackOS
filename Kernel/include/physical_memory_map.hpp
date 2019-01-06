@@ -14,6 +14,13 @@ class PhysicalMemoryMap
 public:
     virtual ~PhysicalMemoryMap() = default;
 
+    // Map virtual memory with the given protection.
+    // Physical page frames will be allocated for any holes in the memory map
+    // in the specified region.
+    virtual void map_pages(uintptr_t begin,
+                           uintptr_t end,
+                           ProtectionFlags flags) = 0;
+
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.
     virtual void map_page(uintptr_t physical_address,

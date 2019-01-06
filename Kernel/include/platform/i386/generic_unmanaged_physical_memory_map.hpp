@@ -23,6 +23,20 @@ public:
      : resolver_(mmu),
        mmu_(mmu)
     {}
+    
+    // Map virtual memory with the given protection.
+    // Assumes a kernel logical mapping for memory in this region.
+    void map_pages(uintptr_t begin,
+                   uintptr_t end,
+                   ProtectionFlags flags) override
+    {
+        assert(begin < end);
+        for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
+            map_page(mmu_.convert_logical_to_physical_address(page),
+                     page,
+                     flags);
+        }
+    }
 
     // Map the specified physical page to the virtual page.
     // Use `flags' to control the permissions.

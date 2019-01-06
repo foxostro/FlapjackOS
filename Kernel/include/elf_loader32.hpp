@@ -16,14 +16,10 @@ public:
     // physical_memory_map -- The ELF loader needs to be able adjust virtual
     //                        memory mapping to place the executable's memory
     //                        segments appropriately.
-    // page_frame_allocator -- It's also necessary to be able to allocate more
-    //                         physical memory to accomodate the executable's
-    //                         memory segments. 
     // elf_image -- The ELF image in memory.
     ElfLoader32(PhysicalMemoryMap& physical_memory_map,
-                PageFrameAllocator& page_frame_allocator,
                 const Data& elf_image)
-     : ElfLoaderBase(physical_memory_map, page_frame_allocator, elf_image)
+     : ElfLoaderBase(physical_memory_map, elf_image)
     {}
 
     // Returns true if the image is acceptable and this loader can exec().

@@ -19,7 +19,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
    device_drivers_(interrupt_controller_),
    terminal_(display_),
    address_space_bootstrapper_(mmu_),
-   phys_map_(mmu_)
+   phys_map_(mmu_, page_frame_allocator_)
 {
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
@@ -81,7 +81,7 @@ Data Kernel::get_module_data(multiboot_module_t& module)
 UniquePointer<ElfLoader> Kernel::create_elf_loader(const Data& elf_image)
 {
     ElfLoaderFactory factory;
-    return factory.create_loader(phys_map_, page_frame_allocator_, elf_image);
+    return factory.create_loader(phys_map_, elf_image);
 }
 
 void Kernel::do_console_loop()
@@ -114,19 +114,11 @@ void Kernel::prepare_kernel_address_space()
 {
     address_space_bootstrapper_.prepare_address_space();
 
-    // Ensure the address space is mapped.
+    // Ensure the kernel region of memory is mapped.
     uintptr_t linear_address = mmu_.get_kernel_virtual_start_address();
-
-    for (uintptr_t length = KERNEL_MEMORY_REGION_SIZE;
-         length > 0;
-         length -= PAGE_SIZE) {
-
-        phys_map_.map_page(mmu_.convert_logical_to_physical_address(linear_address),
-                           linear_address,
-                           WRITABLE | GLOBAL);
-
-        linear_address += PAGE_SIZE;
-    }
+    phys_map_.map_pages(linear_address,
+                        linear_address + KERNEL_MEMORY_REGION_SIZE,
+                        WRITABLE | GLOBAL);
 
     // Setup correct permissions for the .text and .rodata sections.
     phys_map_.set_readonly((uintptr_t)g_kernel_text_begin,

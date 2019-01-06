@@ -15,8 +15,10 @@ namespace i386 {
 // are very substantial.
 class ConcretePhysicalMemoryMap : public PhysicalMemoryMap {
 public:
-    ConcretePhysicalMemoryMap(HardwareMemoryManagementUnit& mmu)
+    ConcretePhysicalMemoryMap(HardwareMemoryManagementUnit& mmu,
+                              PageFrameAllocator& page_frame_allocator)
      : mmu_(mmu),
+       page_frame_allocator_(page_frame_allocator),
        unmanaged_(mmu)
     {}
 
@@ -25,7 +27,22 @@ public:
     void heap_is_ready()
     {
         LockGuard lock{mutex_};
-        managed_ = new ManagedPhysicalMemoryMap{mmu_};
+        managed_ = new ManagedPhysicalMemoryMap{mmu_, page_frame_allocator_};
+    }
+    
+    // Map virtual memory with the given protection.
+    // Physical page frames will be allocated for any holes in the memory map
+    // in the specified region.
+    void map_pages(uintptr_t begin, uintptr_t end, ProtectionFlags flags) override
+    {
+        assert_is_page_aligned(begin);
+        assert(begin < end);
+        LockGuard lock{mutex_};
+        if (end < KERNEL_VIRTUAL_START_ADDR) {
+            managed_->map_pages(begin, end, flags);
+        } else {
+            unmanaged_.map_pages(begin, end, flags);
+        }
     }
 
     void map_page(uintptr_t physical_address,
@@ -54,6 +71,7 @@ public:
 private:
     Mutex mutex_;
     HardwareMemoryManagementUnit& mmu_;
+    PageFrameAllocator& page_frame_allocator_;
     UnmanagedPhysicalMemoryMap unmanaged_;
     UniquePointer<PhysicalMemoryMap> managed_;
 };
