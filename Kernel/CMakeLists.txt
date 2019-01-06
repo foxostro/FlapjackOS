@@ -109,6 +109,8 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/context_switch.hpp" "src/platform/x86_64/context_switch.S"
     "include/platform/x86_64/thread.hpp"
     "include/platform/x86_64/platform_namer.hpp"
+    "include/platform/i386/page_frame_controller.hpp"
+    "include/platform/x86_64/page_map_level_one_controller.hpp"
     )
 
 set(PC_SOURCE_FILES
@@ -212,6 +214,8 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_x86_64_page_table_entry.cpp"
              "test/test_x86_64_unmanaged_physical_memory_map.cpp"
              "test/test_x86_64_kernel_address_space_bootstrapper.cpp"
+             "test/test_i386_page_frame_controller.cpp"
+             "test/test_x86_64_page_map_level_one_controller.cpp"
              )
     endif ()
 

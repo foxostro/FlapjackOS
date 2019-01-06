@@ -1,11 +1,11 @@
 #include "catch.hpp"
-#include <platform/i386/page_map_level_one_controller.hpp>
+#include <platform/x86_64/page_map_level_one_controller.hpp>
 #include <concrete_page_frame_allocator.hpp>
 #include "mock_memory_management_unit.hpp"
 
 constexpr size_t MAX_PAGE_FRAMES = 1024;
 using TestingAllocator = GenericConcretePageFrameAllocator<MAX_PAGE_FRAMES>;
-using PML1 = i386::PageMapLevelOneController;
+using PML1 = x86_64::PageMapLevelOneController;
 
 static TestingAllocator create_page_frame_allocator()
 {
@@ -16,14 +16,14 @@ static TestingAllocator create_page_frame_allocator()
     return allocator;
 }
 
-TEST_CASE("i386::PageMapLevelOneController -- PML1 has 1024 entries", "[i386]")
+TEST_CASE("x86_64::PageMapLevelOneController -- PML1 has 512 entries", "[x86_64]")
 {
     MockMemoryManagementUnit mmu;
     PML1 page_table{mmu};
-    REQUIRE(1024 == page_table.get_number_of_entries());
+    REQUIRE(512 == page_table.get_number_of_entries());
 }
 
-TEST_CASE("i386::PageMapLevelOneController -- page table is initially empty", "[i386]")
+TEST_CASE("x86_64::PageMapLevelOneController -- page table is initially empty", "[x86_64]")
 {
     MockMemoryManagementUnit mmu;
     PML1 page_table{mmu};
@@ -34,7 +34,7 @@ TEST_CASE("i386::PageMapLevelOneController -- page table is initially empty", "[
     }
 }
 
-TEST_CASE("i386::PageMapLevelOneController -- ensure we can stick page frames in the table", "[i386]")
+TEST_CASE("x86_64::PageMapLevelOneController -- ensure we can stick page frames in the table", "[x86_64]")
 {
     TestingAllocator allocator = create_page_frame_allocator();
     MockMemoryManagementUnit mmu;
@@ -52,7 +52,7 @@ TEST_CASE("i386::PageMapLevelOneController -- ensure we can stick page frames in
     }
 }
 
-TEST_CASE("i386::PageMapLevelOneController -- ensure we can remove page frame from the table", "[i386]")
+TEST_CASE("x86_64::PageMapLevelOneController -- ensure we can remove page frame from the table", "[x86_64]")
 {
     TestingAllocator allocator = create_page_frame_allocator();
     MockMemoryManagementUnit mmu;
@@ -78,11 +78,11 @@ TEST_CASE("i386::PageMapLevelOneController -- ensure we can remove page frame fr
     }
 }
 
-TEST_CASE("i386::PageMapLevelOneController -- ctor can accept a raw pointer to a page table", "[i386]")
+TEST_CASE("x86_64::PageMapLevelOneController -- ctor can accept a raw pointer to a page table", "[x86_64]")
 {
     TestingAllocator allocator = create_page_frame_allocator();
     MockMemoryManagementUnit mmu;
-    i386::PageTable* page_table = new i386::PageTable;
+    x86_64::PageTable* page_table = new x86_64::PageTable;
     PML1 controller{mmu, page_table};
     auto& entry = controller.get_entry(0);
     entry.set_page_frame(new i386::PageFrameController{allocator});
@@ -90,13 +90,13 @@ TEST_CASE("i386::PageMapLevelOneController -- ctor can accept a raw pointer to a
     REQUIRE(addr == page_table->entries[0].get_address());
 }
 
-TEST_CASE("i386::PageMapLevelOneController -- ctor will not modify a page table that it receives", "[i386]")
+TEST_CASE("x86_64::PageMapLevelOneController -- ctor will not modify a page table that it receives", "[x86_64]")
 {
-    i386::PageTable* actual = new i386::PageTable;
-    memset(actual, 0xAB, sizeof(i386::PageTable));
-    i386::PageTable* expected = new i386::PageTable;
-    memcpy(expected, actual, sizeof(i386::PageTable));
+    x86_64::PageTable* actual = new x86_64::PageTable;
+    memset(actual, 0xAB, sizeof(x86_64::PageTable));
+    x86_64::PageTable* expected = new x86_64::PageTable;
+    memcpy(expected, actual, sizeof(x86_64::PageTable));
     MockMemoryManagementUnit mmu;
     PML1 controller{mmu, actual};
-    REQUIRE(0 == memcmp(expected, actual, sizeof(i386::PageTable)));
+    REQUIRE(0 == memcmp(expected, actual, sizeof(x86_64::PageTable)));
 }
