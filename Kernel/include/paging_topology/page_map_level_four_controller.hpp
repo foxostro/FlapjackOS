@@ -47,7 +47,7 @@ public:
     virtual size_t get_size_governed_by_entry() const = 0;
 
     // Gets the linear address of the underlying physical paging object.
-    virtual void* get_physical_object_pointer() const = 0;
+    virtual void* get_underlying_object_pointer() const = 0;
 
     // Gets the physical address of the underlying page directory object.
     virtual uintptr_t get_underlying_object_physical_address() const = 0;

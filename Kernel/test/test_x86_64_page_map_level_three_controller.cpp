@@ -78,7 +78,7 @@ TEST_CASE("x86_64::PageMapLevelThreeController -- ctor can accept a raw pointer 
     x86_64::PageDirectoryPointerTable* pdpt = new x86_64::PageDirectoryPointerTable;
     memset(pdpt, 0, sizeof(x86_64::PageDirectoryPointerTable));
     PML3 controller{mmu, pdpt};
-    REQUIRE(controller.get_physical_object_pointer() == static_cast<void*>(pdpt));
+    REQUIRE(controller.get_underlying_object_pointer() == static_cast<void*>(pdpt));
 }
 
 TEST_CASE("x86_64::PageMapLevelThreeController -- ctor will not modify a PDPT that it receives", "[x86_64]")

@@ -259,7 +259,7 @@ public:
     }
 
     // Gets the linear address of the underlying page directory object.
-    // AFOX_TODO: rename to get_physical_object_pointer() or something
+    // AFOX_TODO: rename to get_underlying_object_pointer() or something
     void* get_page_directory_pointer() const override
     {
         LockGuard guard{lock_};

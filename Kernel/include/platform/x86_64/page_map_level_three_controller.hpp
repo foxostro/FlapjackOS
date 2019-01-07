@@ -262,7 +262,7 @@ public:
     }
 
     // Gets the linear address of the underlying PDPT object.
-    void* get_physical_object_pointer() const override
+    void* get_underlying_object_pointer() const override
     {
         LockGuard guard{lock_};
         return page_directory_.get_pointer();
@@ -271,7 +271,7 @@ public:
     // Gets the physical address of the underlying PDPT object.
     uintptr_t get_underlying_object_physical_address() const override
     {
-        return mmu_.convert_logical_to_physical_address(reinterpret_cast<uintptr_t>(get_physical_object_pointer()));
+        return mmu_.convert_logical_to_physical_address(reinterpret_cast<uintptr_t>(get_underlying_object_pointer()));
     }
 
     // Ensures the underlying paging objects have been populated.

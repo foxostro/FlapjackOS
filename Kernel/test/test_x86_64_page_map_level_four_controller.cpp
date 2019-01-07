@@ -80,7 +80,7 @@ TEST_CASE("x86_64::PageMapLevelFourController -- ctor can accept a raw pointer t
     x86_64::PageMapLevelFour* underlying_object = new x86_64::PageMapLevelFour;
     memset(underlying_object, 0, sizeof(x86_64::PageMapLevelFour));
     PML4 controller{mmu, underlying_object};
-    REQUIRE(controller.get_physical_object_pointer() == static_cast<void*>(underlying_object));
+    REQUIRE(controller.get_underlying_object_pointer() == static_cast<void*>(underlying_object));
 }
 
 TEST_CASE("x86_64::PageMapLevelFourController -- ctor will not modify a PML4 that it receives", "[x86_64]")
