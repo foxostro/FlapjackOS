@@ -191,13 +191,17 @@ public:
         {
             assert(lock_);
             LockGuard guard{*lock_};
-            set_page_frame_unlocked(create_page_frame_controller(physical_address));
+            set_page_frame_unlocked(new MyPageFrameController{physical_address});
             set_protection_unlocked(flags);
         }
         
-        UniquePointer<PagingTopology::PageFrameController> create_page_frame_controller(uintptr_t page_frame) override
+        void set_mapping(PageFrameAllocator& page_frame_allocator,
+                                 ProtectionFlags flags) override
         {
-            return new MyPageFrameController{page_frame};
+            assert(lock_);
+            LockGuard guard{*lock_};
+            set_page_frame_unlocked(new MyPageFrameController{page_frame_allocator});
+            set_protection_unlocked(flags);
         }
 
     private:

@@ -4,6 +4,7 @@
 #include <paging_topology/page_frame_controller.hpp>
 #include <common/shared_pointer.hpp>
 #include <protection_flags.hpp>
+#include <page_frame_allocator.hpp>
 
 namespace PagingTopology {
 
@@ -42,7 +43,8 @@ public:
         virtual void set_mapping(uintptr_t physical_address,
                                  ProtectionFlags flags) = 0;
 
-        virtual UniquePointer<PagingTopology::PageFrameController> create_page_frame_controller(uintptr_t page_frame) = 0;
+        virtual void set_mapping(PageFrameAllocator& page_frame_allocator,
+                                 ProtectionFlags flags) = 0;
     };
 
     virtual ~PageMapLevelOneController() = default;

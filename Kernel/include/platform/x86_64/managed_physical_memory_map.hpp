@@ -97,9 +97,7 @@ private:
         if (pml1_entry.is_present()) {
             pml1_entry.set_protection(flags);
         } else {
-            // AFOX_TODO: Need to pass the allocator to the page frame controller so the page frame can be released later.
-            uintptr_t page_frame = page_frame_allocator_.allocate(PAGE_SIZE);
-            pml1_entry.set_mapping(page_frame, flags);
+            pml1_entry.set_mapping(page_frame_allocator_, flags);
         }
     }
 
