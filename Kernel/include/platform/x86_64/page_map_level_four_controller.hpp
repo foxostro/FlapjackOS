@@ -152,13 +152,13 @@ public:
             pde_->set_supervisor((flags & SUPERVISOR) != 0);
         }
         
-        void populate(uintptr_t offset) override
+        void populate(uintptr_t linear_address) override
         {
             assert(lock_);
             LockGuard guard{*lock_};
             if (!pml3_) {
                 set_pml3_unlocked(create_pml3());
-                pml3_->populate(offset);
+                pml3_->populate(linear_address);
             }
         }
 
@@ -273,12 +273,79 @@ public:
         return mmu_.convert_logical_to_physical_address(reinterpret_cast<uintptr_t>(get_physical_object_pointer()));
     }
 
-    // Ensures the underlying paging objects have been populated for the
-    // specified offset into the PML2. This allocates memory for the
-    // corresponding PML1 object.
-    void populate(uintptr_t offset) override
+    // Ensures the underlying paging objects have been populated.
+    void populate(uintptr_t linear_address) override
     {
-        get_entry_by_offset(offset).populate(get_corresponding_pml3_offset(offset));
+        get_pml4_entry_by_address(linear_address).populate(linear_address);
+    }
+    
+    size_t get_index_of_pml4_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr unsigned PML4E_INDEX_SHIFT = 39;
+        constexpr unsigned PML4E_INDEX_MASK = 0b111111111; // 9 bits
+        size_t index = (linear_address >> PML4E_INDEX_SHIFT) & PML4E_INDEX_MASK;
+        return index;
+    }
+
+    size_t get_index_of_pml3_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr unsigned PDPTE_INDEX_SHIFT = 30;
+        constexpr unsigned PDPTE_INDEX_MASK = 0b111111111; // 9 bits
+        size_t index = (linear_address >> PDPTE_INDEX_SHIFT) & PDPTE_INDEX_MASK;
+        return index;
+    }
+
+    size_t get_index_of_pml2_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr unsigned PDE_INDEX_SHIFT = 21;
+        constexpr unsigned PDE_INDEX_MASK = 0b111111111; // 9 bits
+        size_t index = (linear_address >> PDE_INDEX_SHIFT) & PDE_INDEX_MASK;
+        return index;
+    }
+
+    size_t get_index_of_pml1_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr unsigned PTE_INDEX_SHIFT = 12;
+        constexpr unsigned PTE_INDEX_MASK = 0b111111111; // 9 bits
+        size_t index = (linear_address >> PTE_INDEX_SHIFT) & PTE_INDEX_MASK;
+        return index;
+    }
+    
+    PagingTopology::PageMapLevelFourController::Entry& get_pml4_entry_by_address(uintptr_t linear_address) override
+    {
+        return get_entry(get_index_of_pml4_entry_by_address(linear_address));
+    }
+    
+    PagingTopology::PageMapLevelThreeController::Entry& get_pml3_entry_by_address(uintptr_t linear_address) override
+    {
+        auto pml3 = get_pml3(linear_address);
+        assert(pml3);
+        return pml3->get_pml3_entry_by_address(linear_address);
+    }
+
+    PagingTopology::PageMapLevelTwoController::Entry& get_pml2_entry_by_address(uintptr_t linear_address) override
+    {
+        return get_pml2(linear_address)->get_pml2_entry_by_address(linear_address);
+    }
+
+    PagingTopology::PageMapLevelOneController::Entry& get_pml1_entry_by_address(uintptr_t linear_address) override
+    {
+        return get_pml1(linear_address)->get_pml1_entry_by_address(linear_address);
+    }
+
+    SharedPointer<PagingTopology::PageMapLevelThreeController> get_pml3(uintptr_t linear_address) override
+    {
+        return get_entry(get_index_of_pml4_entry_by_address(linear_address)).get_pml3();
+    }
+
+    SharedPointer<PagingTopology::PageMapLevelTwoController> get_pml2(uintptr_t linear_address) override
+    {
+        return get_pml3(linear_address)->get_pml3_entry_by_address(linear_address).get_pml2();
+    }
+
+    SharedPointer<PagingTopology::PageMapLevelOneController> get_pml1(uintptr_t linear_address) override
+    {
+        return get_pml2(linear_address)->get_pml2_entry_by_address(linear_address).get_pml1();
     }
 
 private:

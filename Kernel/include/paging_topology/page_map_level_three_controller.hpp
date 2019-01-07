@@ -31,7 +31,7 @@ public:
 
         virtual void set_protection(ProtectionFlags flags) = 0;
 
-        virtual void populate(uintptr_t offset) = 0;
+        virtual void populate(uintptr_t linear_address) = 0;
     };
 
     virtual ~PageMapLevelThreeController() = default;
@@ -52,56 +52,19 @@ public:
     // Gets the physical address of the underlying page directory object.
     virtual uintptr_t get_underlying_object_physical_address() const = 0;
 
-    // Ensures the underlying paging objects have been populated for the
-    // specified offset into the PML3. This allocates memory for the
-    // corresponding PML2 object.
-    virtual void populate(uintptr_t offset) = 0;
+    // Ensures the underlying paging objects have been populated.
+    virtual void populate(uintptr_t linear_address) = 0;
 
-    // Gets the PML2 entry associated with the specified offset.
-    // The PML3 governs a region of memory and the offset is an offset from
-    // the beginning of that region of memory. Each entry into the PML3, each
-    // PML2, and each entry into the PML2 are associated with ranges within
-    // this region of memory. All can be located with an offset into the PML3.
-    // AFOX_TODO: Implement an Optional class so I can return "none" when intermediate paging objects are missing.
-    PageMapLevelTwoController::Entry& get_pml2_entry_by_offset(uintptr_t offset)
-    {
-        auto& pml3_entry = get_entry_by_offset(offset);
-        auto pml2 = pml3_entry.get_pml2();
-        assert(pml2 && "The PML2 is missing and there is no associated PML2 entry. (The page map is sparse.)");
-        return pml2->get_entry_by_offset(get_corresponding_pml2_offset(offset));
-    }
-
-    // Gets an entry associated with the specified offset into the page map.
-    // The page map governs a region of memory and the offset is an offset from
-    // the beginning of that region of memory. Each entry is associated with a
-    // range of addresses within that region.
-    Entry& get_entry_by_offset(uintptr_t offset)
-    {
-        return get_entry(get_index_of_entry_by_offset(offset));
-    }
-
-    // Gets the index of an entry associated with the specified offset.
-    // The page map governs a region of memory and the offset is an offset from
-    // the beginning of that region of memory. Each entry is associated with a
-    // range of addresses within that region.
-    size_t get_index_of_entry_by_offset(uintptr_t offset) const
-    {
-        size_t index = offset / get_size_governed_by_entry();
-        assert(index < get_number_of_entries());
-        return index;
-    }
+    virtual size_t get_index_of_pml3_entry_by_address(uintptr_t linear_address) const = 0;
+    virtual size_t get_index_of_pml2_entry_by_address(uintptr_t linear_address) const = 0;
+    virtual size_t get_index_of_pml1_entry_by_address(uintptr_t linear_address) const = 0;
     
-    // Gets the corresponding offset into the corresponding PML2.
-    // Each offset into the region of memory governed by the PML3 is associated
-    // both with a specific PML2 and also with an offset into the region of
-    // memory governed by that PML2.
-    uintptr_t get_corresponding_pml2_offset(uintptr_t pml3_offset)
-    {
-        size_t pml3_index = get_index_of_entry_by_offset(pml3_offset);
-        size_t pml3_entry_size = get_size_governed_by_entry();
-        uintptr_t pml2_offset = (pml3_offset - (pml3_index * pml3_entry_size));
-        return pml2_offset;
-    }
+    virtual PageMapLevelThreeController::Entry& get_pml3_entry_by_address(uintptr_t linear_address) = 0;
+    virtual PageMapLevelTwoController::Entry& get_pml2_entry_by_address(uintptr_t linear_address) = 0;
+    virtual PageMapLevelOneController::Entry& get_pml1_entry_by_address(uintptr_t linear_address) = 0;
+    
+    virtual SharedPointer<PageMapLevelTwoController> get_pml2(uintptr_t linear_address) = 0;
+    virtual SharedPointer<PageMapLevelOneController> get_pml1(uintptr_t linear_address) = 0;
 };
 
 } // namespace PagingTopology

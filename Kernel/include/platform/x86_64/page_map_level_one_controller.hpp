@@ -12,7 +12,26 @@ struct PageMapLevelOneControllerPolicy {
     using MyPageFrameController = i386::PageFrameController;
 };
 
-using PageMapLevelOneController = i386::GenericPageMapLevelOneController<PageMapLevelOneControllerPolicy>;
+class PageMapLevelOneController final : public i386::GenericPageMapLevelOneController<PageMapLevelOneControllerPolicy>
+{
+public:
+    PageMapLevelOneController(HardwareMemoryManagementUnit& mmu)
+     : i386::GenericPageMapLevelOneController<PageMapLevelOneControllerPolicy>(mmu)
+    {}
+
+    PageMapLevelOneController(HardwareMemoryManagementUnit& mmu,
+                              UniquePointer<MyPageTable> pt)
+     : i386::GenericPageMapLevelOneController<PageMapLevelOneControllerPolicy>(mmu, std::move(pt))
+    {}
+
+    size_t get_index_of_pml1_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr unsigned PTE_INDEX_SHIFT = 12;
+        constexpr unsigned PTE_INDEX_MASK = 0b111111111; // 9 bits
+        size_t index = (linear_address >> PTE_INDEX_SHIFT) & PTE_INDEX_MASK;
+        return index;
+    }
+};
 
 } // namespace x86_64
 

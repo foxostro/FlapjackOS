@@ -60,25 +60,8 @@ public:
     // Gets the size of the region of memory governed by each entry.
     virtual size_t get_size_governed_by_entry() const = 0;
 
-    // Gets an entry associated with the specified offset into the page map.
-    // The page map governs a region of memory and the offset is an offset from
-    // the beginning of that region of memory. Each entry is associated with a
-    // range of addresses within that region.
-    Entry& get_entry_by_offset(uintptr_t offset)
-    {
-        return get_entry(get_index_of_entry_by_offset(offset));
-    }
-
-    // Gets the index of an entry associated with the specified offset.
-    // The page map governs a region of memory and the offset is an offset from
-    // the beginning of that region of memory. Each entry is associated with a
-    // range of addresses within that region.
-    size_t get_index_of_entry_by_offset(uintptr_t offset) const
-    {
-        size_t index = offset / get_size_governed_by_entry();
-        assert(index < get_number_of_entries());
-        return index;
-    }
+    virtual size_t get_index_of_pml1_entry_by_address(uintptr_t linear_address) const = 0;
+    virtual Entry& get_pml1_entry_by_address(uintptr_t linear_address) = 0;
 };
 
 } // namespace PagingTopology

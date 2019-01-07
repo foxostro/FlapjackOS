@@ -99,5 +99,5 @@ TEST_CASE("i386::PageMapLevelTwoController -- populate underlying page tables on
     pml2.populate(0);
     auto& entry = pml2.get_entry(0);
     REQUIRE(entry.get_pml1() != nullptr);
-    REQUIRE(pml2.get_pml1_entry_by_offset(0).is_present() == false);
+    REQUIRE(pml2.get_pml1_entry_by_address(0).is_present() == false);
 }

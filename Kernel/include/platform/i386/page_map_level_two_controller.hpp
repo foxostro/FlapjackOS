@@ -14,7 +14,32 @@ struct PageMapLevelTwoControllerPolicy {
     static constexpr size_t SIZE_GOVERENED_BY_ENTRY = 0x400000;
 };
 
-using PageMapLevelTwoController = GenericPageMapLevelTwoController<PageMapLevelTwoControllerPolicy>;
+class PageMapLevelTwoController final : public GenericPageMapLevelTwoController<PageMapLevelTwoControllerPolicy> {
+public:
+    PageMapLevelTwoController(HardwareMemoryManagementUnit& mmu)
+     : GenericPageMapLevelTwoController<PageMapLevelTwoControllerPolicy>(mmu)
+    {}
+
+    PageMapLevelTwoController(HardwareMemoryManagementUnit& mmu,
+                              UniquePointer<MyPageDirectory> pd)
+     : GenericPageMapLevelTwoController<PageMapLevelTwoControllerPolicy>(mmu, std::move(pd))
+    {}
+
+    size_t get_index_of_pml2_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr uint32_t PDE_INDEX_SHIFT = 22;
+        size_t index = linear_address >> PDE_INDEX_SHIFT;
+        return index;
+    }
+
+    size_t get_index_of_pml1_entry_by_address(uintptr_t linear_address) const override
+    {
+        constexpr uint32_t PTE_INDEX_SHIFT = 12;
+        constexpr uint32_t PTE_INDEX_MASK = 0x03FF;
+        size_t index = linear_address >> PTE_INDEX_SHIFT & PTE_INDEX_MASK;
+        return index;
+    }
+};
 
 } // namespace i386
 

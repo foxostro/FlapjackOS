@@ -11,7 +11,7 @@ namespace i386 {
 // Owns a page directory. Provides synchronized access.
 // On IA-32, the second level page map is called a Page Directory.
 template<typename Policy>
-class GenericPageMapLevelTwoController final : public PagingTopology::PageMapLevelTwoController {
+class GenericPageMapLevelTwoController : public PagingTopology::PageMapLevelTwoController {
 public:
     using ConcretePageMapLevelOneController = typename Policy::ConcretePageMapLevelOneController;
     using MyPageTable = typename Policy::MyPageTable;
@@ -151,7 +151,7 @@ public:
             pde_->set_supervisor((flags & SUPERVISOR) != 0);
         }
         
-        void populate([[maybe_unused]] uintptr_t offset) override
+        void populate([[maybe_unused]] uintptr_t linear_address) override
         {
             assert(lock_);
             LockGuard guard{*lock_};
@@ -272,12 +272,25 @@ public:
         return mmu_.convert_logical_to_physical_address(reinterpret_cast<uintptr_t>(get_page_directory_pointer()));
     }
 
-    // Ensures the underlying paging objects have been populated for the
-    // specified offset into the PML2. This allocates memory for the
-    // corresponding PML1 object.
-    void populate(uintptr_t offset) override
+    // Ensures the underlying paging objects have been populated.
+    void populate(uintptr_t linear_address) override
     {
-        get_entry_by_offset(offset).populate(get_corresponding_pml1_offset(offset));
+        get_pml2_entry_by_address(linear_address).populate(linear_address);
+    }
+
+    PagingTopology::PageMapLevelTwoController::Entry& get_pml2_entry_by_address(uintptr_t linear_address) override
+    {
+        return get_entry(get_index_of_pml2_entry_by_address(linear_address));
+    }
+
+    PagingTopology::PageMapLevelOneController::Entry& get_pml1_entry_by_address(uintptr_t linear_address) override
+    {
+        return get_pml1(linear_address)->get_pml1_entry_by_address(linear_address);
+    }
+
+    SharedPointer<PagingTopology::PageMapLevelOneController> get_pml1(uintptr_t linear_address) override
+    {
+        return get_pml2_entry_by_address(linear_address).get_pml1();
     }
 
 private:

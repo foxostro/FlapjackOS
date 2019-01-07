@@ -13,7 +13,7 @@ namespace i386 {
 // Owns a page table. Provides synchronized access.
 // On IA-32, the first level page map is called a Page Table.
 template<typename Policy>
-class GenericPageMapLevelOneController final : public PagingTopology::PageMapLevelOneController {
+class GenericPageMapLevelOneController : public PagingTopology::PageMapLevelOneController {
 public:
     using MyPageFrameController = typename Policy::MyPageFrameController;
     using MyPageTable = typename Policy::MyPageTable;
@@ -291,6 +291,11 @@ public:
     size_t get_size_governed_by_entry() const override
     {
         return PAGE_SIZE;
+    }
+
+    PagingTopology::PageMapLevelOneController::Entry& get_pml1_entry_by_address(uintptr_t linear_address) override
+    {
+        return get_entry(get_index_of_pml1_entry_by_address(linear_address));
     }
 
 private:

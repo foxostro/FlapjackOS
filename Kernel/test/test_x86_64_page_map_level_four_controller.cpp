@@ -104,13 +104,13 @@ TEST_CASE("x86_64::PageMapLevelFourController -- populate underlying page tables
 
     auto pml3 = pml4.get_entry(0).get_pml3();
     REQUIRE(pml3 != nullptr);
-    REQUIRE(pml4.get_pml3_entry_by_offset(0).is_present() == true);
+    REQUIRE(pml4.get_pml3_entry_by_address(0).is_present() == true);
     
     auto pml2 = pml3->get_entry(0).get_pml2();
     REQUIRE(pml2 != nullptr);
-    REQUIRE(pml3->get_pml2_entry_by_offset(0).is_present() == true);
+    REQUIRE(pml3->get_pml2_entry_by_address(0).is_present() == true);
 
     auto pml1 = pml2->get_entry(0).get_pml1();
     REQUIRE(pml1 != nullptr);
-    REQUIRE(pml2->get_pml1_entry_by_offset(0).is_present() == false);
+    REQUIRE(pml2->get_pml1_entry_by_address(0).is_present() == false);
 }

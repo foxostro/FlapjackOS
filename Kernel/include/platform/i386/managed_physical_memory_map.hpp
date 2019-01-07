@@ -43,10 +43,10 @@ public:
         pml2_->populate(linear_address);
 
         // AFOX_TODO: We probably want to set the PML2 entry to the weakest protection afforded any PML1 entry within it.
-        auto& pml2_entry = pml2_->get_entry_by_offset(linear_address);
+        auto& pml2_entry = pml2_->get_pml2_entry_by_address(linear_address);
         pml2_entry.set_protection(flags);
 
-        auto& pml1_entry = pml2_->get_pml1_entry_by_offset(linear_address);
+        auto& pml1_entry = pml2_->get_pml1_entry_by_address(linear_address);
         pml1_entry.set_mapping(physical_address, flags);
         mmu_.invalidate_page(linear_address);
     }
@@ -54,7 +54,7 @@ public:
     void set_readonly(uintptr_t begin, uintptr_t end) override
     {
         for (uintptr_t page = begin; page < end; page += PAGE_SIZE) {
-            pml2_->get_pml1_entry_by_offset(page).set_readwrite(false);
+            pml2_->get_pml1_entry_by_address(page).set_readwrite(false);
         }
         mmu_.invalidate_pages(begin, end);
     }
@@ -69,10 +69,10 @@ private:
         pml2_->populate(page);
 
         // AFOX_TODO: We probably want to set the PML2 entry to the weakest protection afforded any PML1 entry within it.
-        auto& pml2_entry = pml2_->get_entry_by_offset(page);
+        auto& pml2_entry = pml2_->get_pml2_entry_by_address(page);
         pml2_entry.set_protection(flags);
 
-        auto& pml1_entry = pml2_->get_pml1_entry_by_offset(page);
+        auto& pml1_entry = pml2_->get_pml1_entry_by_address(page);
 
         if (pml1_entry.is_present()) {
             pml1_entry.set_protection(flags);
