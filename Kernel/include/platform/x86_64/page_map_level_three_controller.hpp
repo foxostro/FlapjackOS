@@ -3,6 +3,7 @@
 
 #include <paging_topology/page_map_level_three_controller.hpp>
 #include <platform/x86_64/page_directory_pointer_table.hpp>
+#include <platform/x86_64/page_map_level_two_controller.hpp>
 #include <common/unique_pointer.hpp>
 #include <common/mutex.hpp>
 #include <cassert>

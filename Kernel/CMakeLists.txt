@@ -75,6 +75,8 @@ set(I386_SOURCE_FILES
     "include/platform/i386/generic_page_map_level_two_controller.hpp"
     "include/platform/i386/page_map_level_two_controller.hpp"
     "include/platform/i386/managed_physical_memory_map.hpp"
+    "include/platform/i386/generic_concrete_physical_memory_map.hpp"
+    "include/platform/i386/concrete_physical_memory_map.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -119,6 +121,8 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/page_map_level_two_controller.hpp"
     "include/platform/x86_64/page_map_level_three_controller.hpp"
     "include/platform/x86_64/page_map_level_four_controller.hpp"
+    "include/platform/i386/generic_concrete_physical_memory_map.hpp"
+    "include/platform/x86_64/concrete_physical_memory_map.hpp"
     )
 
 set(PC_SOURCE_FILES
@@ -220,8 +224,9 @@ if (NOT CMAKE_CROSSCOMPILING)
              "test/test_x86_64_tss.cpp"
              "test/test_x86_64_generic_page_directory_entry.cpp"
              "test/test_x86_64_page_table_entry.cpp"
-             "test/test_x86_64_unmanaged_physical_memory_map.cpp"
              "test/test_x86_64_kernel_address_space_bootstrapper.cpp"
+             "test/test_x86_64_unmanaged_physical_memory_map.cpp"
+             "test/test_x86_64_managed_physical_memory_map.cpp"
              "test/test_i386_page_frame_controller.cpp"
              "test/test_x86_64_page_map_level_one_controller.cpp"
              "test/test_x86_64_page_map_level_two_controller.cpp"

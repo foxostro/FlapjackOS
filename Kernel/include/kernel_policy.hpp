@@ -6,7 +6,7 @@
 #include <platform/x86_64/hardware_task_configuration.hpp>
 #include <platform/x86_64/kernel_address_space_bootstrapper.hpp>
 #include <platform/x86_64/concrete_hardware_memory_management_unit.hpp>
-#include <platform/i386/concrete_physical_memory_map.hpp> // AFOX_TODO: Write x86_64 version
+#include <platform/x86_64/concrete_physical_memory_map.hpp>
 #include <platform/x86_64/interrupt_controller.hpp>
 #include <platform/x86_64/device_drivers.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
@@ -17,7 +17,7 @@ struct KernelPolicy {
     using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
     using ConcreteHardwareMemoryManagementUnit = x86_64::ConcreteHardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = x86_64::KernelAddressSpaceBootstrapper;
-    using ConcretePhysicalMemoryMap = i386::ConcretePhysicalMemoryMap; // AFOX_TODO: FIX ME
+    using ConcretePhysicalMemoryMap = x86_64::ConcretePhysicalMemoryMap;
     using InterruptController = x86_64::InterruptController;
     using InterruptParameters = x86_64::InterruptParameters;
     using DeviceDrivers = x86_64::DeviceDrivers;

@@ -4,6 +4,7 @@
 #include <hardware_memory_management_unit.hpp>
 #include "creg.hpp"
 #include "kernel_image_info.hpp" // for KERNEL_VIRTUAL_START_ADDR
+#include <page_size.hpp>
 
 namespace x86_64 {
 
