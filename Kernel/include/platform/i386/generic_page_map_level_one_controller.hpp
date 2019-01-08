@@ -196,7 +196,7 @@ public:
         }
         
         void set_mapping(PageFrameAllocator& page_frame_allocator,
-                                 ProtectionFlags flags) override
+                         ProtectionFlags flags) override
         {
             assert(lock_);
             LockGuard guard{*lock_};
