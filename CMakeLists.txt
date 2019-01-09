@@ -93,7 +93,6 @@ endif(CMAKE_CROSSCOMPILING)
 include_directories("3rdParty")
 
 add_subdirectory("Common")
-add_subdirectory("Malloc")
 add_subdirectory("Boot")
 add_subdirectory("Kernel")
 add_subdirectory("User")

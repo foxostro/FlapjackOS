@@ -180,19 +180,16 @@ set(SOURCE_FILES
 
 include_directories("include"
                     ${COMMON_INCLUDE_DIRS}
-                    ${MALLOC_INCLUDE_DIRS}
                     ${BOOT_INCLUDE_DIR}
                     )
 
 link_directories(${COMMON_LIBRARIES_DIR}
-                 ${MALLOC_LIBRARIES_DIRS}
                  )
 
 add_library(Kernel STATIC ${SOURCE_FILES})
 
 target_link_libraries(Kernel
                       ${COMMON_LIBRARIES}
-                      ${MALLOC_LIBRARIES}
                       )
 
 if (NOT CMAKE_CROSSCOMPILING)
