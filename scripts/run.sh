@@ -9,11 +9,8 @@ fi
 
 BUILD_PREFIX="build"
 CROSS_BUILD_DIR="$BUILD_PREFIX/$TARGET"
-
-if [ ! -d "$CROSS_BUILD_DIR" ]; then
-    cmake -E make_directory "$CROSS_BUILD_DIR"
-    cmake -E chdir "$CROSS_BUILD_DIR" cmake ../.. -DCMAKE_TOOLCHAIN_FILE="$TARGET-elf.toolchain.cmake"
-fi
+CONFIGURE="./scripts/do_configure_build.sh"
+"$CONFIGURE" "$CROSS_BUILD_DIR" -DCMAKE_TOOLCHAIN_FILE="$TARGET-elf.toolchain.cmake"
 
 cmake --build "$CROSS_BUILD_DIR"
 
