@@ -9,6 +9,16 @@ if [ -d "$BUILD_DIR" ]; then
     exit 0
 fi
 
+# Use the Ninja generator if the ninja tool is available.
+GENERATOR=""
+echo "Checking for Ninja..."
+if [ -z `which ninja` ]; then
+    echo "ninja is not in the path."
+else
+    echo `which ninja`
+    GENERATOR="-GNinja"
+fi
+
 # Use ccache if it is available.
 CCACHE_LAUNCHER=""
 echo "Checking for ccache..."
@@ -20,4 +30,4 @@ else
 fi
 
 cmake -E make_directory "$BUILD_DIR"
-cmake -E chdir "$BUILD_DIR" cmake ../.. -G"Unix Makefiles" $CCACHE_LAUNCHER $OTHER_OPTIONS
+cmake -E chdir "$BUILD_DIR" cmake ../.. $GENERATOR $CCACHE_LAUNCHER $OTHER_OPTIONS
