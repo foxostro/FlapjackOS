@@ -9,8 +9,8 @@ CONFIGURE="./scripts/do_configure_build.sh"
 "$CONFIGURE" "$TEST32_BUILD_DIR" -DTEST_BUILD_ARCH:string="i386"
 "$CONFIGURE" "$TEST64_BUILD_DIR" -DTEST_BUILD_ARCH:string="x86_64"
 
-cmake --build "$TEST32_BUILD_DIR"
-cmake --build "$TEST64_BUILD_DIR"
+cmake --build "$TEST32_BUILD_DIR" -- -j8
+cmake --build "$TEST64_BUILD_DIR" -- -j8
 
 pushd "$TEST32_BUILD_DIR"
 echo "Running tests for the i386 kernel."
