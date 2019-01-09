@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+set -o pipefail
 
 BUILD_PREFIX="build/"
 TEST32_BUILD_DIR="$BUILD_PREFIX/test_i386"
@@ -13,12 +14,15 @@ BUILD="./scripts/do_build.sh"
 "$BUILD" "$TEST32_BUILD_DIR"
 "$BUILD" "$TEST64_BUILD_DIR"
 
-pushd "$TEST32_BUILD_DIR"
-echo "Running tests for the i386 kernel."
-ctest --output-on-failure
-popd
+pushd "$TEST32_BUILD_DIR" >/dev/null
+ctest --output-on-failure \
+    | GREP_COLOR='01;32' grep --color=always -E '^.*\b0 tests failed.*|$' \
+    | GREP_COLOR='01;31' grep --color=always -E '^.*\b[1-9]\d* tests failed.*|$'
+popd >/dev/null
+echo
 
-pushd "$TEST64_BUILD_DIR"
-echo "Running tests for the x86_64 kernel."
-ctest --output-on-failure
-popd
+pushd "$TEST64_BUILD_DIR" >/dev/null
+ctest --output-on-failure \
+    | GREP_COLOR='01;32' grep --color=always -E '^.*\b0 tests failed.*|$' \
+    | GREP_COLOR='01;31' grep --color=always -E '^.*\b[1-9]\d* tests failed.*|$'
+popd >/dev/null
