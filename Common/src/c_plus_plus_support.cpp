@@ -15,38 +15,22 @@ extern "C" void __cxa_pure_virtual(void)
 
 void* operator new(size_t size)
 {
-    void* pointer = malloc(size);
-    if (pointer == nullptr) {
-        panic("%s: out of memory", __PRETTY_FUNCTION__);
-    }
-    return pointer;
+    return malloc(size);
 }
 
 void* operator new[](size_t size)
 {
-    void* pointer = malloc(size);
-    if (pointer == nullptr) {
-        panic("%s: out of memory", __PRETTY_FUNCTION__);
-    }
-    return pointer;
+    return malloc(size);
 }
 
 void* operator new(size_t size, std::align_val_t align)
 {
-    void* pointer = memalign(size, static_cast<size_t>(align));
-    if (pointer == nullptr) {
-        panic("%s: out of memory", __PRETTY_FUNCTION__);
-    }
-    return pointer;
+    return memalign(size, static_cast<size_t>(align));
 }
 
 void* operator new[](size_t size, std::align_val_t align)
 {
-    void* pointer = memalign(size, static_cast<size_t>(align));
-    if (pointer == nullptr) {
-        panic("%s: out of memory", __PRETTY_FUNCTION__);
-    }
-    return pointer;
+    return memalign(size, static_cast<size_t>(align));
 }
 
 void operator delete(void* p)
