@@ -12,7 +12,8 @@ CROSS_BUILD_DIR="$BUILD_PREFIX/$TARGET"
 CONFIGURE="./scripts/do_configure_build.sh"
 "$CONFIGURE" "$CROSS_BUILD_DIR" -DCMAKE_TOOLCHAIN_FILE="$TARGET-elf.toolchain.cmake"
 
-cmake --build "$CROSS_BUILD_DIR" -- -j8
+BUILD="./scripts/do_build.sh"
+"$BUILD" "$CROSS_BUILD_DIR"
 
 erb iso="$CROSS_BUILD_DIR/FlapjackOS.iso" bochsrc.erb > bochsrc
 echo > parport.out
