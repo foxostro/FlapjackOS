@@ -137,6 +137,7 @@ if(CMAKE_CROSSCOMPILING)
         PREFIX ""
         SUFFIX ""
         LINK_FLAGS "-T ${KERNEL_LAYOUT_FILE}"
+        LINK_DEPENDS "${KERNEL_LAYOUT_FILE_TEMPLATE}"
     )
     
     # Add a custom target for the CD-ROM ISO image. Specify dependencies so that the
