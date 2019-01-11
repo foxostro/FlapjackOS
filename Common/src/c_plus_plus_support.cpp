@@ -13,6 +13,24 @@ extern "C" void __cxa_pure_virtual(void)
 #endif
 }
 
+#ifdef TESTING
+extern "C" __attribute__((noreturn)) void flapjack_abort()
+{
+    abort();
+    __builtin_unreachable();
+}
+#else
+extern "C" __attribute__((noreturn)) void flapjack_abort()
+{
+    panic("flapjack_abort");
+}
+
+extern "C" __attribute__((noreturn)) void abort()
+{
+    flapjack_abort();
+}
+#endif
+
 void* operator new(size_t size)
 {
     return malloc(size);

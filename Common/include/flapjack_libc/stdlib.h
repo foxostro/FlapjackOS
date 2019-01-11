@@ -12,15 +12,16 @@ extern "C" {
 #endif
 
 #ifdef TESTING
-#define MALLOC  flapjack_malloc
+#define MALLOC    flapjack_malloc
 #define MEMALIGN  flapjack_memalign
-#define REALLOC flapjack_realloc
-#define FREE    flapjack_free
+#define REALLOC   flapjack_realloc
+#define FREE      flapjack_free
 #else
-#define MALLOC  malloc
+#define MALLOC    malloc
 #define MEMALIGN  memalign
-#define REALLOC realloc
-#define FREE    free
+#define REALLOC   realloc
+#define FREE      free
+__attribute__((noreturn)) void abort();
 #endif
 
 void* MALLOC(size_t size);
