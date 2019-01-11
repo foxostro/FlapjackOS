@@ -5,8 +5,8 @@ GRUB_CFG="$1"; shift
 ISO_FN="$1"; shift
 MODULES="$@"
 
-grub-file --is-x86-multiboot "$KERNEL_BIN"
-if [[ $? -ne 0 ]]; then
+grub-file --is-x86-multiboot "$KERNEL_BIN" || IS_MULTIBOOT=$?
+if [[ $IS_MULTIBOOT -ne 0 ]]; then
 	echo "The file \"$KERNEL_BIN\" is not a multiboot compliant kernel."
 	echo "It will not be possible to create a bootable ISO image."
     exit 1
