@@ -47,6 +47,22 @@ SECTIONS
     }
 
     . = ALIGN(4K);
+    .eh_frame_hdr : AT(ADDR(.eh_frame_hdr) - KERNEL_VIRTUAL_START_ADDR)
+    {
+        *(.eh_frame_hdr)
+        *(.eh_frame_entry .eh_frame_entry.*)
+    }
+    .eh_frame : AT(ADDR(.eh_frame) - KERNEL_VIRTUAL_START_ADDR)
+    {
+        *(.eh_frame)
+        *(.eh_frame.*)
+    }
+    .gcc_except_table : AT(ADDR(.gcc_except_table) - KERNEL_VIRTUAL_START_ADDR)
+    {
+        *(.gcc_except_table .gcc_except_table.*)
+    }
+
+    . = ALIGN(4K);
     g_kernel_rodata_end = .;
 
     .data : AT(ADDR(.data) - KERNEL_VIRTUAL_START_ADDR)
@@ -70,6 +86,5 @@ SECTIONS
     /DISCARD/ :
     {
         *(.comment)
-        *(.eh_frame)
     }
 }
