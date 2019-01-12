@@ -20,31 +20,31 @@ sudo port install gmp mpfr libmpc libiconv
 mkdir -p build_toolchain
 cd build_toolchain
 
-# # Download packages
-# if [ ! -f gcc-8.2.0.tar.gz ]; then
-# wget http://www.netgull.com/gcc/releases/gcc-8.2.0/gcc-8.2.0.tar.gz
-# fi
+# Download packages
+if [ ! -f gcc-8.2.0.tar.gz ]; then
+    wget http://www.netgull.com/gcc/releases/gcc-8.2.0/gcc-8.2.0.tar.gz
+fi
 
-# if [ ! -f binutils-2.31.1.tar.gz ]; then
-# wget http://mirrors.kernel.org/gnu/binutils/binutils-2.31.1.tar.gz
-# fi
+if [ ! -f binutils-2.31.1.tar.gz ]; then
+    wget http://mirrors.kernel.org/gnu/binutils/binutils-2.31.1.tar.gz
+fi
 
-# if [ ! -f newlib-master.zip ]; then
-# wget -nc -O newlib-master.zip https://github.com/bminor/newlib/archive/master.zip
-# fi
+if [ ! -f newlib-master.zip ]; then
+    wget -nc -O newlib-master.zip https://github.com/bminor/newlib/archive/master.zip
+fi
 
-# # Extract packages
-# if [ ! -d binutils-2.31.1 ]; then
-# tar xzvf binutils-2.31.1.tar.gz
-# fi
+# Extract packages
+if [ ! -d binutils-2.31.1 ]; then
+    tar xzvf binutils-2.31.1.tar.gz
+fi
 
-# if [ ! -d gcc-8.2.0 ]; then
-# tar xzvf gcc-8.2.0.tar.gz
-# fi
+if [ ! -d gcc-8.2.0 ]; then
+    tar xzvf gcc-8.2.0.tar.gz
+fi
 
-# if [ ! -d newlib-master ]; then
-# unzip -qo newlib-master.zip
-# fi
+if [ ! -d newlib-master ]; then
+    unzip -qo newlib-master.zip
+fi
 
 # Build binutils
 mkdir -p build-binutils
@@ -55,9 +55,11 @@ make install
 popd
 
 # Patch GCC
+if [[ $TARGET == "x86_64-elf" ]]; then
 mkdir -p ./gcc-8.2.0/gcc/config/i386/
 mv ../scripts/patch-gcc/t-x86_64-elf ./gcc-8.2.0/gcc/config/i386/
 patch -p0 ./gcc-8.2.0/gcc/config.gcc < ../scripts/patch-gcc/config.gcc.patch
+fi
 
 # Begin building GCC
 mkdir -p build-gcc
