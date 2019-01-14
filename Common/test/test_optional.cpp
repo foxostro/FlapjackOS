@@ -8,13 +8,13 @@ TEST_CASE("Optional -- example", "[Optional]")
     using Image = int;
     using Cat = int;
     auto crop_to_cat = [](Image image) -> Optional<Cat> {
-        return MakeOptional<Cat>(image);
+        return make_optional<Cat>(image);
     };
     auto add_bow_tie = [](Cat cat){
-        return MakeOptional(cat+1);
+        return make_optional(cat+1);
     };
     auto make_eyes_sparkle = [](Cat cat){
-        return MakeOptional(cat+1);
+        return make_optional(cat+1);
     };
     auto make_smaller = [](Cat cat){
         return cat / 2;
@@ -29,8 +29,7 @@ TEST_CASE("Optional -- example", "[Optional]")
             .map(make_smaller)
             .map(add_rainbow);
     };
-    Image image = 40;
-    REQUIRE(get_cute_cat(image).get_value() == 42);
+    REQUIRE(get_cute_cat(Image{40}).get_value() == Cat{42});
 }
 
 TEST_CASE("Optional -- default constructed creates disengaged optional", "[Optional]")
@@ -113,7 +112,9 @@ TEST_CASE("Optional -- move a value out of an optional", "[Optional]")
 TEST_CASE("Optional -- copy-assign an optional", "[Optional]")
 {
     Optional<SharedPointer<int>> foo{SharedPointer(new int{42})};
+    REQUIRE(foo.has_value());
     Optional<SharedPointer<int>> bar;
+    REQUIRE(!bar.has_value());
     bar = foo;
     REQUIRE(foo.has_value());
     REQUIRE(bar.has_value());
@@ -128,7 +129,7 @@ TEST_CASE("Optional -- move-assign an optional", "[Optional]")
     Optional<SharedPointer<int>> foo{UniquePointer(new int{42})};
     Optional<SharedPointer<int>> bar;
     bar = std::move(foo);
-    REQUIRE(!foo.has_value());
+    // NOTE: The state of a moved-from Optional is undefined.
     REQUIRE(bar.has_value());
     REQUIRE(*bar.get_value() == 42);
 }
@@ -217,32 +218,24 @@ TEST_CASE("Optional -- arrow operator", "[Optional]")
     REQUIRE(Foo::count == 1);
 }
 
-TEST_CASE("Optional -- emplace a value", "[Optional]")
+TEST_CASE("Optional -- make_optional emplaces a value", "[Optional]")
 {
-    Optional<UniquePointer<int>> maybe;
-    maybe.emplace(new int{1});
-    REQUIRE(maybe.has_value());
-    REQUIRE(**maybe == 1);
-}
-
-TEST_CASE("Optional -- MakeOptional emplaces a value", "[Optional]")
-{
-    Optional<Foo> maybe = MakeOptional<Foo>(1, 2);
+    Optional<Foo> maybe = make_optional<Foo>(1, 2);
     REQUIRE(maybe.has_value());
 }
 
-TEST_CASE("Optional -- MakeOptional can deduce the type", "[Optional]")
+TEST_CASE("Optional -- make_optional can deduce the type", "[Optional]")
 {
-    auto maybe = MakeOptional(1u);
+    auto maybe = make_optional(1u);
     REQUIRE(maybe.has_value());
     REQUIRE(maybe.get_value() == 1u);
-    static_assert(std::is_same<decltype(maybe)::Type, unsigned int>::value,
+    static_assert(std::is_same<decltype(maybe)::Value, unsigned int>::value,
                   "The Optional type should deduce to unsigned int.");
 }
 
-TEST_CASE("Optional -- MakeOptional(none) returns none", "[Optional]")
+TEST_CASE("Optional -- make_optional(none) returns none", "[Optional]")
 {
-    Optional<Foo> maybe = MakeOptional<Foo>(none);
+    Optional<Foo> maybe = make_optional<Foo>(none);
     REQUIRE(!maybe.has_value());
 }
 
@@ -255,7 +248,7 @@ TEST_CASE("Optional -- A disengaged optional equals 'none'", "[Optional]")
 
 TEST_CASE("Optional -- An engaged optional does not equal 'none'", "[Optional]")
 {
-    auto maybe = MakeOptional(1);
+    auto maybe = make_optional(1);
     REQUIRE((maybe == none) == false);
     REQUIRE(maybe != none);
 }
@@ -286,7 +279,7 @@ TEST_CASE("Optional -- Two engaged optional compare values, equal", "[Optional]"
 
 TEST_CASE("Optional -- Call map() to apply a function to an engaged optional", "[Optional]")
 {
-    const auto foo = MakeOptional(2);
+    const auto foo = make_optional(2);
     auto bar = foo.map([](int value){
         REQUIRE(value == 2);
         return 'a';
@@ -307,13 +300,44 @@ TEST_CASE("Optional -- Calling map() does nothing to a disengaged optional", "[O
 
 TEST_CASE("Optional -- Calls to map() can be chained.", "[Optional]")
 {
-    auto bar = MakeOptional(0).map([](int value){
+    auto bar = make_optional(0).map([](int value){
         return value+1;
     }).map([](int value){
         return value+1;
     });
     REQUIRE(bar.has_value());
     REQUIRE(bar.get_value() == 2);
+}
+
+TEST_CASE("Optional -- for a monostate optional, map's function accepts no parameters at all", "[Optional]")
+{
+    auto bar = make_optional(Monostate{}).map([]{
+        return 1;
+    });
+    REQUIRE(bar.has_value());
+    REQUIRE(bar.get_value() == 1);
+}
+
+TEST_CASE("Optional -- when map's function returns void we map to a monostate optional", "[Optional]")
+{
+    int result = 0;
+    auto foo = make_optional(1).map([&result](int value){
+        result = value;
+    });
+    static_assert(std::is_same<decltype(foo), Optional<Monostate>>::value, "");
+    REQUIRE(result == 1);
+    REQUIRE(foo.get_value() == Monostate{});
+}
+
+TEST_CASE("Optional -- when Optional<Monostate>::map's function returns void we map to Optional<Monostate>", "[Optional]")
+{
+    int result = 0;
+    auto foo = make_optional(Monostate{}).map([&result]{
+        result = 1;
+    });
+    static_assert(std::is_same<decltype(foo), Optional<Monostate>>::value, "");
+    REQUIRE(result == 1);
+    REQUIRE(foo.get_value() == Monostate{});
 }
 
 TEST_CASE("Optional -- or_else() calls the function when the optional is disengaged", "[Optional]")
@@ -352,6 +376,15 @@ TEST_CASE("Optional -- or_else() can be chained", "[Optional]")
     REQUIRE(!bar.has_value());
 }
 
+TEST_CASE("Optional -- or_else with Value=UniquePonter, a move-only type", "[Optional]")
+{
+    int result = -1;
+    Optional<UniquePointer<int>>{none}.or_else([&]{
+        result = 1;
+    });
+    REQUIRE(result == 1);
+}
+
 TEST_CASE("Optional -- and_then() calls the function when the optional is engaged", "[Optional]")
 {
     int result = 0;
@@ -367,6 +400,18 @@ TEST_CASE("Optional -- and_then() calls the function when the optional is engage
     REQUIRE(result == 2);
 }
 
+TEST_CASE("Optional -- and_then() calls the function when the optional is engaged, with move-only type", "[Optional]")
+{
+    int result = 0;
+    auto foo = Optional<UniquePointer<int>>{new int{1}}.and_then([&result](UniquePointer<int> p) {
+        result = *p;
+        return Optional{std::move(p)};
+    });
+    REQUIRE(foo.has_value());
+    REQUIRE(*foo.get_value() == 1);
+    REQUIRE(result == 1);
+}
+
 TEST_CASE("Optional -- and_then() does nothing when the optional is disengaged", "[Optional]")
 {
     int result = 0;
@@ -376,4 +421,58 @@ TEST_CASE("Optional -- and_then() does nothing when the optional is disengaged",
     });
     REQUIRE(!foo.has_value());
     REQUIRE(result == 0);
+}
+
+TEST_CASE("Optional -- and_then() does nothing when the optional is disengaged, move-only type", "[Optional]")
+{
+    int result = 0;
+    auto foo = Optional<UniquePointer<int>>{none}.and_then([&result](UniquePointer<int> p){
+        result = *p;
+        return Optional{std::move(p)};
+    });
+    REQUIRE(!foo.has_value());
+    REQUIRE(result == 0);
+}
+
+TEST_CASE("Optional -- for a monostate optional, and_then's function accepts no parameters at all", "[Optional]")
+{
+    auto foo = make_optional(Monostate{}).and_then([]{
+        return Optional(1);
+    });
+    REQUIRE(foo.has_value());
+    REQUIRE(foo.get_value() == 1);
+}
+
+TEST_CASE("Optional -- when and_then's function returns void we map to a monostate optional", "[Optional]")
+{
+    int result = 0;
+    const auto bar = make_optional(1);
+    auto foo = bar.and_then([&result](int value){
+        result = value;
+    });
+    static_assert(std::is_same<decltype(foo), Optional<Monostate>>::value, "");
+    REQUIRE(result == 1);
+    REQUIRE(foo.get_value() == Monostate{});
+}
+
+TEST_CASE("Optional -- when and_then's function returns void we map to a monostate optional, move-only type", "[Optional]")
+{
+    int result = 0;
+    auto foo = Optional<UniquePointer<int>>{new int{1}}.and_then([&result](UniquePointer<int> p){
+        result = *p;
+    });
+    static_assert(std::is_same<decltype(foo), Optional<Monostate>>::value, "");
+    REQUIRE(result == 1);
+    REQUIRE(foo.get_value() == Monostate{});
+}
+
+TEST_CASE("Optional -- when Optional<Monostate>::and_then's function returns void we map to Optional<Monostate>", "[Optional]")
+{
+    int result = 0;
+    auto foo = make_optional(Monostate{}).and_then([&result]{
+        result = 1;
+    });
+    static_assert(std::is_same<decltype(foo), Optional<Monostate>>::value, "");
+    REQUIRE(result == 1);
+    REQUIRE(foo.get_value() == Monostate{});
 }

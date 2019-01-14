@@ -1,67 +1,43 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_COMMON_OPTIONAL_HPP
 #define FLAPJACKOS_COMMON_INCLUDE_COMMON_OPTIONAL_HPP
 
-#include <utility> // for std::move
-#include <type_traits> // for std::aligned_storage
-#include <new> // for placement-new
 #include <cassert>
+#include "either.hpp"
 
-struct None {};
+struct None {
+    constexpr bool operator==(const None&) const { return true; }
+    constexpr bool operator!=(const None&) const { return false; }
+};
 static const None none;
 
 template<typename T>
 class Optional {
 public:
-    using Type = T;
+    using Value = T;
+    template<typename U> using Next = Optional<U>;
 
-    static_assert(!std::is_void<Type>::value,
+    static_assert(!std::is_void<T>::value,
                   "Optional<void> is not supported.");
 
     static_assert(!std::is_same<typename std::decay<T>::type, None>::value,
                   "Optional<None> is not supported.");
-
-    ~Optional()
-    {
-        reset();
-    }
     
-    Optional() : has_value_(false) {}
+    Optional() : either_(none) {}
+    Optional(const None&) : either_(none) {}
+    Optional(const Optional& other) : either_(other.either_) {}
+    Optional(Optional&& other) : either_(std::move(other.either_)) {}
+    Optional(const Value& value) : either_(value) {}
+    Optional(Value&& value) : either_(std::move(value)) {}
 
-    Optional(const None&) : Optional() {}
-    
-    Optional(const Optional& other)
-     : Optional()
+    Optional& operator=(const Value& value)
     {
-        *this = other;
-    }
-    
-    Optional(Optional&& other)
-     : Optional()
-    {
-        *this = std::move(other);
-    }
-    
-    Optional(const Type& value)
-     : pointer_(new (&storage_) Type(value)),
-       has_value_(pointer_ != nullptr)
-    {}
-
-    Optional(Type&& value)
-     : pointer_(new (&storage_) Type(std::move(value))),
-       has_value_(pointer_ != nullptr)
-    {}
-
-    Optional& operator=(const Type& value)
-    {
-        pointer_ = new (&storage_) Type(value);
-        has_value_ = (pointer_ != nullptr);
+        either_ = value;
         return *this;
     }
 
-    Optional& operator=(Type&& value)
+    Optional& operator=(Value&& value)
     {
-        pointer_ = new (&storage_) Type(std::move(value));
-        has_value_ = (pointer_ != nullptr);
+        either_ = std::move(value);
         return *this;
     }
 
@@ -74,12 +50,7 @@ public:
     Optional& operator=(const Optional& other)
     {
         if (this != &other) {
-            reset();
-            if (other.has_value_) {
-                assert(other.pointer_);
-                pointer_ = new (&storage_) Type(*other.pointer_);
-                has_value_ = (pointer_ != nullptr);
-            }
+            either_ = other.either_;
         }
         return *this;
     }
@@ -87,23 +58,9 @@ public:
     Optional& operator=(Optional&& other)
     {
         if (this != &other) {
-            reset();
-            if (other.has_value_) {
-                assert(other.pointer_);
-                pointer_ = new (&storage_) Type(std::move(*other.pointer_));
-                has_value_ = (pointer_ != nullptr);
-                other.reset();
-            }
+            either_ = std::move(other.either_);
         }
         return *this;
-    }
-
-    template <typename... Args>
-    void emplace(Args&&... args)
-    {
-        reset();
-        pointer_ = new (&storage_) Type(std::forward<Args>(args)...);
-        has_value_ = (pointer_ != nullptr);
     }
     
     explicit operator bool() const
@@ -113,55 +70,44 @@ public:
 
     bool has_value() const
     {
-        return has_value_;
+        return !either_.is_left();
     }
     
-    Type& operator*()
+    Value& operator*()
     {
         return get_value();
     }
     
-    Type& operator*() const
+    Value& operator*() const
     {
         return get_value();
     }
 
-    Type* operator->()
+    Value* operator->()
     {
-        assert(has_value_);
-        assert(pointer_);
-        return pointer_;
+        assert(has_value());
+        Value& ref = either_.get_right();
+        return &ref;
     }
 
-    Type* operator->() const
+    Value* operator->() const
     {
-        assert(has_value_);
-        assert(pointer_);
-        return pointer_;
+        assert(has_value());
+        Value& ref = either_.get_right();
+        return &ref;
     }
 
-    const Type& get_value() const
-    {
-        assert(has_value_);
-        assert(pointer_);
-        return *pointer_;
-    }
+    auto& get_value() & { return either_.get_right(); }
+    auto&& get_value() && { return std::move(either_.get_right()); }
+    const auto& get_value() const& { return either_.get_right(); }
 
-    Type& get_value()
-    {
-        assert(has_value_);
-        assert(pointer_);
-        return *pointer_;
-    }
+    auto& get_either() & { return either_; }
+    auto&& get_either() && { return std::move(either_); }
+    const auto& get_either() const& { return either_; }
 
     void reset()
     {
-        if (has_value_) {
-            assert(pointer_);
-            pointer_->~Type();
-        }
-        pointer_ = nullptr;
-        has_value_ = false;
+        either_ = none;
     }
     
     bool operator==(const None&) const
@@ -176,24 +122,18 @@ public:
     
     bool operator==(const Optional& other) const
     {
-        if (has_value() != other.has_value()) {
-            return false;
+        if (this == &other) {
+            return true;
         }
-        if (has_value() && other.has_value()) {
-            return get_value() == other.get_value();
-        }
-        return true;
+        return either_ == other.either_;
     }
     
     bool operator!=(const Optional& other) const
     {
-        if (has_value() != other.has_value()) {
-            return true;
+        if (this == &other) {
+            return false;
         }
-        if (has_value() && other.has_value()) {
-            return get_value() != other.get_value();
-        }
-        return false;
+        return either_ != other.either_;
     }
 
     // Map functor.
@@ -201,68 +141,91 @@ public:
     // wrap the function's return value in another optional, and return that.
     // If the optional is not engaged then return an empty optional with a type
     // matching the function.
+    // A return value of void is handled by mapping to Monostate. Likewise,
+    // no parameters are passed to `fn' in the case where Value=Monostate.
     // This method can be chained with other calls to map(), &c.
     template<typename Function>
-    auto map(Function&& function) const -> Optional<decltype(function(get_value()))>
+    auto map(Function&& fn) &
     {
-        static_assert(!std::is_void<decltype(function(get_value()))>::value,
-                      "The function must have a non-void return value.");
-        if (has_value()) {
-            return function(get_value());
-        } else {
-            return none;
-        }
+        return map_impl(*this, std::forward<Function>(fn));
+    }
+
+    template<typename Function>
+    auto map(Function&& fn) &&
+    {
+        return map_impl(*this, std::forward<Function>(fn));
+    }
+
+    template<typename Function>
+    auto map(Function&& fn) const&
+    {
+        return map_impl(*this, std::forward<Function>(fn));
     }
 
     // If the optional is engaged then unwrap it, pass it to the given function,
     // and then return whatever value that function returned.
     // If the optional is not engaged then return an empty optional with a type
     // matching the function.
+    // A return value of void is handled by mapping to Monostate. Likewise,
+    // no parameters are passed to `fn' in the case where Value=Monostate.
     // This method can be chained with other calls to map(), &c.
     template<typename Function>
-    auto and_then(Function&& function) const -> decltype(function(get_value()))
+    auto and_then(Function&& fn) &
     {
-        using Return = decltype(function(get_value()));
-        Return result;
-        if (has_value()) {
-            result = function(get_value());
-        }
-        return result;
+        return and_then_impl(*this, std::forward<Function>(fn));
+    }
+
+    template<typename Function>
+    auto and_then(Function&& fn) &&
+    {
+        return and_then_impl(std::move(*this), std::forward<Function>(fn));
+    }
+
+    template<typename Function>
+    auto and_then(Function&& fn) const&
+    {
+        return and_then_impl(*this, std::forward<Function>(fn));
     }
 
     // If the optional is disengaged then execute the function.
     // The function accepts no parameters and returns no value.
     // Since or_else() returns *this, it can be chained with map(), &c.
     template<typename Function>
-    Optional<Type> or_else(Function&& function) const
+    auto or_else(Function&& fn) &
     {
-        if (!has_value()) {
-            function();
-        }
-        return *this;
+        return or_else_impl(*this, std::forward<Function>(fn));
+    }
+    
+    template<typename Function>
+    auto or_else(Function&& fn) &&
+    {
+        return or_else_impl(std::move(*this), std::forward<Function>(fn));
     }
 
+    template<typename Function>
+    auto or_else(Function&& fn) const&
+    {
+        return or_else_impl(*this, std::forward<Function>(fn));
+    }
+    
 private:
-    using Storage = typename std::aligned_storage<sizeof(Type), alignof(Type)>::type;
-    Storage storage_;
-    Type* pointer_;
-    bool has_value_;
+    Either<None, Value> either_;
 };
 
 template<typename T, typename... Args> inline
-Optional<T> MakeOptional(Args&&... args)
+Optional<T> make_optional(Args&&... args)
 {
     return Optional<T>(T(std::forward<Args>(args)...));
 }
 
 template<typename T> inline
-Optional<T> MakeOptional(T&& value)
+Optional<T> make_optional(T&& value)
 {
-    return Optional<T>(value);
+    return Optional<T>(std::move(value));
 }
 
 template<typename T> inline
-Optional<T> MakeOptional(const None& value)
+Optional<T> make_optional(const None& value)
 {
     return Optional<T>(value);
 }

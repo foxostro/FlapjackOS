@@ -44,7 +44,9 @@ set(SOURCE_FILES
     "include/common/elf32_parser.hpp"
     "include/common/elf64_parser.hpp"
     "include/common/data.hpp"
+    "include/common/either.hpp"
     "include/common/optional.hpp"
+    "include/common/expected.hpp"
 
     "include/malloc/malloc_zone.hpp" "src/malloc_zone.cpp"
     )
@@ -82,7 +84,9 @@ else(CMAKE_CROSSCOMPILING)
                    "test/test_elf32.cpp"
                    "test/test_elf64.cpp"
                    "test/test_malloc_zone.cpp"
+                   "test/test_either.cpp"
                    "test/test_optional.cpp"
+                   "test/test_expected.cpp"
                    )
 
     target_link_libraries(CommonTest
