@@ -12,5 +12,5 @@ cpu: count=1, ips=10000000, reset_on_triple_fault=0
 
 megs: 32
 
-# Adds a parallel port to the emulated machine. Prints to file.
-parport1: enabled=1, file="parport.out"
+# Adds a serial port to the machine. Prints to file.
+com1: enabled=1, mode=file, dev=serial.txt
