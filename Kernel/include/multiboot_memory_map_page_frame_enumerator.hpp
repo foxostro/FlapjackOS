@@ -42,7 +42,7 @@ public:
     {
         assert(has_next());
 
-        if (remaining_length_of_entry_ == 0) {
+        if (remaining_length_of_entry_ < PAGE_SIZE) {
             scan_to_next_valid_entry();
         }
 
