@@ -55,11 +55,16 @@ private:
     void mark_unavailable_memory(PageFrameAllocator& page_frames)
     {
         enumerate_page_frames([&](uintptr_t page_frame){
-            uintptr_t corresponding_logical_address = mmu_.convert_physical_to_logical_address(page_frame);
-            if (corresponding_logical_address >= break_address_) {
+            if (is_page_frame_in_available_region(page_frame)) {
                 page_frames.deallocate(page_frame);
             }
         });
+    }
+
+    bool is_page_frame_in_available_region(uintptr_t page_frame)
+    {
+        uintptr_t logical_address = mmu_.convert_physical_to_logical_address(page_frame);
+        return logical_address >= break_address_ && logical_address < KERNEL_VIRTUAL_START_ADDR+KERNEL_MEMORY_REGION_SIZE;
     }
 
     void mark_modules_memory(PageFrameAllocator& page_frames)
