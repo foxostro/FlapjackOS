@@ -37,5 +37,5 @@ void Serial::putchar(char ch)
 
 void Serial::pause()
 {
-	for (volatile int countdown = 100; countdown >= 0; --countdown);
+	for (volatile int countdown = 1000; countdown >= 0; --countdown);
 }
