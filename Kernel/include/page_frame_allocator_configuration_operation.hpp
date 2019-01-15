@@ -5,6 +5,8 @@
 #include <page_frame_allocator.hpp>
 #include <page_size.hpp>
 #include <hardware_memory_management_unit.hpp>
+#include <boot.h> // for KERNEL_VIRTUAL_START_ADDR
+#include <logical_addressing.hpp> // for KERNEL_MEMORY_REGION
 
 // Configures a page frame allocator for use at boot time.
 //
