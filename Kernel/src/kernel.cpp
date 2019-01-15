@@ -1,7 +1,6 @@
 #include <kernel.hpp>
 
-#include <inout.h>
-#include <logger.hpp>
+#include <common/logger.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 #include <multiboot_module_enumerator.hpp>

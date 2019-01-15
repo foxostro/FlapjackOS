@@ -1,5 +1,5 @@
 #include <scheduler.hpp>
-#include <logger.hpp>
+#include <common/logger.hpp>
 #include <cassert>
 #include <utility>
 

@@ -22,7 +22,6 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/interrupt_asm.h"
     "include/page_size.hpp"
     "include/logical_addressing.hpp"
-    "include/logger.hpp" "src/logger.cpp"
     "include/elf_loader.hpp"
     "include/elf_loader32.hpp"
     "include/elf_loader64.hpp"

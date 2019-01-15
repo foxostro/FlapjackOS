@@ -4,7 +4,7 @@
 #include "generic_unmanaged_physical_memory_map.hpp"
 #include "paging_resolver.hpp"
 #include <hardware_memory_management_unit.hpp>
-#include "logger.hpp"
+#include <common/logger.hpp>
 
 namespace i386 {
 

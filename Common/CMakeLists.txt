@@ -48,6 +48,7 @@ set(SOURCE_FILES
     "include/common/either.hpp"
     "include/common/optional.hpp"
     "include/common/expected.hpp"
+    "include/common/logger.hpp" "src/logger.cpp"
 
     "include/malloc/malloc_zone.hpp" "src/malloc_zone.cpp"
     )

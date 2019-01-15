@@ -1,6 +1,6 @@
 #include <interrupt_lock.hpp>
 #include <interrupt_asm.h>
-#include <logger.hpp>
+#include <common/logger.hpp>
 #include <atomic>
 
 static std::atomic<int> g_interrupt_lock_count{0};

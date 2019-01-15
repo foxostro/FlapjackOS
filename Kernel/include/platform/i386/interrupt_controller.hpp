@@ -8,7 +8,7 @@
 #include "page_fault_interrupt_handler.hpp"
 #include <simple_device_interrupt_handler.hpp>
 #include <cassert>
-#include <logger.hpp>
+#include <common/logger.hpp>
 
 namespace i386 {
 

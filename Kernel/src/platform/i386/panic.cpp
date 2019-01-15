@@ -2,7 +2,7 @@
 
 #include <common/text_terminal.hpp>
 #include <drivers/pc/vga_text_display_device.hpp>
-#include <logger.hpp>
+#include <common/logger.hpp>
 #include <inout.h>
 #include <halt.h>
 #include <interrupt_asm.h>

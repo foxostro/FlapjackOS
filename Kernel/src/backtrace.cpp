@@ -1,5 +1,5 @@
 #include <backtrace.hpp>
-#include <logger.hpp>
+#include <common/logger.hpp>
 
 void backtrace(UnlockedTextTerminal &term)
 {
