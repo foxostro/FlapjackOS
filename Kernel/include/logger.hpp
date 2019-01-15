@@ -1,18 +1,19 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_LOGGER_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_LOGGER_HPP
 
+#include <common/text_output_stream.hpp>
+#include <common/unique_pointer.hpp>
+#include <cstddef>
+
 // Debug logging in the kernel
 class Logger {
 public:
-    ~Logger();
-    Logger();
-    void putchar(char ch);
-    void puts(const char *s);
-    void puts_no_newline(const char *s);
+    void set_text_output_stream(UniquePointer<TextOutputStream> stream);
     void log(const char *function, const char *fmt, ...);
 
 private:
-    static constexpr unsigned BOCHS_LOGGER_PORT = 0xe9;
+    static constexpr size_t LOGGER_MESSAGE_SIZE = 1024;
+    UniquePointer<TextOutputStream> stream_;
 };
 
 // There's a single global logger.

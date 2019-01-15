@@ -137,6 +137,7 @@ set(PC_SOURCE_FILES
     "src/drivers/pc/ps2_keyboard_device/keyboard_scancodes_make.inc"
     "include/drivers/pc/vga_text_display_device.hpp" "src/drivers/pc/vga_text_display_device.cpp"
     "include/drivers/pc/pit_timer_device.hpp" "src/drivers/pc/pit_timer_device.cpp"
+    "include/drivers/pc/bochs_e9_hack.hpp" "src/drivers/pc/bochs_e9_hack.cpp"
     )
 
 set(PLATFORM_SPECIFIC_SOURCE_FILES "${PC_SOURCE_FILES}")

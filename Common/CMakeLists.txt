@@ -30,6 +30,7 @@ set(SOURCE_FILES
 
     "include/common/line_editor.hpp" "src/line_editor.cpp"
     "include/common/text_line.hpp" "src/text_line.cpp"
+    "include/common/text_output_stream.hpp"
     "include/common/text_terminal.hpp" "src/text_terminal.cpp"
     "include/common/bit_array.hpp"
     "include/common/spin_lock.hpp" "include/common/spin_lock.h" "src/spin_lock.c"

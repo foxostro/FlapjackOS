@@ -21,6 +21,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
    address_space_bootstrapper_(mmu_),
    phys_map_(mmu_, page_frame_allocator_)
 {
+    initialize_logger();
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
     
@@ -36,6 +37,13 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     initialize_physical_memory_map();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
+}
+
+void Kernel::initialize_logger()
+{
+    UniquePointer<TextOutputStream> stream{&logger_text_output_stream_};
+    stream.set_should_leak();
+    g_logger.set_text_output_stream(std::move(stream));
 }
 
 const char* Kernel::get_platform() const

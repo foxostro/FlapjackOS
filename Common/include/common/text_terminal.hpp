@@ -2,6 +2,7 @@
 #define FLAPJACKOS_COMMON_INCLUDE_COMMON_TEXT_TERMINAL_HPP
 
 #include <common/text_display_device.hpp>
+#include <common/text_output_stream.hpp>
 #include <common/ring_buffer.hpp>
 #include <common/text_line.hpp>
 #include <common/vec2.hpp>
@@ -9,7 +10,7 @@
 #include <common/lock_guard.hpp>
 
 // A text terminal displays lines of text on a text console display.
-class UnlockedTextTerminal {
+class UnlockedTextTerminal : public TextOutputStream {
 public:
     ~UnlockedTextTerminal();
     
@@ -24,10 +25,10 @@ public:
     // - Tab characters ('\t') may be wider than one column.
     // - The backspace character ('\b') deletes a character from the terminal
     //   and moves the cursor to the previous position.
-    void putchar(char ch);
+    void putchar(char ch) override;
 
     // Puts each character in the vector to the terminal.
-    void puts(const char* str);
+    void puts(const char* str) override;
 
     // Puts each character in the container to the terminal.
     template<typename T>
@@ -78,17 +79,17 @@ private:
 
 // A text terminal displays lines of text on a text console display.
 // Uses a mutex to ensure consistency in a multithreaded context.
-class TextTerminal {
+class TextTerminal : public TextOutputStream {
 public:
     TextTerminal(TextDisplayDevice& display) : impl_(display) {}
 
-    void putchar(char ch)
+    void putchar(char ch) override
     {
         LockGuard guard{lock_};
         impl_.putchar(ch);
     }
 
-    void puts(const char* str)
+    void puts(const char* str) override
     {
         LockGuard guard{lock_};
         impl_.puts(str);

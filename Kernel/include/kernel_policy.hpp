@@ -12,6 +12,7 @@
 #include <drivers/pc/vga_text_display_device.hpp>
 #include <platform/x86_64/thread.hpp>
 #include <platform/x86_64/platform_namer.hpp>
+#include <drivers/pc/bochs_e9_hack.hpp>
 
 struct KernelPolicy {
     using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
@@ -25,6 +26,7 @@ struct KernelPolicy {
     using Thread = x86_64::Thread_x86_64;
     using ThreadExternalStack = x86_64::Thread_x86_64_ExternalStack;
     using PlatformNamer = x86_64::PlatformNamer;
+    using LoggerTextOutputStream = BochsE9Hack;
 };
 
 #elif defined(__i386__)
@@ -38,6 +40,7 @@ struct KernelPolicy {
 #include <drivers/pc/vga_text_display_device.hpp>
 #include <platform/i386/thread.hpp>
 #include <platform/i386/platform_namer.hpp>
+#include <drivers/pc/bochs_e9_hack.hpp>
 
 struct KernelPolicy {
     using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;
@@ -51,6 +54,7 @@ struct KernelPolicy {
     using Thread = i386::Thread_i386;
     using ThreadExternalStack = i386::Thread_i386_ExternalStack;
     using PlatformNamer = i386::PlatformNamer;
+    using LoggerTextOutputStream = BochsE9Hack;
 };
 
 #elif defined(__arm__)

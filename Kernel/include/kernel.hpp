@@ -56,6 +56,9 @@ private:
     ConcretePhysicalMemoryMap phys_map_;
     ConcretePageFrameAllocator page_frame_allocator_;
     Scheduler scheduler_;
+    LoggerTextOutputStream logger_text_output_stream_;
+
+    void initialize_logger();
 
     // Setup the VGA console and terminal.
     void setup_terminal();
