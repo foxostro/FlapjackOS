@@ -93,7 +93,6 @@ TEST_CASE("Optional -- move-assign a value", "[Optional]")
     auto value = UniquePointer(new int{42});
     Optional<UniquePointer<int>> maybe;
     maybe = std::move(value);
-    REQUIRE(!value);
     REQUIRE(maybe.has_value());
     REQUIRE(*maybe.get_value() == 42);
 }
