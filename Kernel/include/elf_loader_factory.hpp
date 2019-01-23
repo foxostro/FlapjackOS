@@ -2,15 +2,18 @@
 #define FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF_LOADER_FACTORY_HPP
 
 #include <common/data.hpp>
-#include <common/unique_pointer.hpp>
+#include <common/expected.hpp>
+#include <common/shared_pointer.hpp>
 #include <physical_memory_map.hpp>
 #include <elf_loader.hpp>
+
+extern const char* ExecErrorDomain;
 
 // Creates an object which can load a specified ELF executable image.
 class ElfLoaderFactory {
 public:
     // Instantiates and returns a loader object for the specified executable.
-    UniquePointer<ElfLoader>
+    Expected<SharedPointer<ElfLoader>>
     create_loader(PhysicalMemoryMap& physical_memory_map,
                   const Data& image);
 };

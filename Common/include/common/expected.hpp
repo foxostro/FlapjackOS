@@ -3,10 +3,7 @@
 
 #include <cassert>
 #include "either.hpp"
-
-struct Error {
-    int error_code = 0;
-};
+#include "error.hpp"
 
 template<typename T>
 class Expected {

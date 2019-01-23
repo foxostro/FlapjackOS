@@ -12,6 +12,9 @@
 #include <common/mutex.hpp>
 
 
+const char* KernelErrorDomain = "Kernel";
+
+
 Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
  : mb_info_(mb_info),
    istack_(istack),
@@ -61,14 +64,30 @@ void Kernel::run()
         MultibootModuleEnumerator enumerator{mmu_, mb_info_};
         assert(enumerator.has_next());
         Data elf_image = get_module_data(enumerator.get_next());
-        auto elf_loader = create_elf_loader(elf_image);
-        if (!elf_loader) {
-            panic("cannot execute program");
-        }
-        TRACE("exec");
-        unsigned result = elf_loader->exec();
-        terminal_.printf("result = 0x%x\n", result);
-        assert(result == 0xdeadbeef);
+        create_elf_loader(elf_image)
+        .and_then([&](SharedPointer<ElfLoader> elf_loader) -> Expected<Monostate> {
+            TRACE("exec");
+            unsigned result = elf_loader->exec();
+            terminal_.printf("result = 0x%x\n", result);
+            if (result == 0xdeadbeef) {
+                return Monostate{};
+            } else {
+                // AFOX_TODO: It would be an improvement to add a std::string equivalent class and use that for the error description field. This way, we could format a description which includes the actual status code.
+                return Error{-1, KernelErrorDomain, "Program returned an unexpected status code."};
+            }
+        })
+        .map_error([&](Error error){
+            terminal_.printf("Failed to execute program: error_code = %d ; " \
+                             "error_domain = %s\n%s\n",
+                             error.error_code,
+                             error.error_domain,
+                             error.error_description);
+            return Monostate{};
+        });
+        
+        // AFOX_TODO: There's a bug which makes it impossible to chain a call to Expected::map() after the call to map_error().
+        // AFOX_TODO: It would be great to add a Expected::join() method and use it here.
+        terminal_.printf("Finished executing user program\n");
     }
 
     scheduler_.begin(new ThreadExternalStack);
@@ -85,7 +104,7 @@ Data Kernel::get_module_data(multiboot_module_t& module)
     return mod_data;
 }
 
-UniquePointer<ElfLoader> Kernel::create_elf_loader(const Data& elf_image)
+Expected<SharedPointer<ElfLoader>> Kernel::create_elf_loader(const Data& elf_image)
 {
     ElfLoaderFactory factory;
     return factory.create_loader(phys_map_, elf_image);

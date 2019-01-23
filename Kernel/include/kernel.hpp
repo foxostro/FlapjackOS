@@ -8,6 +8,7 @@
 #include <elf_loader32.hpp>
 #include <common/text_terminal.hpp>
 #include <common/data.hpp>
+#include <common/expected.hpp>
 #include <cstdint>
 
 // The kernel is the heart of the operating system.
@@ -93,7 +94,7 @@ private:
 
     Data get_module_data(multiboot_module_t& module);
 
-    UniquePointer<ElfLoader> create_elf_loader(const Data& elf_image);
+    Expected<SharedPointer<ElfLoader>> create_elf_loader(const Data& elf_image);
 
     void do_console_loop();
 };

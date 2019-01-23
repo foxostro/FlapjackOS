@@ -45,6 +45,7 @@ set(SOURCE_FILES
     "include/common/elf32_parser.hpp"
     "include/common/elf64_parser.hpp"
     "include/common/data.hpp"
+    "include/common/error.hpp"
     "include/common/either.hpp"
     "include/common/optional.hpp"
     "include/common/expected.hpp"
