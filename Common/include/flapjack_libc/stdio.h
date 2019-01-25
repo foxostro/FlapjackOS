@@ -20,6 +20,7 @@ extern "C" {
 #define VASPRINTF  flapjack_vasprintf
 #define ASPRINTF   flapjack_asprintf
 #define PRINTF     flapjack_printf
+#define FPRINTF    flapjack_fprintf
 #define STRCMP     flapjack_strcmp
 #else
 #define VSNPRINTF  vsnprintf
@@ -27,8 +28,19 @@ extern "C" {
 #define VASPRINTF  vasprintf
 #define ASPRINTF   asprintf
 #define PRINTF     printf
+#define FPRINTF    fprintf
 #define STRCMP     strcmp
 #endif
+
+// Avoid colliding with FILE-related symbols when building for testing.
+#ifdef TESTING
+#include <stdio.h>
+#else
+typedef struct {int dummy; } FILE;
+extern FILE* stderr;
+#endif
+#define FLAPJACK_FILE FILE
+#define FLAPJACK_STDERR stderr
 
 // Similar to traditional vsnprintf.
 // Formats the string in manner similar to traditional vsnprintf and returns
@@ -58,6 +70,8 @@ int VASPRINTF(char **ret, const char *format, va_list args);
 int ASPRINTF(char **ret, const char *format, ...);
 
 int PRINTF(const char *format, ...);
+int FPRINTF(FLAPJACK_FILE *stream, const char *format, ...);
+
 int STRCMP(const char *s1, const char *s2);
 
 #ifdef __cplusplus

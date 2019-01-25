@@ -10,6 +10,8 @@
 
 #include <common/logger.hpp>
 
+FLAPJACK_FILE* FLAPJACK_STDERR = nullptr;
+
 static const char digits_lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 static const char digits_upper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
 
@@ -227,6 +229,17 @@ extern "C" int ASPRINTF(char **ret, const char *fmt, ...)
 }
 
 extern "C" int PRINTF(const char *fmt, ...)
+{
+    char buffer[128] = {0};
+    va_list args;
+    va_start(args, fmt);
+    int c = VSNPRINTF(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+    TRACE(buffer);
+    return c;
+}
+
+extern "C" int FPRINTF(__attribute__((unused)) FLAPJACK_FILE *stream, const char *fmt, ...)
 {
     char buffer[128] = {0};
     va_list args;
