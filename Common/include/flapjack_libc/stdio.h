@@ -17,11 +17,15 @@ extern "C" {
 #ifdef TESTING
 #define VSNPRINTF  flapjack_vsnprintf
 #define SNPRINTF   flapjack_snprintf
+#define VASPRINTF  flapjack_vasprintf
+#define ASPRINTF   flapjack_asprintf
 #define PRINTF     flapjack_printf
 #define STRCMP     flapjack_strcmp
 #else
 #define VSNPRINTF  vsnprintf
 #define SNPRINTF   snprintf
+#define VASPRINTF  vasprintf
+#define ASPRINTF   asprintf
 #define PRINTF     printf
 #define STRCMP     strcmp
 #endif
@@ -50,8 +54,10 @@ int SNPRINTF(char *str,
              const char *format,
              ...);
 
-int PRINTF(const char *format, ...);
+int VASPRINTF(char **ret, const char *format, va_list args);
+int ASPRINTF(char **ret, const char *format, ...);
 
+int PRINTF(const char *format, ...);
 int STRCMP(const char *s1, const char *s2);
 
 #ifdef __cplusplus

@@ -1,4 +1,5 @@
 #include "flapjack_libc/stdio.h"
+#include "flapjack_libc/stdlib.h"
 #include "flapjack_libc/ctype.h"
 #include "flapjack_libc/string.h"
 
@@ -202,6 +203,25 @@ extern "C" int SNPRINTF(char *str, size_t size, const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     int c = VSNPRINTF(str, size, fmt, args);
+    va_end(args);
+    return c;
+}
+
+extern "C" int VASPRINTF(char **ret, const char *fmt, va_list args)
+{
+    char small[1] = {0};
+    int len = VSNPRINTF(small, sizeof(small), fmt, args);
+    char* result = (char*)CALLOC(len+1, 1);
+    int c = VSNPRINTF(result, len, fmt, args);
+    *ret = result;
+    return c;
+}
+
+extern "C" int ASPRINTF(char **ret, const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    int c = VASPRINTF(ret, fmt, args);
     va_end(args);
     return c;
 }
