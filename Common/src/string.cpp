@@ -117,3 +117,17 @@ long STRTOL(__attribute__((unused)) const char *str, __attribute__((unused)) cha
 {
     return 0; // stub
 }
+
+char* STRSTR(const char *haystack, const char *needle)
+{
+    if (!*needle) {
+        return (char *)haystack;
+    }
+    if (!*haystack) {
+        return nullptr;
+    }
+    if ((*haystack == *needle) && (STRSTR(haystack+1, needle+1) == haystack+1)) {
+        return (char *)haystack;
+    }
+    return STRSTR(haystack+1, needle);
+}

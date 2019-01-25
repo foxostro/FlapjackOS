@@ -26,6 +26,7 @@ extern "C" {
 #define STRNCMP flapjack_strncmp
 #define STRDUP  flapjack_strdup
 #define STRTOL  flapjack_strtol
+#define STRSTR  flapjack_strstr
 #else
 #define MEMCPY  memcpy
 #define MEMMOVE memmove
@@ -36,6 +37,7 @@ extern "C" {
 #define STRNCMP strncmp
 #define STRDUP  strdup
 #define STRTOL  strtol
+#define STRSTR strstr
 #endif
 
 void* MEMCPY(void *dst, const void *src, size_t n);
@@ -45,12 +47,10 @@ int MEMCMP(const void* s1, const void* s2, size_t n);
 
 size_t STRNLEN(const char *s, size_t maxlen);
 size_t STRLEN(const char *s);
-
 int STRNCMP(const char *s1, const char *s2, size_t n);
-
 char* STRDUP(const char *s);
-
 long STRTOL(const char *str, char **endptr, int base);
+char* STRSTR(const char *haystack, const char *needle);
 
 #ifdef __cplusplus
 }
