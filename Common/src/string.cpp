@@ -112,3 +112,8 @@ int MEMCMP(const void* a, const void* b, size_t n)
     }
     return 0;
 }
+
+long STRTOL(__attribute__((unused)) const char *str, __attribute__((unused)) char **endptr, __attribute__((unused)) int base)
+{
+    return 0; // stub
+}
