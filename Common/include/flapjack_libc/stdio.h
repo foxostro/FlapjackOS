@@ -18,10 +18,12 @@ extern "C" {
 #define VSNPRINTF  flapjack_vsnprintf
 #define SNPRINTF   flapjack_snprintf
 #define PRINTF     flapjack_printf
+#define STRCMP     flapjack_strcmp
 #else
 #define VSNPRINTF  vsnprintf
 #define SNPRINTF   snprintf
 #define PRINTF     printf
+#define STRCMP     strcmp
 #endif
 
 // Similar to traditional vsnprintf.
@@ -49,6 +51,8 @@ int SNPRINTF(char *str,
              ...);
 
 int PRINTF(const char *format, ...);
+
+int STRCMP(const char *s1, const char *s2);
 
 #ifdef __cplusplus
 }
