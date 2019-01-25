@@ -22,12 +22,14 @@ extern "C" {
 #define MEMSET  flapjack_memset
 #define STRNLEN flapjack_strnlen
 #define STRLEN  flapjack_strlen
+#define STRNCMP flapjack_strncmp
 #else
 #define MEMCPY  memcpy
 #define MEMMOVE memmove
 #define MEMSET  memset
 #define STRNLEN strnlen
 #define STRLEN  strlen
+#define STRNCMP strncmp
 #endif
 
 void* MEMCPY(void *dst, const void *src, size_t n);
@@ -36,6 +38,8 @@ void* MEMSET(void *s, int value, size_t n);
 
 size_t STRNLEN(const char *s, size_t maxlen);
 size_t STRLEN(const char *s);
+
+int STRNCMP(const char *s1, const char *s2, size_t n);
 
 
 #ifdef __cplusplus

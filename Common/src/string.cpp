@@ -14,6 +14,20 @@ extern "C" size_t STRNLEN(const char *s, size_t maxlen)
     return c;
 }
 
+extern "C" int STRNCMP(const char *s1, const char *s2, size_t n)
+{
+    while (n && *s1 && (*s1 == *s2)) {
+        ++s1;
+        ++s2;
+        --n;
+    }
+    if (n == 0) {
+        return 0;
+    } else {
+        return *s1 - *s2;
+    }
+}
+
 extern "C" void* MEMCPY(void *dst, const void *src, size_t n)
 {
     // We could do better, but this works.
