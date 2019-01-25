@@ -9,19 +9,19 @@
 // This is also the first kernel logical address.
 #define KERNEL_VIRTUAL_START_ADDR_64BIT 0xFFFFFFFFC0000000
 #define KERNEL_VIRTUAL_START_ADDR_32BIT 0xC0000000
-#ifdef __c_plus_plus
+#ifdef __cplusplus
 #ifdef __x86_64__
 constexpr uintptr_t KERNEL_VIRTUAL_START_ADDR = KERNEL_VIRTUAL_START_ADDR_64BIT;
 #else
 constexpr uintptr_t KERNEL_VIRTUAL_START_ADDR = KERNEL_VIRTUAL_START_ADDR_32BIT;
 #endif
-#else // defined(__c_plus_plus)
+#else // defined(__cplusplus)
 #ifdef __x86_64__
 #define KERNEL_VIRTUAL_START_ADDR KERNEL_VIRTUAL_START_ADDR_64BIT
 #else
 #define KERNEL_VIRTUAL_START_ADDR KERNEL_VIRTUAL_START_ADDR_32BIT
 #endif
-#endif // defined(__c_plus_plus)
+#endif // defined(__cplusplus)
 
 // The physical address where the kernel image is loaded into memory.
 #define KERNEL_PHYSICAL_LOAD_ADDR 0x100000
