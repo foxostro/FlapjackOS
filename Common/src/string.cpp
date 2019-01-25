@@ -96,3 +96,19 @@ extern "C" void* MEMSET(void *dst, int value, size_t n)
 
     return dst;
 }
+
+int MEMCMP(const void* a, const void* b, size_t n)
+{
+    const unsigned char *s1 = reinterpret_cast<const unsigned char *>(a);
+    const unsigned char *s2 = reinterpret_cast<const unsigned char *>(b);
+    while (n--) {
+	    unsigned char u1 = *s1;
+	    unsigned char u2 = *s2;
+	    if (u1 != u2) {
+    	    return u1 - u2;
+    	}
+        s1++;
+        s2++;
+    }
+    return 0;
+}

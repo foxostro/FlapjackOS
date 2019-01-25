@@ -20,6 +20,7 @@ extern "C" {
 #define MEMCPY  flapjack_memcpy
 #define MEMMOVE flapjack_memmove
 #define MEMSET  flapjack_memset
+#define MEMCMP  flapjack_memcmp
 #define STRNLEN flapjack_strnlen
 #define STRLEN  flapjack_strlen
 #define STRNCMP flapjack_strncmp
@@ -28,6 +29,7 @@ extern "C" {
 #define MEMCPY  memcpy
 #define MEMMOVE memmove
 #define MEMSET  memset
+#define MEMCMP  memcmp
 #define STRNLEN strnlen
 #define STRLEN  strlen
 #define STRNCMP strncmp
@@ -37,6 +39,7 @@ extern "C" {
 void* MEMCPY(void *dst, const void *src, size_t n);
 void* MEMMOVE(void *dst, const void *src, size_t n);
 void* MEMSET(void *s, int value, size_t n);
+int MEMCMP(const void* s1, const void* s2, size_t n);
 
 size_t STRNLEN(const char *s, size_t maxlen);
 size_t STRLEN(const char *s);
