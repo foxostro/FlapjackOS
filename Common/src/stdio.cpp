@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <utility>
 
+#include <common/logger.hpp>
+
 static const char digits_lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 static const char digits_upper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
 
@@ -125,10 +127,10 @@ static size_t insert_pointer(uintptr_t value, char **str, size_t *size)
     return i;
 }
 
-extern "C" size_t VSNPRINTF(char *buf,
-                            size_t size,
-                            const char *fmt,
-                            va_list args)
+extern "C" int VSNPRINTF(char *buf,
+                         size_t size,
+                         const char *fmt,
+                         va_list args)
 {
     size_t i = 0;
     char *str = buf;
@@ -195,11 +197,22 @@ extern "C" size_t VSNPRINTF(char *buf,
     return i;
 }
 
-extern "C" size_t SNPRINTF(char *str, size_t size, const char *fmt, ...)
+extern "C" int SNPRINTF(char *str, size_t size, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     int c = VSNPRINTF(str, size, fmt, args);
     va_end(args);
+    return c;
+}
+
+extern "C" int PRINTF(const char *fmt, ...)
+{
+    char buffer[128] = {0};
+    va_list args;
+    va_start(args, fmt);
+    int c = VSNPRINTF(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+    TRACE(buffer);
     return c;
 }

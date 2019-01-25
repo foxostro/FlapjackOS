@@ -17,9 +17,11 @@ extern "C" {
 #ifdef TESTING
 #define VSNPRINTF  flapjack_vsnprintf
 #define SNPRINTF   flapjack_snprintf
+#define PRINTF     flapjack_printf
 #else
 #define VSNPRINTF  vsnprintf
 #define SNPRINTF   snprintf
+#define PRINTF     printf
 #endif
 
 // Similar to traditional vsnprintf.
@@ -35,16 +37,18 @@ extern "C" {
 //
 // Returns the number of characters that would have been output if the size had
 // not been limited.
-size_t VSNPRINTF(char *str,
-                 size_t size,
-                 const char *format,
-                 va_list args);
+int VSNPRINTF(char *str,
+              size_t size,
+              const char *format,
+              va_list args);
 
 // Wraps vsnprintf to allow the use of a variable number of arguments.
-size_t SNPRINTF(char *str,
-                size_t size,
-                const char *format,
-                ...);
+int SNPRINTF(char *str,
+             size_t size,
+             const char *format,
+             ...);
+
+int PRINTF(const char *format, ...);
 
 #ifdef __cplusplus
 }
