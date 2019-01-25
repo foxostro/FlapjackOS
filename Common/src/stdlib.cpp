@@ -1,4 +1,5 @@
 #include "flapjack_libc/stdlib.h"
+#include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
 #include "flapjack_libc/new"
 #include <common/memory_allocator.hpp>
@@ -10,6 +11,15 @@ void* MALLOC(size_t size)
 {
     assert(g_allocator && "malloc() called without first specifying a global allocator.");
     return g_allocator->malloc(size);
+}
+
+extern "C"
+void* CALLOC(size_t count, size_t size)
+{
+    assert(g_allocator && "calloc() called without first specifying a global allocator.");
+    void* result = g_allocator->malloc(count * size);
+    MEMSET(result, 0, count * size);
+    return result;
 }
 
 extern "C"
