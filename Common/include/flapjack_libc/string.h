@@ -23,6 +23,7 @@ extern "C" {
 #define STRNLEN flapjack_strnlen
 #define STRLEN  flapjack_strlen
 #define STRNCMP flapjack_strncmp
+#define STRDUP  flapjack_strdup
 #else
 #define MEMCPY  memcpy
 #define MEMMOVE memmove
@@ -30,6 +31,7 @@ extern "C" {
 #define STRNLEN strnlen
 #define STRLEN  strlen
 #define STRNCMP strncmp
+#define STRDUP strdup
 #endif
 
 void* MEMCPY(void *dst, const void *src, size_t n);
@@ -41,6 +43,7 @@ size_t STRLEN(const char *s);
 
 int STRNCMP(const char *s1, const char *s2, size_t n);
 
+char* STRDUP(const char *s);
 
 #ifdef __cplusplus
 }

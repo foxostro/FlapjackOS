@@ -1,4 +1,5 @@
 #include "flapjack_libc/string.h"
+#include "flapjack_libc/stdlib.h"
 
 extern "C" size_t STRLEN(const char *s)
 {
@@ -26,6 +27,15 @@ extern "C" int STRNCMP(const char *s1, const char *s2, size_t n)
     } else {
         return *s1 - *s2;
     }
+}
+
+extern "C" char* STRDUP(const char *s)
+{
+    size_t length = STRLEN(s);
+    char* result = (char*)MALLOC(length+1);
+    MEMCPY(result, s, length);
+    result[length] = 0;
+    return result;
 }
 
 extern "C" void* MEMCPY(void *dst, const void *src, size_t n)
