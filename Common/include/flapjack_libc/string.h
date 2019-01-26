@@ -1,59 +1,45 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STRING_H
 #define FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STRING_H
 
-#ifdef __cplusplus
+#if !defined(__cplusplus) && defined(TESTING)
+#error "Use this from C++ only when running under test."
+#endif
 
+#ifdef __cplusplus
 #include <cstddef>
-extern "C" {
-
 #else
-
 #include <stddef.h>
-
 #endif
 
-
-// To prevent name collisions between symbols here and in the host's C standard
-// library, we hide the FlapjackOS symbols behind macros. When building for unit
-// tests, we rename the symbols to avoid the collision.
+// If we're running under test then insert these symbols into the "flapjack"
+// namespace. Otherwise, insert into the global namespace as would be done for
+// libc.
+#ifdef __cplusplus
 #ifdef TESTING
-#define MEMCPY  flapjack_memcpy
-#define MEMMOVE flapjack_memmove
-#define MEMSET  flapjack_memset
-#define MEMCMP  flapjack_memcmp
-#define STRNLEN flapjack_strnlen
-#define STRLEN  flapjack_strlen
-#define STRNCMP flapjack_strncmp
-#define STRDUP  flapjack_strdup
-#define STRTOL  flapjack_strtol
-#define STRSTR  flapjack_strstr
+namespace flapjack {
 #else
-#define MEMCPY  memcpy
-#define MEMMOVE memmove
-#define MEMSET  memset
-#define MEMCMP  memcmp
-#define STRNLEN strnlen
-#define STRLEN  strlen
-#define STRNCMP strncmp
-#define STRDUP  strdup
-#define STRTOL  strtol
-#define STRSTR strstr
-#endif
+extern "C" {
+#endif // TESTING
+#endif // __cplusplus
 
-void* MEMCPY(void *dst, const void *src, size_t n);
-void* MEMMOVE(void *dst, const void *src, size_t n);
-void* MEMSET(void *s, int value, size_t n);
-int MEMCMP(const void* s1, const void* s2, size_t n);
+void* memcpy(void *dst, const void *src, size_t n);
+void* memmove(void *dst, const void *src, size_t n);
+void* memset(void *s, int value, size_t n);
+int memcmp(const void* s1, const void* s2, size_t n);
 
-size_t STRNLEN(const char *s, size_t maxlen);
-size_t STRLEN(const char *s);
-int STRNCMP(const char *s1, const char *s2, size_t n);
-char* STRDUP(const char *s);
-long STRTOL(const char *str, char **endptr, int base);
-char* STRSTR(const char *haystack, const char *needle);
+size_t strnlen(const char *s, size_t maxlen);
+size_t strlen(const char *s);
+int strncmp(const char *s1, const char *s2, size_t n);
+char* strdup(const char *s);
+long strtol(const char *str, char **endptr, int base);
+char* strstr(const char *haystack, const char *needle);
 
 #ifdef __cplusplus
-}
-#endif
+#ifdef TESTING
+} // namespace flapjack
+#else
+} // extern "C"
+#endif // TESTING
+#endif // __cplusplus
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STRING_H

@@ -1,43 +1,40 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDLIB_H
 #define FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDLIB_H
 
+#if !defined(__cplusplus) && defined(TESTING)
+#error "Use this from C++ only when running under test."
+#endif
+
 #ifdef __cplusplus
 #include <cstddef>
 #else
 #include <stddef.h>
 #endif
 
+// If we're running under test then insert these symbols into the "flapjack"
+// namespace. Otherwise, insert into the global namespace as would be done for
+// libc.
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-// AFOX_TODO: There's got to be a better way to get a libc/libc++ under test. Maybe I can play game with namespaces?
-
 #ifdef TESTING
-#define MALLOC    flapjack_malloc
-#define CALLOC    flapjack_calloc
-#define MEMALIGN  flapjack_memalign
-#define REALLOC   flapjack_realloc
-#define FREE      flapjack_free
-#define ABORT     flapjack_abort
+namespace flapjack {
 #else
-#define MALLOC    malloc
-#define CALLOC    calloc
-#define MEMALIGN  memalign
-#define REALLOC   realloc
-#define FREE      free
-#define ABORT     abort
-#endif
+extern "C" {
+#endif // TESTING
+#endif // __cplusplus
 
-void* MALLOC(size_t size);
-void* CALLOC(size_t count, size_t size);
-void* MEMALIGN(size_t size, size_t align);
-void* REALLOC(void *ptr, size_t size);
-void FREE(void *ptr);
-__attribute__((noreturn)) void ABORT();
+void* malloc(size_t size);
+void* calloc(size_t count, size_t size);
+void* memalign(size_t size, size_t align);
+void* realloc(void *ptr, size_t size);
+void free(void *ptr);
+__attribute__((noreturn)) void abort();
 
 #ifdef __cplusplus
-}
-#endif
+#ifdef TESTING
+} // namespace flapjack
+#else
+} // extern "C"
+#endif // TESTING
+#endif // __cplusplus
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_FLAPJACKLIBC_STDLIB_H

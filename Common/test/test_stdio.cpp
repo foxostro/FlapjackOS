@@ -7,35 +7,35 @@
 #include <cassert>
 #include <cstring>
 
-// SNPRINTF returns zero when the buffer is null
+// snprintf returns zero when the buffer is null
 TEST_CASE("test_null_buffer", "[stdio]")
 {
-    int c = SNPRINTF(nullptr, 1000, nullptr);
+    int c = flapjack::snprintf(nullptr, 1000, nullptr);
     REQUIRE(c == 0);
 }
 
-// SNPRINTF returns zero when the format string is null
+// snprintf returns zero when the format string is null
 TEST_CASE("test_null_format", "[stdio]")
 {
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), nullptr);
+    int c = flapjack::snprintf(buf, sizeof(buf), nullptr);
     REQUIRE(c == 0);
 }
 
-// SNPRINTF returns zero when the size is zero
+// snprintf returns zero when the size is zero
 TEST_CASE("test_zero_length", "[stdio]")
 {
-    int c = SNPRINTF(nullptr, 0, nullptr);
+    int c = flapjack::snprintf(nullptr, 0, nullptr);
     REQUIRE(c == 0);
 }
 
-// SNPRINTF copies the format string verbatim when there are no args
+// snprintf copies the format string verbatim when there are no args
 // (assuming enough space in the output buffer)
 TEST_CASE("test_return_no_args_0", "[stdio]")
 {
     const char fmt[] = "test test";
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), fmt);
+    int c = flapjack::snprintf(buf, sizeof(buf), fmt);
     REQUIRE(c == strlen(fmt));
     REQUIRE(std::string(buf) == std::string(fmt));
 
@@ -46,7 +46,7 @@ TEST_CASE("test_return_no_args_0", "[stdio]")
     REQUIRE(c == d);
 }
 
-// SNPRINTF copies the format string verbatim when there are no args
+// snprintf copies the format string verbatim when there are no args
 // If there's not enough space it truncates the string in the output buffer.
 // The return value is the number of characters that would have been output had
 // the buffer not been size restricted.
@@ -54,7 +54,7 @@ TEST_CASE("test_return_no_args_1", "[stdio]")
 {
     const char fmt[] = "test test";
     char buf[5];
-    int c = SNPRINTF(buf, sizeof(buf), fmt);
+    int c = flapjack::snprintf(buf, sizeof(buf), fmt);
     REQUIRE(c == strlen(fmt));
     REQUIRE(std::string(buf) == "test");
 
@@ -69,7 +69,7 @@ TEST_CASE("test_return_char_arg", "[stdio]")
 {
     static const char expected[] = "test a";
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "test %c", 'a');
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %c", 'a');
     REQUIRE(c == strlen(expected));
     REQUIRE(std::string(buf) == expected);
 
@@ -84,7 +84,7 @@ TEST_CASE("test_return_format_percent", "[stdio]")
 {
     static const char expected[] = "test %";
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "test %%");
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %%");
     REQUIRE(c == strlen(expected));
     REQUIRE(std::string(buf) == expected);
 
@@ -95,12 +95,12 @@ TEST_CASE("test_return_format_percent", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format string arguments
+// snprintf can format string arguments
 TEST_CASE("test_string_arg_0", "[stdio]")
 {
     static const char expected[] = "test foo";
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "test %s", "foo");
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %s", "foo");
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen(expected));
 
@@ -111,13 +111,13 @@ TEST_CASE("test_string_arg_0", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format string arguments
+// snprintf can format string arguments
 // If the string is nullptr then we format as "nullptr".
 TEST_CASE("test_string_arg_1", "[stdio]")
 {
     static const char expected[] = "test (null)";
     char buf[32];
-    int c = SNPRINTF(buf, sizeof(buf), "test %s", nullptr);
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %s", nullptr);
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen(expected));
 
@@ -131,13 +131,13 @@ TEST_CASE("test_string_arg_1", "[stdio]")
     REQUIRE(c == d);
 }
 
-// SNPRINTF can format string arguments
+// snprintf can format string arguments
 // If the output buffer cannot contain the entire string then it truncates.
 TEST_CASE("test_string_arg_2", "[stdio]")
 {
     static const char expected[] = "test";
     char buf[5];
-    int c = SNPRINTF(buf, sizeof(buf), "test %s", nullptr);
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %s", nullptr);
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen("test (null)"));
 
@@ -151,12 +151,12 @@ TEST_CASE("test_string_arg_2", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format integer arguments
+// snprintf can format integer arguments
 TEST_CASE("test_int_arg_0", "[stdio]")
 {
     static const char expected[] = "test -123";
     char buf[16];
-    int c = SNPRINTF(buf, sizeof(buf), "test %d", -123);
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %d", -123);
     REQUIRE(c == strlen(expected));
     REQUIRE(std::string(buf) == expected);
 
@@ -167,13 +167,13 @@ TEST_CASE("test_int_arg_0", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format integer arguments
+// snprintf can format integer arguments
 // If the output buffer cannot contain the entire string then it truncates.
 TEST_CASE("test_int_arg_1", "[stdio]")
 {
     static const char expected[] = "test 1"; // truncated by small buffer
     char buf[7];
-    int c = SNPRINTF(buf, sizeof(buf), "test %d", 12345);
+    int c = flapjack::snprintf(buf, sizeof(buf), "test %d", 12345);
     REQUIRE(std::string(buf) == expected);
 
     // The buffer wasn't long enough to hold the entire output string. This
@@ -188,12 +188,12 @@ TEST_CASE("test_int_arg_1", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format hexadecimal integer arguments
+// snprintf can format hexadecimal integer arguments
 TEST_CASE("test_hex_arg_0", "[stdio]")
 {
     static const char expected[] = "0xdeadbeef";
     char buf[16];
-    int c = SNPRINTF(buf, sizeof(buf), "0x%x", 0xdeadbeef);
+    int c = flapjack::snprintf(buf, sizeof(buf), "0x%x", 0xdeadbeef);
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen(expected));
 
@@ -204,12 +204,12 @@ TEST_CASE("test_hex_arg_0", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format hexadecimal integer arguments
+// snprintf can format hexadecimal integer arguments
 TEST_CASE("test_hex_arg_1", "[stdio]")
 {
     static const char expected[] = "0xCAFE10";
     char buf[16];
-    int c = SNPRINTF(buf, sizeof(buf), "0x%X", 0xcafe10);
+    int c = flapjack::snprintf(buf, sizeof(buf), "0x%X", 0xcafe10);
     REQUIRE(std::string(buf) == expected);
     REQUIRE(c == strlen(expected));
 
@@ -220,7 +220,7 @@ TEST_CASE("test_hex_arg_1", "[stdio]")
     REQUIRE(std::string(buf) == libcbuf);
 }
 
-// SNPRINTF can format pointers arguments too
+// snprintf can format pointers arguments too
 TEST_CASE("test_ptr_arg", "[stdio]")
 {
     static const size_t N = 3;
@@ -252,7 +252,7 @@ TEST_CASE("test_ptr_arg", "[stdio]")
     char buf[128];
 
     for (size_t i = 0; i < N; ++i) {
-        int r = SNPRINTF(buf, sizeof(buf), "ptr is %p", values[i]);
+        int r = flapjack::snprintf(buf, sizeof(buf), "ptr is %p", values[i]);
         REQUIRE(std::string(buf) == expected[i]);
         REQUIRE(r == strlen(expected[i]));
     }

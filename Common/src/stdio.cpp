@@ -10,7 +10,16 @@
 
 #include <common/logger.hpp>
 
-FLAPJACK_FILE* FLAPJACK_STDERR = nullptr;
+// If we're running under test then insert these symbols into the "flapjack"
+// namespace. Otherwise, insert into the global namespace as would be done for
+// libc.
+#ifdef TESTING
+namespace flapjack {
+#else
+extern "C" {
+#endif // TESTING
+
+FILE* stderr = nullptr;
 
 static const char digits_lower[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 static const char digits_upper[] = "0123456789ABCDEFGHIJKLOMNPQRSTUVWXYZ";
@@ -130,10 +139,10 @@ static size_t insert_pointer(uintptr_t value, char **str, size_t *size)
     return i;
 }
 
-extern "C" int VSNPRINTF(char *buf,
-                         size_t size,
-                         const char *fmt,
-                         va_list args)
+int vsnprintf(char *buf,
+              size_t size,
+              const char *fmt,
+              va_list args)
 {
     size_t i = 0;
     char *str = buf;
@@ -200,57 +209,57 @@ extern "C" int VSNPRINTF(char *buf,
     return i;
 }
 
-extern "C" int SNPRINTF(char *str, size_t size, const char *fmt, ...)
+int snprintf(char *str, size_t size, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    int c = VSNPRINTF(str, size, fmt, args);
+    int c = vsnprintf(str, size, fmt, args);
     va_end(args);
     return c;
 }
 
-extern "C" int VASPRINTF(char **ret, const char *fmt, va_list args)
+int vasprintf(char **ret, const char *fmt, va_list args)
 {
     char small[1] = {0};
-    int len = VSNPRINTF(small, sizeof(small), fmt, args);
-    char* result = (char*)CALLOC(len+1, 1);
-    int c = VSNPRINTF(result, len, fmt, args);
+    int len = vsnprintf(small, sizeof(small), fmt, args);
+    char* result = (char*)calloc(len+1, 1);
+    int c = vsnprintf(result, len, fmt, args);
     *ret = result;
     return c;
 }
 
-extern "C" int ASPRINTF(char **ret, const char *fmt, ...)
+int asprintf(char **ret, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    int c = VASPRINTF(ret, fmt, args);
+    int c = vasprintf(ret, fmt, args);
     va_end(args);
     return c;
 }
 
-extern "C" int PRINTF(const char *fmt, ...)
+int printf(const char *fmt, ...)
 {
     char buffer[128] = {0};
     va_list args;
     va_start(args, fmt);
-    int c = VSNPRINTF(buffer, sizeof(buffer), fmt, args);
+    int c = vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
     TRACE(buffer);
     return c;
 }
 
-extern "C" int FPRINTF(__attribute__((unused)) FLAPJACK_FILE *stream, const char *fmt, ...)
+int fprintf(__attribute__((unused)) FILE *stream, const char *fmt, ...)
 {
     char buffer[128] = {0};
     va_list args;
     va_start(args, fmt);
-    int c = VSNPRINTF(buffer, sizeof(buffer), fmt, args);
+    int c = vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
     TRACE(buffer);
     return c;
 }
 
-int STRCMP(const char *s1, const char *s2)
+int strcmp(const char *s1, const char *s2)
 {
     while (*s1 && (*s1 == *s2)) {
         s1++;
@@ -258,3 +267,9 @@ int STRCMP(const char *s1, const char *s2)
     }
     return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
+
+#ifdef TESTING
+} // namespace flapjack
+#else
+} // extern "C"
+#endif // TESTING
