@@ -29,10 +29,13 @@ extern "C" char g_kernel_rodata_begin[];
 extern "C" char g_kernel_rodata_end[];
 
 // The beginning of the C++ global constructors.
-extern char g_start_ctors[];
+extern "C" char g_start_ctors[];
 
 // The end of the C++ global constructors.
-extern char g_end_ctors[];
+extern "C" char g_end_ctors[];
+
+// The beginning of the eh_frame section.
+extern "C" char g_eh_frame_begin[];
 
 // The end of the kernel data section in memory.
 extern "C" char g_kernel_data_end[];

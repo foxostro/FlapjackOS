@@ -54,6 +54,7 @@ SECTIONS
     }
     .eh_frame : AT(ADDR(.eh_frame) - KERNEL_VIRTUAL_START_ADDR)
     {
+        g_eh_frame_begin = .;
         *(.eh_frame)
         *(.eh_frame.*)
         QUAD(0)

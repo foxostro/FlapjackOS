@@ -13,14 +13,6 @@ Kernel& get_global_kernel()
 }
 
 
-// AFOX_TODO: Maybe move all this runtime BS out of kernel_main.cpp and into separate source files like c_plus_plus_support.cpp.
-static const char __EH_FRAME_BEGIN__[]
-__attribute__((section(".eh_frame"), aligned(4)))
-= {};
-
-static const int32_t __FRAME_END__[]
-__attribute__((used, section(".eh_frame"), aligned(alignof(int32_t)))) = {0};
-
 
 // Provided by libgcc. Normally called in code in crt0.
 struct object;
@@ -51,7 +43,7 @@ extern "C" __attribute__((noreturn))
 void kernel_main(multiboot_info_t* mb_info, uintptr_t istack)
 {
     static uint32_t buffer[16]; // Must be large enough to hold the object libgcc is expecting.
-    __register_frame_info(__EH_FRAME_BEGIN__, (object*)buffer);
+    __register_frame_info(g_eh_frame_begin, (object*)buffer);
 
     g_kernel_pointer = (Kernel*)&g_kernel_storage;
     call_global_constructors();
