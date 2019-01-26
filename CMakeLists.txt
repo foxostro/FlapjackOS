@@ -29,7 +29,7 @@ endfunction(GenerateSourceFromTemplate)
 
 
 # Setup compiler flags before building the subdirectories.
-set(COMMON_COMPILER_FLAGS "-Wall -Wextra -Werror")
+set(COMMON_COMPILER_FLAGS "-Wall -Werror -Wno-unused-parameter")
 if(CMAKE_CROSSCOMPILING)
 
     set(BUILD_ARCH "${CMAKE_SYSTEM_PROCESSOR}")

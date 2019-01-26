@@ -54,9 +54,26 @@ set(SOURCE_FILES
     )
 
 if(CMAKE_CROSSCOMPILING)
-list(APPEND SOURCE_FILES
-     "src/c_plus_plus_support.cpp"
-     )
+    list(APPEND SOURCE_FILES
+         "src/c_plus_plus_support.cpp"
+         )
+    list(APPEND SOURCE_FILES
+         # OS Support Files and Stubs
+         "src/libcxxrt/sched.h" "src/libcxxrt/sched.cpp"
+         "src/libcxxrt/pthread.h" "src/libcxxrt/pthread.cpp"
+         "src/libcxxrt/dlfcn.h" "src/libcxxrt/dlfcn.cpp"
+
+         # libcxxrt proper
+         "src/libcxxrt/dynamic_cast.cc"
+         "src/libcxxrt/exception.cc"
+         "src/libcxxrt/guard.cc"
+         "src/libcxxrt/stdexcept.cc"
+         "src/libcxxrt/typeinfo.cc"
+         "src/libcxxrt/memory.cc"
+         "src/libcxxrt/auxhelper.cc"
+         "src/libcxxrt/libelftc_dem_gnu3.c"
+         )
+    add_definitions(-D_GNU_SOURCE)
 endif(CMAKE_CROSSCOMPILING)
 
 include_directories("include")

@@ -4,57 +4,20 @@
 
 #include <cstdlib>
 #include <new>
-#include "flapjack_libc/assert.h"
-#include <common/logger.hpp>
-
-// The C++ runtime needs this function in case a pure virtual function call is
-// made. Though, that should not be possible, anyhow.
-extern "C" void __cxa_pure_virtual(void)
-{
-    panic("__cxa_pure_virtual");
-}
-
-void* operator new(size_t size)
-{
-    return malloc(size);
-}
-
-void* operator new[](size_t size)
-{
-    return malloc(size);
-}
 
 void* operator new(size_t size, std::align_val_t align)
 {
+    // AFOX_TODO: Should this be moved to libcxxrt with the other operator news?
     return memalign(size, static_cast<size_t>(align));
 }
 
 void* operator new[](size_t size, std::align_val_t align)
 {
+    // AFOX_TODO: Should this be moved to libcxxrt with the other operator news?
     return memalign(size, static_cast<size_t>(align));
 }
 
-void operator delete(void* p)
-{
-    free(p);
-}
-
-void operator delete(void* p, size_t)
-{
-    free(p);
-}
-
 void operator delete(void* p, size_t, std::align_val_t)
-{
-    free(p);
-}
-
-void operator delete[](void* p)
-{
-    free(p);
-}
-
-void operator delete[](void* p, size_t)
 {
     free(p);
 }
