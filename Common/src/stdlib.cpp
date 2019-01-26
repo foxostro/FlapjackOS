@@ -1,7 +1,6 @@
 #include "flapjack_libc/stdlib.h"
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
-#include "flapjack_libc/new"
 #include <common/memory_allocator.hpp>
 
 static MemoryAllocator *g_allocator = nullptr;

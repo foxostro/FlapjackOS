@@ -6,7 +6,6 @@ set(SOURCE_FILES
     "include/flapjack_libc/cstdio"
     "include/flapjack_libc/cstdlib"
     "include/flapjack_libc/cstring"
-    "include/flapjack_libc/new"
 
     "include/flapjack_libc/assert.h"
     "include/flapjack_libc/string.h" "src/string.cpp"

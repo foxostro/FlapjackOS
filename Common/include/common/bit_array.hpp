@@ -5,6 +5,7 @@
 #include <cassert>
 #include <new>
 #include <climits> // for CHAR_BIT
+#include <cstdint>
 
 // A compact array of bits.
 // `CAPACITY' is the number of bits in the array.
