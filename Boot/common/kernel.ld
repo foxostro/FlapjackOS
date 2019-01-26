@@ -56,6 +56,7 @@ SECTIONS
     {
         *(.eh_frame)
         *(.eh_frame.*)
+        QUAD(0)
     }
     .gcc_except_table : AT(ADDR(.gcc_except_table) - KERNEL_VIRTUAL_START_ADDR)
     {
