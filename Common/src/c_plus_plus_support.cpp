@@ -3,9 +3,7 @@
 #endif
 
 #include <cstdlib>
-#include <new>
 #include <unwind.h>
-#include "flapjack_libc/assert.h"
 #include <common/logger.hpp>
 
 extern "C"
