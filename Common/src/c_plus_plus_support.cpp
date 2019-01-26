@@ -11,18 +11,15 @@
 extern "C"
 void* __cxa_allocate_exception(size_t thrown_size) throw()
 {
-    TRACE("stub");
     TRACE("thrown_size --> %u", (unsigned)thrown_size);
-    panic("__cxa_allocate_exception");
-    return nullptr;
+    return malloc(thrown_size);
 }
 
 extern "C"
 void __cxa_free_exception(void *thrown_exception) throw()
 {
-    TRACE("stub");
     TRACE("thrown_exception --> %p", thrown_exception);
-    panic("__cxa_free_exception");
+    free(thrown_exception);
 }
 
 extern "C"
@@ -66,15 +63,14 @@ void __cxa_throw(void* thrown_exception,
                  struct type_info* tinfo,
                  void (*dest)(void*))
 {
-    TRACE("stub");
     (void)tinfo;
     (void)dest;
 
     __cxa_exception *header = ((__cxa_exception*)thrown_exception - 1);
-    _Unwind_RaiseException(&header->unwind_header);
 
-    TRACE("exception was not handled in __cxa_throw! We must abort now.");
-    abort();
+    TRACE("about to call _Unwind_RaiseException...");
+    _Unwind_RaiseException(&header->unwind_header);
+    panic("exception was not handled in __cxa_throw");
 }
 
 extern "C"
