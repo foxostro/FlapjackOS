@@ -4,7 +4,15 @@
 
 #include <cstdlib>
 #include <unwind.h>
+#include <exception> // for std::terminate
 #include <common/logger.hpp>
+
+namespace std {
+[[noreturn]] void terminate() noexcept
+{
+    panic("std::terminate");
+}
+} // namespace std
 
 extern "C"
 void* __cxa_allocate_exception(size_t thrown_size) throw()
@@ -68,7 +76,8 @@ void __cxa_throw(void* thrown_exception,
 
     TRACE("about to call _Unwind_RaiseException...");
     _Unwind_RaiseException(&header->unwind_header);
-    panic("exception was not handled in __cxa_throw");
+    TRACE("exception was not handled in __cxa_throw");
+    std::terminate();
 }
 
 extern "C"
