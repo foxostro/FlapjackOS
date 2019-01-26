@@ -54,9 +54,36 @@ const char* Kernel::get_platform() const
     return namer.get_platform();
 }
 
+class exception
+{
+public:
+    exception() throw() = default;
+    exception(const exception&) throw() = default;
+    virtual ~exception() = default;
+
+    exception& operator=(const exception&) throw()
+    {
+        return *this;
+    }
+
+    virtual const char* what() const throw()
+    {
+        return "my exception";
+    }
+};
+
 void Kernel::run()
 {
     TRACE("Running...");
+
+    try {
+        TRACE("try...");
+        throw exception();
+    }
+    catch(exception& e) {
+        TRACE("caught an exception: %s", e.what());
+    }
+    TRACE("done with exception test");
 
     InterruptLock lock;
     {
