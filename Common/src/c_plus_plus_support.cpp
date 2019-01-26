@@ -1,35 +1,18 @@
-#include "flapjack_libc/assert.h"
+#ifdef TESTING
+#error "It's not a good idea to try to replace the C++ runtime within the unit test suite. This translation unit is untestable by nature."
+#endif
+
 #include <cstdlib>
 #include <new>
+#include "flapjack_libc/assert.h"
+#include <common/logger.hpp>
 
 // The C++ runtime needs this function in case a pure virtual function call is
 // made. Though, that should not be possible, anyhow.
 extern "C" void __cxa_pure_virtual(void)
 {
-#ifdef TESTING
-    abort();
-#else
     panic("__cxa_pure_virtual");
-#endif
 }
-
-#ifdef TESTING
-extern "C" __attribute__((noreturn)) void flapjack_abort()
-{
-    abort();
-    __builtin_unreachable();
-}
-#else
-extern "C" __attribute__((noreturn)) void flapjack_abort()
-{
-    panic("flapjack_abort");
-}
-
-extern "C" __attribute__((noreturn)) void abort()
-{
-    flapjack_abort();
-}
-#endif
 
 void* operator new(size_t size)
 {

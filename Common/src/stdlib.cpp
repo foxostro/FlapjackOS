@@ -48,3 +48,13 @@ void set_global_allocator(MemoryAllocator *a)
     assert(a);
     g_allocator = a;
 }
+
+extern "C" __attribute__((noreturn))
+void ABORT()
+{
+#ifdef TESTING
+    abort();
+#else
+    panic("flapjack_abort");
+#endif
+}
