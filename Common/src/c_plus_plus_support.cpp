@@ -17,7 +17,7 @@ namespace std {
 extern "C"
 void* __cxa_allocate_exception(size_t thrown_size) throw()
 {
-    TRACE("thrown_size --> %u", (unsigned)thrown_size);
+    TRACE("thrown_size --> %u", static_cast<unsigned>(thrown_size));
     return malloc(thrown_size);
 }
 
@@ -72,7 +72,7 @@ void __cxa_throw(void* thrown_exception,
     (void)tinfo;
     (void)dest;
 
-    __cxa_exception *header = ((__cxa_exception*)thrown_exception - 1);
+    __cxa_exception *header = reinterpret_cast<__cxa_exception*>(thrown_exception) - 1;
 
     TRACE("about to call _Unwind_RaiseException...");
     _Unwind_RaiseException(&header->unwind_header);
