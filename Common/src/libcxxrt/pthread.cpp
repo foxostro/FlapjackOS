@@ -81,15 +81,17 @@ int pthread_mutex_init(pthread_mutex_t* mutex,
 extern "C"
 int pthread_mutex_lock(pthread_mutex_t* mutex)
 {
-    assert(*mutex == 0);
-    *mutex = 1;
+    assert(mutex);
+    while (!__sync_bool_compare_and_swap(mutex, 0, 1)) {
+        sched_yield();
+    }
     return 0;
 }
 
 extern "C"
 int pthread_mutex_unlock(pthread_mutex_t* mutex)
 {
-    assert(*mutex != 0);
+    assert(*mutex);
     *mutex = 0;
     return 0;
 }
