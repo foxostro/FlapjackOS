@@ -85,40 +85,49 @@ void Kernel::run()
     }
     TRACE("done with exception test");
 
-    InterruptLock lock;
-    {
-        LockGuard guard{lock};
-        MultibootModuleEnumerator enumerator{mmu_, mb_info_};
-        assert(enumerator.has_next());
-        Data elf_image = get_module_data(enumerator.get_next());
-        create_elf_loader(elf_image)
-        .and_then([&](SharedPointer<ElfLoader> elf_loader) -> Expected<Monostate> {
-            TRACE("exec");
-            unsigned result = elf_loader->exec();
-            terminal_.printf("result = 0x%x\n", result);
-            if (result == 0xdeadbeef) {
+    try {
+        InterruptLock lock;
+        {
+            LockGuard guard{lock};
+            MultibootModuleEnumerator enumerator{mmu_, mb_info_};
+            assert(enumerator.has_next());
+            Data elf_image = get_module_data(enumerator.get_next());
+            create_elf_loader(elf_image)
+            .and_then([&](SharedPointer<ElfLoader> elf_loader) -> Expected<Monostate> {
+                TRACE("exec");
+                unsigned result = elf_loader->exec();
+                terminal_.printf("result = 0x%x\n", result);
+                if (result == 0xdeadbeef) {
+                    return Monostate{};
+                } else {
+                    // AFOX_TODO: It would be an improvement to add a std::string equivalent class and use that for the error description field. This way, we could format a description which includes the actual status code.
+                    return Error{-1, KernelErrorDomain, "Program returned an unexpected status code."};
+                }
+            })
+            .map_error([&](Error error){
+                terminal_.printf("Failed to execute program: error_code = %d ; " \
+                                "error_domain = %s\n%s\n",
+                                error.error_code,
+                                error.error_domain,
+                                error.error_description);
                 return Monostate{};
-            } else {
-                // AFOX_TODO: It would be an improvement to add a std::string equivalent class and use that for the error description field. This way, we could format a description which includes the actual status code.
-                return Error{-1, KernelErrorDomain, "Program returned an unexpected status code."};
-            }
-        })
-        .map_error([&](Error error){
-            terminal_.printf("Failed to execute program: error_code = %d ; " \
-                             "error_domain = %s\n%s\n",
-                             error.error_code,
-                             error.error_domain,
-                             error.error_description);
-            return Monostate{};
-        });
-        
-        // AFOX_TODO: There's a bug which makes it impossible to chain a call to Expected::map() after the call to map_error().
-        // AFOX_TODO: It would be great to add a Expected::join() method and use it here.
-        terminal_.printf("Finished executing user program\n");
-    }
+            });
+            
+            // AFOX_TODO: There's a bug which makes it impossible to chain a call to Expected::map() after the call to map_error().
+            // AFOX_TODO: It would be great to add a Expected::join() method and use it here.
+            terminal_.printf("Finished executing user program\n");
+        }
 
-    scheduler_.begin(new ThreadExternalStack);
-    do_console_loop();
+        TRACE("Invoking the scheduler now.");
+        scheduler_.begin(new ThreadExternalStack);
+
+        do_console_loop();
+    } catch (std::exception& ex) {
+        panic("exception in Kernel::run(): %s", ex.what());
+    }
+    catch (...) {
+        panic("unknown exception in Kernel::run()");
+    }
 }
 
 Data Kernel::get_module_data(multiboot_module_t& module)
