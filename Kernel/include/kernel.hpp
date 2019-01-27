@@ -27,19 +27,19 @@ public:
     void run();
 
     // Redirect the interrupt to the appropriate handler.
-    void dispatch_interrupt(void* params)
+    void dispatch_interrupt(void* params) noexcept
     {
         interrupt_controller_.dispatch(params);
     }
 
     // The current thread yields to the next runnable thread.
-    void yield()
+    void yield() noexcept
     {
         scheduler_.yield();
     }
 
     // The current thread exits.
-    __attribute__((noreturn)) void vanish()
+    __attribute__((noreturn)) void vanish() noexcept
     {
         scheduler_.vanish();
     }
