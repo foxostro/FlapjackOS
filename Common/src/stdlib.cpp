@@ -2,6 +2,10 @@
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
 #include <common/memory_allocator.hpp>
+#include <common/mutex.hpp>
+#include <common/lock_guard.hpp>
+
+static Mutex g_malloc_mutex;
 
 // Sets the allocator to use for the malloc family of functions.
 static MemoryAllocator *g_allocator = nullptr;
@@ -22,12 +26,14 @@ extern "C" {
 
 void* malloc(size_t size)
 {
+    LockGuard guard{g_malloc_mutex};
     assert(g_allocator && "malloc() called without first specifying a global allocator.");
     return g_allocator->malloc(size);
 }
 
 void* calloc(size_t count, size_t size)
 {
+    LockGuard guard{g_malloc_mutex};
     assert(g_allocator && "calloc() called without first specifying a global allocator.");
     void* result = g_allocator->malloc(count * size);
     memset(result, 0, count * size);
@@ -36,18 +42,21 @@ void* calloc(size_t count, size_t size)
 
 void* memalign(size_t size, size_t align)
 {
+    LockGuard guard{g_malloc_mutex};
     assert(g_allocator && "memalign() called without first specifying a global allocator.");
     return g_allocator->memalign(size, align);
 }
 
 void* realloc(void *ptr, size_t size)
 {
+    LockGuard guard{g_malloc_mutex};
     assert(g_allocator && "realloc() called without first specifying a global allocator.");
     return g_allocator->realloc(ptr, size);
 }
 
 void free(void *ptr)
 {
+    LockGuard guard{g_malloc_mutex};
     assert(g_allocator && "free() called without first specifying a global allocator.");
     return g_allocator->free(ptr);
 }
