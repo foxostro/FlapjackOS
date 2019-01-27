@@ -95,6 +95,9 @@ private:
     // Try to run the kernel loop, lacks those top-level catch blocks.
     void try_run();
 
+    // Do a test of the ELF loader and exec.
+    void do_exec_test();
+
     Data get_module_data(multiboot_module_t& module);
 
     Expected<SharedPointer<ElfLoader>> create_elf_loader(const Data& elf_image);
