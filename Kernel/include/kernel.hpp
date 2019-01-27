@@ -92,6 +92,9 @@ private:
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
 
+    // Try to run the kernel loop, lacks those top-level catch blocks.
+    void try_run();
+
     Data get_module_data(multiboot_module_t& module);
 
     Expected<SharedPointer<ElfLoader>> create_elf_loader(const Data& elf_image);
