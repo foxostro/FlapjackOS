@@ -5,16 +5,34 @@
 #include <cstdlib>
 #include <new>
 
+void* allocate_memory_for_aligned_new(size_t size, std::align_val_t align)
+{
+    if (0 == size) {
+        size = 1;
+    }
+    void* allocation = memalign(size, static_cast<size_t>(align));
+    while (0 == allocation) {
+        auto h = std::get_new_handler();
+        if (0 != h) {
+            h();
+        } else {
+            throw std::bad_alloc();
+        }
+        allocation = memalign(size, static_cast<size_t>(align));
+    }
+    return allocation;
+}
+
 void* operator new(size_t size, std::align_val_t align)
 {
     // AFOX_TODO: Should this be moved to libcxxrt with the other operator news?
-    return memalign(size, static_cast<size_t>(align));
+    return allocate_memory_for_aligned_new(size, align);
 }
 
 void* operator new[](size_t size, std::align_val_t align)
 {
     // AFOX_TODO: Should this be moved to libcxxrt with the other operator news?
-    return memalign(size, static_cast<size_t>(align));
+    return allocate_memory_for_aligned_new(size, align);
 }
 
 void operator delete(void* p, size_t, std::align_val_t)
