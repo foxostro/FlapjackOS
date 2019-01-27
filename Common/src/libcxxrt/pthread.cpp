@@ -1,5 +1,7 @@
 #include "pthread.h"
-#include <assert.h>
+#include <cassert>
+#include <common/mutex.hpp>
+#include <common/lock_guard.hpp>
 
 void* threadDataTable[64];
 int freeEntry = 0;
@@ -16,8 +18,12 @@ int pthread_key_create(pthread_key_t* key,
 }
  
 extern "C"
-int pthread_once(pthread_once_t* control, void (*init)(void))
+int pthread_once(pthread_once_t* control, void (*init)())
 {
+    assert(control);
+    assert(init);
+    static Mutex mutex;
+    LockGuard guard{mutex};
     if (*control == 0) {
         (*init)();
         *control = 1;
