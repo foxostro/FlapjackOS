@@ -80,7 +80,11 @@ public:
     char* stack_pointer;
 
 private:
-    alignas(alignof(void*)) char backing_[StackSize];
+    // Let's align thread stacks on 16 byte boundaries so they will work fine
+    // with SSE in the future.
+    static constexpr size_t ALIGNMENT = 16;
+
+    alignas(ALIGNMENT) char backing_[StackSize];
 };
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_STATIC_STACK_HPP
