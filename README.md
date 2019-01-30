@@ -9,24 +9,17 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 ## Building and Installing Dependencies and Tools
 
 1. Install [MacPorts](https://www.macports.org).
-2. Use MacPorts to install the following packages:
-
-   ```bash
-   % sudo port install objconv check
-   ```
-
-   * objconv -- This tool can convert and manipulate object files in a variety of formats. This is required for the GRUB2 command-line tools.
-   * check -- This is a C unit testing framework used by Flapjack OS.
-
-3. Build a cross compiler:
+2. Build a cross compiler:
 
    ```bash
    % ./scripts/make_toolchain.sh i386-elf
+   % rm -rf ./build_toolchain/
+   % ./scripts/make_toolchain.sh x86_64-elf
    ```
 
    * Make sure to put the cross compiler into your $PATH.
 
-4. Install [xorriso](https://www.gnu.org/software/xorriso)
+3. Install [xorriso](https://www.gnu.org/software/xorriso)
 
    ```bash
    % wget https://www.gnu.org/software/xorriso/xorriso-1.4.6.tar.gz
@@ -37,9 +30,10 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
    % sudo make install
    ```
 
-5. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
+4. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
 
    ```bash
+   % sudo port install objconv automake autoconf
    % git clone git://git.savannah.gnu.org/grub.git
    % cd grub
    % ./autogen.sh
@@ -71,6 +65,7 @@ To run the unit tests, run the test script, or cd to the build_host directory an
 1. Install Bochs. You should not install from MacPorts. Instead build and install from source so that we can can enable debugging features and different display libraries. The Bochs which comes from MacPorts seems to only support the X11 display driver, for example, and will not work correctly unless you also install [XQuartz](https://www.xquartz.org).
 
    ```bash
+   % sudo port install libsdl2 pkgconfig
    % svn co http://svn.code.sf.net/p/bochs/code/tags/REL_2_6_8_FINAL/bochs boch
    % cd bochs
    % CXX=/usr/bin/clang++ CC=/usr/bin/clang ./configure --enable-smp --enable-cpu-level=6 --enable-all-optimizations --enable-x86-64 --enable-pci --enable-vmx --enable-debugger --enable-disasm --enable-debugger-gui --enable-logging --enable-fpu --enable-3dnow --enable-sb16=dummy --enable-cdrom --enable-x86-debugger --enable-iodebug --disable-plugins --disable-docbook --with-term --with-sdl2
@@ -80,10 +75,10 @@ To run the unit tests, run the test script, or cd to the build_host directory an
 
 2. An example bochsrc file may be found in bochsrc.template. Copy this to bochsrc and tweak as needed.
 3. Build Flapjack OS so that you have the "FlapjackOS.iso" disk image.
-4. Launch Bochs with the "run.sh" helper script:
+4. Launch Bochs with the "run_bochs.sh" helper script:
 
    ```bash
-   % ./scripts/run.sh
+   % ./scripts/run_bochs.sh i386
    ```
 
 Notes:
@@ -102,7 +97,7 @@ Notes:
 3. Launch Qemu as follows:
 
    ```bash
-   % qemu-system-i386 -cdrom ./FlapjackOS.iso
+   % ./scripts/run_qemu.sh i386
    ```
 
 ### Running on real hardware
@@ -124,6 +119,7 @@ Notes:
 
 ## Misc. Tips and Tricks
 
+* The build script will make use of Ninja and Ccache if those tools are installed and available in the PATH.
 * Use the script "mount_bootfd.sh" to mount the boot disk image. This will permit you to see what files it contains.
 * Qemu is capable of directly booting a multiboot compliant kernel like so:
 
