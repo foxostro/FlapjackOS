@@ -1,6 +1,7 @@
 #!/bin/sh
-set -e
+set -eu
 
+PROJECT_DIR="$1"; shift
 BUILD_DIR="$1"; shift
 OTHER_OPTIONS="$@"
 
@@ -30,4 +31,4 @@ else
 fi
 
 cmake -E make_directory "$BUILD_DIR"
-cmake -E chdir "$BUILD_DIR" cmake ../.. $GENERATOR $CCACHE_LAUNCHER $OTHER_OPTIONS
+cmake -E chdir "$BUILD_DIR" cmake "$PROJECT_DIR" $GENERATOR $CCACHE_LAUNCHER $OTHER_OPTIONS

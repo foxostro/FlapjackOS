@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eu
 
 TARGET=$1
 if [ -z "$TARGET" ]; then
@@ -7,10 +7,12 @@ if [ -z "$TARGET" ]; then
     exit 1
 fi
 
-BUILD_PREFIX="build"
+PROJECT_DIR="$(pwd)"
+BUILD_PREFIX="$FLAPJACKOS_BUILD_DIR/build"
+
 CROSS_BUILD_DIR="$BUILD_PREFIX/$TARGET"
 CONFIGURE="./scripts/do_configure_build.sh"
-"$CONFIGURE" "$CROSS_BUILD_DIR" -DCMAKE_TOOLCHAIN_FILE="$TARGET-elf.toolchain.cmake"
+"$CONFIGURE" "$PROJECT_DIR" "$CROSS_BUILD_DIR" -DCMAKE_TOOLCHAIN_FILE="$TARGET-elf.toolchain.cmake"
 
 BUILD="./scripts/do_build.sh"
 "$BUILD" "$CROSS_BUILD_DIR"

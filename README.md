@@ -9,17 +9,28 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
 ## Building and Installing Dependencies and Tools
 
 1. Install [MacPorts](https://www.macports.org).
-2. Build a cross compiler:
+2. Make sure your environment exports a variable FLAPJACKOS_BUILD_DIR which defines the path to the build output directory. Insert this into "$HOME/.profile":
+
+   ```bash
+   export FLAPJACKOS_BUILD_DIR="$HOME/FlapjackOS-build"
+   ```
+   
+   and then make sure that directory exists:
+   ```bash
+   mkdir -p "$FLAPJACKOS_BUILD_DIR"
+   ```
+
+3. Build a cross compiler:
 
    ```bash
    % ./scripts/make_toolchain.sh i386-elf
-   % rm -rf ./build_toolchain/
+   % rm -rf $FLAPJACKOS_BUILD_DIR/build_toolchain/
    % ./scripts/make_toolchain.sh x86_64-elf
    ```
 
    * Make sure to put the cross compiler into your $PATH.
 
-3. Install [xorriso](https://www.gnu.org/software/xorriso)
+4. Install [xorriso](https://www.gnu.org/software/xorriso)
 
    ```bash
    % wget https://www.gnu.org/software/xorriso/xorriso-1.4.6.tar.gz
@@ -30,7 +41,7 @@ I'm developing Flapjack on macOS and all instructions will assume you are too. I
    % sudo make install
    ```
 
-4. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
+5. Install the GRUB2 command-line tools as described on [this wiki page](http://wiki.osdev.org/GRUB):
 
    ```bash
    % sudo port install objconv automake autoconf

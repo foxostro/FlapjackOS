@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eu
 rm -rf "CMakeCache.txt" \
        "CMakeFiles/" \
        "CMakeScripts/" \
@@ -15,7 +15,5 @@ rm -rf "CMakeCache.txt" \
        "Malloc/CTestTestfile.cmake" \
        "Malloc/FlapjackOS.build/" \
        "Malloc/cmake_install.cmake" \
-       "build/" \
-       "build_cross/" \
-       "build_host/" \
+       "$FLAPJACKOS_BUILD_DIR/build/" \
        "cmake_install.cmake" \

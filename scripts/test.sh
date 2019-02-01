@@ -1,14 +1,15 @@
 #!/bin/sh
-set -e
-set -o pipefail
+set -euo pipefail
 
-BUILD_PREFIX="build/"
+PROJECT_DIR="$(pwd)"
+BUILD_PREFIX="$FLAPJACKOS_BUILD_DIR/build"
+
 #TEST32_BUILD_DIR="$BUILD_PREFIX/test_i386"
 TEST64_BUILD_DIR="$BUILD_PREFIX/test_x86_64"
 
 CONFIGURE="./scripts/do_configure_build.sh"
-#"$CONFIGURE" "$TEST32_BUILD_DIR" -DTEST_BUILD_ARCH:string="i386"
-"$CONFIGURE" "$TEST64_BUILD_DIR" -DTEST_BUILD_ARCH:string="x86_64"
+#"$CONFIGURE" "$PROJECT_DIR" "$TEST32_BUILD_DIR" -DTEST_BUILD_ARCH:string="i386"
+"$CONFIGURE" "$PROJECT_DIR" "$TEST64_BUILD_DIR" -DTEST_BUILD_ARCH:string="x86_64"
 
 BUILD="./scripts/do_build.sh"
 #"$BUILD" "$TEST32_BUILD_DIR"
