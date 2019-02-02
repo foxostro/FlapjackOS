@@ -65,8 +65,8 @@ using namespace ABI_NAMESPACE;
  * stored in the generic unwind structure, while on other platforms it is
  * stored in the C++ exception.
  */
-static void saveLandingPad(struct _Unwind_Context *context,
-                           struct _Unwind_Exception *ucb,
+static void saveLandingPad(__attribute__((unused)) struct _Unwind_Context *context,
+                           __attribute__((unused)) struct _Unwind_Exception *ucb,
                            struct __cxa_exception *ex,
                            int selector,
                            dw_eh_ptr_t landingPad)
@@ -89,8 +89,8 @@ static void saveLandingPad(struct _Unwind_Context *context,
 /**
  * Loads the saved landing pad.  Returns 1 on success, 0 on failure.
  */
-static int loadLandingPad(struct _Unwind_Context *context,
-                          struct _Unwind_Exception *ucb,
+static int loadLandingPad(__attribute__((unused)) struct _Unwind_Context *context,
+                          __attribute__((unused)) struct _Unwind_Exception *ucb,
                           struct __cxa_exception *ex,
                           unsigned long *selector,
                           dw_eh_ptr_t *landingPad)
@@ -110,8 +110,8 @@ static int loadLandingPad(struct _Unwind_Context *context,
 #endif
 }
 
-static inline _Unwind_Reason_Code continueUnwinding(struct _Unwind_Exception *ex,
-                                                    struct _Unwind_Context *context)
+static inline _Unwind_Reason_Code continueUnwinding(__attribute__((unused)) struct _Unwind_Exception *ex,
+                                                    __attribute__((unused)) struct _Unwind_Context *context)
 {
 #if defined(__arm__) && !defined(__ARM_DWARF_EH__)
 	if (__gnu_unwind_frame(ex, context) != _URC_OK) { return _URC_FAILURE; }
@@ -301,7 +301,7 @@ static pthread_key_t eh_key;
  * Cleanup function, allowing foreign exception handlers to correctly destroy
  * this exception if they catch it.
  */
-static void exception_cleanup(_Unwind_Reason_Code reason, 
+static void exception_cleanup(__attribute__((unused)) _Unwind_Reason_Code reason, 
                               struct _Unwind_Exception *ex)
 {
 	// Exception layout:
@@ -310,8 +310,8 @@ static void exception_cleanup(_Unwind_Reason_Code reason,
 	// __cxa_free_exception expects a pointer to the exception object
 	__cxa_free_exception(static_cast<void*>(ex + 1));
 }
-static void dependent_exception_cleanup(_Unwind_Reason_Code reason, 
-                              struct _Unwind_Exception *ex)
+static void dependent_exception_cleanup(__attribute__((unused)) _Unwind_Reason_Code reason, 
+                                        struct _Unwind_Exception *ex)
 {
 
 	__cxa_free_dependent_exception(static_cast<void*>(ex + 1));
@@ -655,7 +655,8 @@ void __cxa_free_dependent_exception(void *thrown_exception)
  * Note: As of FreeBSD 8.1, dladd() still doesn't work properly, so this only
  * correctly prints function names from public, relocatable, symbols.
  */
-static _Unwind_Reason_Code trace(struct _Unwind_Context *context, void *c)
+static _Unwind_Reason_Code trace(struct _Unwind_Context *context,
+                                 __attribute__((unused)) void *c)
 {
 	Dl_info myinfo;
 	int mylookup =
@@ -1036,8 +1037,8 @@ static handler_type check_action_record(_Unwind_Context *context,
 	return found;
 }
 
-static void pushCleanupException(_Unwind_Exception *exceptionObject,
-                                 __cxa_exception *ex)
+static void pushCleanupException(__attribute__((unused)) _Unwind_Exception *exceptionObject,
+                                 __attribute__((unused)) __cxa_exception *ex)
 {
 #if defined(__arm__) && !defined(__ARM_DWARF_EH__)
 	__cxa_thread_info *info = thread_info_fast();
@@ -1096,7 +1097,7 @@ BEGIN_PERSONALITY_FUNCTION(__gxx_personality_v0)
 	if (0 == lsda_addr) { return continueUnwinding(exceptionObject, context); }
 
 	// These two variables define how the exception will be handled.
-	dwarf_eh_action action = {0};
+	dwarf_eh_action action = {0, 0};
 	unsigned long selector = 0;
 	
 	// During the search phase, we do a complete lookup.  If we return

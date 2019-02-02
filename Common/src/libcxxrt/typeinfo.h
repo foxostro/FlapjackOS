@@ -98,8 +98,8 @@ namespace std
 		 * the pointer.
 		 */
 		virtual bool __do_upcast(
-		                const ABI_NAMESPACE::__class_type_info *target,
-		                void **thrown_object) const
+		                __attribute__((unused)) const ABI_NAMESPACE::__class_type_info *target,
+		                __attribute__((unused)) void **thrown_object) const
 		{
 			return false;
 		}
@@ -149,8 +149,8 @@ namespace ABI_NAMESPACE
 		 * Function implementing dynamic casts.
 		 */
 		virtual void *cast_to(void *obj, const struct __class_type_info *other) const;
-		virtual bool __do_upcast(const __class_type_info *target,
-		                       void **thrown_object) const
+		virtual bool __do_upcast(__attribute__((unused)) const __class_type_info *target,
+		                         __attribute__((unused)) void **thrown_object) const
 		{
 			return this == target;
 		}

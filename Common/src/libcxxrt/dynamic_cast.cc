@@ -48,7 +48,7 @@ struct vtable_header
 
 bool std::type_info::__do_catch(std::type_info const *ex_type,
                                 void **exception_object,
-                                unsigned int outer) const
+                                __attribute__((unused)) unsigned int outer) const
 {
 	const type_info *type = this;
 
@@ -198,9 +198,9 @@ bool __vmi_class_type_info::__do_upcast(const __class_type_info *target,
  * base type but never a virtual base type
  */
 extern "C" void* __dynamic_cast(const void *sub,
-                                const __class_type_info *src,
+                                __attribute__((unused)) const __class_type_info *src,
                                 const __class_type_info *dst,
-                                ptrdiff_t src2dst_offset)
+                                __attribute__((unused)) ptrdiff_t src2dst_offset)
 {
 	const char *vtable_location = *static_cast<const char * const *>(sub);
 	const vtable_header *header =
