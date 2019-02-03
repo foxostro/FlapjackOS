@@ -10,6 +10,8 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 #include <common/mutex.hpp>
+#include <cpuid.h>
+#include <creg_bits.h>
 
 
 const char* KernelErrorDomain = "Kernel";
@@ -67,8 +69,94 @@ void Kernel::run()
     }
 }
 
+static inline void fninit()
+{
+    asm volatile("fninit");
+}
+
+static inline uint32_t get_cr0()
+{
+    uint32_t value = 0;
+    asm volatile("mov %%cr0, %0" : "=r"(value));
+    return value;
+}
+
+static inline void set_cr0(uint32_t value)
+{
+    asm volatile("mov %0, %%cr0" :: "r"(value));
+}
+
+static inline uint32_t get_cr4()
+{
+    uint32_t value = 0;
+    asm volatile("mov %%cr4, %0" : "=r"(value));
+    return value;
+}
+
+static inline void set_cr4(uint32_t value)
+{
+    asm volatile("mov %0, %%cr4" :: "r"(value));
+}
+
+static void initialize_fpu()
+{
+    TRACE("CPU supports an FPU. Initializing...");
+    uint32_t cr0 = get_cr0();
+    cr0 = cr0 & ~(CR0_EM | CR0_TS | CR0_NE);
+    set_cr0(cr0);
+    fninit();
+}
+
+static void initialize_sse()
+{
+    TRACE("CPU supports SSE. Initializing...");
+    uint32_t cr0 = get_cr0();
+    cr0 = cr0 & ~CR0_EM;
+    cr0 = cr0 | CR0_MP;
+    set_cr0(cr0);
+
+    uint32_t cr4 = get_cr4();
+    cr4 = cr4 | CR4_OSFXSR;
+    cr4 = cr4 | CR4_OSXMMEXCPT;
+    set_cr4(cr4);
+}
+
 void Kernel::try_run()
 {
+    TRACE("Setting up floating point features...");
+    unsigned leaf = 1, a = 0, b = 0, c = 0, d = 0;
+    int result = __get_cpuid(leaf, &a, &b, &c, &d);
+    if (result == 0) {
+        TRACE("Unable to get CPU features from CPUID.");
+    } else {
+        constexpr unsigned bit_FPU = 1 << 0;
+        if (d & bit_FPU) {
+            initialize_fpu();
+        }
+        if (d & bit_MMX) {
+            TRACE("MMX support");
+        }
+        if (d & bit_SSE) {
+            initialize_sse();
+        }
+        if (d & bit_SSE2) {
+            TRACE("SSE2 support");
+        }
+        if (c & bit_SSE3) {
+            TRACE("SSE3 support");
+        }
+        if (c & bit_SSE4_1) {
+            TRACE("SSE4.1 support");
+        }
+        if (c & bit_SSE4_2) {
+            TRACE("SSE4.2 support");
+        }
+    }
+
+    TRACE("Let's try to use some floating point");
+    float f = 5.0f + 1.5f;
+    TRACE("result as int --> %d", (int)f);
+    throw "test";
     do_exec_test();
     scheduler_.begin(new ThreadExternalStack);
     do_console_loop();
