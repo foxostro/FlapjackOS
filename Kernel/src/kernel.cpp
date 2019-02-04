@@ -123,7 +123,7 @@ static void initialize_sse()
     set_cr4(cr4);
 }
 
-void Kernel::try_run()
+static void initialize_floating_point_features()
 {
     TRACE("Setting up floating point features...");
     unsigned leaf = 1, a = 0, b = 0, c = 0, d = 0;
@@ -156,11 +156,29 @@ void Kernel::try_run()
             TRACE("SSE4.2 support");
         }
     }
+}
 
+static void demonstrate_floating_point()
+{
     TRACE("Let's try to use some floating point");
     float f = 5.0f + 1.5f;
     TRACE("result as int --> %d", (int)f);
-    throw "test";
+}
+
+class test_exception: public std::exception
+{
+public:
+    const char* what() const throw() override
+    {
+        return "test_exception";
+    }
+};
+
+void Kernel::try_run()
+{
+    initialize_floating_point_features();
+    demonstrate_floating_point();
+    throw test_exception();
     do_exec_test();
     scheduler_.begin(new ThreadExternalStack);
     do_console_loop();
