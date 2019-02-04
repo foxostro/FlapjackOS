@@ -84,12 +84,31 @@ public:
     }
 };
 
+static std::atomic<int> g_count{1};
+
+static void task(void* param)
+{
+    TextTerminal* terminal = reinterpret_cast<TextTerminal*>(param);
+    assert(terminal);
+    for (int i = 0; i < 20; ++i) {
+        terminal->putchar('a');
+    }
+    g_count--;
+}
+
 void Kernel::try_run()
 {
     demonstrate_floating_point();
+    scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
+    scheduler_.begin(new ThreadExternalStack);
+
+    while (g_count > 0) {
+        yield();
+    }
+    TRACE("task is done");
+
     throw test_exception();
     do_exec_test();
-    scheduler_.begin(new ThreadExternalStack);
     do_console_loop();
 }
 
