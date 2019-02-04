@@ -27,10 +27,11 @@ public:
     Thread_i386(Thread_i386&& other) = default;
     Thread_i386(const Thread_i386&) = delete;
 
-    explicit Thread_i386(void (*function)(unsigned), unsigned param)
+    explicit Thread_i386(void (*function)(void*), void* param)
     {
+        // AFOX_TODO: Need to setup the 512 byte floating point state region here too.
         stack_.push(/*second parameter=*/reinterpret_cast<uintptr_t>(function));
-        stack_.push(/*first parameter=*/static_cast<uint32_t>(param));
+        stack_.push(/*first parameter=*/reinterpret_cast<uint32_t>(param));
         stack_.push(/*return address=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* EBP = stack_.stack_pointer - sizeof(EBP);

@@ -27,8 +27,9 @@ public:
     Thread_x86_64(Thread_x86_64&& other) = default;
     Thread_x86_64(const Thread_x86_64&) = delete;
 
-    explicit Thread_x86_64(void (*function)(unsigned), unsigned param)
+    explicit Thread_x86_64(void (*function)(void*), void* param)
     {
+        // AFOX_TODO: Need to setup the 512 byte floating point state region here too.
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* RBP = stack_.stack_pointer - sizeof(RBP);
@@ -41,7 +42,7 @@ public:
         stack_.push(/*RSP=*/RSP);
         stack_.push(/*RBP=*/RBP);
         stack_.push(/*RSI=*/reinterpret_cast<uintptr_t>(function));
-        stack_.push(/*RDI=*/static_cast<uint64_t>(param));
+        stack_.push(/*RDI=*/reinterpret_cast<uint64_t>(param));
         stack_.push(/*R8=*/InitialRegisterValue);
         stack_.push(/*R9=*/InitialRegisterValue);
         stack_.push(/*R10=*/InitialRegisterValue);
