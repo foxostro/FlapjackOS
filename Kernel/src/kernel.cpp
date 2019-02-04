@@ -67,10 +67,28 @@ void Kernel::run()
     }
 }
 
+class test_exception: public std::exception
+{
+public:
+    const char* what() const throw() override
+    {
+        return "test_exception";
+    }
+};
+
 void Kernel::try_run()
 {
-    do_exec_test();
     scheduler_.begin(new ThreadExternalStack);
+
+    try {
+        throw test_exception();
+    }
+    catch(test_exception& ex) {
+        TRACE("caught exception as expected: %s", ex.what());
+    }
+
+    do_exec_test();
+
     do_console_loop();
 }
 
