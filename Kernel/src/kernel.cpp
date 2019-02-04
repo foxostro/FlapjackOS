@@ -76,10 +76,27 @@ public:
     }
 };
 
+static std::atomic<int> g_count{1};
+
+static void task(unsigned param)
+{
+    for (int i = 0; i < 20; ++i) {
+        TRACE("param: %u", param);
+    }
+    TRACE("going to return from task() now");
+    g_count--;
+}
+
 void Kernel::try_run()
 {
+    scheduler_.add(new Thread(task, 42));
     scheduler_.begin(new ThreadExternalStack);
-
+    while (g_count > 0) {
+        yield();
+        terminal_.putchar('b');
+    }
+    TRACE("task is done");
+    
     try {
         throw test_exception();
     }
