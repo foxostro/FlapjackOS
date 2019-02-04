@@ -6,7 +6,7 @@
 
 static Scheduler* g_scheduler = nullptr;
 
-extern "C" void thread_start(unsigned param, void(*function)(unsigned)) noexcept
+extern "C" void thread_start(uintptr_t param, void(*function)(uintptr_t)) noexcept
 {
     g_scheduler->unlock_at_thread_start();
     function(param);

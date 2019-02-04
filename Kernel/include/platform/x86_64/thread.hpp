@@ -29,27 +29,27 @@ public:
 
     explicit Thread_x86_64(void (*function)(unsigned), unsigned param)
     {
-        stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(vanish));
-        stack_.push(/*RIP=*/reinterpret_cast<uintptr_t>(thread_start));
+        stack_.push8(/*RIP=*/reinterpret_cast<uint64_t>(vanish));
+        stack_.push8(/*RIP=*/reinterpret_cast<uint64_t>(thread_start));
         char* RBP = stack_.stack_pointer - sizeof(RBP);
-        stack_.push(/*RBP=*/RBP);
+        stack_.push8(/*RBP=*/reinterpret_cast<uint64_t>(RBP));
         char* RSP = stack_.stack_pointer;
-        stack_.push(/*RAX=*/InitialRegisterValue);
-        stack_.push(/*RCX=*/InitialRegisterValue);
-        stack_.push(/*RDX=*/InitialRegisterValue);
-        stack_.push(/*RBX=*/InitialRegisterValue);
-        stack_.push(/*RSP=*/RSP);
-        stack_.push(/*RBP=*/RBP);
-        stack_.push(/*RSI=*/reinterpret_cast<uintptr_t>(function));
-        stack_.push(/*RDI=*/static_cast<uint64_t>(param));
-        stack_.push(/*R8=*/InitialRegisterValue);
-        stack_.push(/*R9=*/InitialRegisterValue);
-        stack_.push(/*R10=*/InitialRegisterValue);
-        stack_.push(/*R11=*/InitialRegisterValue);
-        stack_.push(/*R12=*/InitialRegisterValue);
-        stack_.push(/*R13=*/InitialRegisterValue);
-        stack_.push(/*R14=*/InitialRegisterValue);
-        stack_.push(/*R15=*/InitialRegisterValue);
+        stack_.push8(/*RAX=*/InitialRegisterValue);
+        stack_.push8(/*RCX=*/InitialRegisterValue);
+        stack_.push8(/*RDX=*/InitialRegisterValue);
+        stack_.push8(/*RBX=*/InitialRegisterValue);
+        stack_.push8(/*RSP=*/reinterpret_cast<uint64_t>(RSP));
+        stack_.push8(/*RBP=*/reinterpret_cast<uint64_t>(RBP));
+        stack_.push8(/*RSI=*/reinterpret_cast<uint64_t>(function));
+        stack_.push8(/*RDI=*/static_cast<uint64_t>(param));
+        stack_.push8(/*R8=*/InitialRegisterValue);
+        stack_.push8(/*R9=*/InitialRegisterValue);
+        stack_.push8(/*R10=*/InitialRegisterValue);
+        stack_.push8(/*R11=*/InitialRegisterValue);
+        stack_.push8(/*R12=*/InitialRegisterValue);
+        stack_.push8(/*R13=*/InitialRegisterValue);
+        stack_.push8(/*R14=*/InitialRegisterValue);
+        stack_.push8(/*R15=*/InitialRegisterValue);
     }
 
     char*& get_stack_pointer() override

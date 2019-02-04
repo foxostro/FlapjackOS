@@ -17,6 +17,6 @@ extern "C" void yield() noexcept;
 extern "C" __attribute__((noreturn)) void vanish() noexcept;
 
 // Entry point for new threads.
-extern "C" void thread_start(unsigned param, void(*function)(unsigned)) noexcept;
+extern "C" void thread_start(uintptr_t param, void(*function)(uintptr_t)) noexcept;
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_THREAD_HPP

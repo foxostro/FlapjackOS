@@ -29,21 +29,21 @@ public:
 
     explicit Thread_i386(void (*function)(unsigned), unsigned param)
     {
-        stack_.push(/*second parameter=*/reinterpret_cast<uintptr_t>(function));
-        stack_.push(/*first parameter=*/static_cast<uint32_t>(param));
-        stack_.push(/*return address=*/reinterpret_cast<uintptr_t>(vanish));
-        stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
+        stack_.push4(/*second parameter=*/reinterpret_cast<uint32_t>(function));
+        stack_.push4(/*first parameter=*/static_cast<uint32_t>(param));
+        stack_.push4(/*return address=*/reinterpret_cast<uint32_t>(vanish));
+        stack_.push4(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
-        stack_.push(/*EBP=*/EBP);
+        stack_.push(/*EBP=*/reinterpret_cast<uint32_t>(EBP));
         char* ESP = stack_.stack_pointer;
-        stack_.push(/*POPA, EAX=*/InitialRegisterValue);
-        stack_.push(/*POPA, ECX=*/InitialRegisterValue);
-        stack_.push(/*POPA, EDX=*/InitialRegisterValue);
-        stack_.push(/*POPA, EBX=*/InitialRegisterValue);
-        stack_.push(/*POPA, ESP=*/ESP);
-        stack_.push(/*POPA, EBP=*/EBP);
-        stack_.push(/*POPA, ESI=*/InitialRegisterValue);
-        stack_.push(/*POPA, EDI=*/InitialRegisterValue);
+        stack_.push4(/*POPA, EAX=*/InitialRegisterValue);
+        stack_.push4(/*POPA, ECX=*/InitialRegisterValue);
+        stack_.push4(/*POPA, EDX=*/InitialRegisterValue);
+        stack_.push4(/*POPA, EBX=*/InitialRegisterValue);
+        stack_.push4(/*POPA, ESP=*/reinterpret_cast<uint32_t>(ESP));
+        stack_.push4(/*POPA, EBP=*/reinterpret_cast<uint32_t>(EBP));
+        stack_.push4(/*POPA, ESI=*/InitialRegisterValue);
+        stack_.push4(/*POPA, EDI=*/InitialRegisterValue);
     }
 
     char*& get_stack_pointer() override
