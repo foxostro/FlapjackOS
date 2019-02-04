@@ -80,10 +80,12 @@ public:
 
 static std::atomic<int> g_count{1};
 
-static void task(unsigned param)
+static void task(void* param)
 {
+    TextTerminal* terminal = static_cast<TextTerminal*>(param);
+    assert(terminal);
     for (int i = 0; i < 20; ++i) {
-        TRACE("param: %u", param);
+        terminal->putchar('a');
         yield();
     }
     TRACE("going to return from task() now");
@@ -92,7 +94,7 @@ static void task(unsigned param)
 
 void Kernel::try_run()
 {
-    scheduler_.add(new Thread(task, 42));
+    scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
     scheduler_.begin(new ThreadExternalStack);
     while (g_count > 0) {
         terminal_.putchar('b');
