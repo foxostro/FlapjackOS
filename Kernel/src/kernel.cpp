@@ -10,8 +10,10 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 #include <common/mutex.hpp>
-#include <cpuid.h>
-#include <creg_bits.h>
+#include <cpuid.h> // AFOX_TODO: No platform-specific code in kernel.cpp
+#include <creg_bits.h> // AFOX_TODO: No platform-specific code in kernel.cpp
+#include <platform/i386/creg.hpp> // AFOX_TODO: No platform-specific code in kernel.cpp
+#include <platform/x86_64/creg.hpp> // AFOX_TODO: No platform-specific code in kernel.cpp
 
 
 const char* KernelErrorDomain = "Kernel";
@@ -69,39 +71,39 @@ void Kernel::run()
     }
 }
 
+#ifdef __i386__
+inline uint32_t get_cr0() { return i386_get_cr0(); }
+#else
+inline uint64_t get_cr0() { return x86_64_get_cr0(); }
+#endif
+
+#ifdef __i386__
+inline void set_cr0(uint32_t value) { return i386_set_cr0(value); }
+#else
+inline void set_cr0(uint64_t value) { return x86_64_set_cr0(value); }
+#endif
+
+#ifdef __i386__
+inline uint32_t get_cr4() { return i386_get_cr4(); }
+#else
+inline uint64_t get_cr4() { return x86_64_get_cr4(); }
+#endif
+
+#ifdef __i386__
+inline void set_cr4(uint32_t value) { return i386_set_cr4(value); }
+#else
+inline void set_cr4(uint64_t value) { return x86_64_set_cr4(value); }
+#endif
+
 static inline void fninit()
 {
     asm volatile("fninit");
 }
 
-static inline uint32_t get_cr0()
-{
-    uint32_t value = 0;
-    asm volatile("mov %%cr0, %0" : "=r"(value));
-    return value;
-}
-
-static inline void set_cr0(uint32_t value)
-{
-    asm volatile("mov %0, %%cr0" :: "r"(value));
-}
-
-static inline uint32_t get_cr4()
-{
-    uint32_t value = 0;
-    asm volatile("mov %%cr4, %0" : "=r"(value));
-    return value;
-}
-
-static inline void set_cr4(uint32_t value)
-{
-    asm volatile("mov %0, %%cr4" :: "r"(value));
-}
-
 static void initialize_fpu()
 {
     TRACE("CPU supports an FPU. Initializing...");
-    uint32_t cr0 = get_cr0();
+    auto cr0 = get_cr0();
     cr0 = cr0 & ~(CR0_EM | CR0_TS | CR0_NE);
     set_cr0(cr0);
     fninit();
@@ -110,12 +112,12 @@ static void initialize_fpu()
 static void initialize_sse()
 {
     TRACE("CPU supports SSE. Initializing...");
-    uint32_t cr0 = get_cr0();
+    auto cr0 = get_cr0();
     cr0 = cr0 & ~CR0_EM;
     cr0 = cr0 | CR0_MP;
     set_cr0(cr0);
 
-    uint32_t cr4 = get_cr4();
+    auto cr4 = get_cr4();
     cr4 = cr4 | CR4_OSFXSR;
     cr4 = cr4 | CR4_OSXMMEXCPT;
     set_cr4(cr4);
@@ -129,7 +131,9 @@ void Kernel::try_run()
     if (result == 0) {
         TRACE("Unable to get CPU features from CPUID.");
     } else {
+        #ifndef bit_FPU
         constexpr unsigned bit_FPU = 1 << 0;
+        #endif
         if (d & bit_FPU) {
             initialize_fpu();
         }
