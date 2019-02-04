@@ -8,8 +8,15 @@ i386_context_switch:
     # Setup a stack frame.
     pushl %ebp
     movl %esp, %ebp
+
+    # Align the stack on the sixteen byte boundary.
+    andl $-16, %esp
     
     pusha
+
+    # Save floating point state.
+    subl $512, %esp
+    fxsave (%esp)
     
     # Return the old stack pointer so we can restore it later.
     movl 8(%ebp), %eax
@@ -18,6 +25,10 @@ i386_context_switch:
     # Switch to a new stack.
     movl 12(%ebp), %eax
     movl %eax, %esp
+
+    # Restore floating point state.
+    fxrstor (%esp)
+    addl $512, %esp
     
     popa
     
