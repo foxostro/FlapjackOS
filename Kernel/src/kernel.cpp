@@ -10,10 +10,6 @@
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
 #include <common/mutex.hpp>
-#include <cpuid.h> // AFOX_TODO: No platform-specific code in kernel.cpp
-#include <creg_bits.h> // AFOX_TODO: No platform-specific code in kernel.cpp
-#include <platform/i386/creg.hpp> // AFOX_TODO: No platform-specific code in kernel.cpp
-#include <platform/x86_64/creg.hpp> // AFOX_TODO: No platform-specific code in kernel.cpp
 
 
 const char* KernelErrorDomain = "Kernel";
@@ -41,6 +37,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
     initialize_physical_memory_map();
+    initialize_floating_point_features();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
 }
@@ -71,93 +68,6 @@ void Kernel::run()
     }
 }
 
-#ifdef __i386__
-inline uint32_t get_cr0() { return i386_get_cr0(); }
-#else
-inline uint64_t get_cr0() { return x86_64_get_cr0(); }
-#endif
-
-#ifdef __i386__
-inline void set_cr0(uint32_t value) { return i386_set_cr0(value); }
-#else
-inline void set_cr0(uint64_t value) { return x86_64_set_cr0(value); }
-#endif
-
-#ifdef __i386__
-inline uint32_t get_cr4() { return i386_get_cr4(); }
-#else
-inline uint64_t get_cr4() { return x86_64_get_cr4(); }
-#endif
-
-#ifdef __i386__
-inline void set_cr4(uint32_t value) { return i386_set_cr4(value); }
-#else
-inline void set_cr4(uint64_t value) { return x86_64_set_cr4(value); }
-#endif
-
-static inline void fninit()
-{
-    asm volatile("fninit");
-}
-
-static void initialize_fpu()
-{
-    TRACE("CPU supports an FPU. Initializing...");
-    auto cr0 = get_cr0();
-    cr0 = cr0 & ~(CR0_EM | CR0_TS | CR0_NE);
-    set_cr0(cr0);
-    fninit();
-}
-
-static void initialize_sse()
-{
-    TRACE("CPU supports SSE. Initializing...");
-    auto cr0 = get_cr0();
-    cr0 = cr0 & ~CR0_EM;
-    cr0 = cr0 | CR0_MP;
-    set_cr0(cr0);
-
-    auto cr4 = get_cr4();
-    cr4 = cr4 | CR4_OSFXSR;
-    cr4 = cr4 | CR4_OSXMMEXCPT;
-    set_cr4(cr4);
-}
-
-static void initialize_floating_point_features()
-{
-    TRACE("Setting up floating point features...");
-    unsigned leaf = 1, a = 0, b = 0, c = 0, d = 0;
-    int result = __get_cpuid(leaf, &a, &b, &c, &d);
-    if (result == 0) {
-        TRACE("Unable to get CPU features from CPUID.");
-    } else {
-        #ifndef bit_FPU
-        constexpr unsigned bit_FPU = 1 << 0;
-        #endif
-        if (d & bit_FPU) {
-            initialize_fpu();
-        }
-        if (d & bit_MMX) {
-            TRACE("MMX support");
-        }
-        if (d & bit_SSE) {
-            initialize_sse();
-        }
-        if (d & bit_SSE2) {
-            TRACE("SSE2 support");
-        }
-        if (c & bit_SSE3) {
-            TRACE("SSE3 support");
-        }
-        if (c & bit_SSE4_1) {
-            TRACE("SSE4.1 support");
-        }
-        if (c & bit_SSE4_2) {
-            TRACE("SSE4.2 support");
-        }
-    }
-}
-
 static void demonstrate_floating_point()
 {
     TRACE("Let's try to use some floating point");
@@ -176,7 +86,6 @@ public:
 
 void Kernel::try_run()
 {
-    initialize_floating_point_features();
     demonstrate_floating_point();
     throw test_exception();
     do_exec_test();
@@ -315,6 +224,12 @@ void Kernel::initialize_kernel_malloc()
 void Kernel::initialize_physical_memory_map()
 {
     phys_map_.heap_is_ready();
+}
+
+void Kernel::initialize_floating_point_features()
+{
+    FloatingPointFeaturesInitializer initializer;
+    initializer.initialize_floating_point_features();
 }
 
 void Kernel::initialize_interrupts_and_device_drivers()

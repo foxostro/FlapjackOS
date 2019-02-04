@@ -76,6 +76,8 @@ set(I386_SOURCE_FILES
     "include/platform/i386/managed_physical_memory_map.hpp"
     "include/platform/i386/generic_concrete_physical_memory_map.hpp"
     "include/platform/i386/concrete_physical_memory_map.hpp"
+    "include/platform/i386/abstract_floating_point_features_initializer.hpp"
+    "include/platform/i386/floating_point_features_initializer.hpp"
     )
 
 set(X86_64_SOURCE_FILES
@@ -122,6 +124,8 @@ set(X86_64_SOURCE_FILES
     "include/platform/x86_64/page_map_level_four_controller.hpp"
     "include/platform/i386/generic_concrete_physical_memory_map.hpp"
     "include/platform/x86_64/concrete_physical_memory_map.hpp"
+    "include/platform/i386/abstract_floating_point_features_initializer.hpp"
+    "include/platform/x86_64/floating_point_features_initializer.hpp"
     )
 
 set(PC_SOURCE_FILES

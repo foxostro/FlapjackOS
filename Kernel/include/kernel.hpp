@@ -89,6 +89,9 @@ private:
     // allocators to be ready first.
     void initialize_physical_memory_map();
 
+    // Initialize floating point features such as SSE on Intel chips.
+    void initialize_floating_point_features();
+
     // Initialize interrupts and device drivers.
     void initialize_interrupts_and_device_drivers();
 
