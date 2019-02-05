@@ -29,9 +29,8 @@ public:
 
     explicit Thread_i386(void (*function)(void*), void* param)
     {
-        // AFOX_TODO: Need to setup the 512 byte floating point state region here too.
         stack_.push(/*second parameter=*/reinterpret_cast<uintptr_t>(function));
-        stack_.push(/*first parameter=*/reinterpret_cast<uint32_t>(param));
+        stack_.push(/*first parameter=*/reinterpret_cast<uintptr_t>(param));
         stack_.push(/*return address=*/reinterpret_cast<uintptr_t>(vanish));
         stack_.push(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* EBP = stack_.stack_pointer - sizeof(EBP);
@@ -45,6 +44,15 @@ public:
         stack_.push(/*POPA, EBP=*/EBP);
         stack_.push(/*POPA, ESI=*/InitialRegisterValue);
         stack_.push(/*POPA, EDI=*/InitialRegisterValue);
+
+        // We can't simply point fxrstor at a bunch of zeroes. So use real data.
+        // This sets the initial FPU/SSE state when we enter thread_start(),
+        // which will immediately be blown away by an invocation of fninit.
+        constexpr size_t FXSAVE_DATA_SIZE = 512;
+        constexpr size_t FXSAVE_DATA_ALIGN = 16;
+        stack_.stack_pointer -= FXSAVE_DATA_SIZE;
+        assert(reinterpret_cast<uintptr_t>(stack_.stack_pointer) % FXSAVE_DATA_ALIGN == 0);
+        asm volatile("fxsave (%0)" :: "a"(stack_.stack_pointer));
     }
 
     char*& get_stack_pointer() override
