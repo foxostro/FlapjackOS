@@ -99,16 +99,23 @@ static void task(void* param)
 void Kernel::try_run()
 {
     demonstrate_floating_point();
+
+    TRACE("Now let's demonstrate some context switching...");
     scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
     scheduler_.begin(new ThreadExternalStack);
-
     while (g_count > 0) {
         yield();
     }
-    TRACE("task is done");
 
-    throw test_exception();
+    TRACE("Now let's throw and catch an exeption as a test.");
+    try {
+        throw test_exception();
+    } catch(test_exception& ex) {
+        TRACE("caught exception: %s", ex.what());
+    }
+
     do_exec_test();
+
     do_console_loop();
 }
 
