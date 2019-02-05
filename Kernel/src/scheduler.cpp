@@ -7,6 +7,7 @@ static Scheduler* g_scheduler = nullptr;
 
 extern "C" void thread_start(unsigned param, void(*function)(unsigned))
 {
+    asm volatile("fninit"); // AFOX_TODO: Do not insert platform-specific code into scheduler.cpp
     g_scheduler->unlock_at_thread_start();
     function(param);
 }
