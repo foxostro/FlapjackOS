@@ -100,13 +100,6 @@ void Kernel::try_run()
 {
     demonstrate_floating_point();
 
-    TRACE("Now let's demonstrate some context switching...");
-    scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
-    scheduler_.begin(new ThreadExternalStack);
-    while (g_count > 0) {
-        yield();
-    }
-
     TRACE("Now let's throw and catch an exeption as a test.");
     try {
         throw test_exception();
@@ -115,6 +108,13 @@ void Kernel::try_run()
     }
 
     do_exec_test();
+
+    TRACE("Now let's demonstrate some context switching...");
+    scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
+    scheduler_.begin(new ThreadExternalStack);
+    while (g_count > 0) {
+        yield();
+    }
 
     do_console_loop();
 }
