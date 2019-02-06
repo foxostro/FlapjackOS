@@ -124,7 +124,7 @@ void UnlockedTextTerminal::puts(const char* s)
 
 int UnlockedTextTerminal::printf(const char* fmt, ...)
 {
-    constexpr size_t BUFFER_SIZE = 256;
+    constexpr size_t BUFFER_SIZE = 512;
     char buffer[BUFFER_SIZE] = {0};
 
     va_list args;

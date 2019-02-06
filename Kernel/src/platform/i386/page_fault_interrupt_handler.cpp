@@ -25,12 +25,27 @@ PageFaultInterruptHandler::PageFaultInterruptHandler() = default;
 
 void PageFaultInterruptHandler::int_handler(const InterruptParameters& params)
 {
-    char message[128]={0};
+    char message[512]={0};
     snprintf(message, sizeof(message),
-             "Page Fault.\nfaulting_address: %p\nerror: %s (%u)\n",
-              (void*)(uintptr_t)get_cr2(),
-              get_page_fault_error_string(params.error_code),
-              params.error_code);
+             "Page Fault. Faulting Address: %p\n"
+             "Registers:\n"
+             "edi = %p\tesi = %p\tebp = %p\n"
+             "esp = %p\tebx = %p\tedx = %p\n"
+             "ecx = %p\teax = %p\teip = %p\n"
+             "Error Code: 0x%x\n"
+             "%s",
+             reinterpret_cast<void*>(static_cast<uintptr_t>(get_cr2())),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.edi)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.esi)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.ebp)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.esp)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.ebx)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.edx)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.ecx)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.eax)),
+             reinterpret_cast<void*>(static_cast<uintptr_t>(params.eip)),
+             static_cast<unsigned>(params.error_code),
+             get_page_fault_error_string(params.error_code));
     panic(message);
 }
 
