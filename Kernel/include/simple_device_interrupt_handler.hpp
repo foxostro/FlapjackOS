@@ -4,7 +4,7 @@
 #include "generic_interrupt_handler.hpp"
 
 extern "C" {
-    void yield(void);
+    void yield(void) noexcept;
 }
 
 template<typename InterruptParameters, typename Device>

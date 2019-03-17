@@ -39,8 +39,11 @@ static void call_global_constructors()
 }
 
 // This is marked with "C" linkage because we call it from assembly in boot.S.
+// This is marked "noexcept" because it does not make sense to attmept to unwind
+// the stack during exception handling past this point; this is the C++ entry
+// point for the kernel.
 extern "C" __attribute__((noreturn))
-void kernel_main(multiboot_info_t* mb_info, uintptr_t istack)
+void kernel_main(multiboot_info_t* mb_info, uintptr_t istack) noexcept
 {
     static uint32_t buffer[16]; // Must be large enough to hold the object libgcc is expecting.
     __register_frame_info(g_eh_frame_begin, (object*)buffer);
@@ -56,17 +59,29 @@ void kernel_main(multiboot_info_t* mb_info, uintptr_t istack)
 
 // This is marked with "C" linkage because we call it from the assembly code
 // ISR stubs in isr_wrapper_asm.S.
-extern "C" void interrupt_dispatch_trampoline(void* params)
+// This is marked "noexcept" because it does not make sense to attmept to unwind
+// the stack during exception handling past this point.
+extern "C" void interrupt_dispatch_trampoline(void* params) noexcept
 {
     get_global_kernel().dispatch_interrupt(params);
 }
 
-extern "C" void yield()
+// This is marked "noexcept" because it does not make sense to attmept to unwind
+// the stack during exception handling past this point.
+// This function switches between threads and so implements some control flow
+// shenanigans which are not typical in standard C++ code. It would be a bad
+// thing if exceptions were able to propagate across threads should the unwinder
+// try to take us up and out of this function.
+extern "C" void yield() noexcept
 {
     get_global_kernel().yield();
 }
 
-extern "C" __attribute__((noreturn)) void vanish()
+// This is marked "noexcept" because it does not make sense to attmept to unwind
+// the stack during exception handling past this point.
+// This function should never return and so it would be a bad thing to permit
+// an exceptions to propagate up above this call.
+extern "C" __attribute__((noreturn)) void vanish() noexcept
 {
     get_global_kernel().vanish();
 }
