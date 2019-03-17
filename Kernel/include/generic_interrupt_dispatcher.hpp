@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_GENERIC_INTERRUPT_DISPATCHER_HPP
 
 #include <common/shared_pointer.hpp>
+#include <common/lock_guard.hpp>
 #include <interrupt_lock.hpp>
 #include <panic.h>
 #include <cstddef>
@@ -29,23 +30,22 @@ public:
     void set_handler(unsigned interrupt_number, const Handler& handler)
     {
         assert(interrupt_number < MAX_HANDLERS);
-        lock_.lock();
+        LockGuard lock{lock_};
         handlers_[interrupt_number] = handler;
-        lock_.unlock();
     }
 
     // Gets the specified interrupt handler.
     Handler get_handler(unsigned interrupt_number)
     {
-        lock_.lock();
+        LockGuard lock{lock_};
         Handler handler = handlers_[interrupt_number];
-        lock_.unlock();
         return handler;
     }
 
     // Invoked when an interrupt occurs to redirect to the appropriate handler.
     void dispatch(const Params& params)
     {
+        LockGuard lock{lock_};
         assert(params.size == sizeof(Params));
         unsigned interrupt_number = params.interrupt_number;
         assert(interrupt_number < MAX_HANDLERS);
@@ -65,18 +65,14 @@ public:
     // memory allocators are available.
     void set_should_panic_on_null_handler(bool should_panic)
     {
-        lock_.lock();
+        LockGuard lock{lock_};
         should_panic_on_null_handler_ = should_panic;
-        lock_.unlock();
     }
 
     bool should_panic_on_null_handler()
     {
-        bool should_panic; 
-        lock_.lock();
-        should_panic = should_panic_on_null_handler_;
-        lock_.unlock();
-        return should_panic;
+        LockGuard lock{lock_};
+        return should_panic_on_null_handler_;
     }
 
 private:
