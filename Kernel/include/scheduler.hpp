@@ -3,8 +3,8 @@
 
 #include <common/vector.hpp>
 #include <common/unique_pointer.hpp>
+#include <common/interrupt_lock.hpp>
 #include <thread.hpp>
-#include <interrupt_lock.hpp>
 
 namespace SchedulerDetail {
 

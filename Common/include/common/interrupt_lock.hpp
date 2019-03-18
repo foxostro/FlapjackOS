@@ -1,6 +1,8 @@
 #ifndef FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_LOCK_HPP
 #define FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_LOCK_HPP
 
+#include <atomic>
+
 // Mutual exclusion by enabling and disabling interrupts.
 //
 // This is only appropriate on a uniprocessor system.
@@ -17,6 +19,12 @@ public:
 
     void lock();
     void unlock();
+
+    static void (*enable_interrupts)();
+    static void (*disable_interrupts)();
+
+private:
+    static std::atomic<int> count_;
 };
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_INTERRUPT_LOCK_HPP

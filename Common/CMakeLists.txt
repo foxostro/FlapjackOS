@@ -34,6 +34,7 @@ set(SOURCE_FILES
     "include/common/bit_array.hpp"
     "include/common/spin_lock.hpp" "include/common/spin_lock.h" "src/spin_lock.c"
     "include/common/mutex.hpp" "src/mutex.cpp"
+    "include/common/interrupt_lock.hpp" "src/interrupt_lock.cpp"
     "include/common/lock_guard.hpp"
     "include/common/shared_pointer.hpp"
     "include/common/unique_pointer.hpp"

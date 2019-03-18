@@ -13,7 +13,6 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/multiboot_memory_map_page_frame_enumerator.hpp"
     "include/multiboot_module_enumerator.hpp"
     "include/generic_interrupt_dispatcher.hpp"
-    "include/interrupt_lock.hpp" "src/interrupt_lock.cpp"
     "include/generic_interrupt_handler.hpp"
     "include/simple_device_interrupt_handler.hpp"
     "include/get_frame_pointer.h"

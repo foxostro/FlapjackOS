@@ -3,9 +3,9 @@
 #include <climits>
 #include <cstring>
 #include <cassert>
-#include <interrupt_lock.hpp>
 #include <halt.h>
 #include <inout.h>
+#include <common/interrupt_lock.hpp>
 #include <common/lock_guard.hpp>
 
 constexpr unsigned KEYBOARD_DATA_PORT = 0x60;

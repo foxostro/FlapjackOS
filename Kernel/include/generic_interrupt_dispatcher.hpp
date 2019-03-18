@@ -3,7 +3,7 @@
 
 #include <common/shared_pointer.hpp>
 #include <common/lock_guard.hpp>
-#include <interrupt_lock.hpp>
+#include <common/interrupt_lock.hpp>
 #include <panic.h>
 #include <cstddef>
 #include "generic_interrupt_handler.hpp"
