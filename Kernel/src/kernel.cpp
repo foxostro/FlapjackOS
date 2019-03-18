@@ -84,6 +84,7 @@ static void task(unsigned param)
 {
     for (int i = 0; i < 20; ++i) {
         TRACE("param: %u", param);
+        yield();
     }
     TRACE("going to return from task() now");
     g_count--;
@@ -94,8 +95,8 @@ void Kernel::try_run()
     scheduler_.add(new Thread(task, 42));
     scheduler_.begin(new ThreadExternalStack);
     while (g_count > 0) {
-        yield();
         terminal_.putchar('b');
+        yield();
     }
     terminal_.putchar('\n');
     TRACE("task is done");
