@@ -27,7 +27,7 @@ private:
 // This wrapped by a monitor which takes care of that stuff.
 class SchedulerUnlocked {
 public:
-    using ThreadPointer = UniquePointer<Thread, InterruptLock>;
+    using ThreadPointer = UniquePointer<Thread>;
 
     // Adds a new runnable thread.
     // The scheduler takes ownership of the pointer.
