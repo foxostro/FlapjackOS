@@ -6,7 +6,7 @@
 #include <common/ring_buffer.hpp>
 #include <common/text_line.hpp>
 #include <common/vec2.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <common/lock_guard.hpp>
 
 // A text terminal displays lines of text on a text console display.
@@ -128,7 +128,7 @@ public:
     }
 
 private:
-    Mutex lock_;
+    InterruptLock lock_;
     UnlockedTextTerminal impl_;
 };
 
