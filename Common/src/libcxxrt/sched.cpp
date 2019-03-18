@@ -6,6 +6,6 @@ extern "C" {
 
 extern "C" int sched_yield()
 {
-	Mutex::yield();
-	return 0;
+    Mutex::yield();
+    return 0;
 }

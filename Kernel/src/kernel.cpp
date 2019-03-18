@@ -9,7 +9,6 @@
 #include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
-#include <common/mutex.hpp>
 
 
 const char* KernelErrorDomain = "Kernel";
@@ -27,7 +26,6 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
     
-    Mutex::yield = ::yield;
     hardware_task_configuration_.init(istack_);
     interrupt_controller_.initialize_hardware();
     setup_terminal();
