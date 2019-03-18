@@ -2,10 +2,10 @@
 #include "flapjack_libc/string.h"
 #include "flapjack_libc/assert.h"
 #include <common/memory_allocator.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <common/lock_guard.hpp>
 
-static Mutex g_malloc_mutex;
+static InterruptLock g_malloc_mutex;
 
 // Sets the allocator to use for the malloc family of functions.
 static MemoryAllocator *g_allocator = nullptr;
