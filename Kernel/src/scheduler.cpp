@@ -5,30 +5,30 @@
 
 static Scheduler* g_scheduler = nullptr;
 
-extern "C" void thread_start(unsigned param, void(*function)(unsigned))
+extern "C" void thread_start(unsigned param, void(*function)(unsigned)) noexcept
 {
     g_scheduler->unlock_at_thread_start();
     function(param);
 }
 
-Scheduler::Scheduler()
+Scheduler::Scheduler() noexcept
 {
     g_scheduler = this;
 }
 
-void Scheduler::add(ThreadPointer thread)
+void Scheduler::add(ThreadPointer thread) noexcept
 {
     LockGuard guard{lock_};
     runnable_.emplace_back(std::move(thread));
 }
 
-void Scheduler::begin(ThreadPointer init_thread)
+void Scheduler::begin(ThreadPointer init_thread) noexcept
 {
     LockGuard guard{lock_};
     current_thread_ = std::move(init_thread);
 }
 
-void Scheduler::yield()
+void Scheduler::yield() noexcept
 {
     LockGuard guard{lock_};
     if (can_yield()) {
@@ -39,12 +39,12 @@ void Scheduler::yield()
     }
 }
 
-bool Scheduler::can_yield()
+bool Scheduler::can_yield() noexcept
 {
     return current_thread_ && !(runnable_.empty() && exhausted_.empty());
 }
 
-void Scheduler::vanish()
+void Scheduler::vanish() noexcept
 {
     lock_.lock();
     assert(current_thread_);
@@ -58,18 +58,18 @@ void Scheduler::vanish()
     __builtin_unreachable();
 }
 
-void Scheduler::unlock_at_thread_start()
+void Scheduler::unlock_at_thread_start() noexcept
 {
     lock_.unlock();
 }
 
-void Scheduler::take_current_thread_from_runnable_queue()
+void Scheduler::take_current_thread_from_runnable_queue() noexcept
 {
     current_thread_ = std::move(runnable_.front());
     runnable_.pop_front();
 }
 
-void Scheduler::swap_runnable_and_exhausted_if_necessary()
+void Scheduler::swap_runnable_and_exhausted_if_necessary() noexcept
 {
     assert(!(runnable_.empty() && exhausted_.empty()));
     if (runnable_.empty()) {
@@ -77,7 +77,7 @@ void Scheduler::swap_runnable_and_exhausted_if_necessary()
     }
 }
 
-void Scheduler::move_to_next_runnable_thread()
+void Scheduler::move_to_next_runnable_thread() noexcept
 {
     if (!runnable_.empty()) {
         exhausted_.emplace_back(std::move(current_thread_));
