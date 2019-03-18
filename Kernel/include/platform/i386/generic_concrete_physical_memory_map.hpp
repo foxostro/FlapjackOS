@@ -4,7 +4,7 @@
 #include <page_frame_allocator.hpp>
 #include <physical_memory_map.hpp>
 #include <hardware_memory_management_unit.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <common/shared_pointer.hpp>
 #include <common/lock_guard.hpp>
 
@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    Mutex mutex_;
+    InterruptLock mutex_;
     HardwareMemoryManagementUnit& mmu_;
     PageFrameAllocator& page_frame_allocator_;
     UnmanagedPhysicalMemoryMap unmanaged_;
