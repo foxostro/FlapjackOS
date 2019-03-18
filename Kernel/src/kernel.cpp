@@ -97,6 +97,7 @@ void Kernel::try_run()
         yield();
         terminal_.putchar('b');
     }
+    terminal_.putchar('\n');
     TRACE("task is done");
     
     try {
