@@ -23,6 +23,8 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params)
 
     if (error_code_present_) {
         snprintf(text, sizeof(text),
+                "Error Code: 0x%x\n"
+                "%s\n"
                 "Registers:\n"
                 "edi = 0x%x\n"
                 "esi = 0x%x\n"
@@ -32,9 +34,9 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params)
                 "edx = 0x%x\n"
                 "ecx = 0x%x\n"
                 "eax = 0x%x\n"
-                "eip = %p\n"
-                "Error Code: 0x%x\n"
-                "%s",
+                "eip = %p\n",
+                params.error_code,
+                message_,
                 params.edi,
                 params.esi,
                 params.ebp,
@@ -43,11 +45,10 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params)
                 params.edx,
                 params.ecx,
                 params.eax,
-                (void*)(uintptr_t)params.eip,
-                params.error_code,
-                message_);
+                (void*)(uintptr_t)params.eip);
     } else {
         snprintf(text, sizeof(text),
+                "%s\n",
                 "Registers:\n"
                 "edi = 0x%x\n"
                 "esi = 0x%x\n"
@@ -57,8 +58,8 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params)
                 "edx = 0x%x\n"
                 "ecx = 0x%x\n"
                 "eax = 0x%x\n"
-                "eip = %p\n"
-                "%s",
+                "eip = %p\n",
+                message_,
                 params.edi,
                 params.esi,
                 params.ebp,
@@ -67,8 +68,7 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params)
                 params.edx,
                 params.ecx,
                 params.eax,
-                (void*)(uintptr_t)params.eip,
-                message_);
+                (void*)(uintptr_t)params.eip);
     }
     panic(text);
 }
