@@ -10,7 +10,7 @@ PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_cod
  : error_code_present_(error_code_present)
 {
     memset(message_, 0, sizeof(message_));
-    memcpy(message_, message, MIN(sizeof(message_), strlen(message))-1);
+    memcpy(message_, message, MIN(sizeof(message_) - 1, strlen(message)));
 }
 
 void PanicInterruptHandler::int_handler(const InterruptParameters& params)

@@ -32,7 +32,8 @@ public:
     __attribute__((noreturn)) void run() noexcept
     {
         display_.clear();
-        terminal_.printf("PANIC: %s", message_);
+        terminal_.puts("PANIC: ");
+        terminal_.puts(message_);
         logger_.log("PANIC", "%s", message_);
         // backtrace(terminal_);
         halt_forever();
@@ -41,8 +42,8 @@ public:
     __attribute__((noreturn)) void interrupt() noexcept
     {
         const char* s = "Interrupt occurred during panic. Halting immediately.";
-        terminal_.printf(s);
         logger_.log(__FUNCTION__, s);
+        terminal_.puts(s);
         halt_forever();
     }
 
