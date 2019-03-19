@@ -33,6 +33,6 @@ void enumerate_stack_frames(Function&& function)
     }
 }
 
-void backtrace(UnlockedTextTerminal &term);
+void backtrace(TextTerminal &term);
 
 #endif // FLAPJACKOS_KERNEL_INCLUDE_BACKTRACE_HPP

@@ -1,7 +1,7 @@
 #include <backtrace.hpp>
 #include <common/logger.hpp>
 
-void backtrace(UnlockedTextTerminal &term)
+void backtrace(TextTerminal &term)
 {
     TRACE("begin");
     term.printf("Back Trace:\n");

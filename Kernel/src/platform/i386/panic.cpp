@@ -1,15 +1,61 @@
 #include <panic.h> // The panic API uses C linkage.
 
+#include <kernel_policy.hpp>
 #include <common/text_terminal.hpp>
-#include <drivers/pc/vga_text_display_device.hpp>
 #include <common/logger.hpp>
-#include <inout.h>
 #include <halt.h>
 #include <interrupt_asm.h>
 #include <backtrace.hpp>
 
 #include <cstdio>
 #include <cstdarg>
+
+class PanicKernel : private KernelPolicy {
+public:
+    virtual ~PanicKernel() = default;
+
+    PanicKernel(const char* message)
+     : message_(message),
+       terminal_(display_)
+    {
+        hardware_interrupt_controller_.init(/*panic=*/ true);
+        logger_.set_text_output_stream(get_logger_stream());
+    }
+
+    UniquePointer<TextOutputStream> get_logger_stream()
+    {
+        UniquePointer<TextOutputStream> stream{&logger_text_output_stream_};
+        stream.set_should_leak();
+        return stream;
+    }
+
+    __attribute__((noreturn)) void run() noexcept
+    {
+        display_.clear();
+        terminal_.printf("PANIC: %s", message_);
+        logger_.log("PANIC", "%s", message_);
+        // backtrace(terminal_);
+        halt_forever();
+    }
+
+    __attribute__((noreturn)) void interrupt() noexcept
+    {
+        const char* s = "Interrupt occurred during panic. Halting immediately.";
+        terminal_.printf(s);
+        logger_.log(__FUNCTION__, s);
+        halt_forever();
+    }
+
+protected:
+    const char* message_;
+    HardwareInterruptController hardware_interrupt_controller_;
+    TextDisplayDevice display_;
+    TextTerminal terminal_;
+    LoggerTextOutputStream logger_text_output_stream_;
+    Logger logger_;
+};
+
+static PanicKernel* g_panic_kernel;
 
 // Prints a message to the screen and halts forever.
 // This is only called in emergencies.
@@ -22,7 +68,6 @@ __attribute__((noreturn))
 void panic(const char* fmt, ...)
 {
     disable_interrupts();
-    TRACE("Kernel is going to panic.");
 
     constexpr size_t PANIC_BUFFER_SIZE = 1024;
     char buffer[PANIC_BUFFER_SIZE];
@@ -31,14 +76,13 @@ void panic(const char* fmt, ...)
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
 
-    TRACE("message is \"%s\"", buffer);
+    PanicKernel panic_kernel{buffer};
+    g_panic_kernel = &panic_kernel;
+    panic_kernel.run();
+}
 
-    // If the panic happened early in the boot process then we may not have
-    // a text terminal yet. In this case, panic() makes its own.
-    VGATextDisplayDevice display;
-    UnlockedTextTerminal terminal(display);
-    terminal.printf("PANIC: %s\n\n", buffer);
-    // backtrace(terminal);
-
-    halt_forever();
+// Call this when an interrupt or fault occurs during a panic.
+__attribute__((noreturn)) void on_interrupt_during_panic() noexcept
+{
+    g_panic_kernel->interrupt();
 }
