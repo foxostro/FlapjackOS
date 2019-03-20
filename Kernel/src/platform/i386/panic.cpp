@@ -2,10 +2,9 @@
 
 #include <kernel_policy.hpp>
 #include <common/text_terminal.hpp>
-#include <common/logger.hpp>
 #include <halt.h>
 #include <interrupt_asm.h>
-#include <backtrace.hpp>
+#include <backtrace.hpp> // for enumerate_stack_frames()
 
 #include <cstdio>
 #include <cstdarg>
@@ -19,30 +18,41 @@ public:
        terminal_(display_)
     {
         hardware_interrupt_controller_.init(/*panic=*/ true);
-        logger_.set_text_output_stream(get_logger_stream());
-    }
-
-    UniquePointer<TextOutputStream> get_logger_stream()
-    {
-        UniquePointer<TextOutputStream> stream{&logger_text_output_stream_};
-        stream.set_should_leak();
-        return stream;
     }
 
     __attribute__((noreturn)) void run() noexcept
     {
         display_.clear();
-        terminal_.puts("PANIC: ");
-        terminal_.puts(message_);
-        logger_.log("PANIC", "%s", message_);
-        // backtrace(terminal_);
+        puts("PANIC: ");
+        puts(message_);
+        puts("\n");
+        backtrace();
         halt_forever();
+    }
+
+    void puts(const char* s)
+    {
+        logger_.puts(s);
+        terminal_.puts(s);
+    }
+
+    void backtrace()
+    {
+        puts("Back Trace:\n");
+        enumerate_stack_frames([&](uintptr_t instruction_pointer){
+            char buffer[32] = {0};
+            snprintf(buffer, sizeof(buffer),
+                     "[%p]\n",
+                     reinterpret_cast<void*>(instruction_pointer));
+            puts(buffer);
+        });
+        puts("End Back Trace\n");
     }
 
     __attribute__((noreturn)) void interrupt() noexcept
     {
         const char* s = "Interrupt occurred during panic. Halting immediately.";
-        logger_.log(__FUNCTION__, s);
+        logger_.puts(s);
         terminal_.puts(s);
         halt_forever();
     }
@@ -52,8 +62,7 @@ protected:
     HardwareInterruptController hardware_interrupt_controller_;
     TextDisplayDevice display_;
     TextTerminal terminal_;
-    LoggerTextOutputStream logger_text_output_stream_;
-    Logger logger_;
+    LoggerTextOutputStream logger_;
 };
 
 static PanicKernel* g_panic_kernel;
