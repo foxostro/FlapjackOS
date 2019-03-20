@@ -1,14 +1,17 @@
 #include <backtrace.hpp>
-#include <common/logger.hpp>
 
-void backtrace(TextTerminal &term)
+static _Unwind_Reason_Code backtrace_trace(struct _Unwind_Context* context, void* param)
 {
-    TRACE("begin");
-    term.printf("Back Trace:\n");
-    enumerate_stack_frames([&](uintptr_t instruction_pointer){
-        TRACE("[%p]", reinterpret_cast<void*>(instruction_pointer));
-        term.printf("[%p]\n", reinterpret_cast<void*>(instruction_pointer));
-    });
-    TRACE("end");
-    term.printf("\n");
+    void* ip = reinterpret_cast<void*>(_Unwind_GetIP(context));
+    if (ip) {
+        reinterpret_cast<StackWalker*>(param)->trace(ip);
+        return _URC_NO_REASON;
+    } else {
+        return _URC_END_OF_STACK;
+    }
+}
+
+void backtrace(StackWalker& stack_walker)
+{
+    _Unwind_Backtrace(backtrace_trace, reinterpret_cast<void*>(&stack_walker));
 }

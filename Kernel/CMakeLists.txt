@@ -15,7 +15,6 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/generic_interrupt_dispatcher.hpp"
     "include/generic_interrupt_handler.hpp"
     "include/simple_device_interrupt_handler.hpp"
-    "include/get_frame_pointer.h"
     "include/halt.h"
     "include/inout.h"
     "include/interrupt_asm.h"
@@ -145,7 +144,6 @@ if(CMAKE_CROSSCOMPILING)
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/${CMAKE_SYSTEM_PROCESSOR}/isr_wrapper_asm.S.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper_asm.S")
     list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
-         "src/${BUILD_ARCH}/get_frame_pointer.S"
          "src/${BUILD_ARCH}/halt.S"
          "src/${BUILD_ARCH}/inout.S"
          "src/${BUILD_ARCH}/interrupt_asm.S"
@@ -155,7 +153,6 @@ else(CMAKE_CROSSCOMPILING)
     GenerateSourceFromTemplate("${PROJECT_SOURCE_DIR}/Kernel/src/host/isr_wrapper.c.erb"
                                "${CMAKE_CURRENT_BINARY_DIR}/isr_wrapper.c")
     list(APPEND PLATFORM_SPECIFIC_SOURCE_FILES
-         "src/host/get_frame_pointer.c"
          "src/host/halt.c"
          "src/host/inout.c"
          "src/host/interrupt.c"

@@ -4,14 +4,12 @@
 #include <common/text_terminal.hpp>
 #include <halt.h>
 #include <interrupt_asm.h>
-#include <unwind.h> // for _Unwind_* symbols
+#include <backtrace.hpp>
 
 #include <cstdio>
 #include <cstdarg>
 
-static _Unwind_Reason_Code trace(struct _Unwind_Context* context, void* param);
-
-class PanicKernel : private KernelPolicy {
+class PanicKernel : public StackWalker, private KernelPolicy {
 public:
     virtual ~PanicKernel() = default;
 
@@ -41,22 +39,16 @@ public:
     void backtrace()
     {
         puts("Back Trace:\n");
-        _Unwind_Backtrace(::trace, reinterpret_cast<void*>(this));
+        ::backtrace(*this);
         puts("End Back Trace\n");
     }
 
-    _Unwind_Reason_Code trace(struct _Unwind_Context* context)
+    void trace(void *ip) override
     {
-        void* ip = reinterpret_cast<void*>(_Unwind_GetIP(context));
-        if (ip) {
-            char buffer[32] = {0};
-            snprintf(buffer, sizeof(buffer), "[%p]\n",
-                    reinterpret_cast<void*>(ip));
-            puts(buffer);
-            return _URC_NO_REASON;
-        } else {
-            return _URC_END_OF_STACK;
-        }
+        char buffer[32] = {0};
+        snprintf(buffer, sizeof(buffer), "[%p]\n",
+                reinterpret_cast<void*>(ip));
+        puts(buffer);
     }
 
     __attribute__((noreturn)) void interrupt() noexcept
@@ -74,11 +66,6 @@ protected:
     TextTerminal terminal_;
     LoggerTextOutputStream logger_;
 };
-
-static _Unwind_Reason_Code trace(struct _Unwind_Context* context, void* param)
-{
-    return reinterpret_cast<PanicKernel*>(param)->trace(context);
-}
 
 static PanicKernel* g_panic_kernel;
 
