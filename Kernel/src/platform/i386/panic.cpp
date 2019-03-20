@@ -51,6 +51,19 @@ public:
         puts(buffer);
     }
 
+    __attribute__((noreturn)) void reentry(const char* message) noexcept
+    {
+        char buffer[160] = {0};
+        snprintf(buffer, sizeof(buffer),
+                 "Reentrant call to panic. "
+                 "Halting immediately. "
+                 "Message is:\n%s",
+                 message);
+        logger_.puts(buffer);
+        terminal_.puts(buffer);
+        halt_forever();
+    }
+
     __attribute__((noreturn)) void interrupt() noexcept
     {
         const char* s = "Interrupt occurred during panic. Halting immediately.";
@@ -87,6 +100,10 @@ void panic(const char* fmt, ...)
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
+
+    if (g_panic_kernel) {
+        g_panic_kernel->reentry(buffer);
+    }
 
     PanicKernel panic_kernel{buffer};
     g_panic_kernel = &panic_kernel;
