@@ -43,11 +43,12 @@ public:
         puts("End Back Trace\n");
     }
 
-    void trace(void *ip) override
+    void trace(const StackFrame& frame) override
     {
-        char buffer[32] = {0};
-        snprintf(buffer, sizeof(buffer), "[%p]\n",
-                reinterpret_cast<void*>(ip));
+        char buffer[75] = {0};
+        snprintf(buffer, sizeof(buffer), "%p: %s\n",
+                 frame.instruction_pointer,
+                 frame.symbol_name);
         puts(buffer);
     }
 

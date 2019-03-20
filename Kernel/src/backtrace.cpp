@@ -1,10 +1,18 @@
 #include <backtrace.hpp>
 
+static const char* get_symbol_name([[maybe_unused]] const void* ip)
+{
+    return nullptr;
+}
+
 static _Unwind_Reason_Code backtrace_trace(struct _Unwind_Context* context, void* param)
 {
-    void* ip = reinterpret_cast<void*>(_Unwind_GetIP(context));
+    const void* ip = reinterpret_cast<const void*>(_Unwind_GetIP(context));
     if (ip) {
-        reinterpret_cast<StackWalker*>(param)->trace(ip);
+        StackWalker::StackFrame frame;
+        frame.instruction_pointer = ip;
+        frame.symbol_name = get_symbol_name(ip);
+        reinterpret_cast<StackWalker*>(param)->trace(frame);
         return _URC_NO_REASON;
     } else {
         return _URC_END_OF_STACK;

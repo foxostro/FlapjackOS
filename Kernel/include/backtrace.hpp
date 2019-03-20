@@ -5,8 +5,13 @@
 
 class StackWalker {
 public:
+    struct StackFrame {
+        const void* instruction_pointer = nullptr;
+        const char* symbol_name = nullptr;
+    };
+
     virtual ~StackWalker() = default;
-    virtual void trace(void* ip) = 0;
+    virtual void trace(const StackFrame& frame) = 0;
 };
 
 void backtrace(StackWalker& stack_walker);
