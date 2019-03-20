@@ -27,7 +27,7 @@ public:
     Thread_i386(Thread_i386&& other) = default;
     Thread_i386(const Thread_i386&) = delete;
 
-    explicit Thread_i386(void (*function)(unsigned), unsigned param)
+    explicit Thread_i386(void (*function)(void*), uintptr_t param)
     {
         stack_.push4(/*second parameter=*/reinterpret_cast<uint32_t>(function));
         stack_.push4(/*first parameter=*/static_cast<uint32_t>(param));
