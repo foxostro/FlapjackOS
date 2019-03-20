@@ -11,5 +11,4 @@ void BochsE9Hack::puts(const char* s)
     while (*s) {
         putchar(*s++);
     }
-    putchar('\n');
 }
