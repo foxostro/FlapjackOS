@@ -27,10 +27,10 @@ public:
     Thread_i386(Thread_i386&& other) = default;
     Thread_i386(const Thread_i386&) = delete;
 
-    explicit Thread_i386(void (*function)(void*), uintptr_t param)
+    explicit Thread_i386(void (*function)(void*), void* param)
     {
         stack_.push4(/*second parameter=*/reinterpret_cast<uint32_t>(function));
-        stack_.push4(/*first parameter=*/static_cast<uint32_t>(param));
+        stack_.push4(/*first parameter=*/reinterpret_cast<uint32_t>(param));
         stack_.push4(/*return address=*/reinterpret_cast<uint32_t>(vanish));
         stack_.push4(/*EIP=*/reinterpret_cast<uintptr_t>(thread_start));
         char* EBP = stack_.stack_pointer - sizeof(EBP);

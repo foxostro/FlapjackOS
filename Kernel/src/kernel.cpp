@@ -94,7 +94,7 @@ static void task(void* param)
 
 void Kernel::try_run()
 {
-    scheduler_.add(new Thread(task, reinterpret_cast<uintptr_t>(&terminal_)));
+    scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
     scheduler_.begin(new ThreadExternalStack);
     while (g_count > 0) {
         terminal_.putchar('b');

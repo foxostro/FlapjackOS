@@ -27,7 +27,7 @@ public:
     Thread_x86_64(Thread_x86_64&& other) = default;
     Thread_x86_64(const Thread_x86_64&) = delete;
 
-    explicit Thread_x86_64(void (*function)(void*), uintptr_t param)
+    explicit Thread_x86_64(void (*function)(void*), void* param)
     {
         stack_.push8(/*RIP=*/reinterpret_cast<uint64_t>(vanish));
         stack_.push8(/*RIP=*/reinterpret_cast<uint64_t>(thread_start));
@@ -41,7 +41,7 @@ public:
         stack_.push8(/*RSP=*/reinterpret_cast<uint64_t>(RSP));
         stack_.push8(/*RBP=*/reinterpret_cast<uint64_t>(RBP));
         stack_.push8(/*RSI=*/reinterpret_cast<uint64_t>(function));
-        stack_.push8(/*RDI=*/static_cast<uint64_t>(param));
+        stack_.push8(/*RDI=*/reinterpret_cast<uint64_t>(param));
         stack_.push8(/*R8=*/InitialRegisterValue);
         stack_.push8(/*R9=*/InitialRegisterValue);
         stack_.push8(/*R10=*/InitialRegisterValue);
