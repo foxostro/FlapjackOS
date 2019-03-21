@@ -2,6 +2,7 @@
 
 static const char* get_symbol_name([[maybe_unused]] const void* ip)
 {
+    // AFOX_TODO: Lookup the symbol name corresponding to the given instruction pointer.
     return nullptr;
 }
 
