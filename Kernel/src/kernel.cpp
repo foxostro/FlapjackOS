@@ -94,6 +94,7 @@ static void task(void* param)
 
 void Kernel::try_run()
 {
+    panic("try_run test panic");
     scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
     scheduler_.begin(new ThreadExternalStack);
     while (g_count > 0) {
