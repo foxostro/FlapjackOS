@@ -10,7 +10,7 @@ PanicInterruptHandler::PanicInterruptHandler(const char *message, bool error_cod
  : error_code_present_(error_code_present)
 {
     memset(message_, 0, sizeof(message_));
-    memcpy(message_, message, MIN(sizeof(message_) - 1, strlen(message)));
+    memcpy(message_, message, MIN(sizeof(message_), strlen(message))-1);
 }
 
 void PanicInterruptHandler::int_handler(const InterruptParameters& params)
@@ -23,76 +23,68 @@ void PanicInterruptHandler::int_handler(const InterruptParameters& params)
 
     if (error_code_present_) {
         snprintf(text, sizeof(text),
-                "Error Code: 0x%x\n"
-                "%s\n"
-                "Registers:\n"
-                "r15 = %p\n"
-                "r14 = %p\n"
-                "r13 = %p\n"
-                "r12 = %p\n"
-                "r11 = %p\n"
-                "r10 = %p\n"
-                "r9 = %p\n"
-                "r8 = %p\n"
-                "rdi = %p\n"
-                "rsi = %p\n"
-                "rbp = %p\n"
-                "rsp = %p\n"
-                "rbx = %p\n"
-                "rdx = %p\n"
-                "rcx = %p\n"
-                "rax = %p\n"
-                "rip = %p\n",
-                (unsigned)params.error_code,
-                message_,
-                (void*)(uintptr_t)params.r15,
-                (void*)(uintptr_t)params.r14,
-                (void*)(uintptr_t)params.r13,
-                (void*)(uintptr_t)params.r12,
-                (void*)(uintptr_t)params.r11,
-                (void*)(uintptr_t)params.r10,
-                (void*)(uintptr_t)params.r9,
-                (void*)(uintptr_t)params.r8,
-                (void*)(uintptr_t)params.rdi,
-                (void*)(uintptr_t)params.rsi,
-                (void*)(uintptr_t)params.rbp,
-                (void*)(uintptr_t)params.rsp,
-                (void*)(uintptr_t)params.rbx,
-                (void*)(uintptr_t)params.rdx,
-                (void*)(uintptr_t)params.rcx,
-                (void*)(uintptr_t)params.rax,
-                (void*)(uintptr_t)params.rip);
-    } else {
-        snprintf(text, sizeof(text),
-                "%s\n"
                 "Registers:\n"
                 "r15 = %p\tr14 = %p\n"
                 "r13 = %p\tr12 = %p\n"
                 "r11 = %p\tr10 = %p\n"
-                " r9 = %p\t r8 = %p\n"
+                "r9  = %p\tr8  = %p\n"
                 "rdi = %p\trsi = %p\n"
                 "rbp = %p\trsp = %p\n"
                 "rbx = %p\trdx = %p\n"
                 "rcx = %p\trax = %p\n"
-                "rip = %p\n",
-                message_,
-                (void*)(uintptr_t)params.r15,
-                (void*)(uintptr_t)params.r14,
-                (void*)(uintptr_t)params.r13,
-                (void*)(uintptr_t)params.r12,
-                (void*)(uintptr_t)params.r11,
-                (void*)(uintptr_t)params.r10,
-                (void*)(uintptr_t)params.r9,
-                (void*)(uintptr_t)params.r8,
-                (void*)(uintptr_t)params.rdi,
-                (void*)(uintptr_t)params.rsi,
-                (void*)(uintptr_t)params.rbp,
-                (void*)(uintptr_t)params.rsp,
-                (void*)(uintptr_t)params.rbx,
-                (void*)(uintptr_t)params.rdx,
-                (void*)(uintptr_t)params.rcx,
-                (void*)(uintptr_t)params.rax,
-                (void*)(uintptr_t)params.rip);
+                "rip = %p\n"
+                "Error Code: 0x%x\n"
+                "%s",
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r15)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r14)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r13)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r12)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r11)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r10)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r9)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r8)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rdi)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rsi)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rbp)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rsp)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rbx)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rdx)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rcx)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rax)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rip)),
+                static_cast<unsigned>(params.error_code),
+                message_);
+    } else {
+        snprintf(text, sizeof(text),
+                "Registers:\n"
+                "r15 = %p\tr14 = %p\n"
+                "r13 = %p\tr12 = %p\n"
+                "r11 = %p\tr10 = %p\n"
+                "r9  = %p\tr8  = %p\n"
+                "rdi = %p\trsi = %p\n"
+                "rbp = %p\trsp = %p\n"
+                "rbx = %p\trdx = %p\n"
+                "rcx = %p\trax = %p\n"
+                "rip = %p\n"
+                "%s",
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r15)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r14)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r13)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r12)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r11)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r10)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r9)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.r8)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rdi)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rsi)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rbp)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rsp)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rbx)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rdx)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rcx)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rax)),
+                reinterpret_cast<void*>(static_cast<uintptr_t>(params.rip)),
+                message_);
     }
     panic(text);
 }

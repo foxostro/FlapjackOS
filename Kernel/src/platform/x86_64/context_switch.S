@@ -8,6 +8,9 @@ x86_64_context_switch:
     # Setup a stack frame.
     pushq %rbp
     movq %rsp, %rbp
+
+    # Align the stack on the sixteen byte boundary.
+    andq $-16, %rsp
     
     pushq %rax
     pushq %rcx
@@ -25,6 +28,10 @@ x86_64_context_switch:
     pushq %r13
     pushq %r14
     pushq %r15
+
+    # Save floating point state.
+    subq $512, %rsp
+    fxsaveq (%rsp)
     
     # Return the old stack pointer so we can restore it later.
     # (First parameter)
@@ -33,6 +40,10 @@ x86_64_context_switch:
     # Switch to a new stack.
     # (Second parameter)
     movq %rsi, %rsp
+
+    # Restore floating point state.
+    fxrstorq (%rsp)
+    addq $512, %rsp
     
     popq %r15
     popq %r14

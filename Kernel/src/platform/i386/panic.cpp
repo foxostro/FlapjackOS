@@ -96,7 +96,7 @@ void panic(const char* fmt, ...)
 {
     disable_interrupts();
 
-    constexpr size_t PANIC_BUFFER_SIZE = 1024;
+    constexpr size_t PANIC_BUFFER_SIZE = 512;
     char buffer[PANIC_BUFFER_SIZE];
     va_list args;
     va_start(args, fmt);

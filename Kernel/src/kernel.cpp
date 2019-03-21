@@ -39,6 +39,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
     initialize_physical_memory_map();
+    initialize_floating_point_features();
     report_free_page_frames();
     initialize_interrupts_and_device_drivers();
 }
@@ -69,6 +70,13 @@ void Kernel::run()
     }
 }
 
+static void demonstrate_floating_point()
+{
+    TRACE("Let's try to use some floating point");
+    float f = 5.0f + 1.5f;
+    TRACE("result as int --> %d", (int)f);
+}
+
 class test_exception: public std::exception
 {
 public:
@@ -95,6 +103,18 @@ static void task(void* param)
 void Kernel::try_run()
 {
     panic("try_run test panic");
+    demonstrate_floating_point();
+
+    TRACE("Now let's throw and catch an exeption as a test.");
+    try {
+        throw test_exception();
+    } catch(test_exception& ex) {
+        TRACE("caught exception: %s", ex.what());
+    }
+
+    do_exec_test();
+
+    TRACE("Now let's demonstrate some context switching...");
     scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
     scheduler_.begin(new ThreadExternalStack);
     while (g_count > 0) {
@@ -103,15 +123,6 @@ void Kernel::try_run()
     }
     terminal_.putchar('\n');
     TRACE("task is done");
-    
-    try {
-        throw test_exception();
-    }
-    catch(test_exception& ex) {
-        TRACE("caught exception as expected: %s", ex.what());
-    }
-
-    do_exec_test();
 
     do_console_loop();
 }
@@ -247,6 +258,12 @@ void Kernel::initialize_kernel_malloc()
 void Kernel::initialize_physical_memory_map()
 {
     phys_map_.heap_is_ready();
+}
+
+void Kernel::initialize_floating_point_features()
+{
+    FloatingPointFeaturesInitializer initializer;
+    initializer.initialize_floating_point_features();
 }
 
 void Kernel::initialize_interrupts_and_device_drivers()

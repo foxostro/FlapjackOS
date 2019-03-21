@@ -71,6 +71,13 @@ public:
         stack_pointer -= sizeof(value);
         memcpy(stack_pointer, &value, sizeof(value));
     }
+
+    void push(size_t size, const char *bytes)
+    {
+        assert(bytes);
+        stack_pointer -= size;
+        memcpy(stack_pointer, bytes, size);
+    }
     
     template<typename T>
     T pop()

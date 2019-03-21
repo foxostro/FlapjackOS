@@ -13,6 +13,7 @@
 #include <platform/x86_64/thread.hpp>
 #include <platform/x86_64/platform_namer.hpp>
 #include <drivers/pc/serial.hpp>
+#include <platform/x86_64/floating_point_features_initializer.hpp>
 
 struct KernelPolicy {
     using HardwareTaskConfiguration = x86_64::HardwareTaskConfiguration;
@@ -28,6 +29,7 @@ struct KernelPolicy {
     using ThreadExternalStack = x86_64::Thread_x86_64_ExternalStack;
     using PlatformNamer = x86_64::PlatformNamer;
     using LoggerTextOutputStream = Serial;
+    using FloatingPointFeaturesInitializer = x86_64::FloatingPointFeaturesInitializer;
 };
 
 #elif defined(__i386__)
@@ -42,6 +44,7 @@ struct KernelPolicy {
 #include <platform/i386/thread.hpp>
 #include <platform/i386/platform_namer.hpp>
 #include <drivers/pc/serial.hpp>
+#include <platform/i386/floating_point_features_initializer.hpp>
 
 struct KernelPolicy {
     using HardwareTaskConfiguration = i386::HardwareTaskConfiguration;
@@ -57,6 +60,7 @@ struct KernelPolicy {
     using ThreadExternalStack = i386::Thread_i386_ExternalStack;
     using PlatformNamer = i386::PlatformNamer;
     using LoggerTextOutputStream = Serial;
+    using FloatingPointFeaturesInitializer = i386::FloatingPointFeaturesInitializer;
 };
 
 #elif defined(__arm__)
