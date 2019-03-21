@@ -5,8 +5,17 @@
 # Though, all are simply assembly wrappers which call the high-level dispatcher.
 
 .macro ISR_WRAPPER INTERRUPT_NUMBER
-pushq $160 # Push the size of the parameter package
-pushq \INTERRUPT_NUMBER # Push the interrupt number
+# Setup a stack frame.
+pushq %rbp
+movq %rsp, %rbp
+
+# Align the stack on the sixteen byte boundary.
+andq $-16, %rsp
+
+# Save floating point state.
+subq $512, %rsp
+fxsaveq (%rsp)
+
 pushq %rax
 pushq %rcx
 pushq %rdx
@@ -23,8 +32,29 @@ pushq %r12
 pushq %r13
 pushq %r14
 pushq %r15
+
+# Get the error code the CPU provided and push it into the structure here.
+movq %rbp, %rax
+subq $8, %rax
+pushq (%rax)
+
+# Get the return address pushed by the CPU, push it into the structure too.
+movq %rbp, %rax
+subq $8, %rax
+pushq (%rax)
+
+pushq \INTERRUPT_NUMBER # Push the interrupt number.
+pushq $672 # Push the size of the parameter package.
+
 movq %rsp, %rdi # The first parameter is the address of the parameter package.
-call interrupt_dispatch_trampoline
+callq interrupt_dispatch_trampoline
+
+addq $8, %rsp  # Clean up the size of the structure
+addq $8, %rsp  # Clean up the interrupt number
+
+addq $8, %rsp # Clean up the instruction pointer we pushed just above.
+addq $8, %rsp # Clean up the error code we pushed just above.
+
 popq %r15
 popq %r14
 popq %r13
@@ -41,8 +71,13 @@ popq %rbx
 popq %rdx
 popq %rcx
 popq %rax
-addq $8, %rsp  # Clean up the interrupt number
-addq $8, %rsp  # Clean up the size of the structure
+
+# Restore floating point state.
+fxrstorq (%rsp)
+
+# Tear down the stack frame.
+movq %rbp, %rsp
+popq %rbp
 .endm
 
 # The CPU pushes an error code on the stack for the following ISR wrappers.

@@ -4,20 +4,72 @@
 # These are the procedures which are directly referenced by the IDT.
 # Though, all are simply assembly wrappers which call the high-level dispatcher.
 
+.macro ISR_WRAPPER INTERRUPT_NUMBER
+# Setup a stack frame.
+pushl %ebp
+movl %esp, %ebp
+
+# Align the stack on the sixteen byte boundary.
+andl $-16, %esp
+
+# Save floating point state.
+subl $512, %esp
+fxsave (%esp)
+
+pushl %eax
+pushl %ecx
+pushl %edx
+pushl %ebx
+pushl %esp
+pushl %ebp
+pushl %esi
+pushl %edi
+
+# Get the error code the CPU provided and push it into the structure here.
+movl %ebp, %eax
+subl $4, %eax
+pushl (%eax)
+
+# Get the return address pushed by the CPU, push it into the structure too.
+movl %ebp, %eax
+subl $4, %eax
+pushl (%eax)
+
+pushl \INTERRUPT_NUMBER # Push the interrupt number.
+pushl $560 # Push the size of the parameter package.
+
+pushl %esp # The first parameter is the address of the parameter package.
+call interrupt_dispatch_trampoline
+addl $4, %esp  # Clean up the size of the structure
+
+addl $4, %esp  # Clean up the size of the parameter package.
+addl $4, %esp  # Clean up the interrupt number.
+
+addl $4, %esp # Clean up the instruction pointer we pushed just above.
+addl $4, %esp # Clean up the error code we pushed just above.
+
+popl %edi
+popl %esi
+popl %ebp
+popl %esp
+popl %ebx
+popl %edx
+popl %ecx
+popl %eax
+
+# Restore floating point state.
+fxrstor (%esp)
+
+# Tear down the stack frame.
+movl %ebp, %esp
+popl %ebp
+.endm
+
 # The CPU pushes an error code on the stack for the following ISR wrappers.
 <% [8, 10..14].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    pusha
-    pushl $<%= isr %>
-    pushl $48 # Push the size of the context structure
-    pushl %esp # Push the address of the context structure
-    call interrupt_dispatch_trampoline
-    addl $4, %esp # Clean up the address of the context structure
-    addl $4, %esp # Clean up the size of the context structures
-    addl $4, %esp # Clean up the interrupt number.
-    popa
-    addl $4, %esp  # Clean up the error code.
+    ISR_WRAPPER $<%= isr %>
     iret
 <% end %>
 
@@ -25,14 +77,8 @@ isr_wrapper_<%= isr %>:
 <% [0..7, 9, 16..19, 32..255].map { |r| Array(r) }.inject( :+ ).each do |isr| %>
 .global isr_wrapper_<%= isr %>
 isr_wrapper_<%= isr %>:
-    pusha
-    pushl $<%= isr %>
-    pushl $48 # Push the size of the context structure
-    pushl %esp # Push the address of the context structure
-    call interrupt_dispatch_trampoline
-    addl $4, %esp # Clean up the address of the context structure
-    addl $4, %esp # Clean up the size of the context structures
-    addl $4, %esp # Clean up the interrupt number.
-    popa
+    pushl $0 # Push a zero for the error code value.
+    ISR_WRAPPER $<%= isr %>
+    addl $4, %esp  # Clean up the fake error code value.
     iret
 <% end %>

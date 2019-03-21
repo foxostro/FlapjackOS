@@ -9,6 +9,8 @@ namespace i386 {
 struct InterruptParameters {
     uint32_t size; // The size of the structure.
     uint32_t interrupt_number;
+    uint32_t eip;
+    uint32_t error_code;
     uint32_t edi;
     uint32_t esi;
     uint32_t ebp;
@@ -17,9 +19,11 @@ struct InterruptParameters {
     uint32_t edx;
     uint32_t ecx;
     uint32_t eax;
-    uint32_t error_code;
-    uint32_t eip;
+    char fxsave[512];
 };
+
+static_assert(560 == sizeof(InterruptParameters),
+              "The assembly wrappers onstruct a 560 byte structure in memory.");
 
 } // namespace i386
 
