@@ -173,6 +173,26 @@ struct Elf32_Phdr {
     Elf32_Word p_align;
 };
 
+// Symbol in the symbol table. See section 1-17.
+struct Elf32_Sym {
+    // An index into the object file's symbol string table.
+    Elf32_Word st_name;
+    
+    // The value of the associated symbol such as an address.
+    Elf32_Addr st_value;
+    
+    // The number of bytes contained in the object.
+    Elf32_Word st_size;
+    
+    // Symbol's type and binding attributes.
+    unsigned char st_info;
+    
+    // Contains zero and has no meaning.
+    unsigned char st_other;
+    
+    // The index of the section header associated with this symbol.
+    Elf32_Half st_shndx;
+};
 
 } // namespace Elf
 
