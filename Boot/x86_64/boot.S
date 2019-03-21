@@ -100,6 +100,20 @@ _start64:
     movw %ax, %gs
     movw %ax, %ss
 
+    # Need to initialize SSE immediately on x86_64 because the C++ kernel will
+    # expect to be able to use those instructions.
+    # These features are guaranteed to be supported on x86_64 so we don't bother
+    # to check the cpuid feature flags.
+    movq %cr0, %rcx
+    andq $(~(CR0_EM | CR0_TS | CR0_NE)), %rcx
+    orq $(CR0_MP), %rcx
+    movq %rcx, %cr0
+    fninit
+
+    movq %cr4, %rcx
+    orq $(CR4_OSFXSR | CR4_OSXMMEXCPT), %rcx
+    movq %rcx, %cr4
+
     # Setup a stack we can use in a C environment.
     leaq stack_top, %rsp
     movq $0, %rbp # back traces end here
