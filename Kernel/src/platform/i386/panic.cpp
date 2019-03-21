@@ -17,6 +17,7 @@ public:
      : message_(message),
        terminal_(display_)
     {
+        // AFOX_TODO: I want to replace the IDT during a panic. Unfortunately, this is a little messy and actually crashes on i386. Need to find a better solution.
         // hardware_interrupt_controller_.init(/*panic=*/ true);
     }
 
