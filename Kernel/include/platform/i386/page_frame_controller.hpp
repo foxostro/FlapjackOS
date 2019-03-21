@@ -3,7 +3,7 @@
 
 #include <paging_topology/page_frame_controller.hpp>
 #include <page_frame_allocator.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <common/lock_guard.hpp>
 
 namespace i386 {
@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    mutable Mutex lock_;
+    mutable InterruptLock lock_;
     PageFrameAllocator* allocator_;
     uintptr_t page_frame_;
 

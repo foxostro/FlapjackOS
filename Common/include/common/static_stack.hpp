@@ -53,6 +53,18 @@ public:
         return *this;
     }
 
+    void push4(uint32_t value)
+    {
+        stack_pointer -= sizeof(value);
+        memcpy(stack_pointer, &value, sizeof(value));
+    }
+
+    void push8(uint64_t value)
+    {
+        stack_pointer -= sizeof(value);
+        memcpy(stack_pointer, &value, sizeof(value));
+    }
+
     template<typename T>
     void push(T value)
     {

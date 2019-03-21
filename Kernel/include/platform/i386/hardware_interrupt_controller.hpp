@@ -6,6 +6,8 @@
 #include <interrupt_asm.h>
 #include <seg.h>
 
+extern __attribute__((noreturn)) void on_interrupt_during_panic() noexcept; // in panic.cpp
+ 
 extern "C" {
 extern void isr_wrapper_0(void);
 extern void isr_wrapper_1(void);
@@ -263,11 +265,11 @@ public:
 
     GenericHardwareInterruptController() = default;
 
-    void init()
+    void init(bool is_panic_context = false)
     {
         pic_.init();
         idt_.clear();
-        build_idt();
+        build_idt(is_panic_context);
         idt_.load();
     }
 
@@ -290,7 +292,23 @@ private:
     ProgrammableInterruptController pic_;
     InterruptDescriptorTable idt_;
 
-    void build_idt()
+    void build_idt(bool is_panic_context)
+    {
+        if (is_panic_context) {
+            build_idt_for_panic_context();
+        } else {
+            build_idt_for_normal_kernel();
+        }
+    }
+
+    void build_idt_for_panic_context()
+    {
+        for (int i = 0; i < 256; ++i) {
+            build_idt_entry(idt_.entries[i], (uintptr_t)on_interrupt_during_panic);
+        }
+    }
+
+    void build_idt_for_normal_kernel()
     {
         build_idt_entry(idt_.entries[0], (uintptr_t)isr_wrapper_0);
         build_idt_entry(idt_.entries[1], (uintptr_t)isr_wrapper_1);

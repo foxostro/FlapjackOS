@@ -1,14 +1,25 @@
 #include <backtrace.hpp>
-#include <common/logger.hpp>
 
-void backtrace(UnlockedTextTerminal &term)
+static const char* get_symbol_name([[maybe_unused]] const void* ip)
 {
-    TRACE("begin");
-    term.printf("Back Trace:\n");
-    enumerate_stack_frames([&](uintptr_t instruction_pointer){
-        TRACE("[%p]", reinterpret_cast<void*>(instruction_pointer));
-        term.printf("[%p]\n", reinterpret_cast<void*>(instruction_pointer));
-    });
-    TRACE("end");
-    term.printf("\n");
+    return nullptr;
+}
+
+static _Unwind_Reason_Code backtrace_trace(struct _Unwind_Context* context, void* param)
+{
+    const void* ip = reinterpret_cast<const void*>(_Unwind_GetIP(context));
+    if (ip) {
+        StackWalker::StackFrame frame;
+        frame.instruction_pointer = ip;
+        frame.symbol_name = get_symbol_name(ip);
+        reinterpret_cast<StackWalker*>(param)->trace(frame);
+        return _URC_NO_REASON;
+    } else {
+        return _URC_END_OF_STACK;
+    }
+}
+
+void backtrace(StackWalker& stack_walker)
+{
+    _Unwind_Backtrace(backtrace_trace, reinterpret_cast<void*>(&stack_walker));
 }

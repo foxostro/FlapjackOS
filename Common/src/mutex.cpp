@@ -1,2 +1,5 @@
 #include <common/mutex.hpp>
-void (*Mutex::yield)() = nullptr;
+
+static void nop() {}
+
+void (*Mutex::yield)() = ::nop;

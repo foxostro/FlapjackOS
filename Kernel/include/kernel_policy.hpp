@@ -20,6 +20,7 @@ struct KernelPolicy {
     using ConcreteHardwareMemoryManagementUnit = x86_64::ConcreteHardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = x86_64::KernelAddressSpaceBootstrapper;
     using ConcretePhysicalMemoryMap = x86_64::ConcretePhysicalMemoryMap;
+    using HardwareInterruptController = x86_64::HardwareInterruptController;
     using InterruptController = x86_64::InterruptController;
     using InterruptParameters = x86_64::InterruptParameters;
     using DeviceDrivers = x86_64::DeviceDrivers;
@@ -50,6 +51,7 @@ struct KernelPolicy {
     using ConcreteHardwareMemoryManagementUnit = i386::ConcreteHardwareMemoryManagementUnit;
     using KernelAddressSpaceBootstrapper = i386::KernelAddressSpaceBootstrapper;
     using ConcretePhysicalMemoryMap = i386::ConcretePhysicalMemoryMap;
+    using HardwareInterruptController = i386::HardwareInterruptController;
     using InterruptController = i386::InterruptController;
     using InterruptParameters = i386::InterruptParameters;
     using DeviceDrivers = i386::DeviceDrivers;

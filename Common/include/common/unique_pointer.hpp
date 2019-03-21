@@ -1,12 +1,12 @@
 #ifndef FLAPJACKOS_COMMON_INCLUDE_UNIQUE_POINTER_HPP
 #define FLAPJACKOS_COMMON_INCLUDE_UNIQUE_POINTER_HPP
 
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <common/lock_guard.hpp>
 #include <cassert>
 
 // Unique Pointer class, roughly equivalent to std::unique_pointer.
-template<typename Type, typename LockType = Mutex>
+template<typename Type, typename LockType = InterruptLock>
 class UniquePointer {
 public:
     ~UniquePointer()

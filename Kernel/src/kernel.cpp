@@ -1,15 +1,15 @@
 #include <kernel.hpp>
 
-#include <common/logger.hpp>
 #include <page_frame_allocator_configuration_operation.hpp>
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 #include <multiboot_module_enumerator.hpp>
 #include <elf_loader_factory.hpp>
 #include <malloc/malloc_zone.hpp>
+#include <common/logger.hpp>
 #include <common/global_allocator.hpp>
 #include <common/line_editor.hpp>
 #include <common/text_terminal.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 
 
 const char* KernelErrorDomain = "Kernel";
@@ -26,8 +26,10 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     initialize_logger();
     TRACE("Flapjack OS (%s)", get_platform());
     TRACE("mb_info=%p ; istack=0x%x", mb_info, static_cast<unsigned>(istack));
+
+    InterruptLock::enable_interrupts = ::enable_interrupts;
+    InterruptLock::disable_interrupts = ::disable_interrupts;
     
-    Mutex::yield = ::yield;
     hardware_task_configuration_.init(istack_);
     interrupt_controller_.initialize_hardware();
     setup_terminal();
@@ -88,11 +90,13 @@ static std::atomic<int> g_count{1};
 
 static void task(void* param)
 {
-    TextTerminal* terminal = reinterpret_cast<TextTerminal*>(param);
+    TextTerminal* terminal = static_cast<TextTerminal*>(param);
     assert(terminal);
     for (int i = 0; i < 20; ++i) {
         terminal->putchar('a');
+        yield();
     }
+    TRACE("going to return from task() now");
     g_count--;
 }
 
@@ -113,8 +117,11 @@ void Kernel::try_run()
     scheduler_.add(new Thread(task, static_cast<void*>(&terminal_)));
     scheduler_.begin(new ThreadExternalStack);
     while (g_count > 0) {
+        terminal_.putchar('b');
         yield();
     }
+    terminal_.putchar('\n');
+    TRACE("task is done");
 
     do_console_loop();
 }

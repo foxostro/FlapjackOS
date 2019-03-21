@@ -23,7 +23,7 @@ void Logger::log(const char *function, const char *fmt, ...)
     vsnprintf(message, sizeof(message), fmt, args);
     va_end(args);
 
-    snprintf(buffer, sizeof(buffer), "%s: %s", function, message);
+    snprintf(buffer, sizeof(buffer), "%s: %s\n", function, message);
 
     stream_->puts(buffer);
 }

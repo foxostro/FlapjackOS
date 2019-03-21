@@ -3,7 +3,7 @@
 
 #include <paging_topology/page_map_level_two_controller.hpp>
 #include <common/unique_pointer.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <cassert>
 
 namespace i386 {
@@ -28,7 +28,7 @@ public:
 
         Entry() : lock_(nullptr), pde_(nullptr), mmu_(nullptr) {}
 
-        void set_lock(Mutex* lock)
+        void set_lock(InterruptLock* lock)
         {
             assert(lock);
             lock_ = lock;
@@ -169,7 +169,7 @@ public:
         }
 
     private:
-        Mutex* lock_;
+        InterruptLock* lock_;
         MyPageDirectoryEntry* pde_;
         HardwareMemoryManagementUnit* mmu_;
         SharedPointer<PagingTopology::PageMapLevelOneController> pml1_;
@@ -294,7 +294,7 @@ public:
     }
 
 private:
-    mutable Mutex lock_;
+    mutable InterruptLock lock_;
     HardwareMemoryManagementUnit& mmu_;
     UniquePointer<MyPageDirectory> page_directory_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.

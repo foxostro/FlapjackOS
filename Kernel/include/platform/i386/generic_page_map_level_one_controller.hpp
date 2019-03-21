@@ -4,7 +4,7 @@
 #include <paging_topology/page_map_level_one_controller.hpp>
 #include <hardware_memory_management_unit.hpp>
 #include <common/unique_pointer.hpp>
-#include <common/mutex.hpp>
+#include <common/interrupt_lock.hpp>
 #include <cassert>
 #include <type_traits> // for std::remove_reference
 
@@ -29,7 +29,7 @@ public:
 
         Entry() : lock_(nullptr), pte_(nullptr) {}
 
-        void set_lock(Mutex* lock)
+        void set_lock(InterruptLock* lock)
         {
             assert(lock);
             lock_ = lock;
@@ -205,7 +205,7 @@ public:
         }
 
     private:
-        Mutex* lock_;
+        InterruptLock* lock_;
         MyPageTableEntry* pte_;
         SharedPointer<PagingTopology::PageFrameController> page_frame_;
     };
@@ -303,7 +303,7 @@ public:
     }
 
 private:
-    mutable Mutex lock_;
+    mutable InterruptLock lock_;
     HardwareMemoryManagementUnit& mmu_;
     UniquePointer<MyPageTable> page_table_;
     Entry entries_[COUNT]; // AFOX_TODO: Implement something like std::array.
