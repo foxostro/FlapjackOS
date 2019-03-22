@@ -4,6 +4,7 @@
 #include <multiboot_memory_map_page_frame_enumerator.hpp>
 #include <multiboot_module_enumerator.hpp>
 #include <elf_loader_factory.hpp>
+#include <symbolicator_factory_elf32.hpp>
 #include <malloc/malloc_zone.hpp>
 #include <common/logger.hpp>
 #include <common/global_allocator.hpp>
@@ -11,10 +12,6 @@
 #include <common/text_terminal.hpp>
 #include <common/interrupt_lock.hpp>
 #include <common/elf32.hpp>
-
-
-size_t g_shdr_table_count = 0;
-Elf::Elf32_Shdr* g_shdr_table = nullptr;
 
 
 const char* KernelErrorDomain = "Kernel";
@@ -43,23 +40,7 @@ Kernel::Kernel(multiboot_info_t* mb_info, uintptr_t istack)
     report_installed_memory();
     initialize_page_frame_allocator();
     initialize_kernel_malloc();
-
-    // Copy the symbol table into the free store.
-    // AFOX_TODO: What if this memory overlaps the heap?
-    // AFOX_TODO: We only actually need to copy the string table and the symbol table. Or, we could walk these structures and produce a new table which contains only what we need.
-    // AFOX_TODO: Alternatively, mark this memory as being in-use forever and use it as-is.
-    // AFOX_TODO: Regardless, substantial code clean up is needed and this should be moved to its own class.
-    {
-        TRACE("Copying the symbol table to the free store.");
-        multiboot_elf_section_header_table_t& elf_sec = mb_info->u.elf_sec;
-        assert(sizeof(Elf::Elf32_Shdr) == elf_sec.size);
-        TRACE("The table contains %u symbols.", static_cast<unsigned>(elf_sec.num));
-        g_shdr_table_count = elf_sec.num;
-        g_shdr_table = new Elf::Elf32_Shdr[g_shdr_table_count];
-        Elf::Elf32_Shdr* shdr_table = reinterpret_cast<Elf::Elf32_Shdr*>(mmu_.convert_physical_to_logical_address(elf_sec.addr));
-        memcpy(g_shdr_table, shdr_table, elf_sec.num * elf_sec.size);
-    }
-
+    initialize_symbolicator();
     initialize_physical_memory_map();
     initialize_floating_point_features();
     report_free_page_frames();
@@ -124,7 +105,6 @@ static void task(void* param)
 
 void Kernel::try_run()
 {
-    panic("try_run test panic");
     demonstrate_floating_point();
 
     TRACE("Now let's throw and catch an exeption as a test.");
@@ -275,6 +255,12 @@ void Kernel::initialize_kernel_malloc()
 
     MemoryAllocator *alloc = MallocZone::create((uintptr_t)begin, length);
     set_global_allocator(alloc);
+}
+
+void Kernel::initialize_symbolicator()
+{
+    SymbolicatorFactory factory(mmu_, mb_info_);
+    g_symbolicator = factory.make_symbolicator();
 }
 
 void Kernel::initialize_physical_memory_map()

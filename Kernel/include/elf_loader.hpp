@@ -2,6 +2,7 @@
 #define FLAPJACKOS_KERNEL_INCLUDE_ELF_LOADER_HPP
 
 #include <common/elf.hpp>
+#include <common/data.hpp>
 #include <protection_flags.hpp>
 
 // Interface for a class which can load an ELF image into memory for exec().

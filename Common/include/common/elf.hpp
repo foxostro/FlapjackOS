@@ -147,6 +147,12 @@ constexpr unsigned PF_MASKOS = 0x00FF0000; // These flag bits are reserved for e
 constexpr unsigned PF_MASKPROC = 0xFF000000; // These flag bits are reserved for processor-specific use
 
 
+constexpr unsigned STT_FUNC = 2;
+
+
 } // namespace Elf
+
+#define ELF32_ST_TYPE(i) ((i)&0xf)
+#define ELF64_ST_TYPE(i) ((i)&0xf)
 
 #endif // FLAPJACKOS_COMMON_INCLUDE_COMMON_ELF_HPP

@@ -31,6 +31,10 @@ set(PLATFORM_AGNOSTIC_SOURCE_FILES
     "include/paging_topology/page_map_level_two_controller.hpp"
     "include/paging_topology/page_map_level_three_controller.hpp"
     "include/paging_topology/page_map_level_four_controller.hpp"
+    "include/symbolicator.hpp" "src/symbolicator.cpp"
+    "include/symbolicator_factory_elf32.hpp"
+    "include/symbolicator_factory_elf64.hpp"
+    "include/generic_symbolicator_factory.hpp"
     )
 
 set(I386_SOURCE_FILES

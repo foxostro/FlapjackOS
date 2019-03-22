@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 3.6)
 
 set(SOURCE_FILES
-    "include/flapjack_libc/cassert"
     "include/flapjack_libc/cctype"
+    "include/flapjack_libc/ctype.h"
+    "include/flapjack_libc/ctype.inc"
+
+    "include/flapjack_libc/cassert"
+    "include/flapjack_libc/assert.h"
+    
     "include/flapjack_libc/cstdio"
     "include/flapjack_libc/cstdlib"
     "include/flapjack_libc/cstring"
 
-    "include/flapjack_libc/assert.h"
     "include/flapjack_libc/string.h" "src/string.cpp"
     "include/flapjack_libc/stdio.h" "src/stdio.cpp"
     "include/flapjack_libc/stdlib.h" "src/stdlib.cpp"
@@ -50,6 +54,7 @@ set(SOURCE_FILES
     "include/common/optional.hpp"
     "include/common/expected.hpp"
     "include/common/logger.hpp" "src/logger.cpp"
+    "include/common/string_to_long_converter.hpp"
 
     "include/malloc/malloc_zone.hpp" "src/malloc_zone.cpp"
     )

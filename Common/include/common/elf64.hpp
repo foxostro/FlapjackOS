@@ -155,6 +155,27 @@ struct Elf64_Phdr {
     Elf64_Xword p_align;
 };
 
+// Symbol in the symbol table. See section 6, figure 4.
+struct Elf64_Sym {
+    // An index into the object file's symbol string table.
+    Elf64_Word st_name;
+    
+    // Symbol's type and binding attributes.
+    unsigned char st_info;
+    
+    // Contains zero and has no meaning.
+    unsigned char st_other;
+    
+    // The index of the section header associated with this symbol.
+    Elf64_Half st_shndx;
+    
+    // The value of the associated symbol such as an address.
+    Elf64_Addr st_value;
+    
+    // The number of bytes contained in the object.
+    Elf64_Word st_size;
+};
+
 
 } // namespace Elf
 

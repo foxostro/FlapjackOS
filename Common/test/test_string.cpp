@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "flapjack_libc/string.h"
+#include "flapjack_libc/cstring"
 
 #include <cstdlib>
 #include <cstdio>
@@ -183,4 +183,120 @@ TEST_CASE("test_memset_zerolen_null", "[String]")
 {
     void *r = flapjack::memset(nullptr, '?', 0);
     REQUIRE(r == nullptr);
+}
+
+TEST_CASE("test strtol -- pass null string", "[String]")
+{
+    REQUIRE(0 == flapjack::strtol(nullptr, nullptr, -1));
+}
+
+TEST_CASE("test strtol -- strtol(\"ZZ\", nullptr, 10)", "[String]")
+{
+    // Invalid characters in string.
+    REQUIRE(0 == flapjack::strtol("ZZ", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(\"0\", nullptr, 10)", "[String]")
+{
+    REQUIRE(0 == flapjack::strtol("0", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(\"-1\", nullptr, 10)", "[String]")
+{
+    REQUIRE(-1 == flapjack::strtol("-1", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(\"+1\", nullptr, 10)", "[String]")
+{
+    REQUIRE(1 == flapjack::strtol("+1", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(10, nullptr, 10)", "[String]")
+{
+    REQUIRE(10 == flapjack::strtol("10", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(10, nullptr, 0)", "[String]")
+{
+    REQUIRE(10 == flapjack::strtol("10", nullptr, 0));
+}
+
+TEST_CASE("test strtol -- strtol(-123, nullptr, 10)", "[String]")
+{
+    REQUIRE(-123 == flapjack::strtol("-123", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(\"10\", nullptr, 16)", "[String]")
+{
+    REQUIRE(0x10 == flapjack::strtol("10", nullptr, 16));
+}
+
+TEST_CASE("test strtol -- strtol(\"Ff\", nullptr, 16)", "[String]")
+{
+    REQUIRE(0xff == flapjack::strtol("Ff", nullptr, 16));
+}
+
+TEST_CASE("test strtol -- strtol(\"10\", nullptr, 8)", "[String]")
+{
+    REQUIRE(8 == flapjack::strtol("10", nullptr, 8));
+}
+
+TEST_CASE("test strtol -- strtol(\"123foo\", nullptr, 10)", "[String]")
+{
+    REQUIRE(123 == flapjack::strtol("123foo", nullptr, 10));
+}
+
+TEST_CASE("test strtol -- strtol(\"123foo\", non-null, 10)", "[String]")
+{
+    const char* s = "123foo";
+    char* endptr = nullptr;
+    REQUIRE(123 == flapjack::strtol(s, &endptr, 10));
+    REQUIRE(endptr == s + 3);
+}
+
+TEST_CASE("test strtol -- strtol(\"+_\", non-null, 0)", "[String]")
+{
+    const char* s = "+_";
+    char* endptr = nullptr;
+
+    REQUIRE(0 == flapjack::strtol(s, &endptr, 0));
+    REQUIRE(endptr == s);
+}
+
+TEST_CASE("test strtol -- strtol(\"0x10\", nullptr, 16)", "[String]")
+{
+    REQUIRE(0x10 == flapjack::strtol("0x10", nullptr, 16));
+}
+
+TEST_CASE("test strtol -- strtol(\"0x10\", nullptr, 0)", "[String]")
+{
+    REQUIRE(0x10 == flapjack::strtol("0x10", nullptr, 0));
+}
+
+TEST_CASE("test strtol -- strtol(\"010\", nullptr, 8)", "[String]")
+{
+    REQUIRE(010 == flapjack::strtol("010", nullptr, 8));
+}
+
+TEST_CASE("test strtol -- strtol(\"0x\", nullptr, 0)", "[String]")
+{
+    REQUIRE(0 == flapjack::strtol("0x", nullptr, 0));
+}
+
+TEST_CASE("test strtol -- strtol(\"0x\", non-null, 0)", "[String]")
+{
+    const char* s = "0x";
+    char* endptr = nullptr;
+    REQUIRE(0 == flapjack::strtol(s, &endptr, 0));
+    REQUIRE(endptr == s);
+}
+
+TEST_CASE("test strtol -- strtol(\"123\", nullptr, -1)", "[String]")
+{
+    REQUIRE(0 == flapjack::strtol("123", nullptr, -1));
+}
+
+TEST_CASE("test strtol -- strtol(\"123\", nullptr, 36)", "[String]")
+{
+    REQUIRE(0 == flapjack::strtol("123", nullptr, 36));
 }

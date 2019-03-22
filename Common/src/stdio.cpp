@@ -1,8 +1,7 @@
 #include "flapjack_libc/stdio.h"
-#include "flapjack_libc/stdlib.h"
-#include "flapjack_libc/ctype.h"
-#include "flapjack_libc/string.h"
-
+#include <cstdlib>
+#include <cctype>
+#include <cstring>
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>

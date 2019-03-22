@@ -1,5 +1,7 @@
-#include "flapjack_libc/string.h"
-#include "flapjack_libc/stdlib.h"
+#include "flapjack_libc/cstring"
+#include <cstdlib>
+#include <cctype>
+#include <common/string_to_long_converter.hpp>
 
 // If we're running under test then insert these symbols into the "flapjack"
 // namespace. Otherwise, insert into the global namespace as would be done for
@@ -109,9 +111,10 @@ int memcmp(const void* a, const void* b, size_t n)
     return 0;
 }
 
-long strtol(__attribute__((unused)) const char *str, __attribute__((unused)) char **endptr, __attribute__((unused)) int base)
+long strtol(const char *original_string, char **out_endptr, int base)
 {
-    return 0; // stub
+    StringToLongConverter converter{original_string, out_endptr, base};
+    return converter.convert();
 }
 
 char* strstr(const char *haystack, const char *needle)

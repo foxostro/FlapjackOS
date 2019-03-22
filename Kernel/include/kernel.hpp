@@ -5,7 +5,7 @@
 #include <concrete_page_frame_allocator.hpp>
 #include <kernel_policy.hpp>
 #include <scheduler.hpp>
-#include <elf_loader32.hpp>
+#include <elf_loader.hpp>
 #include <common/text_terminal.hpp>
 #include <common/data.hpp>
 #include <common/expected.hpp>
@@ -84,6 +84,9 @@ private:
 
     // Initialize the kernel malloc zone allocator.
     void initialize_kernel_malloc();
+
+    // Initialize the symbolicator. This can get symbols for addresses.
+    void initialize_symbolicator();
 
     // Initialize the real phsyical memory map. This requires the kernel memory
     // allocators to be ready first.

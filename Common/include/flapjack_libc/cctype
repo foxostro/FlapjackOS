@@ -1,2 +1,15 @@
 #pragma once
-#include "ctype.h"
+
+#ifndef __cplusplus
+#error "Only include this file from C++."
+#endif
+
+#ifdef TESTING
+namespace flapjack {
+#include "ctype.inc"
+}
+#else
+extern "C" {
+#include "ctype.inc"
+}
+#endif
